@@ -1,0 +1,53 @@
+{
+	"Gameplay:" : { "type" : "label" },
+	
+	"earlate_position": {
+		"type": "selection",
+		"label": "Early/Late display position",
+		"default": "bottom",
+		"values": ["bottom", "middle", "top", "off"]
+	},
+	"nick": {
+		"type" : "text",
+		"label" : "Display name",
+		"default" : "Guest"
+	},
+	
+	"separator_a" : {},
+	"Song select:" : { "type" : "label" },
+	"show_guide": {
+		"label" : "Show control guide on song select",
+		"type": "bool",
+		"default": true
+	},
+	"separator_b" : {},
+	"Test objects:" : { "type" : "label" },
+	"Testing with space" : {
+		"type": "float",
+		"label": "Test setting with spaces in the key",
+		"default": 50.0,
+		"max": 100.0,
+		"min": -100.0
+	},
+	
+	"Ineger_test" : {
+		"type": "int",
+		"label": "Ineger Test with range -100<->100",
+		"default": 50,
+		"max": 100,
+		"min": -100
+	},
+	
+	"col_test" : {
+		"type": "color",
+		"label": "Color Test",
+		"default": "007FFFFF"
+	},
+
+	"secret_value" : {
+		"type" : "text",
+		"label" : "Secret value test",
+		"default" : "usc123",
+		"secret" : true
+	}
+}
