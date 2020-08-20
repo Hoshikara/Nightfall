@@ -1,3 +1,5 @@
+hitError = require('gameplay/hiterror');
+
 -- The following code slightly simplifies the render/update code, making it easier to explain in the comments
 -- It replaces a few of the functions built into USC and changes behaviour slightly
 -- Ideally, this should be in the common.lua file, but the rest of the skin does not support it
@@ -337,6 +339,8 @@ function render(deltaTime)
 	end
     draw_combo(deltaTime)
     draw_alerts(deltaTime)
+
+    draw_hit_error(deltaTime);
 	
 	if gameplay.autoplay then
 		gfx.LoadSkinFont("NotoSans-Regular.ttf")
@@ -601,6 +605,15 @@ function draw_banner(deltaTime)
 
     return actualHeight
 end
+
+button_hit = function(button, rating, delta)
+    hitError:triggerHit(button, rating, delta);
+end
+
+draw_hit_error = function(deltaTime)
+    hitError:render(deltaTime, desw, desh, portrait);
+end
+
 -- -------------------------------------------------------------------------- --
 -- draw_stat:                                                                 --
 -- Draws a formatted name + value combination at x, y over w, h area.         --
