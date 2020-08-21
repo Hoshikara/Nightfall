@@ -1,3 +1,3 @@
-work in progress
+Detroit: Become Human-inspired skin for [Unnamed SDVX Clone](https://github.com/Drewol/unnamed-sdvx-clone)
 
-detroit become human inspired skin for usc
+WIP, landscape-only for now--refer to CHANGELOG for details
