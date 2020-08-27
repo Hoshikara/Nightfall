@@ -1,15 +1,19 @@
+hitAnimation = require('gameplay/hitanimation');
 hitError = require('gameplay/hiterror');
+laserAnimation = require('gameplay/laseranimation');
 
--- The following code slightly simplifies the render/update code, making it easier to explain in the comments
--- It replaces a few of the functions built into USC and changes behaviour slightly
--- Ideally, this should be in the common.lua file, but the rest of the skin does not support it
--- I'll be further refactoring and documenting the default skin and making it more easy to
---  modify for those who either don't know how to skin well or just want to change a few images
---  or behaviours of the default to better suit them.
--- Skinning should be easy and fun!
+if (not hitAnimation['initialized']) then
+	hitAnimation:initializeAll();
+end
 
+if (not hitError['initialized']) then
+	hitError:initializeAll();
+end
 
--- Animation functions begin
+if (not laserAnimation['initialized']) then
+	laserAnimation:initializeAll();
+end
+
 function clamp(x, min, max) 
     if x < min then
         x = min
@@ -63,8 +67,6 @@ function Animation:tick(deltaTime)
         return to_range(smootherstep(-1, 1, self.progress) * 2 - 1, self.start, self.stop)
     end
 end
---- Animation Functions end
-
 
 local RECT_FILL = "fill"
 local RECT_STROKE = "stroke"
@@ -77,7 +79,6 @@ if gfx._FillColor == nil then
 	gfx._SetImageTint = gfx.SetImageTint
 end
 
--- we aren't even gonna overwrite it here, it's just dead to us
 gfx.SetImageTint = nil
 
 function gfx.FillColor(r, g, b, a)
@@ -139,46 +140,26 @@ end
 function game.GetButtonPressed(button)
     return game.GetButton(button) and not buttonStates[button]
 end
--- -------------------------------------------------------------------------- --
--- game.IsUserInputActive:                                                    --
--- Used to determine if (valid) controller input is happening.                --
--- Valid meaning that laser motion will not return true unless the laser is   --
---  active in gameplay as well.                                               --
--- This restriction is not applied to buttons.                                --
--- The player may press their buttons whenever and the function returns true. --
--- Lane starts at 1 and ends with 8.                                          --
+
 function game.IsUserInputActive(lane)
     if lane < 7 then
         return game.GetButton(buttonsInOrder[lane])
     end
     return gameplay.IsLaserHeld(lane - 7)
 end
--- -------------------------------------------------------------------------- --
--- gfx.FillLaserColor:                                                        --
--- Sets the current fill color to the laser color of the given index.         --
--- An optional alpha value may be given as well.                              --
--- Index may be 1 or 2.                                                       --
+
 function gfx.FillLaserColor(index, alpha)
     alpha = math.floor(alpha or 255)
     local r, g, b = game.GetLaserColor(index - 1)
     gfx.FillColor(r, g, b, alpha)
 end
--- -------------------------------------------------------------------------- --
--- -------------------------------------------------------------------------- --
--- -------------------------------------------------------------------------- --
---                  The actual gameplay script starts here!                   --
--- -------------------------------------------------------------------------- --
--- -------------------------------------------------------------------------- --
--- -------------------------------------------------------------------------- --
--- Global data used by many things:                                           --
+
 local resx, resy -- The resolution of the window
 local resx_old = 0
 local resy_old = 0
 local portrait -- whether the window is in portrait orientation
 local desw, desh -- The resolution of the deisign
 local scale -- the scale to get from design to actual units
--- -------------------------------------------------------------------------- --
--- All images used by the script:                                             --
 local jacketFallback = gfx.CreateSkinImage("song_select/loading.png", 0)
 local bottomFill = gfx.CreateSkinImage("console/console.png", 0)
 local topFill = gfx.CreateSkinImage("fill_top.png", 0)
@@ -207,8 +188,7 @@ local consoleAnimImages = {
     gfx.CreateSkinImage("console/glow_voll.png", 0),
     gfx.CreateSkinImage("console/glow_volr.png", 0),
 }
--- -------------------------------------------------------------------------- --
--- Timers, used for animations:                                               --
+
 if introTimer == nil then
 	introTimer = 2
 	outroTimer = 0
@@ -220,8 +200,7 @@ local critAnimTimer = 0
 
 local consoleAnimSpeed = 10
 local consoleAnimTimers = { 0, 0, 0, 0, 0, 0, 0, 0 }
--- -------------------------------------------------------------------------- --
--- Miscelaneous, currently unsorted:                                          --
+
 local score = 0
 local combo = 0
 local jacket = nil
@@ -236,9 +215,7 @@ local song_info = {}
 local gauge_info = {}
 local crit_base_info = {}
 local combo_info = {}
--- -------------------------------------------------------------------------- --
--- ResetLayoutInformation:                                                    --
--- Resets the layout values used by the skin.                                 --
+
 function ResetLayoutInformation()
     portrait = resy > resx
     desw = portrait and 720 or 1280 
@@ -311,22 +288,13 @@ function ResetLayoutInformation()
     end
 
 end
--- -------------------------------------------------------------------------- --
--- render:                                                                    --
--- The primary & final render call.                                           --
--- Use this to render basically anything that isn't the crit line or the      --
---  intro/outro transitions.                                                  --
+
 function render(deltaTime)
-    -- make sure that our transform is cleared, clean working space
-    -- TODO: this shouldn't be necessary!!!
     gfx.ResetTransform()
     
     gfx.Scale(scale, scale)
     local yshift = 0
 
-    -- In portrait, we draw a banner across the top
-    -- The rest of the UI needs to be drawn below that banner
-    -- TODO: this isn't how it'll work in the long run, I don't think
     if portrait then yshift = draw_banner(deltaTime) end
 
     gfx.Translate(0, yshift - 150 * math.max(introTimer - 1, 0))
@@ -340,7 +308,7 @@ function render(deltaTime)
     draw_combo(deltaTime)
     draw_alerts(deltaTime)
 
-    draw_hit_error(deltaTime);
+    drawHitError(deltaTime);
 	
 	if gameplay.autoplay then
 		gfx.LoadSkinFont("NotoSans-Regular.ttf")
@@ -350,34 +318,18 @@ function render(deltaTime)
 		gfx.Text("Autoplay", desw/2, yshift)
 	end
 end
--- -------------------------------------------------------------------------- --
--- SetUpCritTransform:                                                        --
--- Utility function which aligns the graphics transform to the center of the  --
---  crit line on screen, rotation include.                                    --
--- This function resets the graphics transform, it's up to the caller to      --
---  save the transform if needed.                                             --
+
 function SetUpCritTransform()
-    -- start us with a clean empty transform
-    gfx.ResetTransform()
-    -- translate and rotate accordingly
-    gfx.Translate(gameplay.critLine.x, gameplay.critLine.y)
-    gfx.Rotate(-gameplay.critLine.rotation)
+	gfx.ResetTransform();
+	gfx.Translate(gameplay.critLine.x, gameplay.critLine.y);
+	gfx.Rotate(-gameplay.critLine.rotation);
 end
--- -------------------------------------------------------------------------- --
--- GetCritLineCenteringOffset:                                                --
--- Utility function which returns the magnitude of an offset to center the    --
---  crit line on the screen based on its position and rotation.               --
+
 function GetCritLineCenteringOffset()
-    return gameplay.critLine.xOffset * 10
+	return gameplay.critLine.xOffset * 10;
 end
--- -------------------------------------------------------------------------- --
--- render_crit_base:                                                          --
--- Called after rendering the highway and playable objects, but before        --
---  the built-in hit effects.                                                 --
--- This is the first render function to be called each frame.                 --
--- This call resets the graphics transform, it's up to the caller to          --
---  save the transform if needed.                                             --
-function render_crit_base(deltaTime)
+
+render_crit_base = function(deltaTime)
     -- Kind of a hack, but here (since this is the first render function
     --  that gets called per frame) we update the layout information.
     -- This means that the player can resize their window and
@@ -496,106 +448,35 @@ function render_crit_base(deltaTime)
     gfx.FillColor(255, 255, 255)
     gfx.ResetTransform()
 end
--- -------------------------------------------------------------------------- --
--- render_crit_overlay:                                                       --
--- Called after rendering built-int crit line effects.                        --
--- Use this to render laser cursors or an IO Console in portrait mode!        --
--- This call resets the graphics transform, it's up to the caller to          --
---  save the transform if needed.                                             --
-function render_crit_overlay(deltaTime)
-    SetUpCritTransform()
 
-    -- Figure out how to offset the center of the crit line to remain
-    --  centered on the players screen.
-    local xOffset = resx / 2 - gameplay.critLine.x
+render_crit_overlay = function(deltaTime)
+	hitAnimation:render(deltaTime, scale);
 
-    -- When in portrait, we can draw the console at the bottom
-    if portrait then
-        -- We're going to make temporary modifications to the transform
-        gfx.Save()
-        gfx.Translate(xOffset * 0.85, 0)
+	SetUpCritTransform();
 
-        local bfw, bfh = gfx.ImageSize(bottomFill)
+	local cw, ch = gfx.ImageSize(laserCursor)
+	local cursorWidth = 40 * scale
+	local cursorHeight = cursorWidth * (ch / cw)
 
-        local distBetweenKnobs = 0.446
-        local distCritVertical = 0.098
+	-- draw each laser cursor
+	for i = 1, 2 do
+		local cursor = gameplay.critLine.cursors[i - 1];
+		local pos, skew = cursor.pos, cursor.skew;
 
-        local ioFillTx = bfw / 2
-        local ioFillTy = bfh * distCritVertical -- 0.098
+		laserAnimation:render(deltaTime, i, pos, scale, skew);
 
-        -- The total dimensions for the console image
-        local io_x, io_y, io_w, io_h = -ioFillTx, -ioFillTy, bfw, bfh
+		gfx.SkewX(skew);
+		gfx.FillLaserColor(i, cursor.alpha * 255)
+		gfx.DrawRect(laserCursor, pos - cursorWidth / 2, -cursorHeight / 2, cursorWidth, cursorHeight)
+		gfx.FillColor(255, 255, 255, cursor.alpha * 255)
+		gfx.DrawRect(laserCursorOverlay, pos - cursorWidth / 2, -cursorHeight / 2, cursorWidth, cursorHeight)
+		gfx.SkewX(-skew)
+	end
 
-        -- Adjust the transform accordingly first
-        local consoleFillScale = (resx * 0.775) / (bfw * distBetweenKnobs)
-        gfx.Scale(consoleFillScale, consoleFillScale);
-
-        -- Actually draw the fill
-        gfx.FillColor(255, 255, 255)
-        gfx.DrawRect(bottomFill, io_x, io_y, io_w, io_h)
-
-        -- Then draw the details which need to be colored to match the lasers
-        for i = 1, 2 do
-            gfx.FillLaserColor(i)
-            gfx.DrawRect(ioConsoleDetails[i], io_x, io_y, io_w, io_h)
-        end
-
-        -- Draw the button press animations by overlaying transparent images
-        gfx.GlobalCompositeOperation(gfx.BLEND_OP_LIGHTER)
-        for i = 1, 6 do
-            -- While a button is held, increment a timer
-            -- If not held, that timer is set back to 0
-            if game.GetButton(buttonsInOrder[i]) then
-                consoleAnimTimers[i] = consoleAnimTimers[i] + deltaTime * consoleAnimSpeed * 3.14 * 2
-            else 
-                consoleAnimTimers[i] = 0
-            end
-
-            -- If the timer is active, flash based on a sin wave
-            local timer = consoleAnimTimers[i]
-            if timer ~= 0 then
-                local image = consoleAnimImages[i]
-                local alpha = (math.sin(timer) * 0.5 + 0.5) * 0.5 + 0.25
-                gfx.FillColor(255, 255, 255, alpha * 255);
-                gfx.DrawRect(image, io_x, io_y, io_w, io_h)
-            end
-        end
-        gfx.GlobalCompositeOperation(gfx.BLEND_OP_SOURCE_OVER)
-        
-        -- Undo those modifications
-        gfx.Restore();
-    end
-
-    local cw, ch = gfx.ImageSize(laserCursor)
-    local cursorWidth = 40 * scale
-    local cursorHeight = cursorWidth * (ch / cw)
-
-    -- draw each laser cursor
-    for i = 1, 2 do
-        local cursor = gameplay.critLine.cursors[i - 1]
-        local pos, skew = cursor.pos, cursor.skew
-
-        -- Add a kinda-perspective effect with a horizontal skew
-        gfx.SkewX(skew)
-
-        -- Draw the colored background with the appropriate laser color
-        gfx.FillLaserColor(i, cursor.alpha * 255)
-        gfx.DrawRect(laserCursor, pos - cursorWidth / 2, -cursorHeight / 2, cursorWidth, cursorHeight)
-        -- Draw the uncolored overlay on top of the color
-        gfx.FillColor(255, 255, 255, cursor.alpha * 255)
-        gfx.DrawRect(laserCursorOverlay, pos - cursorWidth / 2, -cursorHeight / 2, cursorWidth, cursorHeight)
-        -- Un-skew
-        gfx.SkewX(-skew)
-    end
-
-    -- We're done, reset graphics stuffs
-    gfx.FillColor(255, 255, 255)
-    gfx.ResetTransform()
+	gfx.FillColor(255, 255, 255)
+	gfx.ResetTransform();
 end
--- -------------------------------------------------------------------------- --
--- draw_banner:                                                               --
--- Renders the banner across the top of the screen in portrait.               --
--- This function expects no graphics transform except the design scale.       --
+
 function draw_banner(deltaTime)
     local bannerWidth, bannerHeight = gfx.ImageSize(topFill)
     local actualHeight = desw * (bannerHeight / bannerWidth)
@@ -607,16 +488,17 @@ function draw_banner(deltaTime)
 end
 
 button_hit = function(button, rating, delta)
-    hitError:triggerHit(button, rating, delta);
+	hitAnimation:queueHit(button, rating);
+	hitError:queueHit(button, rating, delta);
 end
 
-draw_hit_error = function(deltaTime)
-    hitError:render(deltaTime, desw, desh, portrait);
+drawHitError = function(deltaTime)
+	if (string.upper(game.GetSkinSetting('hitErrorPosition')) == 'OFF') then return end;
+	
+	hitError:render(deltaTime, desw, desh, portrait);
 end
 
--- -------------------------------------------------------------------------- --
--- draw_stat:                                                                 --
--- Draws a formatted name + value combination at x, y over w, h area.         --
+
 function draw_stat(x, y, w, h, name, value, format, r, g, b)
     gfx.Save()
 
@@ -651,10 +533,7 @@ function draw_stat(x, y, w, h, name, value, format, r, g, b)
     -- Return the next `y` position, for easier vertical stacking
     return y + h + 5
 end
--- -------------------------------------------------------------------------- --
--- draw_song_info:                                                            --
--- Draws current song information at the top left of the screen.              --
--- This function expects no graphics transform except the design scale.       --
+
 function draw_song_info(deltaTime)
     -- Check to see if there's a jacket to draw, and attempt to load one if not
     if jacket == nil or jacket == jacketFallback then
@@ -744,10 +623,7 @@ function draw_song_info(deltaTime)
     -- aaaand, scene!
     gfx.Restore()
 end
--- -------------------------------------------------------------------------- --
--- draw_best_diff:                                                            --
--- If there are other saved scores, this displays the difference between      --
---  the current play and your best.                                           --
+
 function draw_best_diff(deltaTime, x, y)
     -- Don't do anything if there's nothing to do
     if not gameplay.scoreReplays[1] then return end
@@ -773,8 +649,7 @@ function draw_best_diff(deltaTime, x, y)
 end
 
 local score_animation = Animation:new()
--- -------------------------------------------------------------------------- --
--- draw_score:                                                                --
+
 function draw_score(deltaTime)
     gfx.BeginPath()
     gfx.LoadSkinFont("NovaMono.ttf")
@@ -793,8 +668,7 @@ function draw_score(deltaTime)
     draw_best_diff(deltaTime, desw, 66)
     gfx.Translate(5, -5) -- undo margin
 end
--- -------------------------------------------------------------------------- --
--- draw_gauge:                                                                --
+
 function draw_gauge(deltaTime)
 
     gfx.DrawGauge(gameplay.gauge, 
@@ -815,8 +689,7 @@ function draw_gauge(deltaTime)
 	gfx.FontSize(20)
 	gfx.Text(string.format("%d%%", math.floor(gameplay.gauge * 100)), gauge_info.label_posx, posy )
 end
--- -------------------------------------------------------------------------- --
--- draw_combo:                                                                --
+
 function draw_combo(deltaTime)
     if combo == 0 then return end
     gfx.BeginPath()
@@ -833,8 +706,7 @@ function draw_combo(deltaTime)
     comboScale = comboScale - deltaTime * 3
     gfx.Text(tostring(combo), combo_info.posx, combo_info.posy)
 end
--- -------------------------------------------------------------------------- --
--- draw_earlate:                                                              --
+
 function draw_earlate(deltaTime)
     earlateTimer = math.max(earlateTimer - deltaTime,0)
     if earlateTimer == 0 then return nil end
@@ -859,8 +731,7 @@ function draw_earlate(deltaTime)
         gfx.Text("EARLY", desw / 2, ypos)
     end
 end
--- -------------------------------------------------------------------------- --
--- draw_alerts:                                                               --
+
 function draw_alerts(deltaTime)
     alertTimers[1] = math.max(alertTimers[1] - deltaTime,-2)
     alertTimers[2] = math.max(alertTimers[2] - deltaTime,-2)

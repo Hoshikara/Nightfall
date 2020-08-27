@@ -43,44 +43,44 @@ setupButtons = function()
 		};
 
 		buttons['main'][1] = {
-			['img'] =  gfx.CreateSkinImage('main_menu/buttons/singleplayer.png', 0),
-			['imgHover'] = gfx.CreateSkinImage('main_menu/buttons_hover/singleplayer_h.png', 0),
+			['img'] =  gfx.CreateSkinImage('main_menu/button/singleplayer.png', 0),
+			['imgHover'] = gfx.CreateSkinImage('main_menu/button_hover/singleplayer_hover.png', 0),
 			['action'] = Menu.Start
 		};
 		buttons['main'][2] = {
-			['img'] =  gfx.CreateSkinImage('main_menu/buttons/multiplayer.png', 0),
-			['imgHover'] = gfx.CreateSkinImage('main_menu/buttons_hover/multiplayer_h.png', 0),
+			['img'] =  gfx.CreateSkinImage('main_menu/button/multiplayer.png', 0),
+			['imgHover'] = gfx.CreateSkinImage('main_menu/button_hover/multiplayer_hover.png', 0),
 			['action'] = Menu.Multiplayer
 		};
 		buttons['main'][3] = {
-			['img'] =  gfx.CreateSkinImage('main_menu/buttons/download_charts.png', 0),
-			['imgHover'] = gfx.CreateSkinImage('main_menu/buttons_hover/download_charts_h.png', 0),
+			['img'] =  gfx.CreateSkinImage('main_menu/button/download_charts.png', 0),
+			['imgHover'] = gfx.CreateSkinImage('main_menu/button_hover/download_charts_hover.png', 0),
 			['action'] = Menu.DLScreen
 		};
 		buttons['main'][4] = {
-			['img'] =  gfx.CreateSkinImage('main_menu/buttons/settings.png', 0),
-			['imgHover'] = gfx.CreateSkinImage('main_menu/buttons_hover/settings_h.png', 0),
+			['img'] =  gfx.CreateSkinImage('main_menu/button/settings.png', 0),
+			['imgHover'] = gfx.CreateSkinImage('main_menu/button_hover/settings_hover.png', 0),
 			['action'] = Menu.Settings
 		};
 		buttons['main'][5] = {
-			['img'] =  gfx.CreateSkinImage('main_menu/buttons/exit.png', 0),
-			['imgHover'] = gfx.CreateSkinImage('main_menu/buttons_hover/exit_h.png', 0),
+			['img'] =  gfx.CreateSkinImage('main_menu/button/exit.png', 0),
+			['imgHover'] = gfx.CreateSkinImage('main_menu/button_hover/exit_hover.png', 0),
 			['action'] = Menu.Exit
 		};
 
 		buttons['update'][1] = {
-			['img'] =  gfx.CreateSkinImage('main_menu/buttons/install_update.png', 0),
-			['imgHover'] = gfx.CreateSkinImage('main_menu/buttons_hover/install_update_h.png', 0),
+			['img'] =  gfx.CreateSkinImage('main_menu/button/install_update.png', 0),
+			['imgHover'] = gfx.CreateSkinImage('main_menu/button_hover/install_update_hover.png', 0),
 			['action'] = Menu.Update
 		};
 		buttons['update'][2] = {
-			['img'] =  gfx.CreateSkinImage('main_menu/buttons/view_update.png', 0),
-			['imgHover'] = gfx.CreateSkinImage('main_menu/buttons_hover/view_update_h.png', 0),
+			['img'] =  gfx.CreateSkinImage('main_menu/button/view_update.png', 0),
+			['imgHover'] = gfx.CreateSkinImage('main_menu/button_hover/view_update_hover.png', 0),
 			['action'] = viewUpdate
 		};
 		buttons['update'][3] = {
-			['img'] =  gfx.CreateSkinImage('main_menu/buttons/close.png', 0),
-			['imgHover'] = gfx.CreateSkinImage('main_menu/buttons_hover/close_h.png', 0),
+			['img'] =  gfx.CreateSkinImage('main_menu/button/close.png', 0),
+			['imgHover'] = gfx.CreateSkinImage('main_menu/button_hover/close_hover.png', 0),
 			['action'] = closeUpdatePrompt
 		};
 
@@ -98,7 +98,7 @@ loadMenu = function(deltaTime)
 		end
 	end
 
-	introTimer = math.max(introTimer - (deltaTime / 4), 0);
+	introTimer = math.max(introTimer - (deltaTime / 3), 0);
 
 	local alpha = math.floor(255 * introTimer);
 
