@@ -473,13 +473,16 @@ render = function(deltaTime)
       end
     end
     --Draw Legend Information
-	if showGuide then
+
+  --[[
+    	if showGuide then
 		if aspectRatio == "PortraitWidescreen" then
 			draw_legend(0,(fifthY/3)*14, fullX, (fifthY/3)*1)
 		else
 			draw_legend(0,(fifthY/2)*9, fullX, (fifthY/2))
 		end
 	end
+  ]]--
 
     --draw text search
     if aspectRatio == "PortraitWidescreen" then

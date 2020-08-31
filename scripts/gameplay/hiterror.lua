@@ -7,7 +7,6 @@ local BOTTOM = 'BOTTOM';
 local MIDDLE = 'MIDDLE';
 local TOP = 'TOP';
 
-
 _.initializeHit = function(self)
   local hit = {};
 

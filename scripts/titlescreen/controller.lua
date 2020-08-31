@@ -4,14 +4,17 @@ local _ = {
 };
 
 
-_.handleInput = function(self, activeButton, showUpdatePrompt)
+_.handleInput = function(self, activeButton, showControls, showUpdatePrompt)
 	if (self['lastKnobs'] == nil) then
     self['lastKnobs'] = { game.GetKnob(0), game.GetKnob(1) };
     
     return activeButton;
 	else
     local newKnobs = { game.GetKnob(0), game.GetKnob(1) };
-    local nextButton = activeButton;
+		local nextButton = activeButton;
+		local maxLength = (showControls and 7)
+			or (showUpdatePrompt and 3)
+			or 6;
 	
 		self['knobProgress'] = self['knobProgress'] - deltaKnob(self['lastKnobs'][1] - newKnobs[1]) * 1.2;
 		self['knobProgress'] = self['knobProgress'] - deltaKnob(self['lastKnobs'][2] - newKnobs[2]) * 1.2;
@@ -19,11 +22,7 @@ _.handleInput = function(self, activeButton, showUpdatePrompt)
 		self['lastKnobs'] = newKnobs;
 		
 		if (math.abs(self['knobProgress']) > 1) then
-			if (showUpdatePrompt) then
-				nextButton = (((nextButton - 1) + roundToZero(self['knobProgress'])) % 3) + 1;
-			else 
-				nextButton = (((nextButton - 1) + roundToZero(self['knobProgress'])) % 5) + 1;
-			end
+			nextButton = (((nextButton - 1) + roundToZero(self['knobProgress'])) % maxLength) + 1;
 
 			self['knobProgress'] = self['knobProgress'] - roundToZero(self['knobProgress']);
     end

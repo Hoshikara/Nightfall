@@ -1,3 +1,9 @@
+###### August 31, 2020
+- Created 'Controls' screen, controller-navigable and accessible from a new button in the main menu
+- Modified load-in behavior slightly:
+  - If an update is available, title is hidden until appropriate actions taken in the prompt
+  - Title fades in and the first button is highlighted when menu is fully loaded
+
 ###### August 26, 2020
 - Replaced textures and shaders for buttons, lasers, track, and more
 - Refactored and integrated hit animation system from LucidWave; using different textures

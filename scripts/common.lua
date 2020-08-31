@@ -1,5 +1,13 @@
 gfx.LoadSkinFont("NotoSans-Regular.ttf");
 
+unpack = function(table, i)
+  i = i or 1;
+
+	if (table[i] ~= nil) then
+		return table[i], unpack(table, i + 1);
+	end
+end
+
 logInfo = function(tbl)
   local length = 0;
   local y = 30;
