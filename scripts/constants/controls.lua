@@ -1,226 +1,220 @@
-local controls = {
+local _ = {
   ['general'] = {
     [1] = {
-      ['action'] = '',
-      ['button'] = 'KEYBOARD',
-      ['heading'] = true
+      ['action'] = 'TOGGLE FULLSCREEN',
+      ['controller'] = '',
+      ['keyboard'] = '[ALT]  +  [ENTER]'
     },
     [2] = {
-      ['action'] = 'TOGGLE FULLSCREEN',
-      ['button'] = '[ALT]  +  [ENTER]'
-    },
-    [3] = {
       ['action'] = 'RELOAD SKIN',
-      ['button'] = '[F9]'
+      ['controller'] = '',
+      ['keyboard'] = '[F9]'
     }
   },
   ['songSelect'] = {
     [1] = {
-      ['action'] = '',
-      ['button'] = 'CONTROLLER',
-      ['heading'] = true
+      ['action'] = 'START SONG',
+      ['controller'] = '[START]',
+      ['keyboard'] = ''
     },
     [2] = {
-      ['action'] = 'START SONG',
-      ['button'] = '[START]'
+      ['action'] = 'SELECT DIFFICULTY',
+      ['controller'] = '[KNOB-L]',
+      ['keyboard'] = '[LEFT]  /  [RIGHT]'
     },
     [3] = {
-      ['action'] = 'SELECT LEVEL',
-      ['button'] = '[KNOB-L]'
+      ['action'] = 'SELECT SONG',
+      ['controller'] = '[KNOB-R]',
+      ['keyboard'] = '[UP]  /  [DOWN]'
     },
     [4] = {
-      ['action'] = 'SELECT SONG',
-      ['button'] = '[KNOB-R]'
+      ['action'] = 'FILTER SONGS BY COLLECTION',
+      ['controller'] = '[FX-L]',
+      ['keyboard'] = ''
     },
     [5] = {
-      ['action'] = 'FILTER SONGS BY FOLDER / COLLECTION',
-      ['button'] = '[FX-L]'
+      ['action'] = 'FILTER SONGS BY DIFFICULTY',
+      ['controller'] = '[FX-L]  >  [START]',
+      ['keyboard'] = ''
     },
     [6] = {
-      ['action'] = 'FILTER SONGS BY LEVEL',
-      ['button'] = '[FX-L]  +  [START]'
+      ['action'] = 'SORT SONGS',
+      ['controller'] = '[FX-R]',
+      ['keyboard'] = ''
     },
     [7] = {
-      ['action'] = 'SORT SONGS',
-      ['button'] = '[FX-R]'
+      ['action'] = 'OPEN GAMEPLAY SETTINGS',
+      ['controller'] = '[FX-L]  +  [FX-R]',
+      ['keyboard'] = ''
     },
     [8] = {
-      ['action'] = 'OPEN GAMEPLAY SETTINGS',
-      ['button'] = '[FX-L]  +  [FX-R]'
+      ['action'] = 'OPEN SONG COLLECTIONS',
+      ['controller'] = '[BT-B]  +  [BT-C]',
+      ['keyboard'] = ''
     },
     [9] = {
-      ['action'] = 'OPEN SONG COLLECTIONS',
-      ['button'] = '[BT-B]  +  [BT-C]',
-      ['lineBreak'] = true
+      ['action'] = 'SEARCH SONGS',
+      ['controller'] = '',
+      ['keyboard'] = '[TAB]'
     },
     [10] = {
-      ['action'] = '',
-      ['button'] = 'KEYBOARD',
-      ['heading'] = true
+      ['action'] = 'START SONG IN AUTOPLAY MODE',
+      ['controller'] = '',
+      ['keyboard'] = '[CTRL]  +  [START]'
     },
     [11] = {
-      ['action'] = 'SEARCH SONGS',
-      ['button'] = '[TAB]'
+      ['action'] = 'DELETE SONG',
+      ['controller'] = '',
+      ['keyboard'] = '[DEL]'
     },
     [12] = {
-      ['action'] = 'START SONG IN AUTOPLAY MODE',
-      ['button'] = '[CTRL]  +  [START]'
+      ['action'] = 'PREVIOUS SONG PAGE',
+      ['controller'] = '',
+      ['keyboard'] = '[PGUP]'
     },
     [13] = {
-      ['action'] = 'SELECT RANDOM SONG',
-      ['button'] = '[F2]'
+      ['action'] = 'NEXT SONG PAGE',
+      ['controller'] = '',
+      ['keyboard'] = '[PGDN]'
     },
     [14] = {
-      ['action'] = 'START DEMO MODE',
-      ['button'] = '[F8]'
+      ['action'] = 'SELECT RANDOM SONG',
+      ['controller'] = '',
+      ['keyboard'] = '[F2]'
     },
     [15] = {
-      ['action'] = 'OPEN SELECTED SONG IN EDITOR',
-      ['button'] = '[F11]'
+      ['action'] = 'START DEMO MODE',
+      ['controller'] = '',
+      ['keyboard'] = '[F8]'
     },
     [16] = {
-      ['action'] = 'OPEN SELECTED SONG IN FILE EXPLORER',
-      ['button'] = '[F12]'
+      ['action'] = 'OPEN SELECTED SONG FOLDER',
+      ['controller'] = '',
+      ['keyboard'] = '[F12]'
     }
   },
   ['gameplaySettings'] = {
     [1] = {
-      ['action'] = '',
-      ['button'] = 'CONTROLLER',
-      ['heading'] = true
+      ['action'] = 'CHANGE TABS',
+      ['controller'] = '[FX-L]  /  [FX-R]',
+      ['keyboard'] = ''
     },
     [2] = {
-      ['action'] = 'CHANGE TABS',
-      ['button'] = '[FX-L]  /  [FX-R]'
+      ['action'] = 'CHANGE FIELD',
+      ['controller'] = '[KNOB-L]',
+      ['keyboard'] = '[UP]  /  [DOWN]'
     },
     [3] = {
-      ['action'] = 'CHANGE FIELD',
-      ['button'] = '[KNOB-L]'
+      ['action'] = 'DECREASE VALUE',
+      ['controller'] = '[BT-A]  /  [BT-B]',
+      ['keyboard'] = '[LEFT]'
     },
     [4] = {
-      ['action'] = 'DECREASE / TOGGLE VALUE',
-      ['button'] = '[BT-A]  /  [BT-B]'
+      ['action'] = 'INCREASE VALUE',
+      ['controller'] = '[BT-C]  /  [BT-D]',
+      ['keyboard'] = '[RIGHT]'
     },
     [5] = {
-      ['action'] = 'INCREASE / TOGGLE VALUE',
-      ['button'] = '[BT-C]  /  [BT-D]'
+      ['action'] = 'ADJUST VALUE',
+      ['controller'] = '[KNOB-R]',
+      ['keyboard'] = ''
     },
     [6] = {
-      ['action'] = 'ADJUST VALUE',
-      ['button'] = '[KNOB-R]'
+      ['action'] = 'TOGGLE VALUE',
+      ['controller'] = '[START]',
+      ['keyboard'] = ''
     }
   },
   ['gameplay'] = {
     [1] = {
-      ['action'] = '',
-      ['button'] = 'CONTROLLER',
-      ['heading'] = true
+      ['action'] = 'ADJUST HISPEED',
+      ['controller'] = '[START]*',
+      ['keyboard'] = ''
     },
     [2] = {
-      ['action'] = 'ADJUST HISPEED',
-      ['button'] = '[START]*'
+      ['action'] = 'ADJUST HIDDEN / SUDDEN CUTOFF',
+      ['controller'] = '[START]*  +  [BT-B]*',
+      ['keyboard'] = ''
     },
     [3] = {
-      ['action'] = 'ADJUST HIDDEN / SUDDEN CUTOFF',
-      ['button'] = '[START]*  +  [BT-B]*'
+      ['action'] = 'ADJUST HIDDEN / SUDDEN FADE',
+      ['controller'] = '[START]*  +  [BT-C]*',
+      ['keyboard'] = ''
     },
     [4] = {
-      ['action'] = 'ADJUST HIDDEN / SUDDEN FADE',
-      ['button'] = '[START]*  +  [BT-C]*',
+      ['action'] = 'RESTART SONG',
+      ['controller'] = '',
+      ['keyboard'] = '[F5]',
       ['lineBreak'] = true
     },
     [5] = {
       ['action'] = '',
-      ['button'] = '* HOLD BUTTON, USE  [KNOB-L]  /  [KNOB-R]  TO ADJUST',
+      ['controller'] = '* HOLD BUTTON, USE  [KNOB-L]  /  [KNOB-R]  TO ADJUST',
+      ['keyboard'] = '',
       ['lineBreak'] = true
-    },
-    [6] = {
-      ['action'] = '',
-      ['button'] = 'KEYBOARD',
-      ['heading'] = true
-    },
-    [7] = {
-      ['action'] = 'RESTART SONG',
-      ['button'] = '[F5]'
     }
   },
   ['results'] = {
     [1] = {
-      ['action'] = '',
-      ['button'] = 'CONTROLLER',
-      ['heading'] = true
+      ['action'] = 'DISPLAY ADVANCED STATS',
+      ['controller'] = '[FX-L]',
+      ['keyboard'] = ''
     },
     [2] = {
-      ['action'] = 'DISPLAY ADVANCED STATS',
-      ['button'] = '[FX-L]'
+      ['action'] = 'OPEN SONG COLLECTIONS',
+      ['controller'] = '[BT-B]  +  [BT-C]',
+      ['keyboard'] = ''
     },
     [3] = {
-      ['action'] = 'OPEN SONG COLLECTIONS',
-      ['button'] = '[BT-B]  +  [BT-C]',
-      ['lineBreak'] = true
-    },
-    [4] = {
-      ['action'] = '',
-      ['button'] = 'KEYBOARD',
-      ['heading'] = true
-    },
-    [5] = {
       ['action'] = 'CAPTURE SCREENSHOT',
-      ['button'] = '[F12]'
+      ['controller'] = '',
+      ['keyboard'] = '[F12]'
     }
   },
   ['multiplayer'] = {
     [1] = {
-      ['action'] = '',
-      ['button'] = 'CONTROLLER',
-      ['heading'] = true
+      ['action'] = 'TOGGLE GAUGE TYPE',
+      ['controller'] = '[FX-L]',
+      ['keyboard'] = ''
     },
     [2] = {
-      ['action'] = 'TOGGLE GAUGE TYPE',
-      ['button'] = '[FX-L]'
+      ['action'] = 'TOGGLE MIRROR MODE',
+      ['controller'] = '[FX-R]',
+      ['keyboard'] = ''
     },
     [3] = {
-      ['action'] = 'TOGGLE MIRROR MODE',
-      ['button'] = '[FX-R]',
-      ['lineBreak'] = true
-    },
-    [4] = {
-      ['action'] = '',
-      ['button'] = 'KEYBOARD',
-      ['heading'] = true
-    },
-    [5] = {
       ['action'] = 'TOGGLE CHAT WINDOW',
-      ['button'] = '[F8]'
+      ['controller'] = '',
+      ['keyboard'] = '[F8]'
     }
   },
   ['nautica'] = {
     [1] = {
-      ['action'] = '',
-      ['button'] = 'CONTROLLER',
-      ['heading'] = true
+      ['action'] = 'DOWNLOAD SONG',
+      ['controller'] = '[START]',
+      ['keyboard'] = ''
     },
     [2] = {
-      ['action'] = 'DOWNLOAD SONG',
-      ['button'] = '[START]'
+      ['action'] = 'PREVIEW SONG',
+      ['controller'] = '[BT-A]',
+      ['keyboard'] = ''
     },
     [3] = {
-      ['action'] = 'PREVIEW SONG',
-      ['button'] = '[BT-A]'
+      ['action'] = 'SELECT SONG',
+      ['controller'] = '[KNOB-R]',
+      ['keyboard'] = '[UP]  /  [DOWN]'
     },
     [4] = {
-      ['action'] = 'SELECT SONG',
-      ['button'] = '[KNOB-R]'
+      ['action'] = 'FILTER SONGS BY DIFFICULTY',
+      ['controller'] = '[FX-L]',
+      ['keyboard'] = ''
     },
     [5] = {
-      ['action'] = 'FILTER SONGS BY LEVEL',
-      ['button'] = '[FX-L]'
-    },
-    [6] = {
       ['action'] = 'SORT SONGS',
-      ['button'] = '[FX-R]'
+      ['controller'] = '[FX-R]',
+      ['keyboard'] = ''
     }
   }
 };
 
-return controls;
+return _;

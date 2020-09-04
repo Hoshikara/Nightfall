@@ -29,7 +29,11 @@ function render_bars(progress)
         gfx.Translate(0,yoff)
         gfx.BeginPath()
         gfx.Rect(60 * i, yoff, 60, resy)
-        gfx.FillColor(0,64, 150 + 25 * dir)
+        if ((i % 2) == 0) then
+            gfx.FillColor(16, 32, 48, 255);
+        else
+            gfx.FillColor(24, 48, 72, 255);
+        end
         gfx.Fill()
         gfx.Restore()
     end

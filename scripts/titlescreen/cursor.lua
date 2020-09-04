@@ -1,9 +1,9 @@
 local _ = {};
 
-_.drawCursor = function(self, x, y, w, h, s);
+_.drawCursor = function(self, x, y, w, h, s, a);
 	gfx.BeginPath();
 	gfx.StrokeWidth(2);
-	gfx.StrokeColor(255, 255, 255, 255);
+	gfx.StrokeColor(255, 255, 255, math.floor(255 * a));
 
 	gfx.MoveTo(
 		x - (s * 2),
@@ -14,7 +14,7 @@ _.drawCursor = function(self, x, y, w, h, s);
 		y - (h / 2) - (s * 3)
 	);
 	gfx.LineTo(
-		x + s,
+		x + (s * 1.25),
 		y - (h / 2) - (s * 3)
 	);
 
@@ -27,7 +27,7 @@ _.drawCursor = function(self, x, y, w, h, s);
 		y - (h / 2) - (s * 3)
 	);
 	gfx.LineTo(
-		x + w + (s * 3),
+		x + w + (s * 2.75),
 		y - (h / 2) - (s * 3)
 	);
 
@@ -40,7 +40,7 @@ _.drawCursor = function(self, x, y, w, h, s);
 		y + (h / 2) + (s * 3)
 	);
 	gfx.LineTo(
-		x + s,
+		x + (s * 1.25),
 		y + (h / 2) + (s * 3)
 	);
 	
@@ -53,7 +53,7 @@ _.drawCursor = function(self, x, y, w, h, s);
 		y + (h / 2) + (s * 3)
 	);
 	gfx.LineTo(
-		x + w + (s * 3),
+		x + w + (s * 2.75),
 		y + (h / 2) + (s * 3)
 	);
 

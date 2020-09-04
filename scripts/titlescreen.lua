@@ -1,6 +1,7 @@
 controller = require('titlescreen/controller');
 controls = require('titlescreen/controls');
 cursor = require('titlescreen/cursor');
+easing = require('lib/easing');
 
 if (not controls['initialized']) then
   controls:initializeAll();
@@ -15,6 +16,11 @@ local buttonH = 0;
 local hoveredButton = nil;
 local maxButtons = 6;
 
+local cursorAlpha = 0;
+local cursorPos = {};
+local cursorTimer = 0;
+local cursorX = nil;
+
 local resX;
 local resY;
 local scaledW;
@@ -24,10 +30,14 @@ local scalingFactor;
 local mousePosX = 0;
 local mousePosY = 0;
 
-local buttonWidth = 350;
 local fadeTimer = 0;
 local showUpdatePrompt = false;
 local updateChecked = false;
+
+local updateCursorAlpha = 0;
+local updateCursorPos = {};
+local updateCursorTimer = 0;
+local updateCursorX = nil;
 
 local titleAlpha = 0;
 local titleTimer = 0;
@@ -47,7 +57,9 @@ setupLayout = function()
   resX, resY = game.GetResolution();
   scaledW = 1920;
   scaledH = scaledW * (resY / resX);
-  scalingFactor = resX / scaledW;
+	scalingFactor = resX / scaledW;
+	
+	gfx.Scale(scalingFactor, scalingFactor);
 end
 
 setupButtons = function()
@@ -143,7 +155,7 @@ loadMenu = function(deltaTime)
 end
 
 drawTitle = function(deltaTime)
-	local x = scaledW / 18;
+	local x = scaledW / 20;
 
 	titleTimer = math.min(titleTimer + (deltaTime * 4), 1);
 	titleAlpha = math.floor(titleTimer * 255);
@@ -170,6 +182,13 @@ mouseClipped = function(x, y, w, h)
 		and (mousePosY < scaledH);
 end
 
+setCursorX = function()
+	if (not cursorX) then
+		cursorX = scaledH - (scaledH / 5);
+		updateCursorX = (scaledW / 2) - (((buttons['width'] * 0.8) * 3) / 2) + 13;
+	end
+end 
+
 drawButton = function(x, initialY, i)
 	local isNavigable = menuLoaded and (not showControls);
 	local allowAction = isNavigable and (not showUpdatePrompt);
@@ -181,15 +200,13 @@ drawButton = function(x, initialY, i)
 	local y = initialY - (h / 2);
 
 	gfx.BeginPath();
-	gfx.ImageRect(x, y, w, h, buttons['img'], 0.35, 0);
+	gfx.ImageRect(x, y, w, h, buttons['img'], 0.45, 0);
 
 	if (allowAction and (mouseClipped(x, y, w, h) or isActive)) then
 		activeButton = i;
 		allowClick = mouseClipped(x, y, w, h);
 		hoveredButton = button['action'];
 		gfx.ImageRect(x, y, w, h, buttons['imgHover'], 1, 0);
-
-		cursor:drawCursor(x, initialY, 258, 50, 4);
 	end
 
 	gfx.FillColor(255, 255, 255, textAlpha);
@@ -197,6 +214,22 @@ drawButton = function(x, initialY, i)
 	gfx.DrawLabel(button['label'], x + 35, initialY - 3, -1);
 
 	return (w + buttons['spacing']);
+end
+
+drawCursor = function(deltaTime, x, y)
+	cursorTimer = cursorTimer + deltaTime;
+
+	cursorAlpha = math.abs(0.8 * math.cos(cursorTimer * 5)) + 0.2;
+
+	cursorX = cursorX - (cursorX - x) * deltaTime * 50;
+
+	gfx.Save();
+
+	gfx.BeginPath();
+
+	cursor:drawCursor(cursorX, y, 258, 50, 4, cursorAlpha);
+
+	gfx.Restore();
 end
 
 drawUpdateButton = function(x, initialY, i)
@@ -208,15 +241,13 @@ drawUpdateButton = function(x, initialY, i)
 	local y = initialY - (h / 2);
 
 	gfx.BeginPath();
-	gfx.ImageRect(x, y, w, h, buttons['img'], 0.7, 0);
+	gfx.ImageRect(x, y, w, h, buttons['img'], 0.45, 0);
 
 	if (mouseClipped(x, y, w, h) or isActive) then
 		activeButton = i;
 		allowClick = mouseClipped(x, y, w, h);
 		hoveredButton = button['action'];
 		gfx.ImageRect(x, y, w, h, buttons['imgHover'], 1, 0);
-
-		cursor:drawCursor(x, initialY, (258 * 0.8), (50 * 0.8), 3);
 	end
 
 	gfx.FillColor(255, 255, 255, textAlpha);
@@ -224,6 +255,22 @@ drawUpdateButton = function(x, initialY, i)
 	gfx.DrawLabel(button['label'], x + 29, initialY - 3, -1);
 
 	return (w + buttons['spacing']);
+end
+
+drawUpdateCursor = function(deltaTime, x, y)
+	updateCursorTimer = updateCursorTimer + deltaTime;
+
+	updateCursorAlpha = math.abs(0.8 * math.cos(updateCursorTimer * 5)) + 0.2;
+
+	updateCursorX = updateCursorX - (updateCursorX - x) * deltaTime * 50;
+
+	gfx.Save();
+
+	gfx.BeginPath();
+
+	cursor:drawCursor(updateCursorX, y, (258 * 0.8), (50 * 0.8), 3, updateCursorAlpha);
+
+	gfx.Restore();
 end
 
 drawUpdatePrompt = function(deltaTime)
@@ -234,7 +281,7 @@ drawUpdatePrompt = function(deltaTime)
 	fadeTimer = math.min(fadeTimer + (deltaTime * 3), 1);
 
 	gfx.BeginPath();
-	gfx.FillColor(0, 0, 0, math.floor(170 * fadeTimer));
+	gfx.FillColor(0, 0, 0, math.floor(150 * fadeTimer));
 	gfx.Rect(0, 0, scaledW, scaledH);
 	gfx.Fill();
 
@@ -250,8 +297,11 @@ drawUpdatePrompt = function(deltaTime)
 	local updateButtonY = scaledH / 2 + 133;
 
 	for i = 1, 3 do
+		updateCursorPos[i] = updateButtonX;
 		updateButtonX = updateButtonX + drawUpdateButton(updateButtonX, updateButtonY, i);
 	end
+
+	drawUpdateCursor(deltaTime, updateCursorPos[activeButton], updateButtonY);
 end
 
 closeUpdatePrompt = function()
@@ -313,8 +363,11 @@ end
 render = function(deltaTime)
 	setupButtons();
 	setupLayout();
+	setCursorX();
 
-	gfx.Scale(scalingFactor, scalingFactor);
+	if (not renderX) then
+		renderX = scaledH - (scaledH / 5);
+	end
 
 	mousePosX, mousePosY = game.GetMousePos();
 
@@ -330,6 +383,7 @@ render = function(deltaTime)
 	hoveredButton = nil;
 
 	for i = 1, maxButtons do
+		cursorPos[i] = buttonX;
 		buttonX = buttonX + drawButton(buttonX, buttonY, i);
 	end
 
@@ -344,6 +398,10 @@ render = function(deltaTime)
 			drawUpdatePrompt(deltaTime);
 		else
 			drawTitle(deltaTime);
+
+			if (not showControls) then
+				drawCursor(deltaTime, cursorPos[activeButton], buttonY);
+			end
 		end
 	end
 

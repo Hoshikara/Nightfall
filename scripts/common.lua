@@ -1,4 +1,12 @@
-gfx.LoadSkinFont("NotoSans-Regular.ttf");
+gfx.LoadSkinFont('DFMGM.ttf');
+
+colors = {
+  black = {0, 0, 0, 255},
+  blueDark = {16, 32, 48, 255},
+  blueNormal = {60, 110, 160, 255},
+  blueLight = {70, 120, 170, 255},
+  white = {255, 255, 255, 255}
+};
 
 unpack = function(table, i)
   i = i or 1;
@@ -29,7 +37,7 @@ logInfo = function(tbl)
   gfx.LoadSkinFont('FiraCode.ttf');
   gfx.FontSize(30);
   gfx.TextAlign(gfx.TEXT_ALIGN_TOP + gfx.TEXT_ALIGN_LEFT);
-  gfx.FillColor(255, 255, 255, 255);
+  gfx.FillColor(unpack(colors['white']));
   
   for k, v in pairs(tbl) do
     gfx.Text(string.format('%s: %s', k, v), 0, y * inc);
@@ -71,4 +79,70 @@ drawCenteredImage = function(params)
   gfx.BeginPath();
   gfx.GlobalCompositeOperation(blendOp);
   gfx.ImageRect(x, y, w, h, params['image'], alpha, 0);
+end
+
+drawScrollingLabel = function(timer, label, maxWidth, h, x, y, scale, speed, color)
+  local labelW = getLabelInfo(label)['w'];
+  local labelX = labelW * 1.2;
+  local duration = (labelX / 80) * (0.75 * speed);
+  local phase = math.max((timer % (duration + 1.5)) - 1.5, 0) / duration;
+
+  gfx.Save();
+
+  gfx.BeginPath();
+  gfx.Scissor((x + 2) * scale, y * scale, maxWidth, h * 1.25);
+
+  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
+
+  gfx.FillColor(unpack(color));
+
+  gfx.DrawLabel(label, x - (phase * labelX), y);
+  gfx.DrawLabel(label, x - (phase * labelX) + labelX, y);
+
+  gfx.ResetScissor();
+
+  gfx.Restore();
+end
+
+getImageInfo = function(image)
+  if (image) then
+    local w, h = gfx.ImageSize(image);
+
+    return { ['w'] = w, ['h'] = h };
+  end
+
+  return { ['w'] = 0, ['h'] = 0 };
+end
+
+getLabelInfo = function(label)
+  if (label) then
+    local w, h = gfx.LabelSize(label);
+
+    return { ['w'] = w, ['h'] = h };
+  end
+
+  return { ['w'] = 0, ['h'] = 0 };
+end
+
+mouseClipped = function(mPosX, mPosY, x, y, w, h, scale)
+	local scaledX = x * scale;
+	local scaledY = y * scale;
+	local scaledW = scaledX + (w * scale);
+	local scaledH = scaledY + (h * scale);
+
+	return (mPosX > scaledX)
+		and (mPosY > scaledY)
+		and (mPosX < scaledW)
+		and (mPosY < scaledH);
+end
+
+stringReplace = function(str, patternTable, replacement)
+  local replaceWith = replacement or '';
+	local newStr = str;
+
+	for _, pattern in ipairs(patternTable) do
+		newStr = string.gsub(newStr, pattern, replaceWith);
+	end
+
+	return string.upper(newStr);
 end

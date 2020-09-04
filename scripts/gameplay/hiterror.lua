@@ -137,7 +137,7 @@ _.render = function(self, deltaTime, desw, desh)
   gfx.Fill();
 
   gfx.BeginPath();
-  gfx.FillColor(255, 255, 255, 255);
+  gfx.FillColor(unpack(colors['white']));
   gfx.Rect(-0.8, -12, 1.6, 24);
   gfx.Fill();
 

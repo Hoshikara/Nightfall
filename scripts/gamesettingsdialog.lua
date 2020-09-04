@@ -1,196 +1,291 @@
-function clamp(x, min, max) 
-    if x < min then
-        x = min
-    end
-    if x > max then
-        x = max
-    end
+CONSTANTS = require('constants/songwheel');
+layout = require('layout/dialog');
 
-    return x
+local timer = 0;
+
+local resX;
+local resY;
+local scaledW;
+local scaledH;
+local scalingFactor;
+
+setupLayout = function()
+  resX, resY = game.GetResolution();
+  scaledW = 1920;
+  scaledH = scaledW * (resY / resX);
+	scalingFactor = resX / scaledW;
 end
 
-function smootherstep(edge0, edge1, x) 
-    -- Scale, and clamp x to 0..1 range
-    x = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0)
-    -- Evaluate polynomial
-    return x * x * x * (x * (x * 6 - 15) + 10)
+local labels = nil;
+
+setLabels = function()
+	if (not labels) then
+		labels = {
+			['navigation'] = {},
+			['settings'] = {},
+			['tabs'] = {}
+		};
+
+		gfx.LoadSkinFont('GothamMedium.ttf');
+		labels['fxl'] = gfx.CreateLabel('[FX-L]', 20, 0);
+		labels['fxr'] = gfx.CreateLabel('[FX-R]', 20, 0);
+		labels['start'] = gfx.CreateLabel('[START]', 24, 0);
+
+		for index, tab in ipairs(CONSTANTS['tabs']) do
+			gfx.LoadSkinFont('GothamMedium.ttf');
+			labels['navigation'][index] = gfx.CreateLabel(tab, 20, 0);
+
+			gfx.LoadSkinFont('GothamBook.ttf');
+			labels['tabs'][index] = gfx.CreateLabel(tab, 48, 0);
+		end
+
+		gfx.LoadSkinFont('GothamBook.ttf');
+		labels['ms'] = gfx.CreateLabel('MS', 24, 0);
+
+		for index, tab in ipairs(CONSTANTS['settings']) do
+			labels['settings'][index] = {};
+
+			for settingIndex, setting in pairs(tab) do
+				labels['settings'][index][settingIndex] = {
+					['label'] = gfx.CreateLabel(setting['label'], 24, 0)
+				};
+
+				if (setting['values']) then
+					labels['settings'][index][settingIndex]['values'] = {};
+
+					for valueIndex, value in ipairs(setting['values']) do
+						labels['settings'][index][settingIndex]['values'][valueIndex] = gfx.CreateLabel(value, 24, 0);
+					end
+				end
+			end
+		end
+	end
 end
-  
-function to_range(val, start, stop)
-    return start + (stop - start) * val
+
+drawArrows = function(initialX, initialY, minBounded, maxBounded);
+	local x1 = initialX + 28;
+	local x2 = initialX + 44;
+	local y = initialY + 10;
+
+	gfx.Save();
+
+	gfx.Scale(scalingFactor, scalingFactor);
+
+	gfx.BeginPath();
+
+	if (minBounded) then
+		gfx.FillColor(255, 255, 255, math.floor(50 * timer));
+	else
+		gfx.FillColor(255, 255, 255, math.floor(255 * timer));
+	end
+
+	gfx.MoveTo(x1, y);
+	gfx.LineTo(x1, y + 12);
+	gfx.LineTo(x1 - 10, y + 6)
+	gfx.LineTo(x1, y);
+	
+	gfx.Fill();
+
+	gfx.BeginPath();
+
+	if (maxBounded) then
+		gfx.FillColor(255, 255, 255, math.floor(50 * timer));
+	else
+		gfx.FillColor(255, 255, 255, math.floor(255 * timer));
+	end
+
+	gfx.MoveTo(x2, y);
+	gfx.LineTo(x2, y + 12);
+	gfx.LineTo(x2 + 10, y + 6)
+	gfx.LineTo(x2, y);
+
+	gfx.Fill();
+
+	gfx.Restore();
 end
 
-Animation = {
-    start = 0,
-    stop = 0,
-    progress = 0,
-    duration = 1,
-    smoothStart = false
-}
+drawNavigation = function()
+	local currentTab = SettingsDiag.currentTab;
 
-function Animation:new(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
-    return o
+	local next = (((currentTab + 1) <= 5) and (currentTab + 1)) or 1;
+	local nextLabel = labels['navigation'][next];
+
+	local previous = (((currentTab - 1) >= 1) and (currentTab - 1)) or 5;
+	local previousLabel = labels['navigation'][previous];
+
+	local x1 = layout['x']['innerLeft'];
+	local x2 = layout['x']['outerRight'];
+	local y = layout['y']['bottom'] + 12;
+
+	gfx.BeginPath();
+
+	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
+	gfx.FillColor(255, 255, 255, math.floor(255 * timer));
+	gfx.DrawLabel(previousLabel, x1, y);
+	gfx.FillColor(60, 110, 160, math.floor(255 * timer));
+	gfx.DrawLabel(labels['fxr'], x2 + 8, y - 1);
+
+	gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
+	gfx.FillColor(255, 255, 255, math.floor(255 * timer));
+	gfx.DrawLabel(nextLabel, x2, y);
+	gfx.FillColor(60, 110, 160, math.floor(255 * timer));
+	gfx.DrawLabel(labels['fxl'], x1 - 8, y - 1);
 end
 
-function Animation:restart(start, stop, duration)
-    self.progress = 0
-    self.start = start
-    self.stop = stop
-    self.duration = duration
+drawHeading = function()
+	local label = labels['tabs'][SettingsDiag.currentTab];
+	local x = layout['x']['outerLeft'] - 2;
+	local y = layout['y']['top'] - (getLabelInfo(label)['h'] / 1.25);
+
+	gfx.BeginPath();
+	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
+	gfx.FillColor(60, 110, 160, math.floor(255 * timer));
+	gfx.DrawLabel(label, x, y);
 end
 
-function Animation:tick(deltaTime)
-    self.progress = math.min(1, self.progress + deltaTime / self.duration)
-    if self.progress == 1 then return self.stop end
-    if self.smoothStart then
-        return to_range(smootherstep(0, 1, self.progress), self.start, self.stop)
-    else
-        return to_range(smootherstep(-1, 1, self.progress) * 2 - 1, self.start, self.stop)
-    end
+drawSettings = function()
+	local currentSetting = SettingsDiag.currentSetting;
+	local currentTab = SettingsDiag.currentTab;
+	local settings = SettingsDiag.tabs[currentTab].settings;
+	local settingLabels = labels['settings'][currentTab];
+
+	local x = layout['x']['middleLeft'];
+	local y = layout['y']['top'] + (getLabelInfo(labels['tabs'][currentTab])['h'] / 1.75);
+
+	for index, setting in ipairs(settings) do
+		local isSelected = currentSetting == index;
+		gfx.BeginPath();
+		gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
+
+		if (isSelected) then
+			gfx.FillColor(255, 255, 255, math.floor(255 * timer));
+		else
+			gfx.FillColor(255, 255, 255, math.floor(50 * timer));
+		end
+
+		gfx.DrawLabel(settingLabels[index]['label'], x, y);
+
+		if (setting.value ~= nil) then
+			drawSettingValue(setting, labels['settings'][currentTab][index]['values'], y, isSelected);
+		elseif ((not setting.value) and isSelected) then
+			gfx.BeginPath();
+			gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
+			gfx.FillColor(60, 110, 160, math.floor(255 * timer));
+			gfx.DrawLabel(labels['start'], layout['x']['middleRight'], y);
+		end
+
+		y = y + (getLabelInfo(settingLabels[index]['label'])['h'] * 1.75);
+	end
 end
 
-local yScale = Animation:new()
-local diagWidth = 600
-local diagHeight = 400
-local tabStroke = {start=0, stop=1}
-local tabStrokeAnimation = {start=Animation:new(), stop=Animation:new()}
-local settingsStrokeAnimation = {x=Animation:new(), y=Animation:new()}
-local prevTab = -1
-local prevSettingStroke = {x=0, y=0}
-local settingStroke = {x=0, y=0}
-local prevVis = false
+drawSettingValue = function(setting, values, y, isSelected)
+	local x = layout['x']['middleRight'];
 
-function render(deltaTime, visible)
-    if visible and not prevVis then
-        yScale:restart(0, 1, 0.25)
-    elseif not visible and prevVis then
-        yScale:restart(1, 0, 0.25)
-    end
+	gfx.BeginPath();
+	gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
+	
+	if (isSelected) then
+		gfx.FillColor(255, 255, 255, math.floor(255 * timer));
+	else
+		gfx.FillColor(255, 255, 255, math.floor(50 * timer));
+	end
 
-    if not visible and yScale:tick(0) < 0.05 then return end
+	if (setting.type == 'int') then
+		gfx.LoadSkinFont('DigitalSerialBold.ttf');
+	
+		gfx.UpdateLabel(values[1], tostring(setting.value), 24, 0);
 
-    resX, resY = game.GetResolution()
-    local scale = resY / 1080
-    gfx.ResetTransform()
-    gfx.Translate(math.floor(resX / 2), math.floor(resY / 2))
-    gfx.Scale(scale, scale)
-    gfx.Scale(1.0, smootherstep(0, 1, yScale:tick(deltaTime)))
-    gfx.BeginPath()
-    gfx.Rect(-diagWidth/2, -diagHeight/2, diagWidth, diagHeight)
-    gfx.FillColor(50,50,50)
-    gfx.Fill()
-    gfx.FillColor(255,255,255)
+		gfx.DrawLabel(labels['ms'], x, y);
+		gfx.DrawLabel(values[1], x - getLabelInfo(labels['ms'])['w'] - 12, y);
 
-    tabStroke.start = tabStrokeAnimation.start:tick(deltaTime)
-    tabStroke.stop = tabStrokeAnimation.stop:tick(deltaTime)
+		if (isSelected) then
+			drawArrows(x, y, setting.value == setting.min, setting.value == setting.max);
+		end
+	elseif (setting.type == 'float') then
+		local formatted;
 
-    settingStroke.x = settingsStrokeAnimation.x:tick(deltaTime)
-    settingStroke.y = settingsStrokeAnimation.y:tick(deltaTime)
+		gfx.LoadSkinFont('DigitalSerialBold.ttf');
 
-    local tabBarHeight = 0
-    local nextTabX = 5
+		if (setting.max <= 1) then
+			formatted = string.format('%.f%%', (setting.value * 100));
+		else
+			formatted = string.format('%.2f', setting.value);
+		end
 
-    gfx.TextAlign(gfx.TEXT_ALIGN_TOP + gfx.TEXT_ALIGN_LEFT)
-    gfx.FontSize(35)
-    gfx.Save() --draw tab bar
-    gfx.Translate(-diagWidth / 2, -diagHeight / 2)
-    for ti, tab in ipairs(SettingsDiag.tabs) do
-        local xmin,ymin, xmax,ymax = gfx.TextBounds(nextTabX, 5, tab.name)
+		gfx.UpdateLabel(values[1], formatted, 24, 0);
 
-        if ti == SettingsDiag.currentTab and SettingsDiag.currentTab ~= prevTab then 
-            tabStrokeAnimation.start:restart(tabStroke.start, nextTabX, 0.1)
-            tabStrokeAnimation.stop:restart(tabStroke.stop, xmax, 0.1)
-        end
-        tabBarHeight = math.max(tabBarHeight, ymax + 5)
-        gfx.Text(tab.name, nextTabX, 5)
-        nextTabX = xmax + 10
-    end
-    gfx.BeginPath()
-    gfx.MoveTo(0, tabBarHeight)
-    gfx.LineTo(diagWidth, tabBarHeight)
-    gfx.StrokeWidth(2)
-    gfx.StrokeColor(0,127,255)
-    gfx.Stroke()
-    gfx.BeginPath()
-    gfx.MoveTo(tabStroke.start, tabBarHeight)
-    gfx.LineTo(tabStroke.stop, tabBarHeight)
-    gfx.StrokeColor(255, 127, 0)
-    gfx.Stroke()
-    gfx.Restore() --draw tab bar end
+		gfx.DrawLabel(values[1], x, y);
 
-    gfx.FontSize(30)
-    gfx.Save() --draw current tab
-    gfx.Translate(-diagWidth / 2, -diagHeight / 2)
-    gfx.Translate(5, tabBarHeight + 5)
+		if (isSelected) then
+			drawArrows(x, y, setting.value == setting.min, setting.value == setting.max);
+		end
+	elseif (setting.type == 'enum') then
+		gfx.DrawLabel(values[setting.value], x, y);
 
-    gfx.BeginPath()
-    gfx.MoveTo(0, settingStroke.y)
-    gfx.LineTo(settingStroke.x, settingStroke.y)
-    gfx.StrokeWidth(2)
-    gfx.StrokeColor(255, 127, 0)
-    gfx.Stroke()
+		if (isSelected) then
+			drawArrows(x, y, false, false);
+		end
+	else
+		if (setting.value == false) then
+			gfx.DrawLabel(values[1], x, y);
+		elseif (setting.value == true) then
+			gfx.DrawLabel(values[2], x, y);
+		end
 
-    local settingHeigt = 30
-    local tab = SettingsDiag.tabs[SettingsDiag.currentTab]
-    for si, setting in ipairs(tab.settings) do
-        local disp = ""
-        if setting.type == "enum" then
-            disp = string.format("%s: %s", setting.name, setting.options[setting.value])
-        elseif setting.type == "int" then
-            disp = string.format("%s: %d", setting.name, setting.value)
-        elseif setting.type == "float" then
-            disp = string.format("%s: %.2f", setting.name, setting.value)
-            if setting.max == 1 and setting.min == 0 then --draw slider
-                disp = setting.name .. ": "
-                local xmin,ymin, xmax,ymax = gfx.TextBounds(0, 0, disp)
-                local width = diagWidth - 20 - xmax
-                gfx.BeginPath()
-                gfx.MoveTo(xmax + 5, 20)
-                gfx.LineTo(xmax + 5 + width, 20)
-                gfx.StrokeColor(0,127,255)
-                gfx.StrokeWidth(2)
-                gfx.Stroke()
-                gfx.BeginPath()
-                gfx.MoveTo(xmax + 5, 20)
-                gfx.LineTo(xmax + 5 + width * setting.value, 20)
-                gfx.StrokeColor(255,127,0)
-                gfx.StrokeWidth(2)
-                gfx.Stroke()
-                
-            end
-        else
-            disp = string.format("%s:", setting.name)
-            local xmin,ymin, xmax,ymax = gfx.TextBounds(0, 0, disp)
-            gfx.BeginPath()
-            gfx.Rect(xmax + 5, 7, 20,20)
-            gfx.FillColor(255, 127, 0, setting.value and 255 or 0)
-            gfx.StrokeColor(0,127,255)
-            gfx.StrokeWidth(2)
-            gfx.Fill()
-            gfx.Stroke()
-            gfx.FillColor(255,255,255)
-        end
-        gfx.Text(disp, 0 ,0)
-        if si == SettingsDiag.currentSetting then
-            local xmin,ymin, xmax,ymax = gfx.TextBounds(0, 0, setting.name .. ":")
-            ymax = ymax + settingHeigt * (si - 1)
-            if xmax ~= prevSettingStroke.x or ymax ~= prevSettingStroke.y then
-                settingsStrokeAnimation.x:restart(settingStroke.x, xmax, 0.1)
-                settingsStrokeAnimation.y:restart(settingStroke.y, ymax, 0.1)
-            end
+		if (isSelected) then
+			drawArrows(x, y, false, false);
+		end
+	end
+end
 
-            prevSettingStroke.x = xmax
-            prevSettingStroke.y = ymax
-        end
-        gfx.Translate(0, settingHeigt)
-    end
+render = function(deltaTime, displaying)
+	-- TODO: skin this dialog for Practice Mode
+	if (SettingsDiag.tabs[1].name == 'Main') then return end
 
+	gfx.Save();
 
-    gfx.Restore() --draw current tab end
-    prevTab = SettingsDiag.currentTab
-    prevVis = visible
+	setupLayout();
 
+	layout:setAllSizes(scaledW, scaledH);
+
+	setLabels();
+
+	gfx.ForceRender();
+
+	if ((timer > 0) and (not displaying)) then
+		timer = math.max(timer - (deltaTime * 6), 0);
+
+		if (timer == 0) then
+			return;
+		end
+	end
+
+	if (displaying) then
+		timer = math.min(timer + (deltaTime * 8), 1);
+	end
+
+	gfx.Save();
+
+	gfx.Scale(scalingFactor, scalingFactor);
+
+	gfx.BeginPath();
+	gfx.ImageRect(
+		layout['dialog']['x'],
+		layout['dialog']['y'],
+		layout['dialog']['w'],
+		layout['dialog']['h'],
+		layout['images']['dialogBox'],
+		timer,
+		0
+	);
+
+	gfx.Restore();
+
+	drawHeading();
+
+	drawSettings();
+
+	drawNavigation();
+
+	gfx.Restore();
 end

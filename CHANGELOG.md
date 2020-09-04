@@ -1,3 +1,11 @@
+###### September 8, 2020
+- Completed work on song select screen and related components including:
+  - Filter and Sort wheels
+  - Collection Dialog
+  - Game settings dialog, currently incomplete/inaccessible for Practice Mode
+- Added 'Song Select' and 'Gameplay Settings' controls screen to song select, hover over controller icon in bottom-left corner to display
+- Combined 'Controller' and 'Keyboard' sections for controls to account for overlapping actions
+
 ###### August 31, 2020
 - Created 'Controls' screen, controller-navigable and accessible from a new button in the main menu
 - Modified load-in behavior slightly:

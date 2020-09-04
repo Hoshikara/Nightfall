@@ -1,12 +1,8 @@
-controlList = require('constants/controls');
+CONTROL_LIST = require('constants/controls');
 
 local _ = {
   ['initialized'] = false,
   ['buttonY'] = 0,
-  ['colors'] = {
-    ['action'] = {255, 255, 255, 255},
-    ['button'] = {60, 110, 150, 255}
-  },
   ['hoveredPage'] = nil,
   ['maxPages'] = 7,
   ['mousePosX'] = 0,
@@ -19,35 +15,35 @@ _.initializeButton = function(self)
 
   local button = {
     [1] = {
-      ['label'] = gfx.CreateLabel('GENERAL', 40, 0),
+      ['label'] = gfx.CreateLabel('GENERAL', 36, 0),
       ['page'] = 'general'
     },
     [2] = {
-      ['label'] = gfx.CreateLabel('SONG SELECT', 40, 0),
+      ['label'] = gfx.CreateLabel('SONG SELECT', 36, 0),
       ['page'] = 'songSelect'
     },
     [3] = {
-      ['label'] = gfx.CreateLabel('GAMEPLAY SETTINGS', 40, 0),
+      ['label'] = gfx.CreateLabel('GAMEPLAY SETTINGS', 36, 0),
       ['page'] = 'gameplaySettings'
     },
     [4] = {
-      ['label'] = gfx.CreateLabel('GAMEPLAY', 40, 0),
+      ['label'] = gfx.CreateLabel('GAMEPLAY', 36, 0),
       ['page'] = 'gameplay'
     },
     [5] = {
-      ['label'] = gfx.CreateLabel('RESULTS', 40, 0),
+      ['label'] = gfx.CreateLabel('RESULTS', 36, 0),
       ['page'] = 'results'
     },
     [6] = {
-      ['label'] = gfx.CreateLabel('MULTIPLAYER', 40, 0),
+      ['label'] = gfx.CreateLabel('MULTIPLAYER', 36, 0),
       ['page'] = 'multiplayer'
     },
     [7] = {
-      ['label'] = gfx.CreateLabel('NAUTICA', 40, 0),
+      ['label'] = gfx.CreateLabel('NAUTICA', 36, 0),
       ['page'] = 'nautica'
     },
     ['activePage'] = 1,
-    ['close'] = gfx.CreateLabel('[START]  /  [ESC] CLOSE', 30, 0),
+    ['close'] = gfx.CreateLabel('[START]  /  [ESC] CLOSE', 24, 0),
     ['width'] = 300,
     ['height'] = 45,
     ['maxWidth'] = 0
@@ -55,15 +51,15 @@ _.initializeButton = function(self)
 
   button.drawButton = function(self, x, y, i, isActive)
     local w, h = gfx.LabelSize(self[i]['label']);
-    local r = (isActive and 60) or 255;
-    local g = (isActive and 110) or 255;
+    local r = (isActive and 50) or 255;
+    local g = (isActive and 100) or 255;
     local b = (isActive and 150) or 255;
     local a = (isActive and 255) or 80;
 
     gfx.BeginPath();
     gfx.FillColor(r, g, b, a);
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM);
-    gfx.DrawLabel(self[i]['label'], x, y + (self['height'] / 2), -1);
+    gfx.DrawLabel(self[i]['label'], x, y + (self['height'] / 2));
 
     if (_:mouseClipped(x - 20, y - 25, w + 40, h + 35)) then
       _['hoveredPage'] = i;
@@ -91,19 +87,17 @@ _.initializeControls = function(self)
   };
 
   for category, list in pairs(controls) do
-    for i = 1, #controlList[category] do
-      local size = (controlList[category][i]['heading'] and 32) or 28;
+    for i = 1, #CONTROL_LIST[category] do
       list[i] = {};
 
       gfx.LoadSkinFont('GothamBook.ttf');
-      list[i]['action'] = gfx.CreateLabel(controlList[category][i]['action'], size, 0);
+      list[i]['action'] = gfx.CreateLabel(CONTROL_LIST[category][i]['action'], 24, 0);
 
       gfx.LoadSkinFont('GothamMedium.ttf');
-      list[i]['button'] = gfx.CreateLabel(controlList[category][i]['button'], size, 0);
+      list[i]['controller'] = gfx.CreateLabel(CONTROL_LIST[category][i]['controller'], 24, 0);
+      list[i]['keyboard'] = gfx.CreateLabel(CONTROL_LIST[category][i]['keyboard'], 24, 0);
 
-      if (controlList[category][i]['heading']) then
-        list[i]['heading'] = true;
-      elseif (controlList[category][i]['lineBreak']) then
+      if (CONTROL_LIST[category][i]['lineBreak']) then
         list[i]['lineBreak'] = true;
       end
     end
@@ -111,24 +105,33 @@ _.initializeControls = function(self)
 
   controls.drawControls = function(self, category, initialX, initialY)
     local list = self[category];
+    local x = initialX;
     local y = initialY;
 
     gfx.BeginPath();
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM);
+    gfx.FillColor(unpack(colors['white']));
+
+    gfx.DrawLabel(_['controller'], x, y);
+    gfx.DrawLabel(_['keyboard'], x + 350, y);
+
+    y = y + 45;
 
     for i = 1, #list do
-      local x = (list[i]['heading'] and initialX) or initialX + 35;
+      gfx.FillColor(unpack(colors['blueNormal']));
+      gfx.DrawLabel(list[i]['controller'], x, y);
 
-      if (list[i]['heading']) then
-        gfx.FillColor(255, 255, 255, 255);
-      else
-        gfx.FillColor(unpack(_['colors']['button']));
+      gfx.DrawLabel(list[i]['keyboard'], x + 350, y);
+
+      gfx.FillColor(unpack(colors['white']));
+      gfx.DrawLabel(list[i]['action'], x + 700, y);
+
+      if ((i ~= #list) and (not list[i]['lineBreak'])) then
+        gfx.BeginPath();
+        gfx.FillColor(60, 110, 160, 100);
+        gfx.FastRect(x + 1, y + 14, _['layout']['scaledW'] / 1.65, 2);
+        gfx.Fill();
       end
-
-      gfx.DrawLabel(list[i]['button'], x, y, -1);
-
-      gfx.FillColor(unpack(_['colors']['action']));
-      gfx.DrawLabel(list[i]['action'], x + 325 , y, -1);
 
       if (list[i]['lineBreak']) then
         y = y + 90;
@@ -150,7 +153,7 @@ _.initializeLayout = function(self)
     self['scaledW'] = 1920;
     self['scaledH'] = self['scaledW'] * (resY / resX);
     self['scalingFactor'] = resX / self['scaledW'];
-    self['padding'] = self['scaledH'] / 12;
+    self['padding'] = self['scaledW'] / 20;
   end
 
   layout:setupLayout();
@@ -171,8 +174,12 @@ _.initializeAll = function(self, selection)
       and (self['mousePosY'] < scaledH);
   end
 
-  gfx.LoadSkinFont('GothamBold.ttf');
+  gfx.LoadSkinFont('GothamMedium.ttf');
   self['heading'] = gfx.CreateLabel('CONTROLS', 60, 0);
+
+  self['action'] = gfx.CreateLabel('ACTION', 30, 0);
+  self['controller'] = gfx.CreateLabel('CONTROLLER', 30, 0);
+  self['keyboard'] = gfx.CreateLabel('KEYBOARD', 30, 0);
 
   self['button'] = self:initializeButton();
 
@@ -198,14 +205,14 @@ _.render = function(self, deltaTime, showControls, selectedPage)
   gfx.Fill();
 
   gfx.BeginPath();
-  gfx.FillColor(255, 255, 255, 255);
+  gfx.FillColor(unpack(colors['white']));
   gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM);
   gfx.DrawLabel(
     self['heading'],
-    self['layout']['padding'],
+    self['layout']['padding'] - 1,
     self['layout']['padding'] * 1.5
   );
-  gfx.FillColor(60, 110, 150, 255);
+  gfx.FillColor(unpack(colors['blueNormal']));
   gfx.DrawLabel(
     self['button']['close'],
     self['layout']['padding'],
@@ -225,7 +232,7 @@ _.render = function(self, deltaTime, showControls, selectedPage)
   end
 
   gfx.BeginPath();
-  gfx.FillColor(255, 255, 255, 255);
+  gfx.FillColor(unpack(colors['white']));
   gfx.FastRect(
     self['layout']['padding'] + self['button']['maxWidth'] + 75,
     (self['layout']['padding'] * 2.25) + 18,

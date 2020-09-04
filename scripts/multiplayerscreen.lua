@@ -1,4 +1,4 @@
-json = require "json"
+json = require('lib/json');
 
 local resX,resY = game.GetResolution()
 

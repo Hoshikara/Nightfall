@@ -298,7 +298,7 @@ function render(deltaTime)
     if portrait then yshift = draw_banner(deltaTime) end
 
     gfx.Translate(0, yshift - 150 * math.max(introTimer - 1, 0))
-    draw_song_info(deltaTime)
+    --draw_song_info(deltaTime)
     draw_score(deltaTime)
     gfx.Translate(0, -yshift + 150 * math.max(introTimer - 1, 0))
     draw_gauge(deltaTime)
@@ -452,8 +452,8 @@ end
 render_crit_overlay = function(deltaTime)
 	hitAnimation:render(deltaTime, scale);
 
-	SetUpCritTransform();
-
+    SetUpCritTransform();
+    
 	local cw, ch = gfx.ImageSize(laserCursor)
 	local cursorWidth = 40 * scale
 	local cursorHeight = cursorWidth * (ch / cw)
@@ -463,7 +463,7 @@ render_crit_overlay = function(deltaTime)
 		local cursor = gameplay.critLine.cursors[i - 1];
 		local pos, skew = cursor.pos, cursor.skew;
 
-		laserAnimation:render(deltaTime, i, pos, scale, skew);
+        laserAnimation:render(deltaTime, i, pos, scale, skew);
 
 		gfx.SkewX(skew);
 		gfx.FillLaserColor(i, cursor.alpha * 255)
@@ -495,7 +495,7 @@ end
 drawHitError = function(deltaTime)
 	if (string.upper(game.GetSkinSetting('hitErrorPosition')) == 'OFF') then return end;
 	
-	hitError:render(deltaTime, desw, desh, portrait);
+    hitError:render(deltaTime, desw, desh);
 end
 
 
@@ -883,7 +883,7 @@ end
 
 -- ======================== Start mutliplayer ========================
 
-json = require "json"
+json = require('lib/json');
 
 local normal_font = game.GetSkinSetting('multi.normal_font')
 if normal_font == nil then
