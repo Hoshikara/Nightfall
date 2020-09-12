@@ -1,5 +1,5 @@
-buttonCursor = require('songselect/cursor');
-layout = require('layout/dialog');
+local buttonCursor = require('songselect/cursor');
+local layout = require('layout/dialog');
 
 menuOptions = {};
 selectedIndex = 0;
@@ -45,16 +45,16 @@ setLabels = function()
 		gfx.LoadSkinFont('GothamMedium.ttf');
 
 		labels = {
-			['artist'] = gfx.CreateLabel('ARTIST', 18, 0),
-			['collectionName'] = gfx.CreateLabel('COLLECTION NAME', 18, 0),
-			['confirm'] = gfx.CreateLabel('CONFIRM', 18, 0),
-			['enter'] = gfx.CreateLabel('[ENTER]', 18, 0),
-			['title'] = gfx.CreateLabel('TITLE', 18, 0)
+			['artist'] = cacheLabel('ARTIST', 18),
+			['collectionName'] = cacheLabel('COLLECTION NAME', 18),
+			['confirm'] = cacheLabel('CONFIRM', 18),
+			['enter'] = cacheLabel('[ENTER]', 18),
+			['title'] = cacheLabel('TITLE', 18)
 		};
 
 		gfx.LoadSkinFont('DFMGM.ttf');
 
-		labels['input'] = gfx.CreateLabel('', 28, 0);
+		labels['input'] = cacheLabel('', 28);
 	end
 end
 
@@ -86,28 +86,20 @@ drawButton = function(deltaTime, label, isSelected, y)
 	if ((y < layout['y']['center']) or (y > layout['y']['bottom'])) then return end;
 
 	local alpha = math.floor(((isSelected and 255) or 50) * timer);
-	local labelH = getLabelInfo(label)['h'];
+	local w = layout['images']['button']['w'];
 
 	if (isSelected) then
-		gfx.ImageRect(
-			layout['button']['x'],
-			y,
-			layout['button']['w'],
-			layout['button']['h'],
-			layout['images']['buttonHover'],
-			timer,
-			0
-		);
+		layout['images']['buttonHover']:draw({
+			['x'] = layout['x']['outerRight'] - w + 12,
+			['y'] = y,
+			['a'] = timer
+		});
 	else
-		gfx.ImageRect(
-			layout['button']['x'],
-			y,
-			layout['button']['w'],
-			layout['button']['h'],
-			layout['images']['button'],
-			(0.45 * timer),
-			0
-		);
+		layout['images']['button']:draw({
+			['x'] = layout['x']['outerRight'] - w + 12,
+			['y'] = y,
+			['a'] = (0.45 * timer)
+		});
 	end
 
 	gfx.Save();
@@ -118,22 +110,23 @@ drawButton = function(deltaTime, label, isSelected, y)
 	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
 	gfx.FillColor(255, 255, 255, alpha);
 
-	if (getLabelInfo(label)['w'] > (layout['button']['w'] - 90)) then
+	if (label['w'] > (w - 90)) then
 		buttonScrollTimer = buttonScrollTimer + deltaTime;
 
 		drawScrollingLabel(
 			buttonScrollTimer,
 			label,
-			(layout['button']['w'] - 90),
-			labelH,
-			layout['button']['x'] + 43,
-			y + labelH + 8,
+			(w - 90),
+			layout['x']['outerRight'] - w + 55,
+			y + label['h'] + 8,
 			scalingFactor,
-			1,
 			{255, 255, 255, alpha}
 		);
 	else
-		gfx.DrawLabel(label, layout['button']['x'] + 43, y + labelH + 8);
+		label:draw({
+			['x'] = layout['x']['outerRight'] - w + 55,
+			['y'] = y + label['h'] + 8
+		});
 	end
 
 	gfx.Restore();
@@ -144,14 +137,13 @@ drawInput = function()
 	local y = layout['y']['center'] + (layout['h']['outer'] / 10);
 	local labelY = layout['y']['center'] + (layout['h']['outer'] / 10);
 
-	y = y + (getLabelInfo(labels['collectionName'])['h'] * 2);
+	y = y + (labels['collectionName']['h'] * 2);
 
-	cursor['offset'] = math.min(
-		getLabelInfo(labels['input'])['w'] + 2,
-		layout['w']['middle'] - 20
-	);
+	cursor['offset'] = math.min(labels['input']['w'] + 2, layout['w']['middle'] - 20);
 
 	gfx.BeginPath();
+	gfx.StrokeWidth(1);
+	gfx.StrokeColor(60, 110, 160, math.floor(255 * timer));
 	gfx.FillColor(16, 32, 48, math.floor(100 * timer));
 	gfx.Rect(
 		x,
@@ -160,6 +152,7 @@ drawInput = function()
 		layout['h']['outer'] / 6
 	);
 	gfx.Fill();
+	gfx.Stroke();
 
 	gfx.BeginPath();
 	gfx.FillColor(255, 255, 255, math.floor(255 * cursor['alpha']));
@@ -176,34 +169,41 @@ drawInput = function()
 	gfx.Scale(1 / scalingFactor, 1 / scalingFactor);
 
 	gfx.LoadSkinFont('DFMGM.ttf');
-	gfx.UpdateLabel(labels['input'], string.upper(dialog.newName), 28, 0);
+	labels['input']:update({ ['new'] = string.upper(dialog.newName) });
 
 	gfx.BeginPath();
 	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
 	gfx.FillColor(60, 110, 160, math.floor(255 * timer));
-	gfx.DrawLabel(labels['collectionName'], layout['x']['middleLeft'], labelY);
+	labels['collectionName']:draw({
+		['x'] = layout['x']['middleLeft'],
+		['y'] = labelY
+	});
 
-	labelY = labelY + (getLabelInfo(labels['collectionName'])['h'] * 2);
+	labelY = labelY + (labels['collectionName']['h'] * 2);
 
 	gfx.FillColor(255, 255, 255, math.floor(255 * timer));
-	gfx.DrawLabel(labels['input'], x + 8, labelY + 7, layout['w']['middle'] - 22);
+	labels['input']:draw({
+		['x'] = x + 8,
+		['y'] = labelY + 7,
+		['maxWidth'] = layout['w']['middle'] - 22
+	});
 
 	labelY = labelY + (layout['h']['outer'] / 6);
 
 	gfx.BeginPath();
 	gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
+
 	gfx.FillColor(255, 255, 255, math.floor(255 * timer));
-	gfx.DrawLabel(
-		labels['confirm'],
-		layout['x']['middleRight'] + 2,
-		labelY + getLabelInfo(labels['confirm'])['h']
-	);
+	labels['confirm']:draw({
+		['x'] = layout['x']['middleRight'] + 2,
+		['y'] = labelY + labels['confirm']['h']
+	});
+
 	gfx.FillColor(60, 110, 160, math.floor(255 * timer));
-	gfx.DrawLabel(
-		labels['enter'],
-		layout['x']['middleRight'] - getLabelInfo(labels['enter'])['w'] - 16,
-		labelY + getLabelInfo(labels['enter'])['h']
-	);
+	labels['enter']:draw({
+		['x'] = layout['x']['middleRight'] - labels['enter']['w'] - 16,
+		['y'] = labelY + labels['enter']['h']
+	});
 
 	gfx.Restore();
 end
@@ -221,53 +221,61 @@ drawSongInfo = function(deltaTime)
 	gfx.BeginPath();
 	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
 	gfx.FillColor(60, 110, 160, alpha);
-	gfx.DrawLabel(labels['title'], x, y);
+	labels['title']:draw({
+		['x'] = x,
+		['y'] = y
+	});
 
-	y = y + (getLabelInfo(labels['title'])['h'] * 1.25);
+	y = y + (labels['title']['h'] * 1.25);
 
-	if (getLabelInfo(title)['w'] > maxWidth) then
+	if (title['w'] > maxWidth) then
 		timers['title'] = timers['title'] + deltaTime;
 
 		drawScrollingLabel(
 			timers['title'],
 			title,
 			maxWidth,
-			getLabelInfo(title)['h'],
 			x + 2,
 			y,
 			scalingFactor,
-			1,
 			{255, 255, 255, alpha}
 		);
 	else
 		gfx.FillColor(255, 255, 255, alpha);
-		gfx.DrawLabel(title, x, y);
+		title:draw({
+			['x'] = x,
+			['y'] = y
+		});
 	end
 
-	y = y + (getLabelInfo(title)['h'] * 1.5);
+	y = y + (title['h'] * 1.5);
 
 	gfx.FillColor(60, 110, 160, alpha);
-	gfx.DrawLabel(labels['artist'], x, y);
+	labels['artist']:draw({
+		['x'] = x,
+		['y'] = y
+	});
 
-	y = y + (getLabelInfo(labels['artist'])['h'] * 1.5);
+	y = y + (labels['artist']['h'] * 1.5);
 	
-	if (getLabelInfo(artist)['w'] > maxWidth) then
+	if (artist['w'] > maxWidth) then
 		timers['artist'] = timers['artist'] + deltaTime;
 
 		drawScrollingLabel(
 			timers['artist'],
 			artist,
 			maxWidth,
-			getLabelInfo(artist)['h'],
 			x + 2,
 			y,
 			scalingFactor,
-			1,
 			{255, 255, 255, alpha}
 		);
 	else
 		gfx.FillColor(255, 255, 255, alpha);
-		gfx.DrawLabel(artist, x, y);
+		artist:draw({
+			['x'] = x,
+			['y'] = y
+		});
 	end
 
 	gfx.Restore();
@@ -283,7 +291,7 @@ open = function()
 	if (#dialog.collections == 0) then
 		menuOptions[initialIndex] = {
 			['action'] = createCollection('FAVOURITES'),
-			['label'] = gfx.CreateLabel('ADD TO FAVOURITES', 18, 0)
+			['label'] = cacheLabel('ADD TO FAVOURITES', 18)
 		};
 	end
 
@@ -294,22 +302,22 @@ open = function()
 
 		menuOptions[i] = {
 			['action'] = createCollection(collection.name),
-			['label'] = gfx.CreateLabel(currentName, 18, 0)
+			['label'] = cacheLabel(currentName, 18)
 		};
 	end
 
 	table.insert(menuOptions, {
 		['action'] = menu.ChangeState,
-		['label'] = gfx.CreateLabel('CREATE COLLECTION', 18, 0)
+		['label'] = cacheLabel('CREATE COLLECTION', 18)
 	});
 	table.insert(menuOptions, {
 		['action'] = menu.Cancel,
-		['label'] = gfx.CreateLabel('CLOSE', 18, 0)
+		['label'] = cacheLabel('CLOSE', 18)
 	});
 
 	gfx.LoadSkinFont('DFMGM.ttf');
-	artist = gfx.CreateLabel(string.upper(dialog.artist), 28, 0);
-	title = gfx.CreateLabel(string.upper(dialog.title), 36, 0);
+	artist = cacheLabel(string.upper(dialog.artist), 28);
+	title = cacheLabel(string.upper(dialog.title), 36);
 end
 
 render = function(deltaTime)
@@ -330,16 +338,12 @@ render = function(deltaTime)
 	cursor['timer'] = cursor['timer'] + deltaTime;
 	cursor['alpha'] = timer * (math.abs(0.8 * math.cos(cursor['timer'] * 5)) + 0.2);
 
-	gfx.BeginPath();
-	gfx.ImageRect(
-		layout['dialog']['x'],
-		layout['dialog']['y'],
-		layout['dialog']['w'],
-		layout['dialog']['h'],
-		layout['images']['dialogBox'],
-		timer,
-		0
-	);
+	layout['images']['dialogBox']:draw({
+		['x'] = scaledW / 2,
+		['y'] = scaledH / 2,
+		['a'] = timer,
+		['centered'] = true
+	});
 
 	drawSongInfo(deltaTime);
 
@@ -347,7 +351,7 @@ render = function(deltaTime)
 		drawInput();
 	else
 		local y = layout['y']['center'];
-		local nextY = layout['button']['h'] * 1.25;
+		local nextY = layout['images']['button']['h'] * 1.25;
 		
 		for i, option in ipairs(menuOptions) do
 			local buttonY = y + nextY * ((i - 1) - selectedIndex);
@@ -357,7 +361,7 @@ render = function(deltaTime)
 		end
 
 		buttonCursor:drawDifficultyCursor(
-			layout['button']['x'],
+			layout['x']['outerRight'] - layout['images']['button']['w'] + 12,
 			layout['y']['center'],
 			427,
 			74,

@@ -1,5 +1,9 @@
-CONSTANTS = require('constants/songwheel');
-layout = require('layout/dialog');
+local CONSTANTS = require('constants/songwheel');
+
+local controls = require('songselect/controls');
+local layout = require('layout/dialog');
+
+local pressedBTA = false;
 
 local timer = 0;
 
@@ -27,34 +31,34 @@ setLabels = function()
 		};
 
 		gfx.LoadSkinFont('GothamMedium.ttf');
-		labels['fxl'] = gfx.CreateLabel('[FX-L]', 20, 0);
-		labels['fxr'] = gfx.CreateLabel('[FX-R]', 20, 0);
-		labels['start'] = gfx.CreateLabel('[START]', 24, 0);
+		labels['fxl'] = cacheLabel('[FX-L]', 20);
+		labels['fxr'] = cacheLabel('[FX-R]', 20);
+		labels['start'] = cacheLabel('[START]', 24);
 
 		for index, tab in ipairs(CONSTANTS['tabs']) do
 			gfx.LoadSkinFont('GothamMedium.ttf');
-			labels['navigation'][index] = gfx.CreateLabel(tab, 20, 0);
+			labels['navigation'][index] = cacheLabel(tab, 20);
 
 			gfx.LoadSkinFont('GothamBook.ttf');
-			labels['tabs'][index] = gfx.CreateLabel(tab, 48, 0);
+			labels['tabs'][index] = cacheLabel(tab, 48);
 		end
 
 		gfx.LoadSkinFont('GothamBook.ttf');
-		labels['ms'] = gfx.CreateLabel('MS', 24, 0);
+		labels['ms'] = cacheLabel('MS', 24);
 
 		for index, tab in ipairs(CONSTANTS['settings']) do
 			labels['settings'][index] = {};
 
 			for settingIndex, setting in pairs(tab) do
 				labels['settings'][index][settingIndex] = {
-					['label'] = gfx.CreateLabel(setting['label'], 24, 0)
+					['label'] = cacheLabel(setting['label'], 24)
 				};
 
 				if (setting['values']) then
 					labels['settings'][index][settingIndex]['values'] = {};
 
 					for valueIndex, value in ipairs(setting['values']) do
-						labels['settings'][index][settingIndex]['values'][valueIndex] = gfx.CreateLabel(value, 24, 0);
+						labels['settings'][index][settingIndex]['values'][valueIndex] = cacheLabel(value, 24);
 					end
 				end
 			end
@@ -121,26 +125,41 @@ drawNavigation = function()
 
 	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
 	gfx.FillColor(255, 255, 255, math.floor(255 * timer));
-	gfx.DrawLabel(previousLabel, x1, y);
+	previousLabel:draw({
+		['x'] = x1,
+		['y'] = y
+	});
 	gfx.FillColor(60, 110, 160, math.floor(255 * timer));
-	gfx.DrawLabel(labels['fxr'], x2 + 8, y - 1);
+	labels['fxr']:draw({
+		['x'] = x2 + 8,
+		['y'] = y - 1
+	});
 
 	gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
 	gfx.FillColor(255, 255, 255, math.floor(255 * timer));
-	gfx.DrawLabel(nextLabel, x2, y);
+	nextLabel:draw({
+		['x'] = x2, 
+		['y'] = y
+	});
 	gfx.FillColor(60, 110, 160, math.floor(255 * timer));
-	gfx.DrawLabel(labels['fxl'], x1 - 8, y - 1);
+	labels['fxl']:draw({
+		['x'] = x1 - 8,
+		['y'] = y - 1
+	});
 end
 
 drawHeading = function()
 	local label = labels['tabs'][SettingsDiag.currentTab];
 	local x = layout['x']['outerLeft'] - 2;
-	local y = layout['y']['top'] - (getLabelInfo(label)['h'] / 1.25);
+	local y = layout['y']['top'] - (label['h'] / 1.25);
 
 	gfx.BeginPath();
 	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
 	gfx.FillColor(60, 110, 160, math.floor(255 * timer));
-	gfx.DrawLabel(label, x, y);
+	label:draw({
+		['x'] = x,
+		['y'] = y
+	});
 end
 
 drawSettings = function()
@@ -150,7 +169,7 @@ drawSettings = function()
 	local settingLabels = labels['settings'][currentTab];
 
 	local x = layout['x']['middleLeft'];
-	local y = layout['y']['top'] + (getLabelInfo(labels['tabs'][currentTab])['h'] / 1.75);
+	local y = layout['y']['top'] + (labels['tabs'][currentTab]['h'] / 1.75);
 
 	for index, setting in ipairs(settings) do
 		local isSelected = currentSetting == index;
@@ -163,7 +182,10 @@ drawSettings = function()
 			gfx.FillColor(255, 255, 255, math.floor(50 * timer));
 		end
 
-		gfx.DrawLabel(settingLabels[index]['label'], x, y);
+		settingLabels[index]['label']:draw({
+			['x'] = x,
+			['y'] = y
+		});
 
 		if (setting.value ~= nil) then
 			drawSettingValue(setting, labels['settings'][currentTab][index]['values'], y, isSelected);
@@ -171,10 +193,13 @@ drawSettings = function()
 			gfx.BeginPath();
 			gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
 			gfx.FillColor(60, 110, 160, math.floor(255 * timer));
-			gfx.DrawLabel(labels['start'], layout['x']['middleRight'], y);
+			labels['start']:draw({
+				['x'] = layout['x']['middleRight'],
+				['y'] = y
+			});
 		end
 
-		y = y + (getLabelInfo(settingLabels[index]['label'])['h'] * 1.75);
+		y = y + (settingLabels[index]['label']['h'] * 1.75);
 	end
 end
 
@@ -192,11 +217,16 @@ drawSettingValue = function(setting, values, y, isSelected)
 
 	if (setting.type == 'int') then
 		gfx.LoadSkinFont('DigitalSerialBold.ttf');
-	
-		gfx.UpdateLabel(values[1], tostring(setting.value), 24, 0);
+		values[1]:update({ ['new'] = tostring(setting.value) });
 
-		gfx.DrawLabel(labels['ms'], x, y);
-		gfx.DrawLabel(values[1], x - getLabelInfo(labels['ms'])['w'] - 12, y);
+		labels['ms']:draw({
+			['x'] = x,
+			['y'] = y
+		});
+		values[1]:draw({
+			['x'] = x - labels['ms']['w'] - 12,
+			['y'] = y
+		});
 
 		if (isSelected) then
 			drawArrows(x, y, setting.value == setting.min, setting.value == setting.max);
@@ -212,24 +242,36 @@ drawSettingValue = function(setting, values, y, isSelected)
 			formatted = string.format('%.2f', setting.value);
 		end
 
-		gfx.UpdateLabel(values[1], formatted, 24, 0);
+		values[1]:update({ ['new'] = formatted });
 
-		gfx.DrawLabel(values[1], x, y);
+		values[1]:draw({
+			['x'] = x,
+			['y'] = y
+		});
 
 		if (isSelected) then
 			drawArrows(x, y, setting.value == setting.min, setting.value == setting.max);
 		end
 	elseif (setting.type == 'enum') then
-		gfx.DrawLabel(values[setting.value], x, y);
+		values[setting.value]:draw({
+			['x'] = x,
+			['y'] = y
+		});
 
 		if (isSelected) then
 			drawArrows(x, y, false, false);
 		end
 	else
 		if (setting.value == false) then
-			gfx.DrawLabel(values[1], x, y);
+			values[1]:draw({
+				['x'] = x,
+				['y'] = y
+			});
 		elseif (setting.value == true) then
-			gfx.DrawLabel(values[2], x, y);
+			values[2]:draw({
+				['x'] = x,
+				['y'] = y
+			});
 		end
 
 		if (isSelected) then
@@ -252,6 +294,8 @@ render = function(deltaTime, displaying)
 
 	gfx.ForceRender();
 
+	controls:render(deltaTime, displaying, scaledW, scaledH);
+
 	if ((timer > 0) and (not displaying)) then
 		timer = math.max(timer - (deltaTime * 6), 0);
 
@@ -268,17 +312,13 @@ render = function(deltaTime, displaying)
 
 	gfx.Scale(scalingFactor, scalingFactor);
 
-	gfx.BeginPath();
-	gfx.ImageRect(
-		layout['dialog']['x'],
-		layout['dialog']['y'],
-		layout['dialog']['w'],
-		layout['dialog']['h'],
-		layout['images']['dialogBox'],
-		timer,
-		0
-	);
-
+	layout['images']['dialogBox']:draw({
+		['x'] = scaledW / 2,
+		['y'] = scaledH / 2,
+		['a'] = timer,
+		['centered'] = true
+	});
+	
 	gfx.Restore();
 
 	drawHeading();

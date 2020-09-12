@@ -7,3 +7,5 @@ Preview images
 ![titlescreen](./preview/titlescreen.png)
 
 ![songselect](./preview/songselect.png)
+
+![gameplay](./preview/gameplay.png)

@@ -1,6 +1,4 @@
 local _ = {
-  ['initialized'] = false,
-  ['scale'] = nil,
   ['laneMapper'] = {
     [1] = 1,
     [2] = 2,
@@ -8,7 +6,8 @@ local _ = {
     [4] = 4,
     [5] = 1.5,
     [6] = 3.5
-  }
+  },
+  ['scale'] = nil
 };
 
 _.initializeHold = function(self)
@@ -34,8 +33,8 @@ _.initializeHold = function(self)
     hold[part]['alpha'] = ((part == 'inner') and 1.35) or 1.5;
     hold[part]['blendOp'] = gfx.BLEND_OP_LIGHTER;
     hold[part]['frames'] = frames;
-    hold[part]['frameTime'] = (1.0 / 36.0);
-    hold[part]['width'] = width * 0.5;
+    hold[part]['frameTime'] = (1.0 / 38.0);
+    hold[part]['width'] = width * 0.625;
 
     for btn = 1, 6 do
       hold[part][btn] = {
@@ -144,8 +143,8 @@ _.initializeHit = function(self)
       ['alpha'] = ((type == 'near') and 1) or 1.2,
       ['blendOp'] = gfx.BLEND_OP_SOURCE_OVER,
       ['frames'] = frames,
-      ['frameTime'] = ((type == 'near') and (1.0 / 72.0)) or (1.0 / 56.0),
-      ['width'] = width * (((type == 'near') and 0.85) or 0.54)
+      ['frameTime'] = ((type == 'near') and (1.0 / 74.0)) or (1.0 / 58.0),
+      ['width'] = width * (((type == 'near') and 0.975) or 0.65)
     };
   
     for btn = 1, 6 do
@@ -202,14 +201,12 @@ _.initializeAll = function(self)
     
     gfx.Translate(x, y);
     gfx.Rotate(-gameplay.critLine.rotation);
-    gfx.Scale(self['scale'] * 0.9, self['scale'] * 0.9);
+    gfx.Scale(self['scale'], self['scale']);
   end
 
   self['hit'] = self:initializeHit();
 
   self['hold'] = self:initializeHold();
-
-  self['initialized'] = true;
 end
 
 _.queueHit = function(self, btn, rating)

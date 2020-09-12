@@ -1,7 +1,6 @@
-CONTROL_LIST = require('constants/controls');
+local CONTROL_LIST = require('constants/controls');
 
 local _ = {
-  ['initialized'] = false,
   ['buttonY'] = 0,
   ['hoveredPage'] = nil,
   ['maxPages'] = 7,
@@ -15,61 +14,64 @@ _.initializeButton = function(self)
 
   local button = {
     [1] = {
-      ['label'] = gfx.CreateLabel('GENERAL', 36, 0),
+      ['label'] = cacheLabel('GENERAL', 36),
       ['page'] = 'general'
     },
     [2] = {
-      ['label'] = gfx.CreateLabel('SONG SELECT', 36, 0),
+      ['label'] = cacheLabel('SONG SELECT', 36),
       ['page'] = 'songSelect'
     },
     [3] = {
-      ['label'] = gfx.CreateLabel('GAMEPLAY SETTINGS', 36, 0),
+      ['label'] = cacheLabel('GAMEPLAY SETTINGS', 36),
       ['page'] = 'gameplaySettings'
     },
     [4] = {
-      ['label'] = gfx.CreateLabel('GAMEPLAY', 36, 0),
+      ['label'] = cacheLabel('GAMEPLAY', 36),
       ['page'] = 'gameplay'
     },
     [5] = {
-      ['label'] = gfx.CreateLabel('RESULTS', 36, 0),
+      ['label'] = cacheLabel('RESULTS', 36),
       ['page'] = 'results'
     },
     [6] = {
-      ['label'] = gfx.CreateLabel('MULTIPLAYER', 36, 0),
+      ['label'] = cacheLabel('MULTIPLAYER', 36),
       ['page'] = 'multiplayer'
     },
     [7] = {
-      ['label'] = gfx.CreateLabel('NAUTICA', 36, 0),
+      ['label'] = cacheLabel('NAUTICA', 36),
       ['page'] = 'nautica'
     },
     ['activePage'] = 1,
-    ['close'] = gfx.CreateLabel('[START]  /  [ESC] CLOSE', 24, 0),
+    ['startEsc'] = cacheLabel('[START]  /  [ESC]', 24),
+    ['close'] = cacheLabel('CLOSE', 24),
     ['width'] = 300,
     ['height'] = 45,
     ['maxWidth'] = 0
   };
 
   button.drawButton = function(self, x, y, i, isActive)
-    local w, h = gfx.LabelSize(self[i]['label']);
-    local r = (isActive and 50) or 255;
-    local g = (isActive and 100) or 255;
-    local b = (isActive and 150) or 255;
+    local r = (isActive and 60) or 255;
+    local g = (isActive and 110) or 255;
+    local b = (isActive and 160) or 255;
     local a = (isActive and 255) or 80;
 
     gfx.BeginPath();
     gfx.FillColor(r, g, b, a);
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM);
-    gfx.DrawLabel(self[i]['label'], x, y + (self['height'] / 2));
+    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
+    self[i]['label']:draw({
+      ['x'] = x,
+      ['y'] = y
+    });
 
-    if (_:mouseClipped(x - 20, y - 25, w + 40, h + 35)) then
+    if (_:mouseClipped(x - 20, y - 10, self[i]['label']['w'] + 40, self[i]['label']['h'] + 30)) then
       _['hoveredPage'] = i;
     end
 
-    if (w > self['maxWidth']) then
-      self['maxWidth'] = w;
+    if (self[i]['label']['w'] > self['maxWidth']) then
+      self['maxWidth'] = self[i]['label']['w'];
     end
 
-    return (h + 40);
+    return (self[i]['label']['h'] * 2);
   end
 
   return button;
@@ -91,11 +93,11 @@ _.initializeControls = function(self)
       list[i] = {};
 
       gfx.LoadSkinFont('GothamBook.ttf');
-      list[i]['action'] = gfx.CreateLabel(CONTROL_LIST[category][i]['action'], 24, 0);
+      list[i]['action'] = cacheLabel(CONTROL_LIST[category][i]['action'], 24);
 
       gfx.LoadSkinFont('GothamMedium.ttf');
-      list[i]['controller'] = gfx.CreateLabel(CONTROL_LIST[category][i]['controller'], 24, 0);
-      list[i]['keyboard'] = gfx.CreateLabel(CONTROL_LIST[category][i]['keyboard'], 24, 0);
+      list[i]['controller'] = cacheLabel(CONTROL_LIST[category][i]['controller'], 24);
+      list[i]['keyboard'] = cacheLabel(CONTROL_LIST[category][i]['keyboard'], 24);
 
       if (CONTROL_LIST[category][i]['lineBreak']) then
         list[i]['lineBreak'] = true;
@@ -109,27 +111,42 @@ _.initializeControls = function(self)
     local y = initialY;
 
     gfx.BeginPath();
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM);
+    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
     gfx.FillColor(unpack(colors['white']));
 
-    gfx.DrawLabel(_['controller'], x, y);
-    gfx.DrawLabel(_['keyboard'], x + 350, y);
+    _['controller']:draw({
+      ['x'] = x,
+      ['y'] = y
+    });
+    _['keyboard']:draw({
+      ['x'] = x + 350,
+      ['y'] = y
+    });
 
-    y = y + 45;
+    y = y + 60;
 
     for i = 1, #list do
       gfx.FillColor(unpack(colors['blueNormal']));
-      gfx.DrawLabel(list[i]['controller'], x, y);
+      list[i]['controller']:draw({
+        ['x'] = x,
+        ['y'] = y
+      });
 
-      gfx.DrawLabel(list[i]['keyboard'], x + 350, y);
+      list[i]['keyboard']:draw({
+        ['x'] = x + 350,
+        ['y'] = y
+      });
 
       gfx.FillColor(unpack(colors['white']));
-      gfx.DrawLabel(list[i]['action'], x + 700, y);
+      list[i]['action']:draw({
+        ['x'] = x + 700,
+        ['y'] = y
+      });
 
       if ((i ~= #list) and (not list[i]['lineBreak'])) then
         gfx.BeginPath();
         gfx.FillColor(60, 110, 160, 100);
-        gfx.FastRect(x + 1, y + 14, _['layout']['scaledW'] / 1.65, 2);
+        gfx.FastRect(x + 1, y + 38, _['layout']['scaledW'] / 1.65, 2);
         gfx.Fill();
       end
 
@@ -153,7 +170,6 @@ _.initializeLayout = function(self)
     self['scaledW'] = 1920;
     self['scaledH'] = self['scaledW'] * (resY / resX);
     self['scalingFactor'] = resX / self['scaledW'];
-    self['padding'] = self['scaledW'] / 20;
   end
 
   layout:setupLayout();
@@ -175,19 +191,16 @@ _.initializeAll = function(self, selection)
   end
 
   gfx.LoadSkinFont('GothamMedium.ttf');
-  self['heading'] = gfx.CreateLabel('CONTROLS', 60, 0);
+  self['heading'] = cacheLabel('CONTROLS', 60);
 
-  self['action'] = gfx.CreateLabel('ACTION', 30, 0);
-  self['controller'] = gfx.CreateLabel('CONTROLLER', 30, 0);
-  self['keyboard'] = gfx.CreateLabel('KEYBOARD', 30, 0);
+  self['controller'] = cacheLabel('CONTROLLER', 30);
+  self['keyboard'] = cacheLabel('KEYBOARD', 30);
 
   self['button'] = self:initializeButton();
 
   self['controls'] = self:initializeControls();
 
   self['layout'] = self:initializeLayout();
-
-  self['initialized'] = true;
 end
 
 _.render = function(self, deltaTime, showControls, selectedPage)
@@ -204,27 +217,23 @@ _.render = function(self, deltaTime, showControls, selectedPage)
   gfx.FastRect(0, 0, self['layout']['scaledW'], self['layout']['scaledH']);
   gfx.Fill();
 
+  local x = self['layout']['scaledW'] / 20;
+  local y = self['layout']['scaledH'] / 20;
+
   gfx.BeginPath();
   gfx.FillColor(unpack(colors['white']));
-  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM);
-  gfx.DrawLabel(
-    self['heading'],
-    self['layout']['padding'] - 1,
-    self['layout']['padding'] * 1.5
-  );
-  gfx.FillColor(unpack(colors['blueNormal']));
-  gfx.DrawLabel(
-    self['button']['close'],
-    self['layout']['padding'],
-    self['layout']['scaledH'] - self['layout']['padding']
-  );
+  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
+  self['heading']:draw({
+    ['x'] = x - 3,
+    ['y'] = y
+  });
 
-  self['buttonY'] = self['layout']['padding'] * 2.5;
+  self['buttonY'] = y + self['heading']['h'] * 2;
   self['hoveredPage'] = nil;
 
   for category = 1, self['maxPages'] do
     self['buttonY'] = self['buttonY'] + self['button']:drawButton(
-      self['layout']['padding'],
+      x,
       self['buttonY'],
       category,
       category == self['selectedPage']
@@ -234,8 +243,8 @@ _.render = function(self, deltaTime, showControls, selectedPage)
   gfx.BeginPath();
   gfx.FillColor(unpack(colors['white']));
   gfx.FastRect(
-    self['layout']['padding'] + self['button']['maxWidth'] + 75,
-    (self['layout']['padding'] * 2.25) + 18,
+    x + self['button']['maxWidth'] + 75,
+    y + (self['heading']['h'] * 2) + 10,
     4,
     self['layout']['scaledH'] * 0.475
   );
@@ -243,9 +252,23 @@ _.render = function(self, deltaTime, showControls, selectedPage)
 
   self['controls']:drawControls(
     self['button'][self['selectedPage']]['page'],
-    self['layout']['padding'] + self['button']['maxWidth'] + 150,
-    (self['layout']['padding'] * 2.25) + 39
+    x + self['button']['maxWidth'] + 150,
+    y + (self['heading']['h'] * 2)
   );
+
+  gfx.BeginPath();
+  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
+  gfx.FillColor(unpack(colors['blueNormal']));
+  self['button']['startEsc']:draw({
+    ['x'] = x,
+    ['y'] = y + self['layout']['scaledH'] - (self['layout']['scaledH'] / 7)
+  });
+
+  gfx.FillColor(unpack(colors['white']));
+  self['button']['close']:draw({
+    ['x'] = x + self['button']['startEsc']['w'] + 8,
+    ['y'] = y + self['layout']['scaledH'] - (self['layout']['scaledH'] / 7)
+  });
 
   return self['hoveredPage'];
 end

@@ -1,3 +1,12 @@
+###### September 12, 2020
+- Completed work for gameplay screen, including multiplayer scoreboard
+- Changed accessiblity for 'Controls' screen during Song Select: Hold BT-A to show, and press BT-D to navigate pages
+  - 'General', 'Gameplay', and 'Results' pages added
+  - Previous controller icon and hover behavior removed
+- Added an outline to Search and Collection Name input fields when active
+- Added volforce display to Song Select screen
+- Refactored and cleaned up various scripts
+
 ###### September 8, 2020
 - Completed work on song select screen and related components including:
   - Filter and Sort wheels

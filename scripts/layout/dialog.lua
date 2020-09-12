@@ -36,9 +36,9 @@ local _ = {
 _.setAllSizes = function(self, scaledW, scaledH)
 	if (not self['images']) then
 		self['images'] = {
-			['dialogBox'] = gfx.CreateSkinImage('dialog.png', 0),
-			['button'] = gfx.CreateSkinImage('song_select/button_long.png', 0),
-			['buttonHover'] = gfx.CreateSkinImage('song_select/button_long_hover.png', 0)
+			['dialogBox'] = cacheImage('dialog.png'),
+			['button'] = cacheImage('song_select/button_long.png'),
+			['buttonHover'] = cacheImage('song_select/button_long_hover.png')
 		};
 	end
 
@@ -59,15 +59,6 @@ _.setAllSizes = function(self, scaledW, scaledH)
 
 	self['y']['top'] = self['y']['center'] - (self['h']['outer'] / 2);
 	self['y']['bottom'] = self['y']['center'] + (self['h']['outer'] / 2);
-
-	self['button']['w'], self['button']['h'] = gfx.ImageSize(self['images']['button']);
-
-	self['button']['x'] = self['x']['outerRight'] - self['button']['w'] + 12;
-
-	self['dialog']['w'], self['dialog']['h'] = gfx.ImageSize(self['images']['dialogBox']);
-
-	self['dialog']['x'] = self['x']['center'] - (self['dialog']['w'] / 2);
-	self['dialog']['y'] = self['y']['center'] - (self['dialog']['h'] / 2);
 end
 
 return _;

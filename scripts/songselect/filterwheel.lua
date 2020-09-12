@@ -1,5 +1,4 @@
-CONSTANTS = require('constants/songwheel');
-layout = require('layout/grid');
+local CONSTANTS = require('constants/songwheel');
 
 local allowScroll = false;
 
@@ -10,11 +9,7 @@ local currentFolder = 1;
 
 local choosingFolder = true;
 
-local labelAlpha = 1;
 local labelCount = 0;
-
-local mousePosX = 0;
-local mousePosY = 0;
 
 local prefixes = {
 	[1] = 'Collection: ',
@@ -43,6 +38,67 @@ setupLayout = function()
 	gfx.Scale(scalingFactor, scalingFactor);
 end
 
+local layout = {
+  ['dropdown'] = {
+    [1] = {},
+    [2] = {},
+    [3] = {},
+    ['padding'] = 24,
+    ['start'] = 0,
+    ['y'] = 0
+  },
+  ['field'] = {
+    [1] = {},
+    [2] = {},
+    [3] = {},
+    ['y'] = 0
+  },
+  ['grid'] = {},
+	['labels'] = nil,
+	
+	setAllSizes = function(self)
+		if (not self['labels']) then
+			gfx.LoadSkinFont('GothamMedium.ttf');
+	
+			self['labels'] = {};
+	
+			for name, str in pairs(CONSTANTS['labels']['grid']) do
+				self['labels'][name] = cacheLabel(str, 18);
+			end
+	
+			local tempLabel = cacheLabel('TEMPLABEL', 24);
+	
+			self['field']['height'] = tempLabel['h'];
+			self['labels']['height'] = self['labels']['sort']['h'];
+		end
+	
+		self['jacketSize'] = scaledH / 4;
+		self['grid']['gutter'] = self['jacketSize'] / 8;
+		self['grid']['size'] = (self['jacketSize'] + self['grid']['gutter']) * 4;
+		self['grid']['x'] = scaledW - self['grid']['size'] + (self['grid']['gutter'] * 7);
+	
+		self['labels']['spacing'] = (self['jacketSize'] * 2) / 3.5;
+		self['labels']['x'] = self['grid']['x'];
+		self['labels']['y'] = scaledH / 20;
+	
+		self['field'][1]['x'] = self['labels']['x'] - 4;
+		self['field'][2]['x'] = self['field'][1]['x']
+			+ self['labels']['sort']['w']
+			+ self['labels']['spacing'];
+		self['field'][3]['x'] = self['field'][2]['x']
+			+ self['labels']['difficulty']['w']
+			+ self['labels']['spacing'];
+		self['field']['y'] = self['labels']['y'] + (self['labels']['height'] * 1.25);
+	
+		self['dropdown'][1]['x'] = self['field'][1]['x'] + 2;
+		self['dropdown'][2]['x'] = self['field'][2]['x'];
+		self['dropdown'][3]['x'] = self['field'][3]['x'];
+		self['dropdown'][3]['maxWidth'] = (self['jacketSize'] * 1.65) - (self['dropdown']['padding'] * 2);
+		self['dropdown']['start'] = self['dropdown']['padding'] - 7;
+		self['dropdown']['y'] = self['field']['y'] + (self['field']['height'] * 1.25);
+	end
+};
+
 local labels = nil;
 
 setLabels = function(folderCount)
@@ -65,9 +121,9 @@ setLabels = function(folderCount)
 		gfx.LoadSkinFont('GothamBook.ttf');
 
 		for index, folder in ipairs(filters.folder) do
-			labels['folder'][index] = gfx.CreateLabel(stringReplace(folder, prefixes), 24, 0);
+			labels['folder'][index] = cacheLabel(stringReplace(folder, prefixes), 24);
 
-			local width = getLabelInfo(labels['folder'][index])['w'];
+			local width = labels['folder'][index]['w'];
 
 			labels['timers'][folder] = 0;
 
@@ -84,7 +140,7 @@ setLabels = function(folderCount)
 			end
 
 			labels['folder']['maxHeight'] = labels['folder']['maxHeight']
-				+ getLabelInfo(labels['folder'][index])['h']
+				+ labels['folder'][index]['h']
 				+ layout['dropdown']['padding'];
 
 			labelCount = labelCount + 1;
@@ -101,23 +157,22 @@ setLabels = function(folderCount)
 				gfx.LoadSkinFont('GothamBook.ttf');
 			end
 
-			labels['level'][index] = gfx.CreateLabel(currentLabel, 24, 0);
+			labels['level'][index] = cacheLabel(currentLabel, 24, 0);
 
-			local width = getLabelInfo(labels['level'][index])['w'];
+			local width = labels['level'][index]['w'];
 
 			if (width > labels['level']['maxWidth']) then
 				labels['level']['maxWidth'] = width;
 			end
 
 			labels['level']['maxHeight'] = labels['level']['maxHeight']
-				+ getLabelInfo(labels['level'][index])['h']
+				+ labels['level'][index]['h']
 				+ (layout['dropdown']['padding'] / 2);
 		end
 	end
 end
 
 drawCurrentField = function(deltaTime, which, index, displaying)
-	local alpha = math.floor(255 * labelAlpha);
 	local x = layout['field'][index]['x'];
 	local y = layout['field']['y'];
 	local color;
@@ -127,7 +182,7 @@ drawCurrentField = function(deltaTime, which, index, displaying)
 	local doesOverflow = false;
 
 	if (isFolder) then
-		doesOverflow = getLabelInfo(labels[which][current])['w'] > layout['dropdown'][3]['maxWidth'];
+		doesOverflow = labels[which][current]['w'] > layout['dropdown'][3]['maxWidth'];
 	end
 
 	gfx.BeginPath();
@@ -135,14 +190,14 @@ drawCurrentField = function(deltaTime, which, index, displaying)
 
 	if (displaying) then
 		if (choosingFolder and (which == 'folder')) then
-			color = {70, 120, 170, alpha};
+			color = {70, 120, 170, 255};
 		elseif ((not choosingFolder) and (which == 'level')) then
-			color = {70, 120, 170, alpha};
+			color = {70, 120, 170, 255};
 		else
-			color = {255, 255, 255, alpha};
+			color = {255, 255, 255, 255};
 		end
 	else
-		color = {255, 255, 255, alpha};
+		color = {255, 255, 255, 255};
 	end
 
 	if (doesOverflow) then
@@ -152,20 +207,19 @@ drawCurrentField = function(deltaTime, which, index, displaying)
 			timers['scroll'],
 			labels[which][current],
 			layout['dropdown'][3]['maxWidth'] + (layout['dropdown']['padding'] / 2),
-			getLabelInfo(labels[which][current])['h'],
 			x,
 			y,
 			scalingFactor,
-			1,
 			color
 		);
 	else
 		gfx.FillColor(unpack(color));
-		gfx.DrawLabel(labels[which][current], x, y);
+		labels[which][current]:draw({
+			['x'] = x, 
+			['y'] = y
+		});
 	end
 end
-
-local testTimer = 0;
 
 drawFilterLabel = function(deltaTime, which, index, y, isSelected, key)
 	local isFolder = which == 'folder';
@@ -175,7 +229,7 @@ drawFilterLabel = function(deltaTime, which, index, y, isSelected, key)
 	local padding = layout['dropdown']['padding'];
 	local returnPadding = (isFolder and padding) or (padding / 2);
 	local x = layout['dropdown'][whichField]['x'] + padding;
-	local doesOverflow = getLabelInfo(labels[which][index])['w'] > layout['dropdown'][3]['maxWidth'];
+	local doesOverflow = labels[which][index]['w'] > layout['dropdown'][3]['maxWidth'];
 	local color;
 
 	gfx.BeginPath();
@@ -194,19 +248,20 @@ drawFilterLabel = function(deltaTime, which, index, y, isSelected, key)
 			labels['timers'][key],
 			labels[which][index],
 			layout['dropdown'][3]['maxWidth'],
-			getLabelInfo(labels[which][index])['h'],
 			x,
 			y,
 			scalingFactor,
-			1,
 			color
 		);
 	else 
 		gfx.FillColor(unpack(color));
-		gfx.DrawLabel(labels[which][index], x, y);
+		labels[which][index]:draw({
+			['x'] = x,
+			['y'] = y
+		});
 	end
 
-	return (getLabelInfo(labels[which][index])['h'] + returnPadding);
+	return (labels[which][index]['h'] + returnPadding);
 end
 
 render = function(deltaTime, displaying)
@@ -214,25 +269,9 @@ render = function(deltaTime, displaying)
 
 	setupLayout();
 
-	layout:setAllSizes(scaledW, scaledH);
+	layout:setAllSizes();
 
 	setLabels(#filters.folder);
-
-	labelAlpha = 1;
-
-	mousePosX, mousePosY = game.GetMousePos();
-
-	if (mouseClipped(
-		mousePosX,
-		mousePosY,
-		0,
-		scaledH - (scaledH / 20) - 10,
-		scaledW / 20,
-		(scaledH / 20) + 10,
-		scalingFactor
-	)) then
-		labelAlpha = 0.1;
-	end
 
 	drawCurrentField(deltaTime, 'level', 2, displaying);
 	drawCurrentField(deltaTime, 'folder', 3, displaying);

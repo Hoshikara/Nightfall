@@ -1,16 +1,35 @@
 {
-	"Hit Error:": {
+	"Gameplay:": {
+		"type": "label"
+	},
+	"separator_a": {},
+	"Early / Late": {
+		"type": "label"
+	},
+	"earlatePosition": {
+		"type": "selection",
+		"label": "Position",
+		"default": "BOTTOM",
+		"values": [
+			"OFF",
+			"BOTTOM",
+			"MIDDLE",
+			"UPPER",
+			"UPPER+"
+		]
+	},
+	"Hit Error": {
 		"type": "label"
 	},
 	"hitErrorPosition": {
 		"type": "selection",
 		"label": "Position",
-		"default": "Bottom",
+		"default": "BOTTOM",
 		"values": [
-			"Off",
-			"Bottom",
-			"Middle",
-			"Top"
+			"OFF",
+			"BOTTOM",
+			"MIDDLE",
+			"TOP"
 		]
 	},
 	"hitErrorScale": {
@@ -19,21 +38,6 @@
 		"default": 1.0,
 		"max": 2.0,
 		"min": 0.5
-	},
-	"Gameplay:": {
-		"type": "label"
-	},
-	"separator_a": {},
-	"earlate_position": {
-		"type": "selection",
-		"label": "Early/Late display position",
-		"default": "bottom",
-		"values": [
-			"bottom",
-			"middle",
-			"top",
-			"off"
-		]
 	},
 	"nick": {
 		"type": "text",

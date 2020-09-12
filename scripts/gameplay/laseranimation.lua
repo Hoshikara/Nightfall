@@ -1,6 +1,4 @@
-local _ = {
-  ['initialized'] = false
-};
+local _ = {};
 
 _.initializeLaser = function(self)
   local laser = {
@@ -17,7 +15,7 @@ _.initializeLaser = function(self)
       }
     },
     ['frameCount'] = 13,
-    ['frameTime'] = (1.0 / 48.0)
+    ['frameTime'] = (1.0 / 52.0)
   };
 
   for side = 1, 2 do
@@ -37,7 +35,7 @@ _.initializeLaser = function(self)
     laser[side]['active'] = {
       ['dome'] = dome,
       ['tail'] = tail,
-      ['width'] = width * 0.5,
+      ['width'] = width * 0.625,
     };
 
     for cache = 1, 6 do
@@ -61,13 +59,13 @@ _.initializeLaser = function(self)
         ['alpha'] = (((part == 1) and 2) or 1),
         ['blendOp'] = (((part == 1) and gfx.BLEND_OP_SOURCE_OVER) or gfx.BLEND_OP_LIGHTER),
         ['frames'] = frames,
-        ['width'] = width * (((part == 1) and 0.625) or 0.5)
+        ['width'] = width * (((part == 1) and 0.75) or 0.625)
       };
     end
   end
 
   laser.drawAnimation = function(self, deltaTime, lsr, pos, scale, skew)
-    local w = lsr['width'] * (scale * 0.875);
+    local w = lsr['width'] * scale;
 
     gfx.Save();
 
@@ -84,7 +82,6 @@ _.initializeLaser = function(self)
   end
 
   laser.drawEnd = function(self, deltaTime, lsr, cached, inner, outer, scale)
-    local s = scale * 0.875;
     local pos = self[lsr]['end']['pos'];
 
     gfx.Save();
@@ -101,10 +98,10 @@ _.initializeLaser = function(self)
     if (cached['timer'] < self['frameTime']) then
       gfx.GlobalCompositeOperation(inner['blendOp']);
       gfx.ImageRect(
-        pos - ((inner['width'] * s) / 2),
-        -((inner['width'] * s) / 2),
-        inner['width'] * s,
-        inner['width'] * s,
+        pos - ((inner['width'] * scale) / 2),
+        -((inner['width'] * scale * 0.925) / 2),
+        inner['width'] * scale,
+        inner['width'] * scale * 0.925,
         inner['frames'][cached['counter']],
         inner['alpha'],
         0
@@ -112,10 +109,10 @@ _.initializeLaser = function(self)
 
       gfx.GlobalCompositeOperation(outer['blendOp']);
       gfx.ImageRect(
-        pos - ((outer['width'] * s) / 2),
-        -((outer['width'] * s) / 2),
-        outer['width'] * s,
-        outer['width'] * s,
+        pos - ((outer['width'] * scale) / 2),
+        -((outer['width'] * scale * 0.925) / 2),
+        outer['width'] * scale,
+        outer['width'] * scale * 0.925,
         outer['frames'][cached['counter']],
         outer['alpha'],
         0
@@ -136,8 +133,6 @@ end
 
 _.initializeAll = function(self)
   self['laser'] = self:initializeLaser();
-
-  self['initialized'] = true;
 end
 
 _.queueEnd = function(self, lsr)

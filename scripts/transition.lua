@@ -1,46 +1,152 @@
-local transitionTimer = 0
-local resx, resy = game.GetResolution()
-local outTimer = 1
 
+local background = cacheImage('bg.png');
 
-function render(deltaTime)
-    render_bars(transitionTimer)
-    transitionTimer = transitionTimer + deltaTime * 2
-    transitionTimer = math.min(transitionTimer,1)
-    return transitionTimer >= 1
+local resX;
+local resY;
+local scaledW;
+local scaledH;
+local scalingFactor;
+
+setupLayout = function()
+  resX, resY = game.GetResolution();
+  scaledW = 1920;
+  scaledH = scaledW * (resY / resX);
+  scalingFactor = resX / scaledW;
+
+  gfx.Scale(scalingFactor, scalingFactor);
 end
 
-function render_out(deltaTime)
-    outTimer = outTimer + deltaTime * 2
-    outTimer = math.min(outTimer, 2)
-    render_bars(outTimer)
-    return outTimer >= 2;
+local introComplete = false;
+local outroComplete = false;
+
+local timers = {
+	['intro'] = 0,
+	['outro'] = 0,
+	['fade'] = {
+		['in'] = 1
+	},
+	['scissor'] = {
+		['intro'] = 0,
+		['outro'] = {
+			['left'] = 1,
+			['right'] = 0,
+		}
+	}
+};
+
+
+drawTransition = function(deltaTime, isIntro);
+	gfx.Save();
+
+	setupLayout();
+
+	if (isIntro) then
+		timers['fade']['in'] = math.max(timers['fade']['in'] - (deltaTime * 1.5), 0);
+	
+		timers['scissor']['intro'] = math.min(timers['scissor']['intro'] + (deltaTime * 3), 1)
+
+		timers['intro'] = timers['intro'] + deltaTime;
+
+		introComplete = timers['intro'] >= 1;
+	else
+		timers['scissor']['outro']['left'] = math.max(
+			timers['scissor']['outro']['left'] - (deltaTime * 2),
+			0
+		);
+		timers['scissor']['outro']['right'] = math.min(
+			timers['scissor']['outro']['right'] + (deltaTime *  2),
+			1
+		);
+
+		timers['outro'] = timers['outro'] + (deltaTime * 2);
+		
+		outroComplete = timers['outro'] >= 1;
+	end
+
+	if (isIntro) then
+		gfx.Translate(scaledW / 2, 0);
+
+		gfx.Scissor(
+			-((scaledW / 2) * timers['scissor']['intro']),
+			0,
+			scaledW * timers['scissor']['intro'],
+			scaledH
+		);
+
+		gfx.Translate(-(scaledW / 2), 0);
+
+		background:draw({
+			['x'] = scaledW / 2,
+			['y'] = scaledH / 2,
+			['centered'] = true
+		});
+
+		gfx.BeginPath();
+		gfx.FillColor(0, 0, 0, math.floor(150 * timers['fade']['in']));
+		gfx.Rect(0, 0, scaledW, scaledH);
+		gfx.Fill();
+
+		gfx.ResetScissor();
+	else
+		gfx.Scissor(
+			0,
+			0,
+			(scaledW / 2) * timers['scissor']['outro']['left'],
+			scaledH
+		);
+
+		background:draw({
+			['x'] = scaledW / 2,
+			['y'] = scaledH / 2,
+			['centered'] = true
+		});
+
+		gfx.ResetScissor();
+
+		gfx.Scissor(
+			(scaledW / 2) + ((scaledW / 2) * timers['scissor']['outro']['right']),
+			0,
+			scaledW / 2,
+			scaledH
+		);
+
+		background:draw({
+			['x'] = scaledW / 2,
+			['y'] = scaledH / 2,
+			['centered'] = true
+		});
+
+		gfx.ResetScissor();
+	end
+
+	gfx.Restore();
 end
 
-function sign(x)
-  return x>0 and 1 or x<0 and -1 or 0
+render = function(deltaTime)
+	drawTransition(deltaTime, true);
+
+  return introComplete;
 end
 
-function render_bars(progress)
-    for i=0,resx/50 do
-        local dir = sign((i % 2) - 0.5)
-        local yoff = dir * resy * (1 - progress)
-        gfx.Save()
-        gfx.Translate(0,yoff)
-        gfx.BeginPath()
-        gfx.Rect(60 * i, yoff, 60, resy)
-        if ((i % 2) == 0) then
-            gfx.FillColor(16, 32, 48, 255);
-        else
-            gfx.FillColor(24, 48, 72, 255);
-        end
-        gfx.Fill()
-        gfx.Restore()
-    end
+render_out = function(deltaTime)
+	drawTransition(deltaTime, false);
+
+	return outroComplete;
 end
 
-function reset()
-    transitionTimer = 0
-    resx, resy = game.GetResolution()
-    outTimer = 1
+reset = function()
+	timers = {
+		['intro'] = 0,
+		['outro'] = 0,
+		['fade'] = {
+			['in'] = 1
+		},
+		['scissor'] = {
+			['intro'] = 0,
+			['outro'] = {
+				['left'] = 1,
+				['right'] = 0,
+			}
+		}
+	};
 end

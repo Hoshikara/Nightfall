@@ -3,7 +3,6 @@ local _ = {
   knobProgress = 0
 };
 
-
 _.handleInput = function(self, activeButton, showControls, showUpdatePrompt)
 	if (self['lastKnobs'] == nil) then
     self['lastKnobs'] = { game.GetKnob(0), game.GetKnob(1) };
@@ -37,20 +36,6 @@ deltaKnob = function(delta)
 	end
 
 	return delta;
-end
-
-getSign = function(val)
-  return ((val > 0) and 1) or ((val < 0) and -1) or 0;
-end
-
-roundToZero = function(val)
-	if (val < 0) then
-		return math.ceil(val);
-	elseif (val > 0) then 
-		return math.floor(val);
-	else 
-		return 0;
-	end
 end
 
 return _;

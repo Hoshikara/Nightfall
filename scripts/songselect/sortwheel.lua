@@ -1,16 +1,10 @@
 CONSTANTS = require('constants/songwheel');
-layout = require('layout/grid');
 
 local arrowWidth = 12;
 
 local currentSort = 1;
 
 local initialY = -1000;
-
-local labelAlpha = 1;
-
-local mousePosX = 0;
-local mousePosY = 0;
 
 local timer = 0;
 
@@ -29,6 +23,67 @@ setupLayout = function()
   gfx.Scale(scalingFactor, scalingFactor);
 end
 
+local layout = {
+  ['dropdown'] = {
+    [1] = {},
+    [2] = {},
+    [3] = {},
+    ['padding'] = 24,
+    ['start'] = 0,
+    ['y'] = 0
+  },
+  ['field'] = {
+    [1] = {},
+    [2] = {},
+    [3] = {},
+    ['y'] = 0
+  },
+  ['grid'] = {},
+	['labels'] = nil,
+	
+	setAllSizes = function(self)
+		if (not self['labels']) then
+			gfx.LoadSkinFont('GothamMedium.ttf');
+	
+			self['labels'] = {};
+	
+			for name, str in pairs(CONSTANTS['labels']['grid']) do
+				self['labels'][name] = cacheLabel(str, 18);
+			end
+	
+			local tempLabel = cacheLabel('TEMPLABEL', 24);
+	
+			self['field']['height'] = tempLabel['h'];
+			self['labels']['height'] = self['labels']['sort']['h'];
+		end
+	
+		self['jacketSize'] = scaledH / 4;
+		self['grid']['gutter'] = self['jacketSize'] / 8;
+		self['grid']['size'] = (self['jacketSize'] + self['grid']['gutter']) * 4;
+		self['grid']['x'] = scaledW - self['grid']['size'] + (self['grid']['gutter'] * 7);
+	
+		self['labels']['spacing'] = (self['jacketSize'] * 2) / 3.5;
+		self['labels']['x'] = self['grid']['x'];
+		self['labels']['y'] = scaledH / 20;
+	
+		self['field'][1]['x'] = self['labels']['x'] - 4;
+		self['field'][2]['x'] = self['field'][1]['x']
+			+ self['labels']['sort']['w']
+			+ self['labels']['spacing'];
+		self['field'][3]['x'] = self['field'][2]['x']
+			+ self['labels']['difficulty']['w']
+			+ self['labels']['spacing'];
+		self['field']['y'] = self['labels']['y'] + (self['labels']['height'] * 1.25);
+	
+		self['dropdown'][1]['x'] = self['field'][1]['x'] + 2;
+		self['dropdown'][2]['x'] = self['field'][2]['x'];
+		self['dropdown'][3]['x'] = self['field'][3]['x'];
+		self['dropdown'][3]['maxWidth'] = (self['jacketSize'] * 1.65) - (self['dropdown']['padding'] * 2);
+		self['dropdown']['start'] = self['dropdown']['padding'] - 7;
+		self['dropdown']['y'] = self['field']['y'] + (self['field']['height'] * 1.25);
+	end
+};
+
 local labels = nil;
 
 setLabels = function()
@@ -42,17 +97,17 @@ setLabels = function()
 
 		for index, current in ipairs(CONSTANTS['sorts']) do
 			labels[index] = {
-				['name'] = gfx.CreateLabel(current['name'], 24, 0),
+				['name'] = cacheLabel(current['name'], 24),
 				['direction'] = current['direction']
 			};
 
-			if (getLabelInfo(labels[index]['name'])['w'] > labels['maxWidth']) then
-				labels['maxWidth'] = getLabelInfo(labels[index]['name'])['w'];
+			if (labels[index]['name']['w'] > labels['maxWidth']) then
+				labels['maxWidth'] = labels[index]['name']['w'];
 			end
 
 			labels['maxHeight'] = labels['maxHeight']
-				+ getLabelInfo(labels[index]['name'])['h']
-				+ layout['dropdown']['padding']
+				+ labels[index]['name']['h']
+				+ layout['dropdown']['padding'];
 		end
 	end
 end
@@ -65,19 +120,22 @@ drawCurrentSort = function(displaying)
 	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
 
 	if (displaying) then
-		gfx.FillColor(70, 120, 170, math.floor(255 * labelAlpha));
+		gfx.FillColor(70, 120, 170, 255);
 	else
-		gfx.FillColor(255, 255, 255, math.floor(255 * labelAlpha));
+		gfx.FillColor(255, 255, 255, 255);
 	end
 
-	gfx.DrawLabel(labels[currentSort]['name'], x, y);
+	labels[currentSort]['name']:draw({
+		['x'] = x,
+		['y'] = y
+	});
 
 	gfx.Save();
 
 	gfx.Translate(
-		x + getLabelInfo(labels[currentSort]['name'])['w'] + arrowWidth,
+		x + labels[currentSort]['name']['w'] + arrowWidth,
 		y 
-			+ (getLabelInfo(labels[currentSort]['name'])['h'] / 2)
+			+ (labels[currentSort]['name']['h'] / 2)
 			+ (((labels[currentSort]['direction'] == 'up') and 0) or 8)
 	);
 
@@ -104,14 +162,17 @@ drawSortLabel = function(index, y, isSelected)
 		gfx.FillColor(255, 255, 255, alpha);
 	end
 
-	gfx.DrawLabel(labels[index]['name'], x, y);
+	labels[index]['name']:draw({
+		['x'] = x,
+		['y'] = y
+	});
 
 	gfx.Save();
 
 	gfx.Translate(
-		x + getLabelInfo(labels[index]['name'])['w'] + arrowWidth,
+		x + labels[index]['name']['w'] + arrowWidth,
 		y 
-			+ (getLabelInfo(labels[index]['name'])['h'] / 2)
+			+ (labels[index]['name']['h'] / 2)
 			+ (((labels[index]['direction'] == 'up') and 0) or 8)
 	);
 
@@ -123,7 +184,7 @@ drawSortLabel = function(index, y, isSelected)
 
 	gfx.Restore();
 
-	return (getLabelInfo(labels[index]['name'])['h'] + padding);
+	return (labels[index]['name']['h'] + padding);
 end
 
 render = function(deltaTime, displaying)
@@ -131,25 +192,9 @@ render = function(deltaTime, displaying)
 
 	setupLayout();
 
-	layout:setAllSizes(scaledW, scaledH);
+	layout:setAllSizes();
 
 	setLabels();
-
-	labelAlpha = 1;
-
-	mousePosX, mousePosY = game.GetMousePos();
-
-	if (mouseClipped(
-		mousePosX,
-		mousePosY,
-		0,
-		scaledH - (scaledH / 20) - 10,
-		scaledW / 20,
-		(scaledH / 20) + 10,
-		scalingFactor
-	)) then
-		labelAlpha = 0.1;
-	end
 
 	drawCurrentSort(displaying);
 

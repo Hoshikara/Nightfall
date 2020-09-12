@@ -1,34 +1,27 @@
-CONSTANTS = require('constants/songwheel');
-CONTROL_LIST = require('constants/controls');
+local CONSTANTS = require('constants/songwheel');
 
-cursor = require('songselect/cursor');
-jacketDetail = require('songselect/jacketdetail');
-easing = require('lib/easing');
+local cursor = require('songselect/cursor');
+local jacketDetail = require('songselect/jacketdetail');
+local easing = require('lib/easing');
+local volforce = require('songselect/volforce');
 
-local background = gfx.CreateSkinImage('bg.png', 0);
-
-local controllerIcon = gfx.CreateSkinImage('song_select/controller_icon.png', 0);
+local background = cacheImage('bg.png');
 
 local jacketFallback = gfx.CreateSkinImage('song_select/loading.png', 0);
 
-local mousePosX = 0;
-local mousePosY = 0;
-
 local previousDifficultyIndex = 1;
 local previousSongIndex = 1;
-
-local allInitialized = false;
 
 game.LoadSkinSample('menu_click');
 game.LoadSkinSample('click-02');
 game.LoadSkinSample('woosh');
 
-local padding;
 local resX;
 local resY;
 local scaledW;
 local scaledH;
 local scalingFactor;
+local padding;
 
 setupLayout = function()
   resX, resY = game.GetResolution();
@@ -39,34 +32,6 @@ setupLayout = function()
 
   gfx.Scale(scalingFactor, scalingFactor);
 end
-
-mouseClipped = function(x, y, w, h)
-	local scaledX = x * scalingFactor;
-	local scaledY = y * scalingFactor;
-	local scaledW = scaledX + (w * scalingFactor);
-	local scaledH = scaledY + (h * scalingFactor);
-
-	return (mousePosX > scaledX)
-		and (mousePosY > scaledY)
-		and (mousePosX < scaledW)
-		and (mousePosY < scaledH);
-end
-
-local controls = {
-  ['labels'] = nil,
-  ['x'] = {
-    [1] = 0,
-    [2] = 0,
-    [3] = 0,
-    [4] = 0
-  },
-  ['y'] = {
-    [1] = 0,
-    [2] = 0
-  },
-  ['showingControls'] = false,
-  ['timer'] = 0
-};
 
 local labelHeight = {
   ['artist'] = 0,
@@ -87,38 +52,38 @@ verifySongCache = function(song)
   gfx.LoadSkinFont('DFMGM.ttf');
 
   if (not songCache[song.id]['title']) then
-    songCache[song.id]['title'] = gfx.CreateLabel(string.upper(song.title), 36, 0);
+    songCache[song.id]['title'] = cacheLabel(string.upper(song.title), 36);
 
     if (labelHeight['title'] == 0) then
-      labelHeight['title'] = getLabelInfo(songCache[song.id]['title'])['h'];
+      labelHeight['title'] = songCache[song.id]['title']['h'];
     end
   end
 
   if (not songCache[song.id]['artist']) then
-    songCache[song.id]['artist'] = gfx.CreateLabel(string.upper(song.artist), 36, 0);
+    songCache[song.id]['artist'] = cacheLabel(string.upper(song.artist), 36);
 
     if (labelHeight['artist'] == 0) then
-      labelHeight['artist'] = getLabelInfo(songCache[song.id]['artist'])['h'];
+      labelHeight['artist'] = songCache[song.id]['artist']['h'];
     end
   end
 
   if (labelHeight['effector'] == 0) then
-    local tempLabel = gfx.CreateLabel('EFFECTOR', 24, 0);
+    local tempLabel = cacheLabel('EFFECTOR', 24);
 
-    labelHeight['effector'] = getLabelInfo(tempLabel)['h'];
+    labelHeight['effector'] = tempLabel['h'];
   end
 
   gfx.LoadSkinFont('DigitalSerialBold.ttf');
 
   if (not songCache[song.id]['bpm']) then
-    songCache[song.id]['bpm'] = gfx.CreateLabel(tostring(song.bpm), 24, 0);
+    songCache[song.id]['bpm'] = cacheLabel(tostring(song.bpm), 24);
 
     if (labelHeight['bpm'] == 0) then
       gfx.LoadSkinFont('GothamMedium.ttf');
 
-      local tempLabel = gfx.CreateLabel('100', 24, 0);
+      local tempLabel = cacheLabel('100', 24);
 
-      labelHeight['bpm'] = getLabelInfo(tempLabel)['h'];
+      labelHeight['bpm'] = tempLabel['h'];
       labelHeight['grade'] = labelHeight['bpm'];
       labelHeight['clear'] = labelHeight['bpm'];
     end
@@ -139,22 +104,14 @@ verifySongCacheEffector = function(song, difficultyIndex)
   gfx.LoadSkinFont('DFMGM.ttf');
 
   if (not songCache[song.id]['effector'][difficultyIndex]) then
-    songCache[song.id]['effector'][difficultyIndex] = gfx.CreateLabel(string.upper(difficulty.effector), 24, 0);
+    songCache[song.id]['effector'][difficultyIndex] = cacheLabel(string.upper(difficulty.effector), 24);
   end
 end
 
 local clears = {
-  ['labels'] = {}
-};
+  ['labels'] = {},
 
-clears.initialize = function(self)
-  gfx.LoadSkinFont('GothamBook.ttf');
-
-  for index, clear in ipairs(CONSTANTS['clears']) do
-    self['labels'][index] = gfx.CreateLabel(clear, 24, 0);
-  end
-
-  self.getClear = function(self, difficulty)
+  getClear = function(self, difficulty)
     local label = nil;
 
     if (difficulty.scores[1]) then
@@ -165,23 +122,18 @@ clears.initialize = function(self)
 
     return label;
   end
+};
+
+do
+  for index, clear in ipairs(CONSTANTS['clears']) do
+    clears['labels'][index] = cacheLabel(clear, 24);
+  end
 end
 
 local grades = {
-  ['breakpoints'] = {}
-};
+  ['breakpoints'] = {},
 
-grades.initialize = function(self)
-  gfx.LoadSkinFont('GothamBook.ttf');
-
-  for index, current in ipairs(CONSTANTS['grades']) do
-    self['breakpoints'][index] = {
-      ['minimum'] = current['minimum'],
-      ['label'] = gfx.CreateLabel(current['grade'], 24, 0)
-    };
-  end
-
-  self.getGrade = function(self, difficulty)
+  getGrade = function(self, difficulty)
     local label = nil;
 
     if (difficulty.scores[1]) then
@@ -197,6 +149,17 @@ grades.initialize = function(self)
 
     return label;
   end
+};
+
+do
+  gfx.LoadSkinFont('GothamBook.ttf');
+
+  for index, current in ipairs(CONSTANTS['grades']) do
+    grades['breakpoints'][index] = {
+      ['minimum'] = current['minimum'],
+      ['label'] = cacheLabel(current['grade'], 24)
+    };
+  end
 end
 
 local songGrid = {
@@ -204,6 +167,7 @@ local songGrid = {
     ['alpha'] = 0,
     ['animTimer'] = 0,
     ['animTotal'] = 0.1,
+    ['flickerTimer'] = 0,
     ['pos'] = 0,
     ['displayPos'] = 0,
     ['timer'] = 0
@@ -238,11 +202,9 @@ local songGrid = {
     ['y'] = 0
   },
   ['selectedDifficulty'] = 0,
-  ['selectedSongIndex'] = 1
-};
+  ['selectedSongIndex'] = 1,
 
-songGrid.initialize = function(self)
-  self.setAllSizes = function(self)
+  setAllSizes = function(self)
     self['jacketSize'] = scaledH / 4;
     self['grid']['gutter'] = self['jacketSize'] / 8;
     self['grid']['size'] = (self['jacketSize'] + self['grid']['gutter']) * 4;
@@ -256,44 +218,44 @@ songGrid.initialize = function(self)
     self['scrollbar']['height'] = (self['jacketSize'] * 3) + (self['grid']['gutter'] * 2);
     self['scrollbar']['x'] = scaledW - (self['grid']['gutter'] * 1.5);
     self['scrollbar']['y'] = self['grid']['y'];
-  end
+  end,
 
-  self.setDifficulty = function(self, newDifficulty)
+  setDifficulty = function(self, newDifficulty)
     self['selectedDifficulty'] = newDifficulty;
-  end
+  end,
 
-  self.setLabels = function(self)
+  setLabels = function(self)
     if (not self['labels']) then
       gfx.LoadSkinFont('GothamMedium.ttf');
 
       self['labels'] = {};
 
-      self['labels']['of'] = gfx.CreateLabel('OF', 18, 0);
+      self['labels']['of'] = cacheLabel('OF', 18);
 
       for name, str in pairs(CONSTANTS['labels']['grid']) do
-        self['labels'][name] = gfx.CreateLabel(str, 18, 0);
+        self['labels'][name] = cacheLabel(str, 18);
       end
 
       gfx.LoadSkinFont('DigitalSerialBold.ttf');
 
-      self['labels']['currentSong'] = gfx.CreateLabel('', 18, 0);
-      self['labels']['totalSongs'] = gfx.CreateLabel('', 18, 0);
+      self['labels']['currentSong'] = cacheLabel('', 18);
+      self['labels']['totalSongs'] = cacheLabel('', 18);
     end
-  end
+  end,
 
-  self.setRowOffset = function(self, newRowOffset)
+  setRowOffset = function(self, newRowOffset)
     self['easing']['grid']['initial'] = self['rowOffset'];
     self['easing']['grid']['timer'] = self['easing']['grid']['duration'];
     self['rowOffset'] = newRowOffset;
-  end
+  end,
 
-  self.setScrollbarPos = function(self, completion)
+  setScrollbarPos = function(self, completion)
     self['easing']['scrollbar']['initial'] = self['scrollbar']['pos'];
     self['easing']['scrollbar']['timer'] = self['easing']['scrollbar']['duration'];
     self['scrollbar']['pos'] = self['scrollbar']['y'] + (completion * (self['scrollbar']['height'] - 32));
-  end
+  end,
 
-  self.setSongIndex = function(self, newSongIndex)
+  setSongIndex = function(self, newSongIndex)
     local delta = newSongIndex - self['selectedSongIndex'];
 
     if ((delta < -1) or (delta > 1)) then
@@ -326,39 +288,43 @@ songGrid.initialize = function(self)
       self['cursor']['pos'] = newCursorPos;
     end
 
+    if (self['selectedSongIndex'] ~= newSongIndex) then
+      self['cursor']['flickerTimer'] = 0;
+    end
+
     self['selectedSongIndex'] = newSongIndex;
 
     self:setScrollbarPos((self['rowOffset'] + self['cursor']['pos']) / (#songwheel.songs - 1));
-  end
+  end,
 
-  self.getCurrentRowOffset = function(self)
+  getCurrentRowOffset = function(self)
     return easing.outQuad(
       self['easing']['grid']['duration'] - self['easing']['grid']['timer'],
       self['easing']['grid']['initial'],
       self['rowOffset'] - self['easing']['grid']['initial'],
       self['easing']['grid']['duration']
     );
-  end
+  end,
 
-  self.getCursorPosition = function(self, position, yOffset)
+  getCursorPosition = function(self, position, yOffset)
     local whichColumn = position % self['numColumns'];
     local whichRow = math.floor(position / self['numColumns']) + (yOffset or 0);
     local x = self['grid']['x'] + whichColumn * (self['grid']['size'] / 4);
     local y = self['grid']['y'] + whichRow * (self['grid']['size'] / 4);
 
     return x, y;
-  end
+  end,
 
-  self.getScrollbarPos = function(self)
+  getScrollbarPos = function(self)
     return easing.outQuad(
       self['easing']['scrollbar']['duration'] - self['easing']['scrollbar']['timer'],
       self['easing']['scrollbar']['initial'],
       self['scrollbar']['pos'] - self['easing']['scrollbar']['initial'],
       self['easing']['scrollbar']['duration']
     );
-  end
+  end,
 
-  self.drawAllSongs = function(self, deltaTime)
+  drawAllSongs = function(self, deltaTime)
     if (self['easing']['grid']['timer'] > 0) then
       self['easing']['grid']['timer'] = math.max(self['easing']['grid']['timer'] - deltaTime, 0);
     end
@@ -379,12 +345,18 @@ songGrid.initialize = function(self)
         end
       end
     end
-  end
+  end,
 
-  self.drawCursor = function(self, deltaTime)
+  drawCursor = function(self, deltaTime)
     self['cursor']['timer'] = self['cursor']['timer'] + deltaTime;
+    self['cursor']['flickerTimer'] = self['cursor']['flickerTimer'] + deltaTime;
 
-    self['cursor']['alpha'] = math.abs(0.8 * math.cos(self['cursor']['timer'] * 5)) + 0.2;
+    self['cursor']['alpha'] = math.floor(self['cursor']['flickerTimer'] * 30) % 2;
+    self['cursor']['alpha'] = (self['cursor']['alpha'] * 255) / 255;
+
+    if (self['cursor']['flickerTimer'] >= 0.3) then
+      self['cursor']['alpha'] = math.abs(0.8 * math.cos(self['cursor']['timer'] * 5)) + 0.2;
+    end
 
     local position = self['cursor']['displayPos'];
 
@@ -414,9 +386,9 @@ songGrid.initialize = function(self)
     cursor:drawSongCursor(0, 0, self['jacketSize'], self['jacketSize'], 8, self['cursor']['alpha']);
 
     gfx.Restore();
-  end
+  end,
 
-  self.drawLabels = function(self)
+  drawLabels = function(self)
     gfx.Save();
   
     local x = 0;
@@ -427,18 +399,29 @@ songGrid.initialize = function(self)
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
     gfx.FillColor(unpack(colors['blueNormal']));
 
-    gfx.DrawLabel(self['labels']['sort'], x, 0);
-    x = x + getLabelInfo(self['labels']['sort'])['w'] + self['labels']['spacing'];
+    self['labels']['sort']:draw({
+      ['x'] = x,
+      ['y'] = 0
+    });
 
-    gfx.DrawLabel(self['labels']['difficulty'], x, 0);
-    x = x + getLabelInfo(self['labels']['difficulty'])['w'] + self['labels']['spacing'];
+    x = x + self['labels']['sort']['w'] + self['labels']['spacing'];
+
+    self['labels']['difficulty']:draw({
+      ['x'] = x,
+      ['y'] = 0
+    });
+
+    x = x + self['labels']['difficulty']['w'] + self['labels']['spacing'];
   
-    gfx.DrawLabel(self['labels']['collection'], x, 0);
+    self['labels']['collection']:draw({
+      ['x'] = x,
+      ['y'] = 0
+    });
 
     gfx.Restore();
-  end
+  end,
 
-  self.drawNoSongMessage = function(self)
+  drawNoSongMessage = function(self)
     local x = self['grid']['x'] + ((self['grid']['size'] - self['grid']['gutter'] * 10) / 2);
     local y = scaledH / 2 + self['grid']['gutter'];
 
@@ -454,9 +437,9 @@ songGrid.initialize = function(self)
     gfx.Text('NO SONGS FOUND', 0, 0);
 
     gfx.Restore();
-  end
+  end,
 
-  self.drawScrollbar = function(self, deltaTime)
+  drawScrollbar = function(self, deltaTime)
     if (self['easing']['scrollbar']['timer'] > 0) then
       self['easing']['scrollbar']['timer'] = math.max(self['easing']['scrollbar']['timer'] - deltaTime, 0);
     end
@@ -478,36 +461,40 @@ songGrid.initialize = function(self)
     gfx.FillColor(unpack(colors['blueNormal']));
     gfx.Rect(self['scrollbar']['x'], barPos, 8, 32);
     gfx.Fill();
-  end
+  end,
 
-  self.drawSongAmount = function(self)
-    local x = scaledW - self['grid']['gutter'] * 5.25;
-    local y = scaledH - self['grid']['gutter'] - 5;
+  drawSongAmount = function(self)
+    local x = scaledW - self['grid']['gutter'] * 1.25;
+    local y = scaledH - self['grid']['gutter'] - 6;
   
     gfx.LoadSkinFont('DigitalSerialBold.ttf');
+    self['labels']['currentSong']:update({ ['new'] = string.format('%04d', self['selectedSongIndex']) });
+    self['labels']['totalSongs']:update({ ['new'] = string.format('%04d', #songwheel.songs) });
 
-    gfx.UpdateLabel(
-      self['labels']['currentSong'],
-      string.format('%04d', self['selectedSongIndex']),
-      18,
-      0
-    );
-    gfx.UpdateLabel(
-      self['labels']['totalSongs'],
-      string.format('%04d', #songwheel.songs),
-      18,
-      0
-    );
+    gfx.Save();
+
+    gfx.Translate(x, y);
 
     gfx.BeginPath();
     gfx.FillColor(unpack(colors['blueNormal']));
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
-    gfx.DrawLabel(self['labels']['currentSong'], x + 3, y);
-    gfx.DrawLabel(self['labels']['of'], x + 60, y);
-    gfx.DrawLabel(self['labels']['totalSongs'], x + 96, y);
-  end
+    gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
+    self['labels']['currentSong']:draw({
+      ['x'] = -(self['labels']['of']['w'] + self['labels']['totalSongs']['w'] + 16),
+      ['y'] = 0
+    });
+    self['labels']['of']:draw({
+      ['x'] = -(self['labels']['totalSongs']['w'] + 8),
+      ['y'] = 0
+    });
+    self['labels']['totalSongs']:draw({
+      ['x'] = 0,
+      ['y'] = 0
+    });
 
-  self.drawSong = function(self, deltaTime, position, songIndex, yOffset)
+    gfx.Restore();
+  end,
+
+  drawSong = function(self, deltaTime, position, songIndex, yOffset)
     if (songIndex < 1) then return end;
 
     local song = songwheel.songs[songIndex];
@@ -575,9 +562,9 @@ songGrid.initialize = function(self)
     end
 
      gfx.Restore();
-  end
+  end,
 
-  self.render = function(self, deltaTime)
+  render = function(self, deltaTime)
     gfx.Save();
 
     self:setLabels();
@@ -610,11 +597,12 @@ songGrid.initialize = function(self)
 
     gfx.Restore();
   end
-end
+};
 
 local songInfo = {
   ['cursor'] = {
     ['alpha'] = 0,
+    ['flickerTimer'] = 0,
     ['pos'] = 0,
     ['selected'] = nil,
     ['timer'] = 0,
@@ -624,9 +612,9 @@ local songInfo = {
   ['difficulties'] = nil,
   ['highScore'] = nil,
   ['images'] = {
-    ['button'] = gfx.CreateSkinImage('song_select/button.png', 0),
-    ['buttonHover'] = gfx.CreateSkinImage('song_select/button_hover.png', 0),
-    ['panel'] = gfx.CreateSkinImage('song_select/panel.png', 0)
+    ['button'] = cacheImage('song_select/button.png'),
+    ['buttonHover'] = cacheImage('song_select/button_hover.png'),
+    ['panel'] = cacheImage('song_select/panel.png')
   },
   ['jacketSize'] = nil,
   ['labels'] = nil,
@@ -670,14 +658,12 @@ local songInfo = {
     ['artist'] = 0,
     ['effector'] = 0,
     ['title'] = 0
-  }
-};
+  },
 
-songInfo.initialize = function(self)
-  self.setAllSizes = function(self)
+  setAllSizes = function(self)
     self['jacketSize'] = scaledW / 5;
 
-    self['panel']['w'] = scaledW / (scaledW / getImageInfo(self['images']['panel'])['w']);
+    self['panel']['w'] = scaledW / (scaledW / self['images']['panel']['w']);
     self['panel']['h'] = scaledH - (scaledH / 10);
     self['panel']['x'] = scaledW / 20;
     self['panel']['y'] = scaledH / 20;
@@ -699,20 +685,24 @@ songInfo.initialize = function(self)
 
     self['labels']['x'] = self['padding']['x']['double'];
     self['labels']['y'] = self['padding']['y']['double'] + self['jacketSize'];
-  end
+  end,
 
-  self.setDifficulty = function(self, newDifficulty)
+  setDifficulty = function(self, newDifficulty)
+    if (self['selectedDifficulty'] ~= newDifficulty) then
+      self['cursor']['flickerTimer'] = 0;
+    end
+
     self['selectedDifficulty'] = newDifficulty;
-  end
+  end,
 
-  self.setLabels = function(self)
+  setLabels = function(self)
     if (not self['labels']) then
       gfx.LoadSkinFont('DigitalSerialBold.ttf');
 
       self['difficulties'] = {};
       self['highScore'] = {
-        [1] = gfx.CreateLabel('', 90, 0),
-        [2] = gfx.CreateLabel('', 72, 0)
+        [1] = cacheLabel('', 90),
+        [2] = cacheLabel('', 72)
       };
       self['labels'] = {
         ['order'] = {
@@ -731,26 +721,26 @@ songInfo.initialize = function(self)
       self['levels'] = {};
 
       for index, level in pairs(CONSTANTS['levels']) do
-        self['levels'][index] = gfx.CreateLabel(level, 18, 0);
+        self['levels'][index] = cacheLabel(level, 18);
       end
 
       gfx.LoadSkinFont('GothamMedium.ttf');
 
       for index, name in pairs(CONSTANTS['difficulties']) do
-        self['difficulties'][index] = gfx.CreateLabel(name, 18, 0);
+        self['difficulties'][index] = cacheLabel(name, 18);
       end
 
       for name, str in pairs(CONSTANTS['labels']['info']) do
-        self['labels'][name] = gfx.CreateLabel(str, 18, 0);
+        self['labels'][name] = cacheLabel(str, 18);
       end
     end
-  end
+  end,
 
-  self.setSongIndex = function(self, newSongIndex)
+  setSongIndex = function(self, newSongIndex)
     self['selectedSongIndex'] = newSongIndex;
-  end
+  end,
 
-  self.getDifficulty = function(self, difficulties, index)
+  getDifficulty = function(self, difficulties, index)
     local difficultyIndex = nil;
 
     for i, v in pairs(difficulties) do
@@ -766,9 +756,9 @@ songInfo.initialize = function(self)
     end
 
     return difficulty;
-  end
+  end,
 
-  self.drawJacket = function(self, song, difficulty)
+  drawJacket = function(self, song, difficulty)
     gfx.Save();
 
     if ((not songCache[song.id][self['selectedDifficulty']])
@@ -798,26 +788,28 @@ songInfo.initialize = function(self)
     end
 
     gfx.Restore();
-  end
+  end,
 
-  self.drawLabels = function(self, song)
+  drawLabels = function(self, song)
     gfx.Save();
 
-    local baseLabelHeight = getLabelInfo(self['labels']['title'])['h'];
+    local baseLabelHeight = self['labels']['title']['h'];
     local y = self['labels']['y'] - 4;
 
     gfx.BeginPath();
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
     gfx.FillColor(unpack(colors['blueNormal']));
 
-    gfx.DrawLabel(
-      self['labels']['difficulty'],
-      self['padding']['x']['double'] + self['jacketSize'] + self['padding']['x']['full'] + 6,
-      self['padding']['y']['full'] - 4
-    );
+    self['labels']['difficulty']:draw({
+      ['x'] = self['padding']['x']['double'] + self['jacketSize'] + self['padding']['x']['full'] + 6,
+      ['y'] = self['padding']['y']['full'] - 4
+    });
 
     for _, name in ipairs(self['labels']['order']['main']) do
-      gfx.DrawLabel(self['labels'][name], self['labels']['x'], y, -1);
+      self['labels'][name]:draw({
+        ['x'] = self['labels']['x'],
+        ['y'] = y
+      });
 
       y = y 
         + baseLabelHeight
@@ -836,7 +828,10 @@ songInfo.initialize = function(self)
 
       if (grades:getGrade(difficulty)) then
         for _, name in ipairs(self['labels']['order']['conditional']) do
-          gfx.DrawLabel(self['labels'][name], self['labels']['x'], y, -1);
+          self['labels'][name]:draw({
+            ['x'] = self['labels']['x'],
+            ['y'] = y
+          });
 
           y = y 
             + baseLabelHeight
@@ -849,12 +844,12 @@ songInfo.initialize = function(self)
     end
 
     gfx.Restore();
-  end
+  end,
 
-  self.drawSongInfo = function(self, deltaTime, id, difficulty)
+  drawSongInfo = function(self, deltaTime, id, difficulty)
     gfx.Save();
 
-    local baseLabelHeight = getLabelInfo(self['labels']['title'])['h'];
+    local baseLabelHeight = self['labels']['title']['h'];
     local y = self['labels']['y']
       + baseLabelHeight
       + self['padding']['y']['quarter']
@@ -871,7 +866,7 @@ songInfo.initialize = function(self)
       local currentLabel =
         ((name == 'effector') and songCache[id][name][self['selectedDifficulty']])
         or songCache[id][name];
-      local doesOverflow = getLabelInfo(currentLabel)['w'] > self['panel']['innerWidth'];
+      local doesOverflow = currentLabel['w'] > self['panel']['innerWidth'];
   
       if (doesOverflow and self['scrollTimers'][name] ~= nil) then
         self['scrollTimers'][name] = self['scrollTimers'][name] + deltaTime;
@@ -880,15 +875,16 @@ songInfo.initialize = function(self)
           self['scrollTimers'][name],
           currentLabel,
           self['panel']['innerWidth'],
-          getLabelInfo(currentLabel)['h'],
           self['labels']['x'],
           y,
           scalingFactor,
-          1,
           {255, 255, 255, 255}
         );
       else
-        gfx.DrawLabel(currentLabel, self['labels']['x'], y - 1);
+        currentLabel:draw({
+          ['x'] = self['labels']['x'], 
+          ['y'] = y - 1
+        });
       end
 
       y = y
@@ -903,7 +899,10 @@ songInfo.initialize = function(self)
       for _, name in ipairs(self['order']['conditional']) do
         local currentLabel = ((name == 'grade') and gradeLabel) or clearLabel;
 
-        gfx.DrawLabel(currentLabel, self['labels']['x'], y, -1);
+        currentLabel:draw({
+          ['x'] = self['labels']['x'],
+          ['y'] = y
+        });
 
         y = y
           + labelHeight[name]
@@ -915,74 +914,93 @@ songInfo.initialize = function(self)
 
       local highScore = difficulty.scores[1].score;
       local scoreText = string.format('%08d', highScore);
+
+      gfx.LoadSkinFont('DigitalSerialBold.ttf');
+      self['highScore'][1]:update({ ['new'] = string.sub(scoreText, 1, 4) });
+      self['highScore'][2]:update({ ['new'] = string.sub(scoreText, -4) });
       
       gfx.BeginPath();
-      gfx.LoadSkinFont('DigitalSerialBold.ttf');
-      gfx.UpdateLabel(self['highScore'][1], string.sub(scoreText, 1, 4), 90, 0);
-      gfx.UpdateLabel(self['highScore'][2], string.sub(scoreText, -4), 72, 0);
 
       local x = self['labels']['x'] + (self['padding']['x']['double'] * 2.4);
       local y = scaledH - (scaledH / 20) - (self['padding']['y']['double'] * 2.15);
 
       gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
       gfx.FillColor(unpack(colors['blueNormal']));
-      gfx.DrawLabel(self['labels']['highScore'], x, y);
+      self['labels']['highScore']:draw({
+        ['x'] = x,
+        ['y'] = y
+      });
 
       y = y + (self['padding']['y']['quarter'] / 2) + 2;
 
       gfx.FillColor(unpack(colors['white']));
-      gfx.DrawLabel(self['highScore'][1], x - 4, y);
+      self['highScore'][1]:draw({
+        ['x'] = x - 4, 
+        ['y'] = y
+      });
 
       gfx.FillColor(unpack(colors['blueNormal']));
-      gfx.DrawLabel(
-        self['highScore'][2],
-        x + getLabelInfo(self['highScore'][1])['w'],
-        y + self['padding']['y']['half'] - 6
-      );
+      self['highScore'][2]:draw({
+        ['x'] = x + self['highScore'][1]['w'],
+        ['y'] = y + self['padding']['y']['half'] - 6
+      });
     end
 
     gfx.Restore();
-  end
+  end,
 
-  self.drawDifficulty = function(self, currentDifficulty, isSelected, y)
+  drawDifficulty = function(self, currentDifficulty, isSelected, y)
     gfx.Save();
-  
-    local w, h = gfx.ImageSize(self['images']['button']);
+
     local x = self['cursor']['x'];
     local alpha = math.floor(255 * ((isSelected and 1) or 0.2));
   
-    gfx.BeginPath();
-
     if (isSelected) then
-      gfx.ImageRect(x, y, w, h, self['images']['buttonHover'], 1, 0);
+      self['images']['buttonHover']:draw({
+        ['x'] = x,
+        ['y'] = y
+      });
     else
-      gfx.ImageRect(x, y, w, h, self['images']['button'], 0.45, 0);
+      self['images']['button']:draw({
+        ['x'] = x, 
+        ['y'] = y,
+        ['a'] = 0.45
+      });
     end
 
     if (currentDifficulty) then
       gfx.BeginPath();
       gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
       gfx.FillColor(255, 255, 255, alpha);
-      gfx.DrawLabel(
-        self['difficulties'][currentDifficulty.difficulty + 1],
-        x + 36,
-        y + (h / 2.85)
-      );
+      self['difficulties'][currentDifficulty.difficulty + 1]:draw({
+        ['x'] = x + 36,
+        ['y'] = y + (self['images']['button']['h'] / 2.85)
+      });
+
       gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
-      gfx.DrawLabel(self['levels'][currentDifficulty.level], x + w - 36, y + (h / 2.85));
+      self['levels'][currentDifficulty.level]:draw({
+        ['x'] = x + self['images']['button']['w'] - 36,
+        ['y'] = y + (self['images']['button']['h'] / 2.85)
+      });
     end
 
     gfx.Restore();
 
-    return (y + h + 6);
-  end
+    return (y + self['images']['button']['h'] + 6);
+  end,
 
-  self.drawCursor = function(self, deltaTime, y)
+  drawCursor = function(self, deltaTime, y)
     gfx.Save();
 
     self['cursor']['timer'] = self['cursor']['timer'] + deltaTime;
+    self['cursor']['flickerTimer'] = self['cursor']['flickerTimer'] + deltaTime;
 
-    self['cursor']['alpha'] = math.abs(0.8 * math.cos(self['cursor']['timer'] * 5)) + 0.2;
+    self['cursor']['alpha'] = math.floor(self['cursor']['flickerTimer'] * 30) % 2;
+    self['cursor']['alpha'] = (self['cursor']['alpha'] * 255) / 255;
+
+    if (self['cursor']['flickerTimer'] >= 0.3) then
+      self['cursor']['alpha'] = math.abs(0.8 * math.cos(self['cursor']['timer'] * 5)) + 0.2;
+    end
 
     self['cursor']['pos'] = self['cursor']['pos'] - (self['cursor']['pos'] - y) * deltaTime * 50;
 
@@ -991,17 +1009,20 @@ songInfo.initialize = function(self)
     cursor:drawDifficultyCursor(self['cursor']['x'], self['cursor']['pos'], 222, 74, 4, self['cursor']['alpha']);
 
     gfx.Restore();
-  end
+  end,
 
-  self.drawSongInfoPanel = function(self, deltaTime)
+  drawSongInfoPanel = function(self, deltaTime)
     local song = songwheel.songs[self['selectedSongIndex']];
 
     gfx.Save();
 
     gfx.Translate(self['panel']['x'], self['panel']['y']);
 
-    gfx.BeginPath();
-    gfx.ImageRect(0, 0, self['panel']['w'], self['panel']['h'], self['images']['panel'], 0.65, 0);
+    self['images']['panel']:draw({
+      ['x'] = 0,
+      ['y'] = 0,
+      ['a'] = 0.65
+    });
 
     self:drawLabels(song);
 
@@ -1026,7 +1047,7 @@ songInfo.initialize = function(self)
 
     self:drawSongInfo(deltaTime, song.id, difficulty);
 
-    local difficultyY = self['padding']['y']['double'] + getLabelInfo(self['labels']['difficulty'])['h'] - 24;
+    local difficultyY = self['padding']['y']['double'] + self['labels']['difficulty']['h'] - 24;
 
     for index = 1, 4 do
       local level = self:getDifficulty(song.difficulties, index);
@@ -1043,9 +1064,9 @@ songInfo.initialize = function(self)
     self:drawCursor(deltaTime, self['cursor']['y'][self['cursor']['selected']]);
     
     gfx.Restore();
-  end
+  end,
 
-  self.render = function(self, deltaTime)
+  render = function(self, deltaTime)
     gfx.Save();
 
     self:setLabels();
@@ -1055,7 +1076,7 @@ songInfo.initialize = function(self)
 
     gfx.Restore();
   end
-end
+};
 
 local search = {
   ['alpha'] = 0,
@@ -1069,32 +1090,30 @@ local search = {
   ['h'] = 0,
   ['x'] = 0,
   ['y'] = 0,
-  ['timer'] = 0
-};
+  ['timer'] = 0,
 
-search.initialize = function(self)
-  self.setAllSizes = function(self)
+  setAllSizes = function(self)
     self['w'] = songInfo['panel']['w'] + 6;
     self['h'] = (songGrid['grid']['gutter'] * 1.5);
     self['x'] = scaledW / 20;
     self['y'] = scaledH / 40;
-  end
+  end,
 
-  self.setLabels = function(self)
+  setLabels = function(self)
     if (not self['labels']) then
       gfx.LoadSkinFont('GothamMedium.ttf');
 
       self['labels'] = {};
 
-      self['labels']['search'] = gfx.CreateLabel('SEARCH', 18, 0);
+      self['labels']['search'] = cacheLabel('SEARCH', 18);
 
       gfx.LoadSkinFont('GothamBook.ttf');
 
-      self['labels']['input'] = gfx.CreateLabel('', 24, 0);
+      self['labels']['input'] = cacheLabel('', 24);
     end
-  end
+  end,
 
-  self.drawSearch = function(self, deltaTime)
+  drawSearch = function(self, deltaTime)
     gfx.Save();
   
     local acceptInput = songwheel.searchInputActive;
@@ -1112,9 +1131,9 @@ search.initialize = function(self)
     self['cursor']['alpha'] = (acceptInput and math.abs(0.9 * math.cos(self['cursor']['timer'] * 5)) + 0.1) or 0;
 
     gfx.LoadSkinFont('GothamBook.ttf');
-    gfx.UpdateLabel(self['labels']['input'], string.upper(songwheel.searchText), 24, 0);
+    self['labels']['input']:update({ ['new'] = string.upper(songwheel.searchText) });
 
-    local cursorOffset = math.min(getLabelInfo(self['labels']['input'])['w'] + 2, self['w'] - 20);
+    local cursorOffset = math.min(self['labels']['input']['w'] + 2, self['w'] - 24);
 
     if (self['index'] ~= ((acceptInput and 0) or 1)) then
       game.PlaySample('woosh');
@@ -1124,19 +1143,32 @@ search.initialize = function(self)
 
     gfx.BeginPath();
     gfx.FillColor(0, 0, 0, 150);
-    gfx.FastRect(self['x'] - 6, self['y'] - 6, self['w'] * self['timer'], self['h'] + 12);
+    gfx.FastRect(self['x'] + 2, self['y'] - 6, (self['w'] - 8) * self['timer'], self['h'] + 12);
     gfx.Fill();
+
+    if (acceptInput) then
+      gfx.BeginPath();
+      gfx.StrokeWidth(2);
+      gfx.StrokeColor(60, 110, 160, self['alpha']);
+      gfx.FillColor(0, 0, 0, 0);
+      gfx.Rect(self['x'] + 2, self['y'] - 6, (self['w'] - 8) * self['timer'], self['h'] + 12);
+      gfx.Fill();
+      gfx.Stroke();
+    end
 
     gfx.BeginPath();
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
     gfx.FillColor(60, 110, 160, self['alpha']);
-    gfx.DrawLabel(self['labels']['search'], self['x'], self['y'] - 4, -1);
+    self['labels']['search']:draw({
+      ['x'] = self['x'] + 8,
+      ['y'] = self['y'] - 4
+    });
 
     if (shouldShow) then
       gfx.BeginPath();
       gfx.FillColor(255, 255, 255, math.floor(255 * self['cursor']['alpha']));
       gfx.FastRect(
-        self['x'] + cursorOffset,
+        self['x'] + 8 + cursorOffset,
         self['y'] + (self['h'] / 2) - 4,
         2,
         28
@@ -1146,13 +1178,17 @@ search.initialize = function(self)
       gfx.BeginPath();
       gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
       gfx.FillColor(unpack(colors['white']));
-      gfx.DrawLabel(self['labels']['input'], self['x'], self['y'] + 20, self['w'] - 20);
+      self['labels']['input']:draw({
+        ['x'] = self['x'] + 8,
+        ['y'] = self['y'] + 20,
+        ['maxWidth'] = self['w'] - 24
+      });
     end
 
     gfx.Restore();
-  end
+  end,
 
-  self.render = function(self, deltaTime)
+  render = function(self, deltaTime)
     gfx.Save();
 
     self:setAllSizes();
@@ -1162,215 +1198,91 @@ search.initialize = function(self)
 
     gfx.Restore();
   end
-end
+};
 
-controls.initialize = function(self)
-  self.setAllSizes = function(self)
-    self['x'] = scaledW / 20;
-    self['y'] = scaledH / 20;
-  end
+local miscInfo = {
+  ['labels'] = nil,
 
-  self.setLabels = function(self)
+  render = function(self)
     if (not self['labels']) then
       gfx.LoadSkinFont('GothamMedium.ttf');
-    
+  
       self['labels'] = {
-        ['heading'] = gfx.CreateLabel('CONTROLS', 60, 0),
-        ['songSelectHeading'] = gfx.CreateLabel('SONG SELECT', 36, 0),
-        ['gameplaySettingsHeading'] = gfx.CreateLabel('GAMEPLAY SETTINGS', 36, 0),
-        ['controller'] = gfx.CreateLabel('CONTROLLER', 30, 0),
-        ['keyboard'] = gfx.CreateLabel('KEYBOARD', 30, 0),
-        ['songSelect'] = {
-          ['action'] = {},
-          ['controller'] = {},
-          ['keyboard'] = {}
-        },
-        ['gameplaySettings'] = {
-          ['action'] = {},
-          ['button'] = {},
-          ['keyboard'] = {}
+        ['bta'] = cacheLabel('[BT-A]', 20),
+        ['showControls'] = cacheLabel('SHOW CONTROLS', 20),
+        ['volforce'] = {
+          ['label'] = cacheLabel('VF', 20)
         }
       };
 
-      for index, control in ipairs(CONTROL_LIST['songSelect']) do
-        self['labels']['songSelect'][index] = {};
-
-        gfx.LoadSkinFont('GothamBook.ttf');
-        self['labels']['songSelect'][index]['action'] = gfx.CreateLabel(control['action'], 24, 0);
-
-        gfx.LoadSkinFont('GothamMedium.ttf');
-        self['labels']['songSelect'][index]['controller'] = gfx.CreateLabel(control['controller'], 24, 0);
-        self['labels']['songSelect'][index]['keyboard'] = gfx.CreateLabel(control['keyboard'], 24, 0);
-      end
-
-      for index, control in ipairs(CONTROL_LIST['gameplaySettings']) do
-        self['labels']['gameplaySettings'][index] = {};
-
-        gfx.LoadSkinFont('GothamBook.ttf');
-        self['labels']['gameplaySettings'][index]['action'] = gfx.CreateLabel(control['action'], 24, 0);
-
-        gfx.LoadSkinFont('GothamMedium.ttf');
-        self['labels']['gameplaySettings'][index]['controller'] = gfx.CreateLabel(control['controller'], 24, 0);
-        self['labels']['gameplaySettings'][index]['keyboard'] = gfx.CreateLabel(control['keyboard'], 24, 0);
-      end
-    end
-  end
-
-  self.drawButton = function(self, deltaTime)
-    local imgW, imgH = gfx.ImageSize(controllerIcon);
-    local imgX = (scaledW / 40) - (imgW / 2);
-    local w = scaledW / 20;
-    local h = (scaledH / 20) + 10;
-    local x = 0;
-    local y = scaledH - h;
-
-    gfx.BeginPath();
-    gfx.ImageRect(imgX, y + 16, imgW, imgH, controllerIcon, math.max(self['timer'] * 0.7, 0.35), 0);
-
-    if (mouseClipped(x, y, w, h)) then
-      self['showingControls'] = true;
-
-      self['timer'] = math.min(self['timer'] + (deltaTime * 8), 1);
-    end
-  end
-
-  self.drawControls = function(self)
-    if ((not self['showingControls']) and (self['timer'] == 0)) then return end;
-
-    local alpha = math.floor(255 * self['timer']);
-    local x = getLabelInfo(self['labels']['gameplaySettingsHeading'])['w'] + 75;
-    local y = 0;
-
-    gfx.BeginPath();
-    gfx.FillColor(0, 0, 0, math.floor(235 * self['timer']));
-    gfx.FastRect(0, 0, scaledW, scaledH);
-    gfx.Fill();
-
-    gfx.Save();
-
-    gfx.BeginPath();
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
-    gfx.FillColor(255, 255, 255, alpha);
-    gfx.DrawLabel(self['labels']['heading'], self['x'] - 2, self['y']);
-
-    gfx.Translate(self['x'], self['y']);
-
-    y = y + (getLabelInfo(self['labels']['heading'])['h'] * 1.5);
-
-    gfx.BeginPath();
-    gfx.FillColor(255, 255, 255, alpha);
-    gfx.FastRect(x, y + 52, 4, scaledH / 1.825);
-    gfx.Fill();
-
-    gfx.BeginPath();
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
-    gfx.FillColor(60, 110, 160, alpha);
-    gfx.DrawLabel(self['labels']['songSelectHeading'], 0, y + 42);
-
-    x = x + 75;
-
-    gfx.FillColor(255, 255, 255, alpha);
-    gfx.DrawLabel(self['labels']['controller'], x, y);
-    gfx.DrawLabel(self['labels']['keyboard'], x + 350, y);
-
-    y = y + 43;
-
-    for i, control in ipairs(self['labels']['songSelect']) do
-      gfx.FillColor(60, 110, 160, alpha);
-      gfx.DrawLabel(control['controller'], x, y);
-
-      gfx.DrawLabel(control['keyboard'], x + 350, y);
-
-      gfx.FillColor(255, 255, 255, alpha);
-      gfx.DrawLabel(control['action'], x + 700, y);
-
-      if (i ~= #self['labels']['songSelect']) then
-        gfx.BeginPath();
-        gfx.FillColor(60, 110, 160, math.floor(100 * self['timer']))
-        gfx.FastRect(x + 1, y + 34, scaledW / 1.7, 1);
-        gfx.Fill();
-      end
-
-      y = y + 38;
-    end
-
-    gfx.FillColor(60, 110, 160, alpha);
-    gfx.DrawLabel(self['labels']['gameplaySettingsHeading'], 0, y + 22);
-
-    gfx.BeginPath();
-    gfx.FillColor(255, 255, 255, alpha);
-    gfx.FastRect(x - 75, y + 32, 4, scaledH / 5);
-    gfx.Fill();
-
-    y = y + 25;
-
-    for i, control in ipairs(self['labels']['gameplaySettings']) do
-      gfx.FillColor(60, 110, 160, alpha);
-      gfx.DrawLabel(control['controller'], x, y);
+      gfx.LoadSkinFont('DigitalSerialBold.ttf');
   
-      gfx.DrawLabel(control['keyboard'], x + 350, y);
-
-      gfx.FillColor(255, 255, 255, alpha);
-      gfx.DrawLabel(control['action'], x + 700, y);
-
-      if (i ~= #self['labels']['gameplaySettings']) then
-        gfx.BeginPath();
-        gfx.FillColor(60, 110, 160, math.floor(100 * self['timer']))
-        gfx.FastRect(x + 1, y + 34, scaledW / 1.7, 1);
-        gfx.Fill();
-      end
-
-      y = y + 38;
+      self['labels']['volforce']['value'] = cacheLabel('', 20);
     end
-
-    gfx.Restore();
-  end
-
-  self.render = function(self, deltaTime)
+  
     gfx.Save();
+  
+    gfx.Translate((scaledW / 20) - 1, scaledH - (scaledH / 20));
 
-    self:setAllSizes();
-    self:setLabels();
+    local y = self['labels']['bta']['h'] - 6;
+  
+    gfx.BeginPath();
+    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
 
-    self['showingControls'] = false;
+    gfx.FillColor(unpack(colors['blueNormal']));
+    self['labels']['bta']:draw({
+      ['x'] = 0, 
+      ['y'] = y
+    });
 
-    self:drawButton(deltaTime);
-    self:drawControls();
+    gfx.FillColor(unpack(colors['white']));
+    self['labels']['showControls']:draw({
+      ['x'] = self['labels']['bta']['w'] + 8,
+      ['y'] = y
+    });
 
-    if (not self['showingControls'] and self['timer'] > 0) then
-      self['timer'] = math.max(self['timer'] - (deltaTime * 6), 0);
+    if (totalForce) then
+      gfx.Translate(songInfo['panel']['w'] + 2, 0);
+
+      gfx.LoadSkinFont('DigitalSerialBold.ttf');
+      self['labels']['volforce']['value']:update({ ['new'] = string.format('%.2f', totalForce) });
+
+      gfx.BeginPath();
+      gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
+
+      gfx.FillColor(unpack(colors['blueNormal']));
+      self['labels']['volforce']['label']:draw({
+        ['x'] = 0,
+        ['y'] = y
+      });
+
+      gfx.FillColor(unpack(colors['white']));
+      self['labels']['volforce']['value']:draw({
+        ['x'] = -(self['labels']['volforce']['label']['w'] + 8),
+        ['y'] = y
+      });
     end
 
     gfx.Restore();
   end
-end
-
-
-if (not allInitialized) then
-  clears:initialize();
-  grades:initialize();
-  songGrid:initialize();
-  songInfo:initialize();
-  search:initialize();
-  controls:initialize();
-
-  allInitialized = true;
-end
+};
 
 render = function(deltaTime)
   gfx.Save();
 
   setupLayout();
 
-  mousePosX, mousePosY = game.GetMousePos();
-
-  gfx.BeginPath();
-  gfx.ImageRect(0, 0, scaledW, scaledH, background, 1, 0);
+  background:draw({
+    ['x'] = 0,
+    ['y'] = 0,
+    ['w'] = scaledW,
+    ['h'] = scaledH
+  });
 
   songGrid:render(deltaTime);
   songInfo:render(deltaTime);
   search:render(deltaTime);
-  controls:render(deltaTime);
+  miscInfo:render();
 
   gfx.Restore();
 end
@@ -1401,64 +1313,44 @@ set_diff = function(newDifficultyIndex)
   previousDifficultyIndex = newDifficultyIndex;
 end
 
-totalForce = nil
+totalForce = nil;
 
-local badgeRates = {
-	0.5,  -- Played
-	1.0,  -- Cleared
-	1.02, -- Hard clear
-	1.04, -- UC
-	1.1   -- PUC
-}
+calculateForce = function(diff)
+  if (#diff.scores < 1) then
+    return 0;
+  end
 
-local gradeRates = {
-	{['min'] = 9900000, ['rate'] = 1.05}, -- S
-	{['min'] = 9800000, ['rate'] = 1.02}, -- AAA+
-	{['min'] = 9700000, ['rate'] = 1},    -- AAA
-	{['min'] = 9500000, ['rate'] = 0.97}, -- AA+
-	{['min'] = 9300000, ['rate'] = 0.94}, -- AA
-	{['min'] = 9000000, ['rate'] = 0.91}, -- A+
-	{['min'] = 8700000, ['rate'] = 0.88}, -- A
-	{['min'] = 7500000, ['rate'] = 0.85}, -- B
-	{['min'] = 6500000, ['rate'] = 0.82}, -- C
-	{['min'] =       0, ['rate'] = 0.8}   -- D
-}
+  local score = diff.scores[1];
 
-calculate_force = function(diff)
-	if #diff.scores < 1 then
-		return 0
-	end
-	local score = diff.scores[1]
-	local badgeRate = badgeRates[diff.topBadge]
-	local gradeRate
-    for i, v in ipairs(gradeRates) do
-      if score.score >= v.min then
-        gradeRate = v.rate
-		break
-      end
-    end
-	return math.floor((diff.level * 2) * (score.score / 10000000) * gradeRate * badgeRate) / 100
+  return volforce(score.score, diff.topBadge, diff.level);
 end
 
 songs_changed = function(withAll)
 	if (not withAll) then return end;
 
-	local diffs = {}
+  local diffs = {};
+
 	for i = 1, #songwheel.allSongs do
-		local song = songwheel.allSongs[i]
+    local song = songwheel.allSongs[i];
+
 		for j = 1, #song.difficulties do
-			local diff = song.difficulties[j]
-			diff.force = calculate_force(diff)
-			table.insert(diffs, diff)
+      local diff = song.difficulties[j];
+  
+      diff.force = calculateForce(diff);
+
+			table.insert(diffs, diff);
 		end
-	end
+  end
+  
 	table.sort(diffs, function (l, r)
-		return l.force > r.force
-	end)
-	totalForce = 0
+		return (l.force > r.force);
+  end)
+
+  totalForce = 0;
+
 	for i = 1, 50 do
-		if diffs[i] then
-			totalForce = totalForce + diffs[i].force
+		if (diffs[i]) then
+			totalForce = totalForce + diffs[i].force;
 		end
 	end
 end

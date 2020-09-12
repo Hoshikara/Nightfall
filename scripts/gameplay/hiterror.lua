@@ -1,6 +1,4 @@
-local _ = {
-  ['initialized'] = false
-};
+local _ = {};
 
 local OFF = 'OFF';
 local BOTTOM = 'BOTTOM';
@@ -69,8 +67,6 @@ _.initializeAll = function(self)
   self['hit'] = self:initializeHit();
 
   self['info'] = self:initializeInfo();
-
-  self['initialized'] = true;
 end
 
 _.queueHit = function(self, btn, rating, delta)

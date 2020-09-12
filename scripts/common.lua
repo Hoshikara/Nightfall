@@ -4,7 +4,7 @@ colors = {
   black = {0, 0, 0, 255},
   blueDark = {16, 32, 48, 255},
   blueNormal = {60, 110, 160, 255},
-  blueLight = {70, 120, 170, 255},
+  blueLight = {80, 130, 180, 255},
   white = {255, 255, 255, 255}
 };
 
@@ -58,6 +58,66 @@ loadFrames = function(path, count)
   return frames;
 end
 
+cacheImage = function(path)
+  local image = gfx.CreateSkinImage(path, 0);
+  local w, h = gfx.ImageSize(image);
+
+  return {
+    ['image'] = image,
+    ['w'] = w,
+    ['h'] = h,
+
+    draw = function(self, params)
+      local a = params['a'] or 1;
+      local w = params['w'] or self['w'];
+      local h = params['h'] or self['h'];
+
+      w = (params['s'] and (params['s'] * w)) or w;
+      h = (params['s'] and (params['s'] * h)) or h;
+  
+      local x = (params['centered'] and (params['x'] - (w / 2))) or params['x'];
+      local y = (params['centered'] and (params['y'] - (h / 2))) or params['y'];
+
+      gfx.BeginPath();
+
+      if (params['blendOp']) then
+        gfx.GlobalCompositeOperation(params['blendOp']);
+      end
+
+      gfx.ImageRect(x, y, w, h, self['image'], a, 0);
+    end
+  };
+end
+
+cacheLabel = function(str, size)
+  local label = gfx.CreateLabel(str, size, 0);
+  local w, h = gfx.LabelSize(label);
+
+  return {
+    ['label'] = label,
+    ['size'] = size,
+    ['w'] = w,
+    ['h'] = h,
+
+    draw = function(self, params);
+      local x = params['x'] or 0;
+      local y = params['y'] or 0;
+      local maxWidth = params['maxWidth'] or -1;
+  
+      gfx.DrawLabel(self['label'], x, y, maxWidth);
+    end,
+
+    update = function(self, params)
+      local new = params['new'] or '';
+      local size = params['size'] or self['size'];
+
+      gfx.UpdateLabel(self['label'], new, size, 0);
+
+      self['w'], self['h'] = gfx.LabelSize(self['label']);
+    end
+  };
+end
+
 createTable = function(size, initial)
   local table = {};
 
@@ -81,23 +141,28 @@ drawCenteredImage = function(params)
   gfx.ImageRect(x, y, w, h, params['image'], alpha, 0);
 end
 
-drawScrollingLabel = function(timer, label, maxWidth, h, x, y, scale, speed, color)
-  local labelW = getLabelInfo(label)['w'];
-  local labelX = labelW * 1.2;
-  local duration = (labelX / 80) * (0.75 * speed);
+drawScrollingLabel = function(timer, label, maxWidth, x, y, scale, color)
+  local labelX = label['w'] * 1.2;
+  local duration = (labelX / 80) * 0.75;
   local phase = math.max((timer % (duration + 1.5)) - 1.5, 0) / duration;
 
   gfx.Save();
 
   gfx.BeginPath();
-  gfx.Scissor((x + 2) * scale, y * scale, maxWidth, h * 1.25);
+  gfx.Scissor((x + 2) * scale, y * scale, maxWidth, label['h'] * 1.25);
 
   gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
 
   gfx.FillColor(unpack(color));
 
-  gfx.DrawLabel(label, x - (phase * labelX), y);
-  gfx.DrawLabel(label, x - (phase * labelX) + labelX, y);
+  label:draw({
+    ['x'] = x - (phase * labelX),
+    ['y'] = y
+  });
+  label:draw({
+    ['x'] = x - (phase * labelX) + labelX,
+    ['y'] = y
+  });
 
   gfx.ResetScissor();
 
@@ -114,26 +179,18 @@ getImageInfo = function(image)
   return { ['w'] = 0, ['h'] = 0 };
 end
 
-getLabelInfo = function(label)
-  if (label) then
-    local w, h = gfx.LabelSize(label);
-
-    return { ['w'] = w, ['h'] = h };
-  end
-
-  return { ['w'] = 0, ['h'] = 0 };
+getSign = function(val)
+  return ((val > 0) and 1) or ((val < 0) and -1) or 0;
 end
 
-mouseClipped = function(mPosX, mPosY, x, y, w, h, scale)
-	local scaledX = x * scale;
-	local scaledY = y * scale;
-	local scaledW = scaledX + (w * scale);
-	local scaledH = scaledY + (h * scale);
-
-	return (mPosX > scaledX)
-		and (mPosY > scaledY)
-		and (mPosX < scaledW)
-		and (mPosY < scaledH);
+roundToZero = function(val)
+	if (val < 0) then
+		return math.ceil(val);
+	elseif (val > 0) then 
+		return math.floor(val);
+	else 
+		return 0;
+	end
 end
 
 stringReplace = function(str, patternTable, replacement)

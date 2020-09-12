@@ -1,11 +1,9 @@
-controller = require('titlescreen/controller');
-controls = require('titlescreen/controls');
-cursor = require('titlescreen/cursor');
-easing = require('lib/easing');
+local controller = require('titlescreen/controller');
+local controls = require('titlescreen/controls');
+local cursor = require('titlescreen/cursor');
+local easing = require('lib/easing');
 
-if (not controls['initialized']) then
-  controls:initializeAll();
-end
+controls:initializeAll();
 
 local activeButton = 1;
 local previousButton = 1;
@@ -20,6 +18,8 @@ local cursorAlpha = 0;
 local cursorPos = {};
 local cursorTimer = 0;
 local cursorX = nil;
+
+local flickerTimer = 0;
 
 local resX;
 local resY;
@@ -48,8 +48,8 @@ local menuLoaded = false;
 local hoveredPage = nil;
 local showControls = false;
 
-local background = gfx.CreateSkinImage('main_menu/menu_bg.png', 0);
-local dialogBox = gfx.CreateSkinImage('main_menu/dialog.png', 0);
+local background = cacheImage('main_menu/menu_bg.png');
+local dialogBox = cacheImage('main_menu/dialog.png');
 
 local title = nil;
 
@@ -70,52 +70,50 @@ setupButtons = function()
 			['main'] = {
 				[1] = {
 					['action'] = Menu.Start,
-					['label'] = gfx.CreateLabel('SINGLEPLAYER', 18, 0)
+					['label'] = cacheLabel('SINGLEPLAYER', 18)
 				},
 				[2] = {
 					['action'] = Menu.Multiplayer,
-					['label'] = gfx.CreateLabel('MULTIPLAYER', 18, 0)
+					['label'] = cacheLabel('MULTIPLAYER', 18)
 				},
 				[3] = {
 					['action'] = Menu.DLScreen,
-					['label'] = gfx.CreateLabel('NAUTICA', 18, 0)
+					['label'] = cacheLabel('NAUTICA', 18)
 				},
 				[4] = {
 					['action'] = displayControls,
-					['label'] = gfx.CreateLabel('CONTROLS', 18, 0)
+					['label'] = cacheLabel('CONTROLS', 18)
 				},
 				[5] = {
 					['action'] = Menu.Settings,
-					['label'] = gfx.CreateLabel('SETTINGS', 18, 0)
+					['label'] = cacheLabel('SETTINGS', 18)
 				},
 				[6] = {
 					['action'] = Menu.Exit,
-					['label'] = gfx.CreateLabel('EXIT', 18, 0)
+					['label'] = cacheLabel('EXIT', 18)
 				},
 			},
 			['update'] = {
 				[1] = {
 					['action'] = Menu.Update,
-					['label'] = gfx.CreateLabel('UPDATE', 16, 0)
+					['label'] = cacheLabel('UPDATE', 16)
 				},
 				[2] = {
 					['action'] = viewUpdate,
-					['label'] = gfx.CreateLabel('VIEW', 16, 0)
+					['label'] = cacheLabel('VIEW', 16)
 				},
 				[3] = {
 					['action'] = closeUpdatePrompt,
-					['label'] = gfx.CreateLabel('CLOSE', 16, 0)
+					['label'] = cacheLabel('CLOSE', 16)
 				}
 			},
-			['img'] = gfx.CreateSkinImage('main_menu/button.png', 0),
-			['imgHover'] = gfx.CreateSkinImage('main_menu/button_hover.png', 0),
+			['img'] = cacheImage('main_menu/button.png'),
+			['imgHover'] = cacheImage('main_menu/button_hover.png'),
 			['spacing'] = 20
 		};
 
-		buttons['width'], buttons['height'] = gfx.ImageSize(buttons['img']);
-
 		gfx.LoadSkinFont('GothamBook.ttf');
-		buttons['update']['heading'] = gfx.CreateLabel('A NEW UPDATE IS AVAILABLE!', 36, 0);
+		buttons['update']['heading'] = cacheLabel('A NEW UPDATE IS AVAILABLE!', 36);
 	end
 end
 
@@ -133,11 +131,11 @@ loadMenu = function(deltaTime)
 		title = {};
 
 		gfx.LoadSkinFont('GothamBook.ttf');
-		title['UNNAMED'] = gfx.CreateLabel('UNNAMED', 64, 0);
-		title['CLONE'] = gfx.CreateLabel('CLONE', 64, 0);
+		title['UNNAMED'] = cacheLabel('UNNAMED', 64);
+		title['CLONE'] = cacheLabel('CLONE', 64);
 
 		gfx.LoadSkinFont('GothamBold.ttf');
-		title['SOUNDVOLTEX'] = gfx.CreateLabel('SOUND VOLTEX', 110, 0);
+		title['SOUNDVOLTEX'] = cacheLabel('SOUND VOLTEX', 110);
 	end
 
 	introTimer = math.max(introTimer - (deltaTime / 3), 0);
@@ -155,19 +153,27 @@ loadMenu = function(deltaTime)
 end
 
 drawTitle = function(deltaTime)
-	local x = scaledW / 20;
-
 	titleTimer = math.min(titleTimer + (deltaTime * 4), 1);
 	titleAlpha = math.floor(titleTimer * 255);
 
 	local alpha = (showControls and 30) or titleAlpha;
+	local x = scaledW / 20;
 
 	gfx.BeginPath();
 	gfx.FillColor(255, 255, 255, alpha);
 	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
-	gfx.DrawLabel(title['UNNAMED'], x, 238, -1);
-	gfx.DrawLabel(title['SOUNDVOLTEX'], x, 279, -1);
-	gfx.DrawLabel(title['CLONE'], x + 689, 380, -1);
+	title['UNNAMED']:draw({
+		['x'] = x,
+		['y'] = 238
+	});
+	title['SOUNDVOLTEX']:draw({
+		['x'] = x,
+		['y'] = 279
+	});
+	title['CLONE']:draw({
+		['x'] = x + 689,
+		['y'] = 380
+	});
 end
 
 mouseClipped = function(x, y, w, h)
@@ -185,7 +191,7 @@ end
 setCursorX = function()
 	if (not cursorX) then
 		cursorX = scaledH - (scaledH / 5);
-		updateCursorX = (scaledW / 2) - (((buttons['width'] * 0.8) * 3) / 2) + 13;
+		updateCursorX = (scaledW / 2) - (((buttons['img']['w'] * 0.8) * 3) / 2) + 13;
 	end
 end 
 
@@ -195,31 +201,46 @@ drawButton = function(x, initialY, i)
 	local button = buttons['main'][i];
 	local isActive = button['action'] == (isNavigable and buttons['main'][activeButton]['action']);
 	local textAlpha = math.floor(255 * ((allowAction and isActive and 1) or 0.2));
-	local w = buttons['width'];
-	local h = buttons['height'];
+	local w = buttons['img']['w'];
+	local h = buttons['img']['h'];
 	local y = initialY - (h / 2);
 
-	gfx.BeginPath();
-	gfx.ImageRect(x, y, w, h, buttons['img'], 0.45, 0);
+	buttons['img']:draw({
+		['x'] = x,
+		['y'] = y,
+		['a'] = 0.45
+	});
 
 	if (allowAction and (mouseClipped(x, y, w, h) or isActive)) then
 		activeButton = i;
 		allowClick = mouseClipped(x, y, w, h);
 		hoveredButton = button['action'];
-		gfx.ImageRect(x, y, w, h, buttons['imgHover'], 1, 0);
+
+		buttons['imgHover']:draw({
+			['x'] = x,
+			['y'] = y
+		});
 	end
 
 	gfx.FillColor(255, 255, 255, textAlpha);
 	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_MIDDLE);
-	gfx.DrawLabel(button['label'], x + 35, initialY - 3, -1);
+	button['label']:draw({
+		['x'] = x + 35,
+		['y'] = initialY - 3
+	});
 
 	return (w + buttons['spacing']);
 end
 
 drawCursor = function(deltaTime, x, y)
 	cursorTimer = cursorTimer + deltaTime;
+	flickerTimer = flickerTimer + deltaTime;
 
-	cursorAlpha = math.abs(0.8 * math.cos(cursorTimer * 5)) + 0.2;
+	cursorAlpha = math.floor(flickerTimer * 30) % 2;
+
+	if (flickerTimer >= 0.3) then
+		cursorAlpha = math.abs(0.8 * math.cos(cursorTimer * 5)) + 0.2;
+	end
 
 	cursorX = cursorX - (cursorX - x) * deltaTime * 50;
 
@@ -236,31 +257,48 @@ drawUpdateButton = function(x, initialY, i)
 	local button = buttons['update'][i];
 	local isActive = button['action'] == buttons['update'][activeButton]['action'];
 	local textAlpha = math.floor(255 * ((isActive and 1) or 0.2));
-	local w = buttons['width'] * 0.8;
-	local h = buttons['height'] * 0.8;
+	local w = buttons['img']['w'] * 0.8;
+	local h = buttons['img']['h'] * 0.8;
 	local y = initialY - (h / 2);
 
-	gfx.BeginPath();
-	gfx.ImageRect(x, y, w, h, buttons['img'], 0.45, 0);
+	buttons['img']:draw({
+		['x'] = x,
+		['y'] = y,
+		['s'] = 0.8,
+		['a'] = 0.45
+	});
 
 	if (mouseClipped(x, y, w, h) or isActive) then
 		activeButton = i;
 		allowClick = mouseClipped(x, y, w, h);
 		hoveredButton = button['action'];
-		gfx.ImageRect(x, y, w, h, buttons['imgHover'], 1, 0);
+
+		buttons['imgHover']:draw({
+			['x'] = x,
+			['y'] = y,
+			['s'] = 0.8
+		});
 	end
 
 	gfx.FillColor(255, 255, 255, textAlpha);
 	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_MIDDLE);
-	gfx.DrawLabel(button['label'], x + 29, initialY - 3, -1);
+	button['label']:draw({
+		['x'] = x + 29,
+		['y'] = initialY - 3
+	});
 
 	return (w + buttons['spacing']);
 end
 
 drawUpdateCursor = function(deltaTime, x, y)
 	updateCursorTimer = updateCursorTimer + deltaTime;
+	flickerTimer = flickerTimer + deltaTime;
 
-	updateCursorAlpha = math.abs(0.8 * math.cos(updateCursorTimer * 5)) + 0.2;
+	updateCursorAlpha = math.floor(flickerTimer * 30) % 2;
+
+	if (flickerTimer >= 0.3) then
+		updateCursorAlpha = math.abs(0.8 * math.cos(updateCursorTimer * 5)) + 0.2;
+	end
 
 	updateCursorX = updateCursorX - (updateCursorX - x) * deltaTime * 50;
 
@@ -274,10 +312,6 @@ drawUpdateCursor = function(deltaTime, x, y)
 end
 
 drawUpdatePrompt = function(deltaTime)
-	local w, h = gfx.ImageSize(dialogBox);
-	local x = (scaledW / 2) - (w / 2);
-	local y = (scaledH / 2) - (h / 2);
-
 	fadeTimer = math.min(fadeTimer + (deltaTime * 3), 1);
 
 	gfx.BeginPath();
@@ -285,15 +319,22 @@ drawUpdatePrompt = function(deltaTime)
 	gfx.Rect(0, 0, scaledW, scaledH);
 	gfx.Fill();
 
-	gfx.BeginPath();
-	gfx.ImageRect(x, y, w, h, dialogBox, fadeTimer, 0);
+	dialogBox:draw({
+		['x'] = scaledW / 2,
+		['y'] = scaledH / 2,
+		['a'] = fadeTimer,
+		['centered'] = true
+	});
 
 	gfx.BeginPath();
 	gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE);
 	gfx.FillColor(255, 255, 255, math.floor(255 * fadeTimer));
-	gfx.DrawLabel(buttons['update']['heading'], scaledW / 2 - 86, (scaledH / 2) - 144);
+	buttons['update']['heading']:draw({
+		['x'] = scaledW / 2 - 86,
+		['y'] = (scaledH / 2) - 144
+	});
 
-	local updateButtonX = (scaledW / 2) - (((buttons['width'] * 0.8) * 3) / 2) + 13;
+	local updateButtonX = (scaledW / 2) - (((buttons['img']['w'] * 0.8) * 3) / 2) + 13;
 	local updateButtonY = scaledH / 2 + 133;
 
 	for i = 1, 3 do
@@ -371,8 +412,12 @@ render = function(deltaTime)
 
 	mousePosX, mousePosY = game.GetMousePos();
 
-	gfx.BeginPath();
-	gfx.ImageRect(0, 0, scaledW, scaledH, background, 1, 0);
+	background:draw({
+		['x'] = 0,
+		['y'] = 0,
+		['w'] = scaledW,
+		['h'] = scaledH
+	});
 
 	if (not menuLoaded) then
 		loadMenu(deltaTime);
@@ -407,6 +452,8 @@ render = function(deltaTime)
 
 	if (previousButton ~= activeButton) then
 		-- PLAY SAMPLE HERE
+		flickerTimer = 0;
+
 		previousButton = activeButton;
 	end
 

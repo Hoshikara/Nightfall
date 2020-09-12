@@ -132,22 +132,27 @@ local _ = {
       ['keyboard'] = ''
     },
     [2] = {
+      ['action'] = 'ADJUST EARLY  /  LATE POSITION',
+      ['controller'] = '[START]  +  [BT-A]',
+      ['keyboard'] = ''
+    },
+    [3] = {
       ['action'] = 'ADJUST HIDDEN / SUDDEN CUTOFF',
       ['controller'] = '[START]*  +  [BT-B]*',
       ['keyboard'] = ''
     },
-    [3] = {
+    [4] = {
       ['action'] = 'ADJUST HIDDEN / SUDDEN FADE',
       ['controller'] = '[START]*  +  [BT-C]*',
       ['keyboard'] = ''
     },
-    [4] = {
+    [5] = {
       ['action'] = 'RESTART SONG',
       ['controller'] = '',
       ['keyboard'] = '[F5]',
       ['lineBreak'] = true
     },
-    [5] = {
+    [6] = {
       ['action'] = '',
       ['controller'] = '* HOLD BUTTON, USE  [KNOB-L]  /  [KNOB-R]  TO ADJUST',
       ['keyboard'] = '',

@@ -66,54 +66,54 @@ _.drawSongCursor = function(self, x, y, w, h, s, a)
   gfx.StrokeColor(255, 255, 255, math.floor(255 * a));
 
   gfx.MoveTo(
-    x - (s * 2.75),
+    x - (s * 2.5),
     y - (s * 0.25)
   );
   gfx.LineTo(
-    x - (s * 2.75),
+    x - (s * 2.5),
     y - (s * 2.25)
   );
   gfx.LineTo(
-    x - (s * 0.5),
+    x - (s * 0.25),
     y - (s * 2.25)
   );
 
   gfx.MoveTo(
-    x + w + (s * 2.75),
+    x + w + (s * 2.5),
     y - (s * 0.25)
   );
   gfx.LineTo(
-    x + w + (s * 2.75),
+    x + w + (s * 2.5),
     y - (s * 2.25)
   );
   gfx.LineTo(
-    x + w + (s * 0.5),
+    x + w + (s * 0.25),
     y - (s * 2.25)
   );
 
   gfx.MoveTo(
-    x - (s * 2.75),
+    x - (s * 2.5),
     y + h + (s * 0.25)
   );
   gfx.LineTo(
-    x - (s * 2.75),
+    x - (s * 2.5),
     y + h + (s * 2.25)
   );
   gfx.LineTo(
-    x - (s * 0.5),
+    x - (s * 0.25),
     y + h + (s * 2.25)
   );
 
   gfx.MoveTo(
-    x + w + (s * 2.75),
+    x + w + (s * 2.5),
     y + h + (s * 0.25)
   );
   gfx.LineTo(
-    x + w + (s * 2.75),
+    x + w + (s * 2.5),
     y + h + (s * 2.25)
   );
   gfx.LineTo(
-    x + w + (s * 0.5),
+    x + w + (s * 0.25),
     y + h + (s * 2.25)
   )
 
