@@ -104,7 +104,7 @@ _.render = function(self, deltaTime, desw, desh)
   elseif (self['info']['position'] == MIDDLE) then
     y = desh - (desh / 4);
   elseif (self['info']['position'] == TOP) then
-    y = desh / 6;
+    y = 40;
   end
 
   gfx.Save();

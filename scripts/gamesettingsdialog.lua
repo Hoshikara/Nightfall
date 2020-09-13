@@ -46,19 +46,21 @@ setLabels = function()
 		gfx.LoadSkinFont('GothamBook.ttf');
 		labels['ms'] = cacheLabel('MS', 24);
 
-		for index, tab in ipairs(CONSTANTS['settings']) do
-			labels['settings'][index] = {};
+		for tabIndex, currentTab in ipairs(SettingsDiag.tabs) do
+			labels['settings'][tabIndex] = {};
 
-			for settingIndex, setting in pairs(tab) do
-				labels['settings'][index][settingIndex] = {
-					['label'] = cacheLabel(setting['label'], 24)
+			for settingIndex, currentSetting in ipairs(currentTab.settings) do
+				local setting = CONSTANTS['settings'][tabIndex][settingIndex];
+
+				labels['settings'][tabIndex][settingIndex] = {
+					['label'] = cacheLabel(setting['label'], 24);
 				};
 
-				if (setting['values']) then
-					labels['settings'][index][settingIndex]['values'] = {};
+				if ((currentSetting.value ~= nil) and setting['values']) then
+					labels['settings'][tabIndex][settingIndex]['values'] = {};
 
-					for valueIndex, value in ipairs(setting['values']) do
-						labels['settings'][index][settingIndex]['values'][valueIndex] = cacheLabel(value, 24);
+					for valueIndex, currentValue in ipairs(setting['values']) do
+						labels['settings'][tabIndex][settingIndex]['values'][valueIndex] = cacheLabel(currentValue, 24);
 					end
 				end
 			end
@@ -173,6 +175,8 @@ drawSettings = function()
 
 	for index, setting in ipairs(settings) do
 		local isSelected = currentSetting == index;
+		local values = settingLabels[index]['values'];
+
 		gfx.BeginPath();
 		gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
 
@@ -187,9 +191,9 @@ drawSettings = function()
 			['y'] = y
 		});
 
-		if (setting.value ~= nil) then
-			drawSettingValue(setting, labels['settings'][currentTab][index]['values'], y, isSelected);
-		elseif ((not setting.value) and isSelected) then
+		if ((setting.value ~= nil) and values) then
+			drawSettingValue(setting, values, y, isSelected);
+		elseif ((setting.value == nil) and isSelected) then
 			gfx.BeginPath();
 			gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
 			gfx.FillColor(60, 110, 160, math.floor(255 * timer));
@@ -261,7 +265,7 @@ drawSettingValue = function(setting, values, y, isSelected)
 		if (isSelected) then
 			drawArrows(x, y, false, false);
 		end
-	else
+	elseif (setting.type == 'toggle') then
 		if (setting.value == false) then
 			values[1]:draw({
 				['x'] = x,

@@ -212,7 +212,11 @@ local songGrid = {
     self['grid']['y'] = self['jacketSize'] - (self['grid']['gutter'] * 3.75);
 
     self['labels']['spacing'] = (self['jacketSize'] * 2) / 3.5;
-    self['labels']['x'] = self['grid']['x'];
+    self['labels']['x'] = {
+      [1] = self['grid']['x'],
+      [2] = (self['jacketSize'] * 1.5) + self['grid']['gutter'],
+      [3] = ((self['jacketSize'] * 1.5) + self['grid']['gutter']) / 2
+    };
     self['labels']['y'] = scaledH / 20;
 
     self['scrollbar']['height'] = (self['jacketSize'] * 3) + (self['grid']['gutter'] * 2);
@@ -393,27 +397,27 @@ local songGrid = {
   
     local x = 0;
 
-    gfx.Translate(self['labels']['x'] - 4, self['labels']['y'] - 4);
+    gfx.Translate(self['labels']['x'][1] - 4, self['labels']['y'] - 4);
 
     gfx.BeginPath();
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
     gfx.FillColor(unpack(colors['blueNormal']));
 
-    self['labels']['sort']:draw({
+    self['labels']['collection']:draw({
       ['x'] = x,
       ['y'] = 0
     });
 
-    x = x + self['labels']['sort']['w'] + self['labels']['spacing'];
+    x = x + self['labels']['x'][2];
 
     self['labels']['difficulty']:draw({
       ['x'] = x,
       ['y'] = 0
     });
 
-    x = x + self['labels']['difficulty']['w'] + self['labels']['spacing'];
+    x = x + self['labels']['x'][3];
   
-    self['labels']['collection']:draw({
+    self['labels']['sort']:draw({
       ['x'] = x,
       ['y'] = 0
     });

@@ -1,3 +1,10 @@
+###### September 13, 2020
+- Re-arranged 'Sort', 'Difficulty', and 'Collection' labels in Song Select screen
+- Addressed crash caused by newline character being inserted in skin.cfg
+- Enabled Hit Error bar (again), set position in Skin Settings
+- Added a null check to Game Settings labels
+- Removed all backgrounds and unused textures
+
 ###### September 12, 2020
 - Completed work for gameplay screen, including multiplayer scoreboard
 - Changed accessiblity for 'Controls' screen during Song Select: Hold BT-A to show, and press BT-D to navigate pages

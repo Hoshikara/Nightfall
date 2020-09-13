@@ -70,7 +70,7 @@ drawTransition = function(deltaTime, isIntro);
 	
 		timers['flicker']['intro'] = timers['flicker']['intro'] + deltaTime;
 	
-		timers['scissor']['intro'] = math.min(timers['scissor']['intro'] + (deltaTime * 3), 1)
+		timers['scissor']['intro'] = math.min(timers['scissor']['intro'] + (deltaTime * 4), 1)
 
 		flickerAlpha = math.floor(timers['flicker']['intro'] * 30) % 2;
 		flickerAlpha = ((flickerAlpha * 80) + 175) / 255;
@@ -84,11 +84,11 @@ drawTransition = function(deltaTime, isIntro);
 		introComplete = timers['intro'] >= 1;
 	else
 		timers['scissor']['outro']['left'] = math.max(
-			timers['scissor']['outro']['left'] - (deltaTime * 2),
+			timers['scissor']['outro']['left'] - (deltaTime * 3),
 			0
 		);
 		timers['scissor']['outro']['right'] = math.min(
-			timers['scissor']['outro']['right'] + (deltaTime *  2),
+			timers['scissor']['outro']['right'] + (deltaTime *  3),
 			1
 		);
 
@@ -98,7 +98,7 @@ drawTransition = function(deltaTime, isIntro);
 		flickerAlpha = ((flickerAlpha * 80) + 175) / 255;
 
 		if (timers['flicker']['outro'] >= 0.3) then
-			flickerAlpha = timers['scissor']['outro']['left'];
+			flickerAlpha = timers['scissor']['outro']['left'] * 0.5;
 		end
 
 		timers['outro'] = timers['outro'] + (deltaTime * 2);

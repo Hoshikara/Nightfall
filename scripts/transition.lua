@@ -43,18 +43,18 @@ drawTransition = function(deltaTime, isIntro);
 	if (isIntro) then
 		timers['fade']['in'] = math.max(timers['fade']['in'] - (deltaTime * 1.5), 0);
 	
-		timers['scissor']['intro'] = math.min(timers['scissor']['intro'] + (deltaTime * 3), 1)
+		timers['scissor']['intro'] = math.min(timers['scissor']['intro'] + (deltaTime * 4), 1)
 
 		timers['intro'] = timers['intro'] + deltaTime;
 
 		introComplete = timers['intro'] >= 1;
 	else
 		timers['scissor']['outro']['left'] = math.max(
-			timers['scissor']['outro']['left'] - (deltaTime * 2),
+			timers['scissor']['outro']['left'] - (deltaTime * 3),
 			0
 		);
 		timers['scissor']['outro']['right'] = math.min(
-			timers['scissor']['outro']['right'] + (deltaTime *  2),
+			timers['scissor']['outro']['right'] + (deltaTime *  3),
 			1
 		);
 

@@ -77,23 +77,29 @@ local layout = {
 		self['grid']['size'] = (self['jacketSize'] + self['grid']['gutter']) * 4;
 		self['grid']['x'] = scaledW - self['grid']['size'] + (self['grid']['gutter'] * 7);
 	
-		self['labels']['spacing'] = (self['jacketSize'] * 2) / 3.5;
-		self['labels']['x'] = self['grid']['x'];
+		self['labels']['x'] = {
+      [1] = self['grid']['x'],
+      [2] = (self['jacketSize'] * 1.5) + self['grid']['gutter'],
+      [3] = (self['jacketSize'] / 2) + self['grid']['gutter']
+    };
 		self['labels']['y'] = scaledH / 20;
 	
-		self['field'][1]['x'] = self['labels']['x'] - 4;
+		self['field'][1]['x'] = self['labels']['x'][1] - 4;
 		self['field'][2]['x'] = self['field'][1]['x']
-			+ self['labels']['sort']['w']
-			+ self['labels']['spacing'];
+			+ (self['jacketSize'] * 1.5)
+			+ self['grid']['gutter'];
 		self['field'][3]['x'] = self['field'][2]['x']
-			+ self['labels']['difficulty']['w']
-			+ self['labels']['spacing'];
+			+ ((self['jacketSize'] * 1.5) + self['grid']['gutter']) / 2;
+		self['field'][1]['maxWidth'] = (self['jacketSize'] * 1.65)
+			- (self['dropdown']['padding'] * 2);
 		self['field']['y'] = self['labels']['y'] + (self['labels']['height'] * 1.25);
 	
 		self['dropdown'][1]['x'] = self['field'][1]['x'] + 2;
 		self['dropdown'][2]['x'] = self['field'][2]['x'];
 		self['dropdown'][3]['x'] = self['field'][3]['x'];
-		self['dropdown'][3]['maxWidth'] = (self['jacketSize'] * 1.65) - (self['dropdown']['padding'] * 2);
+		self['dropdown'][1]['maxWidth'] = (self['jacketSize'] * 3)
+			+ (self['grid']['gutter'] * 2)
+			- (self['dropdown']['padding'] * 2);
 		self['dropdown']['start'] = self['dropdown']['padding'] - 7;
 		self['dropdown']['y'] = self['field']['y'] + (self['field']['height'] * 1.25);
 	end
@@ -128,7 +134,7 @@ setLabels = function(folderCount)
 			labels['timers'][folder] = 0;
 
 			if (width > labels['folder']['maxWidth']) then
-				local dropdownWidth = layout['dropdown'][3]['maxWidth'];
+				local dropdownWidth = layout['dropdown'][1]['maxWidth'];
 
 				if (width > dropdownWidth) then
 					labels['folder']['finalWidth'] = dropdownWidth;
@@ -182,7 +188,7 @@ drawCurrentField = function(deltaTime, which, index, displaying)
 	local doesOverflow = false;
 
 	if (isFolder) then
-		doesOverflow = labels[which][current]['w'] > layout['dropdown'][3]['maxWidth'];
+		doesOverflow = labels[which][current]['w'] > layout['field'][1]['maxWidth'];
 	end
 
 	gfx.BeginPath();
@@ -206,7 +212,7 @@ drawCurrentField = function(deltaTime, which, index, displaying)
 		drawScrollingLabel(
 			timers['scroll'],
 			labels[which][current],
-			layout['dropdown'][3]['maxWidth'] + (layout['dropdown']['padding'] / 2),
+			layout['field'][1]['maxWidth'] + (layout['dropdown']['padding'] / 2),
 			x,
 			y,
 			scalingFactor,
@@ -223,13 +229,13 @@ end
 
 drawFilterLabel = function(deltaTime, which, index, y, isSelected, key)
 	local isFolder = which == 'folder';
-	local whichField = ((isFolder) and 3) or 2;
+	local whichField = ((isFolder) and 1) or 2;
 
 	local alpha = math.floor(255 * math.min(timers[which] ^ 2, 1));
 	local padding = layout['dropdown']['padding'];
 	local returnPadding = (isFolder and padding) or (padding / 2);
 	local x = layout['dropdown'][whichField]['x'] + padding;
-	local doesOverflow = labels[which][index]['w'] > layout['dropdown'][3]['maxWidth'];
+	local doesOverflow = labels[which][index]['w'] > layout['dropdown'][1]['maxWidth'];
 	local color;
 
 	gfx.BeginPath();
@@ -247,7 +253,7 @@ drawFilterLabel = function(deltaTime, which, index, y, isSelected, key)
 		drawScrollingLabel(
 			labels['timers'][key],
 			labels[which][index],
-			layout['dropdown'][3]['maxWidth'],
+			layout['dropdown'][1]['maxWidth'],
 			x,
 			y,
 			scalingFactor,
@@ -273,8 +279,8 @@ render = function(deltaTime, displaying)
 
 	setLabels(#filters.folder);
 
+	drawCurrentField(deltaTime, 'folder', 1, displaying);
 	drawCurrentField(deltaTime, 'level', 2, displaying);
-	drawCurrentField(deltaTime, 'folder', 3, displaying);
 
 	if (not displaying) then
 		if (choosingFolder and (timers['folder'] > 0)) then
@@ -317,7 +323,7 @@ render = function(deltaTime, displaying)
 	gfx.BeginPath();
 	gfx.FillColor(0, 0, 0, 230);
 	gfx.Rect(
-		layout['dropdown'][3]['x'],
+		layout['dropdown'][1]['x'],
 		initialY,
 		(layout['dropdown']['padding'] * 2) + labels['folder']['finalWidth'],
 		(labels['folder']['maxHeight'] + layout['dropdown']['padding']) * timers['folder']

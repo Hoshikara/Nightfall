@@ -63,12 +63,12 @@ local speedModValue = ""
 local prevFXLeft = false
 local prevFXRight = false
 
-local hitDeltaScale = game.GetSkinSetting("hit_graph_delta_scale") or 1;
+local hitDeltaScale = game.GetSkinSetting("hit_graph_delta_scale")
 
-local showGuide = game.GetSkinSetting("show_result_guide") or true;
-local showIcons = game.GetSkinSetting("show_result_icons") or true;
-local showStatsHit = game.GetSkinSetting("show_detailed_results") or false;
-local showHiScore = game.GetSkinSetting("show_result_hiscore") or true;
+local showGuide = game.GetSkinSetting("show_result_guide")
+local showIcons = game.GetSkinSetting("show_result_icons")
+local showStatsHit = game.GetSkinSetting("show_detailed_results")
+local showHiScore = game.GetSkinSetting("show_result_hiscore")
 local prevShowHiScore = not showHiScore
 
 function waveParam(period, offset)

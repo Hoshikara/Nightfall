@@ -62,23 +62,29 @@ local layout = {
 		self['grid']['size'] = (self['jacketSize'] + self['grid']['gutter']) * 4;
 		self['grid']['x'] = scaledW - self['grid']['size'] + (self['grid']['gutter'] * 7);
 	
-		self['labels']['spacing'] = (self['jacketSize'] * 2) / 3.5;
-		self['labels']['x'] = self['grid']['x'];
+		self['labels']['x'] = {
+      [1] = self['grid']['x'],
+      [2] = (self['jacketSize'] * 1.5) + self['grid']['gutter'],
+      [3] = (self['jacketSize'] / 2) + self['grid']['gutter']
+    };
 		self['labels']['y'] = scaledH / 20;
 	
-		self['field'][1]['x'] = self['labels']['x'] - 4;
+		self['field'][1]['x'] = self['labels']['x'][1] - 4;
 		self['field'][2]['x'] = self['field'][1]['x']
-			+ self['labels']['sort']['w']
-			+ self['labels']['spacing'];
+			+ (self['jacketSize'] * 1.5)
+			+ self['grid']['gutter'];
 		self['field'][3]['x'] = self['field'][2]['x']
-			+ self['labels']['difficulty']['w']
-			+ self['labels']['spacing'];
+			+ ((self['jacketSize'] * 1.5) + self['grid']['gutter']) / 2;
+		self['field'][1]['maxWidth'] = (self['jacketSize'] * 1.65)
+			- (self['dropdown']['padding'] * 2);
 		self['field']['y'] = self['labels']['y'] + (self['labels']['height'] * 1.25);
 	
 		self['dropdown'][1]['x'] = self['field'][1]['x'] + 2;
 		self['dropdown'][2]['x'] = self['field'][2]['x'];
 		self['dropdown'][3]['x'] = self['field'][3]['x'];
-		self['dropdown'][3]['maxWidth'] = (self['jacketSize'] * 1.65) - (self['dropdown']['padding'] * 2);
+		self['dropdown'][1]['maxWidth'] = (self['jacketSize'] * 3)
+			+ (self['grid']['gutter'] * 2)
+			- (self['dropdown']['padding'] * 2);
 		self['dropdown']['start'] = self['dropdown']['padding'] - 7;
 		self['dropdown']['y'] = self['field']['y'] + (self['field']['height'] * 1.25);
 	end
@@ -113,7 +119,7 @@ setLabels = function()
 end
 
 drawCurrentSort = function(displaying)
-	local x = layout['field'][1]['x'];
+	local x = layout['field'][3]['x'];
 	local y = layout['field']['y'];
 
 	gfx.BeginPath();
@@ -151,7 +157,7 @@ end
 drawSortLabel = function(index, y, isSelected)
 	local alpha = math.floor(255 * math.min(timer ^ 2, 1));
 	local padding = layout['dropdown']['padding'];
-	local x = layout['dropdown'][1]['x'] + padding;
+	local x = layout['dropdown'][3]['x'] + padding;
 
 	gfx.BeginPath();
 	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
@@ -215,7 +221,7 @@ render = function(deltaTime, displaying)
 	gfx.BeginPath();
 	gfx.FillColor(0, 0, 0, 230);
 	gfx.Rect(
-		layout['dropdown'][1]['x'],
+		layout['dropdown'][3]['x'],
 		initialY,
 		(layout['dropdown']['padding'] * 2) + labels['maxWidth'] + (arrowWidth * 2),
 		(labels['maxHeight'] + layout['dropdown']['padding']) * timer

@@ -37,6 +37,24 @@ do
 	end
 end
 
+local earlatePosition = game.GetSkinSetting('earlatePosition');
+
+setEarlatePosition = function()
+	if (earlatePosition == 'OFF') then
+		earlatePosition = 'BOTTOM';
+	elseif (earlatePosition == 'BOTTOM') then
+		earlatePosition = 'MIDDLE';
+	elseif (earlatePosition == 'MIDDLE') then
+		earlatePosition = 'UPPER';
+	elseif (earlatePosition == 'UPPER') then
+		earlatePosition = 'UPPER+';
+	elseif (earlatePosition == 'UPPER+') then
+		earlatePosition = 'OFF';
+	end
+
+	game.SetSkinSetting('earlatePosition', earlatePosition);
+end
+
 local laser = {
 	['fill'] = gfx.CreateSkinImage('gameplay/laser_cursor/pointer_fill.png', 0),
 	['overlay'] = gfx.CreateSkinImage('gameplay/laser_cursor/pointer_overlay.png', 0)
@@ -406,7 +424,6 @@ local earlate = {
 	['alphaTimer'] = 0,
 	['isLate'] = false,
 	['labels'] = nil,
-	['position'] = game.GetSkinSetting('earlatePosition'),
 	['timer'] = 0,
 
 	setLabels = function(self)
@@ -420,26 +437,10 @@ local earlate = {
 		end
 	end,
 
-	setPosition = function(self)
-		if (self['position'] == 'OFF') then
-			self['position'] = 'BOTTOM';
-		elseif (self['position'] == 'BOTTOM') then
-			self['position'] = 'MIDDLE';
-		elseif (self['position'] == 'MIDDLE') then
-			self['position'] = 'UPPER';
-		elseif (self['position'] == 'UPPER') then
-			self['position'] = 'UPPER+';
-		elseif (self['position'] == 'UPPER+') then
-			self['position'] = 'OFF';
-		end
-
-		game.SetSkinSetting('earlatePosition', self['position']);
-	end,
-
 	drawEarlate = function(self, deltaTime)
 		self:setLabels();
 
-		if (self['position'] == 'OFF') then return end
+		if (earlatePosition == 'OFF') then return end
 
 		self['timer'] = math.max(self['timer'] - deltaTime, 0);
 
@@ -451,15 +452,15 @@ local earlate = {
 		self['alpha'] = ((self['alpha'] * 175) + 80) / 255;
 
 		local x = scaledW / 2;
-		local y;
+		local y = scaledH - (scaledH / 3.35);
 
-		if (self['position'] == 'BOTTOM') then
+		if (earlatePosition == 'BOTTOM') then
 			y = scaledH - (scaledH / 3.35);
-		elseif (self['position'] == 'MIDDLE') then
+		elseif (earlatePosition == 'MIDDLE') then
 			y = scaledH - (scaledH / 1.85);
-		elseif (self['position'] == 'UPPER') then
+		elseif (earlatePosition == 'UPPER') then
 			y = scaledH - (scaledH / 1.35);
-		elseif (self['position'] == 'UPPER+') then
+		elseif (earlatePosition == 'UPPER+') then
 			y = scaledH - (scaledH / 1.15);
 		end
 
@@ -1065,6 +1066,8 @@ render = function(deltaTime);
 	score:drawScore(deltaTime);
 
 	songInfo:drawSongInfo(deltaTime);
+
+	hitError:render(deltaTime, scaledW, scaledH);
 end
 
 local pressedBTA = false;
@@ -1084,7 +1087,7 @@ render_intro = function(deltaTime)
 		earlate['timer'] = 1;
 
 		if ((not pressedBTA) and game.GetButton(game.BUTTON_BTA)) then
-			earlate:setPosition();
+			setEarlatePosition();
 		end
 	end
 
