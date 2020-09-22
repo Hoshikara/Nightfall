@@ -1,225 +1,327 @@
 local _ = {
-  ['general'] = {
-    [1] = {
-      ['action'] = 'TOGGLE FULLSCREEN',
-      ['controller'] = '',
-      ['keyboard'] = '[ALT]  +  [ENTER]'
+  general = {
+    {
+      action = 'TOGGLE FULLSCREEN',
+      controller = '',
+      keyboard = '[ALT]  +  [ENTER]',
     },
-    [2] = {
-      ['action'] = 'RELOAD SKIN',
-      ['controller'] = '',
-      ['keyboard'] = '[F9]'
-    }
+    {
+      action = 'RELOAD SKIN',
+      controller = '',
+      keyboard = '[F9]',
+    },
   },
-  ['songSelect'] = {
-    [1] = {
-      ['action'] = 'START SONG',
-      ['controller'] = '[START]',
-      ['keyboard'] = ''
+  songSelect = {
+    {
+      action = 'START SONG',
+      controller = '[START]',
+      keyboard = '',
     },
-    [2] = {
-      ['action'] = 'SELECT DIFFICULTY',
-      ['controller'] = '[KNOB-L]',
-      ['keyboard'] = '[LEFT]  /  [RIGHT]'
+    {
+      action = 'SELECT DIFFICULTY',
+      controller = '[KNOB-L]',
+      keyboard = '[LEFT]  /  [RIGHT]',
     },
-    [3] = {
-      ['action'] = 'SELECT SONG',
-      ['controller'] = '[KNOB-R]',
-      ['keyboard'] = '[UP]  /  [DOWN]'
+    {
+      action = 'SELECT SONG',
+      controller = '[KNOB-R]',
+      keyboard = '[UP]  /  [DOWN]',
     },
-    [4] = {
-      ['action'] = 'FILTER SONGS BY COLLECTION',
-      ['controller'] = '[FX-L]',
-      ['keyboard'] = ''
+    {
+      action = 'FILTER SONGS BY COLLECTION',
+      controller = '[FX-L]',
+      keyboard = '',
     },
-    [5] = {
-      ['action'] = 'FILTER SONGS BY DIFFICULTY',
-      ['controller'] = '[FX-L]  >  [START]',
-      ['keyboard'] = ''
+    {
+      action = 'FILTER SONGS BY DIFFICULTY',
+      controller = '[FX-L]  >  [START]',
+      keyboard = '',
     },
-    [6] = {
-      ['action'] = 'SORT SONGS',
-      ['controller'] = '[FX-R]',
-      ['keyboard'] = ''
+    {
+      action = 'SORT SONGS',
+      controller = '[FX-R]',
+      keyboard = '',
     },
-    [7] = {
-      ['action'] = 'OPEN GAMEPLAY SETTINGS',
-      ['controller'] = '[FX-L]  +  [FX-R]',
-      ['keyboard'] = ''
+    {
+      action = 'OPEN GAMEPLAY SETTINGS',
+      controller = '[FX-L]  +  [FX-R]',
+      keyboard = '',
     },
-    [8] = {
-      ['action'] = 'OPEN SONG COLLECTIONS',
-      ['controller'] = '[BT-B]  +  [BT-C]',
-      ['keyboard'] = ''
+    {
+      action = 'OPEN SONG COLLECTIONS',
+      controller = '[BT-B]  +  [BT-C]',
+      keyboard = '',
     },
-    [9] = {
-      ['action'] = 'SEARCH SONGS',
-      ['controller'] = '',
-      ['keyboard'] = '[TAB]'
+    {
+      action = 'SEARCH SONGS',
+      controller = '',
+      keyboard = '[TAB]',
     },
-    [10] = {
-      ['action'] = 'START SONG IN AUTOPLAY MODE',
-      ['controller'] = '',
-      ['keyboard'] = '[CTRL]  +  [START]'
+    {
+      action = 'START SONG IN AUTOPLAY MODE',
+      controller = '',
+      keyboard = '[CTRL]  +  [START]',
     },
-    [11] = {
-      ['action'] = 'DELETE SONG',
-      ['controller'] = '',
-      ['keyboard'] = '[DEL]'
+    {
+      action = 'START SONG IN PRACTICE MODE',
+      controller = '',
+      keyboard = '[ ` ]',
     },
-    [12] = {
-      ['action'] = 'PREVIOUS SONG PAGE',
-      ['controller'] = '',
-      ['keyboard'] = '[PGUP]'
+    {
+      action = 'DELETE SONG',
+      controller = '',
+      keyboard = '[DEL]',
     },
-    [13] = {
-      ['action'] = 'NEXT SONG PAGE',
-      ['controller'] = '',
-      ['keyboard'] = '[PGDN]'
+    {
+      action = 'PREVIOUS SONG PAGE',
+      controller = '',
+      keyboard = '[PGUP]',
     },
-    [14] = {
-      ['action'] = 'SELECT RANDOM SONG',
-      ['controller'] = '',
-      ['keyboard'] = '[F2]'
+    {
+      action = 'NEXT SONG PAGE',
+      controller = '',
+      keyboard = '[PGDN]',
     },
-    [15] = {
-      ['action'] = 'START DEMO MODE',
-      ['controller'] = '',
-      ['keyboard'] = '[F8]'
+    {
+      action = 'SELECT RANDOM SONG',
+      controller = '',
+      keyboard = '[F2]',
     },
-    [16] = {
-      ['action'] = 'OPEN SELECTED SONG FOLDER',
-      ['controller'] = '',
-      ['keyboard'] = '[F12]'
-    }
+    {
+      action = 'START DEMO MODE',
+      controller = '',
+      keyboard = '[F8]',
+    },
+    {
+      action = 'OPEN SELECTED SONG FOLDER',
+      controller = '',
+      keyboard = '[F12]',
+    },
   },
-  ['gameplaySettings'] = {
-    [1] = {
-      ['action'] = 'CHANGE TABS',
-      ['controller'] = '[FX-L]  /  [FX-R]',
-      ['keyboard'] = ''
+  gameplaySettings = {
+    {
+      action = 'CHANGE TABS',
+      controller = '[FX-L]  /  [FX-R]',
+      keyboard = '',
     },
-    [2] = {
-      ['action'] = 'CHANGE FIELD',
-      ['controller'] = '[KNOB-L]',
-      ['keyboard'] = '[UP]  /  [DOWN]'
+    {
+      action = 'CHANGE FIELD',
+      controller = '[KNOB-L]',
+      keyboard = '[UP]  /  [DOWN]',
     },
-    [3] = {
-      ['action'] = 'DECREASE VALUE',
-      ['controller'] = '[BT-A]  /  [BT-B]',
-      ['keyboard'] = '[LEFT]'
+    {
+      action = 'DECREASE VALUE',
+      controller = '[BT-A]  /  [BT-B]',
+      keyboard = '[LEFT]',
     },
-    [4] = {
-      ['action'] = 'INCREASE VALUE',
-      ['controller'] = '[BT-C]  /  [BT-D]',
-      ['keyboard'] = '[RIGHT]'
+    {
+      action = 'INCREASE VALUE',
+      controller = '[BT-C]  /  [BT-D]',
+      keyboard = '[RIGHT]',
     },
-    [5] = {
-      ['action'] = 'ADJUST VALUE',
-      ['controller'] = '[KNOB-R]',
-      ['keyboard'] = ''
+    {
+      action = 'ADJUST VALUE',
+      controller = '[KNOB-R]',
+      keyboard = '',
     },
-    [6] = {
-      ['action'] = 'TOGGLE VALUE',
-      ['controller'] = '[START]',
-      ['keyboard'] = ''
-    }
+    {
+      action = 'TOGGLE  /  TRIGGER VALUE',
+      controller = '[START]',
+      keyboard = '',
+    },
   },
-  ['gameplay'] = {
-    [1] = {
-      ['action'] = 'ADJUST HISPEED',
-      ['controller'] = '[START]*',
-      ['keyboard'] = ''
+  gameplay = {
+    {
+      action = 'ADJUST HISPEED',
+      controller = '[START] *',
+      keyboard = '',
     },
-    [2] = {
-      ['action'] = 'ADJUST EARLY  /  LATE POSITION',
-      ['controller'] = '[START]  +  [BT-A]',
-      ['keyboard'] = ''
+    {
+      action = 'ADJUST EARLY  /  LATE POSITION',
+      controller = '[START]  +  [BT-A]',
+      keyboard = '',
     },
-    [3] = {
-      ['action'] = 'ADJUST HIDDEN / SUDDEN CUTOFF',
-      ['controller'] = '[START]*  +  [BT-B]*',
-      ['keyboard'] = ''
+    {
+      action = 'ADJUST HIDDEN / SUDDEN CUTOFF',
+      controller = '[START] *  +  [BT-B] *',
+      keyboard = '',
     },
-    [4] = {
-      ['action'] = 'ADJUST HIDDEN / SUDDEN FADE',
-      ['controller'] = '[START]*  +  [BT-C]*',
-      ['keyboard'] = ''
+    {
+      action = 'ADJUST HIDDEN / SUDDEN FADE',
+      controller = '[START] *  +  [BT-C] *',
+      keyboard = '',
     },
-    [5] = {
-      ['action'] = 'RESTART SONG',
-      ['controller'] = '',
-      ['keyboard'] = '[F5]',
-      ['lineBreak'] = true
+    {
+      action = 'RESTART SONG',
+      controller = '',
+      keyboard = '[F5]',
+      lineBreak = true,
     },
-    [6] = {
-      ['action'] = '',
-      ['controller'] = '* HOLD BUTTON, USE  [KNOB-L]  /  [KNOB-R]  TO ADJUST',
-      ['keyboard'] = '',
-      ['lineBreak'] = true
-    }
+    {
+      action = '',
+      controller = '*  HOLD BUTTON, USE  [KNOB-L]  /  [KNOB-R]  TO ADJUST',
+      keyboard = '',
+      note = true,
+    },
   },
-  ['results'] = {
-    [1] = {
-      ['action'] = 'DISPLAY ADVANCED STATS',
-      ['controller'] = '[FX-L]',
-      ['keyboard'] = ''
+  results = {
+    {
+      action = 'INCREASE HIT GRAPH SCALE',
+      controller = '[BT-A]',
+      keyboard = '',
     },
-    [2] = {
-      ['action'] = 'OPEN SONG COLLECTIONS',
-      ['controller'] = '[BT-B]  +  [BT-C]',
-      ['keyboard'] = ''
+    {
+      action = 'PREVIOUS SCORE',
+      controller = '[FX-L]',
+      keyboard = '',
     },
-    [3] = {
-      ['action'] = 'CAPTURE SCREENSHOT',
-      ['controller'] = '',
-      ['keyboard'] = '[F12]'
-    }
+    {
+      action = 'NEXT SCORE',
+      controller = '[FX-R]',
+      keyboard = '',
+    },
+    {
+      action = 'CAPTURE SCREENSHOT',
+      controller = '',
+      keyboard = '[F12]',
+      lineBreak = true,
+    },
   },
-  ['multiplayer'] = {
-    [1] = {
-      ['action'] = 'TOGGLE GAUGE TYPE',
-      ['controller'] = '[FX-L]',
-      ['keyboard'] = ''
+  multiplayer = {
+    {
+      action = 'TOGGLE GAUGE TYPE',
+      controller = '[FX-L]',
+      keyboard = '',
     },
-    [2] = {
-      ['action'] = 'TOGGLE MIRROR MODE',
-      ['controller'] = '[FX-R]',
-      ['keyboard'] = ''
+    {
+      action = 'TOGGLE MIRROR MODE',
+      controller = '[FX-R]',
+      keyboard = '',
     },
-    [3] = {
-      ['action'] = 'TOGGLE CHAT WINDOW',
-      ['controller'] = '',
-      ['keyboard'] = '[F8]'
-    }
+    {
+      action = 'TOGGLE CHAT WINDOW',
+      controller = '',
+      keyboard = '[F8]',
+    },
   },
-  ['nautica'] = {
-    [1] = {
-      ['action'] = 'DOWNLOAD SONG',
-      ['controller'] = '[START]',
-      ['keyboard'] = ''
+  nautica = {
+    {
+      action = 'DOWNLOAD SONG',
+      controller = '[START]',
+      keyboard = '',
     },
-    [2] = {
-      ['action'] = 'PREVIEW SONG',
-      ['controller'] = '[BT-A]',
-      ['keyboard'] = ''
+    {
+      action = 'PREVIEW SONG',
+      controller = '[BT-A]',
+      keyboard = '',
     },
-    [3] = {
-      ['action'] = 'SELECT SONG',
-      ['controller'] = '[KNOB-R]',
-      ['keyboard'] = '[UP]  /  [DOWN]'
+    {
+      action = 'SELECT SONG',
+      controller = '[KNOB-R]',
+      keyboard = '[UP]  /  [DOWN]',
     },
-    [4] = {
-      ['action'] = 'FILTER SONGS BY DIFFICULTY',
-      ['controller'] = '[FX-L]',
-      ['keyboard'] = ''
+    {
+      action = 'FILTER SONGS BY DIFFICULTY',
+      controller = '[FX-L]',
+      keyboard = '',
     },
-    [5] = {
-      ['action'] = 'SORT SONGS',
-      ['controller'] = '[FX-R]',
-      ['keyboard'] = ''
-    }
-  }
+    {
+      action = 'SORT SONGS',
+      controller = '[FX-R]',
+      keyboard = '',
+    },
+  },
+  practiceMode = {
+    {
+      action = 'OPEN PRACTICE MODE SETTINGS **',
+      controller = '[FX-L]  +  [FX-R]*',
+      keyboard = '[ESC]',
+    },
+    {
+      action = 'PAUSE SONG',
+      controller = '[FX-L]  /  [FX-R]',
+      keyboard = '',
+    },
+    {
+      action = 'SCRUB THROUGH SONG (NORMAL)',
+      controller = '[KNOB-L]',
+      keyboard = '',
+    },
+    {
+      action = 'SCRUB THROUGH SONG (FAST)',
+      controller = '[KNOB-R]',
+      keyboard = '',
+      lineBreak = true,
+    },
+    {
+      action = '',
+      controller = "*  [BACK]  /  [ESC]  IF   `CONTROLLER INPUTS FOR SETUP`   IS DISABLED",
+      keyboard = '',
+      note = true,
+    },
+    {
+      action = '',
+      controller = "**  SEE   'GAMEPLAY SETTINGS'   FOR CONTROLS",
+      keyboard = '',
+      lineBreak = true,
+      note = true,
+    },
+    {
+      action = '',
+      controller = 'BASIC SETUP',
+      keyboard = '',
+      lineBreak = true,
+      note = true,
+    },
+    {
+      action = '',
+      controller = '1.  ENTER PRACTICE MODE',
+      keyboard = '',
+      note = true,
+    },
+    {
+      action = '',
+      controller = '1.  CLOSE PRACTICE MODE SETTINGS,  SCRUB THROUGH SONG TO FIND START POINT',
+      keyboard = '',
+      note = true,
+    },
+    {
+      action = '',
+      controller = "2.  OPEN PRACTICE MODE SETTINGS,  TRIGGER  'USE CURRENT TIME AS START POINT'",
+      keyboard = '',
+      note = true,
+    },
+    {
+      action = '',
+      controller = '3.  CLOSE PRACTICE MODE SETTINGS,  SCRUB THROUGH SONG TO FIND END POINT',
+      keyboard = '',
+      note = true,
+    },
+    {
+      action = '',
+      controller = "4.  OPEN PRACTICE MODE SETTINGS,  TRIGGER  'USE CURRENT TIME AS END POINT'",
+      keyboard = '',
+      note = true,
+    },
+    {
+      action = '',
+      controller = "5A.  ENABLE  'AUTO-RESTART ON PASS'",
+      keyboard = '',
+      note = true,
+    },
+    {
+      action = '',
+      controller = "5B.  ENABLE  'AUTO-RESTART ON FAIL',  CONFIGURE  'MISSION SETTINGS'",
+      keyboard = '',
+      note = true,
+    },
+    {
+      action = '',
+      controller = "6.  TRIGGER  'BEGIN PRACTICE'",
+      keyboard = '',
+      note = true,
+    },
+  },
 };
 
 return _;

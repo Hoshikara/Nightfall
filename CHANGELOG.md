@@ -1,6 +1,16 @@
+###### September 22, 2020
+- Completed work for Practice Mode, `gameplay` and `gamesettingsdialog` scripts updated
+- Completed work for Results screen, features to note:
+  - Increase hit graph scale with BT-A
+  - Select from list of highscores (or player scores for Multiplayer) with FX-L/FX-R
+  - Select screenshot region from Skin Settings: `fullscreen` or `panel`
+- Moved `Singleplayer` and `Multiplayer` main menu buttons to a separate 'screen' to make room for upcoming `Challenges` feature
+- Added new 'Controls' page for Practice Mode controls and basic setup
+- Added Skin Setting caching for active collection/level and volforce to prevent visual bugs on Song Select screen
+
 ###### September 13, 2020
 - Re-arranged 'Sort', 'Difficulty', and 'Collection' labels in Song Select screen
-- Addressed crash caused by newline character being inserted in skin.cfg
+- Addressed crash caused by newline character being inserted in `skin.cfg`
 - Enabled Hit Error bar (again), set position in Skin Settings
 - Added a null check to Game Settings labels
 - Removed all backgrounds and unused textures

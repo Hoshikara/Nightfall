@@ -1,11 +1,67 @@
+local _ = require('lib/luadash');
+
 gfx.LoadSkinFont('DFMGM.ttf');
 
-colors = {
-  black = {0, 0, 0, 255},
-  blueDark = {16, 32, 48, 255},
-  blueNormal = {60, 110, 160, 255},
-  blueLight = {80, 130, 180, 255},
-  white = {255, 255, 255, 255}
+align = {
+  center = function()
+    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_TOP);
+  end,
+
+  left = function()
+    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
+  end,
+
+  middle = function()
+    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE);
+  end,
+
+  right = function()
+    gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
+  end,
+};
+
+fill = {
+  black = function(alpha)
+    gfx.FillColor(0, 0, 0, (alpha and math.floor(alpha)) or 255);
+  end,
+
+  dark = function(alpha)
+    gfx.FillColor(4, 8, 12, (alpha and math.floor(alpha)) or 255);
+  end,
+
+  normal = function(alpha)
+    gfx.FillColor(60, 110, 160, (alpha and math.floor(alpha)) or 255);
+  end,
+
+  light = function(alpha)
+    gfx.FillColor(80, 130, 180, (alpha and math.floor(alpha)) or 255);
+  end,
+
+  white = function(alpha)
+    gfx.FillColor(255, 255, 255, (alpha and math.floor(alpha)) or 255);
+  end,
+};
+
+font = {
+  bold = function()
+    gfx.LoadSkinFont('GothamBold.ttf');
+  end,
+
+  jp = function()
+    gfx.LoadSkinFont('DFMGM.ttf');
+  end,
+
+  medium = function()
+    gfx.LoadSkinFont('GothamMedium.ttf');
+  end,
+
+  normal = function()
+    gfx.LoadSkinFont('GothamBook.ttf');
+  end,
+
+  number = function()
+    gfx.LoadSkinFont('DigitalSerialBold.ttf');
+  end,
 };
 
 unpack = function(table, i)
@@ -36,9 +92,9 @@ logInfo = function(tbl)
   gfx.BeginPath();
   gfx.LoadSkinFont('FiraCode.ttf');
   gfx.FontSize(30);
-  gfx.TextAlign(gfx.TEXT_ALIGN_TOP + gfx.TEXT_ALIGN_LEFT);
-  gfx.FillColor(unpack(colors['white']));
-  
+  align.left();
+  fill.white();
+
   for k, v in pairs(tbl) do
     gfx.Text(string.format('%s: %s', k, v), 0, y * inc);
 
@@ -94,26 +150,26 @@ cacheLabel = function(str, size)
   local w, h = gfx.LabelSize(label);
 
   return {
-    ['label'] = label,
-    ['size'] = size,
-    ['w'] = w,
-    ['h'] = h,
+    label = label,
+    size = size,
+    w = w,
+    h = h,
 
     draw = function(self, params);
-      local x = params['x'] or 0;
-      local y = params['y'] or 0;
-      local maxWidth = params['maxWidth'] or -1;
+      local x = params.x or 0;
+      local y = params.y or 0;
+      local maxWidth = params.maxWidth or -1;
   
-      gfx.DrawLabel(self['label'], x, y, maxWidth);
+      gfx.DrawLabel(self.label, x, y, maxWidth);
     end,
 
     update = function(self, params)
-      local new = params['new'] or '';
-      local size = params['size'] or self['size'];
+      local new = params.new or '';
+      local size = params.size or self.size;
 
-      gfx.UpdateLabel(self['label'], new, size, 0);
+      gfx.UpdateLabel(self.label, new, size, 0);
 
-      self['w'], self['h'] = gfx.LabelSize(self['label']);
+      self.w, self.h = gfx.LabelSize(self.label);
     end
   };
 end
@@ -141,8 +197,29 @@ drawCenteredImage = function(params)
   gfx.ImageRect(x, y, w, h, params['image'], alpha, 0);
 end
 
+drawErrorPrompt = function(message)
+  local resX, resY = game.GetResolution();
+
+  gfx.Save();
+
+  gfx.BeginPath();
+  fill.black(200);
+  gfx.FastRect(0, 0, resX, 70);
+  gfx.Fill();
+
+  gfx.LoadSkinFont('FiraCode.ttf');
+  gfx.BeginPath();
+  align.middle();
+  fill.white();
+  gfx.FontSize(24);
+  gfx.FastText(message, resX / 2, 20);
+  gfx.FastText('Please update your game or contact me on Discord: Hoshikara#5973', resX / 2, 50);
+
+  gfx.Restore();
+end
+
 drawScrollingLabel = function(timer, label, maxWidth, x, y, scale, color)
-  local labelX = label['w'] * 1.2;
+  local labelX = label.w * 1.2;
   local duration = (labelX / 80) * 0.75;
   local phase = math.max((timer % (duration + 1.5)) - 1.5, 0) / duration;
 
@@ -151,32 +228,34 @@ drawScrollingLabel = function(timer, label, maxWidth, x, y, scale, color)
   gfx.BeginPath();
   gfx.Scissor((x + 2) * scale, y * scale, maxWidth, label['h'] * 1.25);
 
-  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
+  align.left();
 
   gfx.FillColor(unpack(color));
 
-  label:draw({
-    ['x'] = x - (phase * labelX),
-    ['y'] = y
-  });
-  label:draw({
-    ['x'] = x - (phase * labelX) + labelX,
-    ['y'] = y
-  });
+  label:draw({ x = x - (phase * labelX), y = y });
+  label:draw({ x = x - (phase * labelX) + labelX, y = y });
 
   gfx.ResetScissor();
 
   gfx.Restore();
 end
 
-getImageInfo = function(image)
-  if (image) then
-    local w, h = gfx.ImageSize(image);
+get = function(tbl, path, default)
+  return _.get(tbl, path, default);
+end
 
-    return { ['w'] = w, ['h'] = h };
+getDateFormat = function()
+  local dateFormat = game.GetSkinSetting('dateFormat');
+
+  if (dateFormat == 'DAY-MONTH-YEAR') then
+    return '%d-%m-%y';
+  elseif (dateFormat == 'MONTH-DAY-YEAR') then
+    return '%m-%d-%y';
+  elseif (dateFormat == 'YEAR-MONTH-DAY') then
+    return '%y-%m-%d';
+  else
+    return '%d-%m-%y';
   end
-
-  return { ['w'] = 0, ['h'] = 0 };
 end
 
 getSign = function(val)

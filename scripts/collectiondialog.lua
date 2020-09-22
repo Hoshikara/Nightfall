@@ -7,9 +7,9 @@ selectedIndex = 0;
 local buttonScrollTimer = 0;
 
 local cursor = {
-	['alpha'] = 0,
-	['offset'] = 0,
-	['timer'] = 0
+	alpha = 0,
+	offset = 0,
+	timer = 0,
 };
 
 local artist = nil;
@@ -17,11 +17,13 @@ local title = nil;
 
 local timer = 0;
 local timers = {
-	['artist'] = 0,
-	['button'] = 0,
-	['cursor'] = 0,
-	['title'] = 0
+	artist = 0,
+	button = 0,
+	cursor = 0,
+	title = 0,
 };
+
+local cache = { resX = 0, resY = 0 };
 
 local resX;
 local resY;
@@ -31,42 +33,48 @@ local scalingFactor;
 
 setupLayout = function()
   resX, resY = game.GetResolution();
-  scaledW = 1920;
-  scaledH = scaledW * (resY / resX);
-	scalingFactor = resX / scaledW;
 
-	gfx.Scale(scalingFactor, scalingFactor);
+  if ((cache.resX ~= resX) or (cache.resY ~= resY)) then
+    scaledW = 1920;
+    scaledH = scaledW * (resY / resX);
+    scalingFactor = resX / scaledW;
+
+    cache.resX = resX;
+    cache.resY = resY;
+  end
+
+  gfx.Scale(scalingFactor, scalingFactor);
 end
 
 local labels = nil;
 
 setLabels = function()
 	if (not labels) then
-		gfx.LoadSkinFont('GothamMedium.ttf');
+		font.medium();
 
 		labels = {
-			['artist'] = cacheLabel('ARTIST', 18),
-			['collectionName'] = cacheLabel('COLLECTION NAME', 18),
-			['confirm'] = cacheLabel('CONFIRM', 18),
-			['enter'] = cacheLabel('[ENTER]', 18),
-			['title'] = cacheLabel('TITLE', 18)
+			artist = cacheLabel('ARTIST', 18),
+			collectionName = cacheLabel('COLLECTION NAME', 18),
+			confirm = cacheLabel('CONFIRM', 18),
+			enter = cacheLabel('[ENTER]', 18),
+			title = cacheLabel('TITLE', 18),
 		};
 
-		gfx.LoadSkinFont('DFMGM.ttf');
+		font.jp();
 
-		labels['input'] = cacheLabel('', 28);
+		labels.input = cacheLabel('', 28);
 	end
 end
 
 drawArrows = function()
 	local noHigher = selectedIndex == 0;
 	local noLower = (selectedIndex + 1) == #menuOptions;
-	local x = layout['x']['center'] - 36;
-	local y1 = layout['y']['center'] + 29;
-	local y2 = layout['y']['center'] + 45;
+	local x = layout.x.center - 36;
+	local y1 = layout.y.center + 29;
+	local y2 = layout.y.center + 45;
 
 	gfx.BeginPath();
-	gfx.FillColor(255, 255, 255, math.floor(timer * ((noHigher and 50) or 255)));
+	fill.white(timer * ((noHigher and 50) or 255));
 	gfx.MoveTo(x, y1);
 	gfx.LineTo(x - 12, y1);
 	gfx.LineTo(x - 6, y1 - 10);
@@ -74,7 +82,7 @@ drawArrows = function()
 	gfx.Fill();
 
 	gfx.BeginPath();
-	gfx.FillColor(255, 255, 255, math.floor(timer * ((noLower and 50) or 255)));
+	fill.white(timer * ((noLower and 50) or 255));
 	gfx.MoveTo(x, y2);
 	gfx.LineTo(x - 12, y2);
 	gfx.LineTo(x - 6, y2 + 10);
@@ -83,22 +91,22 @@ drawArrows = function()
 end
 
 drawButton = function(deltaTime, label, isSelected, y)
-	if ((y < layout['y']['center']) or (y > layout['y']['bottom'])) then return end;
+	if ((y < layout.y.center) or (y > layout.y.bottom)) then return end;
 
 	local alpha = math.floor(((isSelected and 255) or 50) * timer);
-	local w = layout['images']['button']['w'];
+	local w = layout.images.button.w;
 
 	if (isSelected) then
-		layout['images']['buttonHover']:draw({
-			['x'] = layout['x']['outerRight'] - w + 12,
-			['y'] = y,
-			['a'] = timer
+		layout.images.buttonHover:draw({
+			x = layout.x.outerRight - w + 12,
+			y = y,
+			a = timer
 		});
 	else
-		layout['images']['button']:draw({
-			['x'] = layout['x']['outerRight'] - w + 12,
-			['y'] = y,
-			['a'] = (0.45 * timer)
+		layout.images.button:draw({
+			x = layout.x.outerRight - w + 12,
+			y = y,
+			a = (0.45 * timer)
 		});
 	end
 
@@ -107,102 +115,84 @@ drawButton = function(deltaTime, label, isSelected, y)
 	gfx.Scale(1 / scalingFactor, 1 / scalingFactor);
 	
 	gfx.BeginPath();
-	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
-	gfx.FillColor(255, 255, 255, alpha);
+	align.left();
+	fill.white(alpha);
 
-	if (label['w'] > (w - 90)) then
+	if (label.w > (w - 90)) then
 		buttonScrollTimer = buttonScrollTimer + deltaTime;
 
 		drawScrollingLabel(
 			buttonScrollTimer,
 			label,
 			(w - 90),
-			layout['x']['outerRight'] - w + 55,
-			y + label['h'] + 8,
+			layout.x.outerRight - w + 55,
+			y + label.h + 8,
 			scalingFactor,
 			{255, 255, 255, alpha}
 		);
 	else
-		label:draw({
-			['x'] = layout['x']['outerRight'] - w + 55,
-			['y'] = y + label['h'] + 8
-		});
+		label:draw({ x = layout.x.outerRight - w + 55, y = y + label.h + 8 });
 	end
 
 	gfx.Restore();
 end
 
 drawInput = function()
-	local x = layout['x']['middleLeft'];
-	local y = layout['y']['center'] + (layout['h']['outer'] / 10);
-	local labelY = layout['y']['center'] + (layout['h']['outer'] / 10);
+	local x = layout.x.middleLeft;
+	local y = layout.y.center + (layout.h.outer / 10);
+	local labelY = layout.y.center + (layout.h.outer / 10);
 
-	y = y + (labels['collectionName']['h'] * 2);
+	y = y + (labels.collectionName.h * 2);
 
-	cursor['offset'] = math.min(labels['input']['w'] + 2, layout['w']['middle'] - 20);
+	cursor.offset = math.min(labels.input.w + 2, layout.w.middle - 20);
 
 	gfx.BeginPath();
 	gfx.StrokeWidth(1);
 	gfx.StrokeColor(60, 110, 160, math.floor(255 * timer));
-	gfx.FillColor(16, 32, 48, math.floor(100 * timer));
-	gfx.Rect(
-		x,
-		y,
-		layout['w']['middle'],
-		layout['h']['outer'] / 6
-	);
+	fill.dark(100 * timer);
+	gfx.Rect(x, y, layout.w.middle, layout.h.outer / 6);
 	gfx.Fill();
 	gfx.Stroke();
 
 	gfx.BeginPath();
-	gfx.FillColor(255, 255, 255, math.floor(255 * cursor['alpha']));
-	gfx.Rect(
-		x + 8 + cursor['offset'],
-		y + 10,
-		2,
-		(layout['h']['outer'] / 6) - 20
-	);
+	fill.white(255 * cursor.alpha);
+	gfx.Rect(x + 8 + cursor.offset, y + 10, 2, (layout.h.outer / 6) - 20);
 	gfx.Fill();
 
 	gfx.Save();
 
 	gfx.Scale(1 / scalingFactor, 1 / scalingFactor);
 
-	gfx.LoadSkinFont('DFMGM.ttf');
-	labels['input']:update({ ['new'] = string.upper(dialog.newName) });
+	font.jp();
+	labels.input:update({ new = string.upper(dialog.newName) });
 
 	gfx.BeginPath();
-	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
-	gfx.FillColor(60, 110, 160, math.floor(255 * timer));
-	labels['collectionName']:draw({
-		['x'] = layout['x']['middleLeft'],
-		['y'] = labelY
+	align.left();
+
+	fill.normal(255 * timer);
+	labels.collectionName:draw({ x = layout.x.middleLeft, y = labelY });
+
+	labelY = labelY + (labels.collectionName.h * 2);
+
+	fill.white(255 * timer);
+	labels.input:draw({
+		x = x + 8,
+		y = labelY + 7,
+		maxWidth = layout.w.middle - 22,
 	});
 
-	labelY = labelY + (labels['collectionName']['h'] * 2);
-
-	gfx.FillColor(255, 255, 255, math.floor(255 * timer));
-	labels['input']:draw({
-		['x'] = x + 8,
-		['y'] = labelY + 7,
-		['maxWidth'] = layout['w']['middle'] - 22
-	});
-
-	labelY = labelY + (layout['h']['outer'] / 6);
+	labelY = labelY + (layout.h.outer / 6);
 
 	gfx.BeginPath();
-	gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
+	align.right();
 
-	gfx.FillColor(255, 255, 255, math.floor(255 * timer));
-	labels['confirm']:draw({
-		['x'] = layout['x']['middleRight'] + 2,
-		['y'] = labelY + labels['confirm']['h']
-	});
+	fill.white(255 * timer);
+	labels.confirm:draw({ x = layout.x.middleRight + 2, y = labelY + labels.confirm.h });
 
-	gfx.FillColor(60, 110, 160, math.floor(255 * timer));
-	labels['enter']:draw({
-		['x'] = layout['x']['middleRight'] - labels['enter']['w'] - 16,
-		['y'] = labelY + labels['enter']['h']
+	fill.normal(255 * timer);
+	labels.enter:draw({
+		x = layout.x.middleRight - labels.enter.w - 16,
+		y = labelY + labels.enter.h
 	});
 
 	gfx.Restore();
@@ -210,29 +200,27 @@ end
 
 drawSongInfo = function(deltaTime)
 	local alpha = math.floor(255 * timer);
-	local maxWidth = layout['w']['outer'] - (176 / 2);
-	local x = layout['x']['outerLeft'];
-	local y = layout['y']['top'] - 12;
+	local maxWidth = layout.w.outer - (176 / 2);
+	local x = layout.x.outerLeft;
+	local y = layout.y.top - 12;
 
 	gfx.Save();
 
 	gfx.Scale(1 / scalingFactor, 1 / scalingFactor);
 
 	gfx.BeginPath();
-	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
-	gfx.FillColor(60, 110, 160, alpha);
-	labels['title']:draw({
-		['x'] = x,
-		['y'] = y
-	});
+	align.left();
 
-	y = y + (labels['title']['h'] * 1.25);
+	fill.normal(alpha);
+	labels.title:draw({ x = x, y = y });
 
-	if (title['w'] > maxWidth) then
-		timers['title'] = timers['title'] + deltaTime;
+	y = y + (labels.title.h * 1.25);
+
+	if (title.w > maxWidth) then
+		timers.title = timers.title + deltaTime;
 
 		drawScrollingLabel(
-			timers['title'],
+			timers.title,
 			title,
 			maxWidth,
 			x + 2,
@@ -241,28 +229,22 @@ drawSongInfo = function(deltaTime)
 			{255, 255, 255, alpha}
 		);
 	else
-		gfx.FillColor(255, 255, 255, alpha);
-		title:draw({
-			['x'] = x,
-			['y'] = y
-		});
+		fill.white(alpha);
+		title:draw({ x = x, y = y });
 	end
 
-	y = y + (title['h'] * 1.5);
+	y = y + (title.h * 1.5);
 
-	gfx.FillColor(60, 110, 160, alpha);
-	labels['artist']:draw({
-		['x'] = x,
-		['y'] = y
-	});
+	fill.normal(alpha);
+	labels.artist:draw({ x = x, y = y });
 
-	y = y + (labels['artist']['h'] * 1.5);
+	y = y + (labels.artist.h * 1.5);
 	
-	if (artist['w'] > maxWidth) then
-		timers['artist'] = timers['artist'] + deltaTime;
+	if (artist.w > maxWidth) then
+		timers.artist = timers.artist + deltaTime;
 
 		drawScrollingLabel(
-			timers['artist'],
+			timers.artist,
 			artist,
 			maxWidth,
 			x + 2,
@@ -271,11 +253,8 @@ drawSongInfo = function(deltaTime)
 			{255, 255, 255, alpha}
 		);
 	else
-		gfx.FillColor(255, 255, 255, alpha);
-		artist:draw({
-			['x'] = x,
-			['y'] = y
-		});
+		fill.white(alpha);
+		artist:draw({ x = x, y = y });
 	end
 
 	gfx.Restore();
@@ -286,12 +265,12 @@ open = function()
 	menuOptions = {};
 	selectedIndex = 0;
 
-	gfx.LoadSkinFont('GothamMedium.ttf');
+	font.medium();
 
 	if (#dialog.collections == 0) then
 		menuOptions[initialIndex] = {
-			['action'] = createCollection('FAVOURITES'),
-			['label'] = cacheLabel('ADD TO FAVOURITES', 18)
+			action = createCollection('FAVOURITES'),
+			label = cacheLabel('ADD TO FAVOURITES', 18),
 		};
 	end
 
@@ -301,21 +280,22 @@ open = function()
 			or string.format('ADD TO %s', string.upper(collection.name));
 
 		menuOptions[i] = {
-			['action'] = createCollection(collection.name),
-			['label'] = cacheLabel(currentName, 18)
+			action = createCollection(collection.name),
+			label = cacheLabel(currentName, 18),
 		};
 	end
 
 	table.insert(menuOptions, {
-		['action'] = menu.ChangeState,
-		['label'] = cacheLabel('CREATE COLLECTION', 18)
+		action = menu.ChangeState,
+		label = cacheLabel('CREATE COLLECTION', 18),
 	});
 	table.insert(menuOptions, {
-		['action'] = menu.Cancel,
-		['label'] = cacheLabel('CLOSE', 18)
+		action = menu.Cancel,
+		label = cacheLabel('CLOSE', 18),
 	});
 
-	gfx.LoadSkinFont('DFMGM.ttf');
+	font.jp();
+
 	artist = cacheLabel(string.upper(dialog.artist), 28);
 	title = cacheLabel(string.upper(dialog.title), 36);
 end
@@ -325,7 +305,7 @@ render = function(deltaTime)
 
 	setupLayout();
 
-	layout:setAllSizes(scaledW, scaledH);
+	layout:setSizes(scaledW, scaledH);
 
 	setLabels();
 
@@ -335,14 +315,14 @@ render = function(deltaTime)
 		timer = math.min(timer + (deltaTime * 8), 1);
 	end
 
-	cursor['timer'] = cursor['timer'] + deltaTime;
-	cursor['alpha'] = timer * (math.abs(0.8 * math.cos(cursor['timer'] * 5)) + 0.2);
+	cursor.timer = cursor.timer + deltaTime;
+	cursor.alpha = timer * (math.abs(0.8 * math.cos(cursor.timer * 5)) + 0.2);
 
-	layout['images']['dialogBox']:draw({
-		['x'] = scaledW / 2,
-		['y'] = scaledH / 2,
-		['a'] = timer,
-		['centered'] = true
+	layout.images.dialogBox:draw({
+		x = scaledW / 2,
+		y = scaledH / 2,
+		a = timer,
+		centered = true,
 	});
 
 	drawSongInfo(deltaTime);
@@ -350,23 +330,23 @@ render = function(deltaTime)
 	if (dialog.isTextEntry) then
 		drawInput();
 	else
-		local y = layout['y']['center'];
-		local nextY = layout['images']['button']['h'] * 1.25;
+		local y = layout.y.center;
+		local nextY = layout.images.button.h * 1.25;
 		
 		for i, option in ipairs(menuOptions) do
 			local buttonY = y + nextY * ((i - 1) - selectedIndex);
 			local isSelected = (i - 1) == selectedIndex;
 
-			drawButton(deltaTime, option['label'], isSelected, buttonY);
+			drawButton(deltaTime, option.label, isSelected, buttonY);
 		end
 
 		buttonCursor:drawDifficultyCursor(
-			layout['x']['outerRight'] - layout['images']['button']['w'] + 12,
-			layout['y']['center'],
+			layout.x.outerRight - layout.images.button.w + 12,
+			layout.y.center,
 			427,
 			74,
 			4,
-			cursor['alpha']
+			cursor.alpha
 		);
 
 		drawArrows();
@@ -389,7 +369,7 @@ button_pressed = function(button)
 	if (button == game.BUTTON_BCK) then
 		menu.Cancel();
 	elseif button == game.BUTTON_STA then
-		menuOptions[selectedIndex + 1]['action']();
+		menuOptions[selectedIndex + 1].action();
 	end
 end
 

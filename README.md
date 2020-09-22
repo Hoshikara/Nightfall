@@ -6,6 +6,10 @@ Preview images
 
 ![titlescreen](./preview/titlescreen.png)
 
+![controls](./preview/controls.png)
+
 ![songselect](./preview/songselect.png)
 
 ![gameplay](./preview/gameplay.png)
+
+![results](./preview/results.png)

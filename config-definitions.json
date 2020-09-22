@@ -1,8 +1,16 @@
 {
-	"Gameplay:": {
+	"GENERAL": {
 		"type": "label"
 	},
+	"displayName": {
+		"type": "text",
+		"label": "Display Name",
+		"default": "Guest"
+	},
 	"separator_a": {},
+	"GAMEPLAY": {
+		"type": "label"
+	},
 	"Early / Late": {
 		"type": "label"
 	},
@@ -24,7 +32,7 @@
 	"hitErrorPosition": {
 		"type": "selection",
 		"label": "Position",
-		"default": "BOTTOM",
+		"default": "OFF",
 		"values": [
 			"OFF",
 			"BOTTOM",
@@ -39,78 +47,52 @@
 		"max": 2.0,
 		"min": 0.5
 	},
-	"nick": {
-		"type": "text",
-		"label": "Display name",
-		"default": "Guest"
-	},
 	"separator_b": {},
-	"Song select:": {
+	"RESULTS": {
 		"type": "label"
 	},
-	"show_guide": {
-		"label": "Show control guide on song select",
-		"type": "bool",
-		"default": true
+	"dateFormat": {
+		"type": "selection",
+		"label": "Date Format",
+		"default": "DAY-MONTH-YEAR",
+		"values": [
+			"DAY-MONTH-YEAR",
+			"MONTH-DAY-YEAR",
+			"YEAR-MONTH-DAY"
+		]
+	},
+	"screenshotRegion": {
+		"type": "selection",
+		"label": "Screenshot Region",
+		"default": "FULLSCREEN",
+		"values": [
+			"FULLSCREEN",
+			"PANEL"
+		]
 	},
 	"separator_c": {},
-	"Result:": {
+	"DEVELOPER SETTINGS (DO NOT MODIFY)": {
 		"type": "label"
 	},
-	"show_result_hiscore": {
-		"label": "Show hiscore on result",
-		"type": "bool",
-		"default": true
-	},
-	"hit_graph_delta_scale": {
-		"label": "Hit graph scale (y-axis)",
-		"type": "float",
-		"default": 0.8,
-		"max": 3.0,
-		"min": 0.5
-	},
-	"show_result_guide": {
-		"label": "Show control guide on result",
-		"type": "bool",
-		"default": true
-	},
-	"show_detailed_results": {
-		"label": "Show detailed results by default",
-		"type": "bool",
-		"default": false
-	},
-	"show_result_icons": {
-		"label": "Show icons related to play settings at the bottom",
-		"type": "bool",
-		"default": true
-	},
-	"separator_d": {},
-	"Test objects:": {
-		"type": "label"
-	},
-	"Testing with space": {
-		"type": "float",
-		"label": "Test setting with spaces in the key",
-		"default": 50.0,
-		"max": 100.0,
-		"min": -100.0
-	},
-	"Ineger_test": {
+	"cachedFolder": {
 		"type": "int",
-		"label": "Ineger Test with range -100<->100",
-		"default": 50,
-		"max": 100,
-		"min": -100
+		"label": "Folder",
+		"default": 1,
+		"max": 999,
+		"min": 1
 	},
-	"col_test": {
-		"type": "color",
-		"label": "Color Test",
-		"default": "007FFFFF"
+	"cachedLevel": {
+		"type": "int",
+		"label": "Level",
+		"default": 1,
+		"max": 999,
+		"min": 1
 	},
-	"secret_value": {
-		"type": "text",
-		"label": "Secret value test",
-		"default": "usc123",
-		"secret": true
+	"cachedVolforce": {
+		"type": "float",
+		"label": "Volforce",
+		"default": 0,
+		"max": 25.0,
+		"min": 0
 	}
 }

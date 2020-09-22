@@ -1,1216 +1,1519 @@
--- TODO: move util functions to common.lua
-local jacketImg = nil
-local chartTitle = ""
+local CONSTANTS = require('constants/result');
+local easing = require('lib/easing');
+local help = require('helpers/result');
 
-local desw = 770
-local desh = 800
+local background = cacheImage('bg.png');
 
-local moveX = 0
-local moveY = 0
+local jacket = nil;
+local jacketFallback = gfx.CreateSkinImage('song_select/loading.png', 0);
 
-local currResX = 0
-local currResY = 0
+local previousScore = nil;
+local selectedScore = 1;
 
-local scale = 1
-local hitGraphHoverScale = 10
+local allScores = {};
+local singleplayer = true;
+local songInfo = nil;
 
-local gradeImg = nil;
-local badgeImg = nil;
-local gradeAR = 1 --grade aspect ratio
+local gaugeSamples = {};
+local gaugeType = 0;
 
-local chartDuration = 0
-local chartDurationText = "0m 00s"
+local mousePosX = 0;
+local mousePosY = 0;
 
-local badgeImages = {
-    gfx.CreateSkinImage("badges/played.png", 0),
-    gfx.CreateSkinImage("badges/clear.png", 0),
-    gfx.CreateSkinImage("badges/hard-clear.png", 0),
-    gfx.CreateSkinImage("badges/full-combo.png", 0),
-    gfx.CreateSkinImage("badges/perfect.png", 0)
-}
+local screenshotRegion = game.GetSkinSetting('screenshotRegion');
 
-local laneNames = {"A", "B", "C", "D", "L", "R"}
-local diffNames = {"NOV", "ADV", "EXH", "INF"}
-local backgroundImage = gfx.CreateSkinImage("bg.png", 1);
-game.LoadSkinSample("applause")
-local played = false
-local shotTimer = 0;
-local shotPath = "";
-game.LoadSkinSample("shutter")
-local highScores = nil
+local cache = { resX = 0, resY = 0 };
 
-local highestScore = 0
+local resX;
+local resY;
+local scaledW;
+local scaledH;
+local scalingFactor;
 
-local hasHitStat = false
-local hitHistogram = {}
-local hitMinDelta = 0
-local hitMaxDelta = 0
+local moveX = 0;
+local moveY = 0;
 
-local hitWindowPerfect = 46
-local hitWindowGood = 92
+setupLayout = function()
+  resX, resY = game.GetResolution();
 
-local clearTextBase = "" -- Used to determind the type of clear
-local clearText = ""
+  if ((cache.resX ~= resX) or (cache.resY ~= resY)) then
+    scaledW = 1920;
+    scaledH = scaledW * (resY / resX);
+		scalingFactor = resX / scaledW;
 
-local currTime = 0
+		local scaleX = resX / scaledW;
+		local scaleY = resY / scaledH;
+		
+		if (scaleX > scaleY) then
+			moveX = (resX / (2 * scalingFactor)) - (scaledW / 2);
+			moveY = 0;
+		else
+			moveX = 0;
+			moveY = (resY / (2 * scalingFactor) - (scaledH / 2));
+		end
 
-local critText = "CRIT"
-local nearText = "NEAR"
+    cache.resX = resX;
+    cache.resY = resY;
+  end
 
-local speedMod = ""
-local speedModValue = ""
-
-local prevFXLeft = false
-local prevFXRight = false
-
-local hitDeltaScale = game.GetSkinSetting("hit_graph_delta_scale")
-
-local showGuide = game.GetSkinSetting("show_result_guide")
-local showIcons = game.GetSkinSetting("show_result_icons")
-local showStatsHit = game.GetSkinSetting("show_detailed_results")
-local showHiScore = game.GetSkinSetting("show_result_hiscore")
-local prevShowHiScore = not showHiScore
-
-function waveParam(period, offset)
-    local t = currTime
-    if offset then t = t+offset end
-    
-    t = t / period
-    
-    return 0.5 + 0.5*math.cos(t * math.pi * 2)
+  gfx.Scale(scalingFactor, scalingFactor);
 end
 
-function getTextScale(txt, max_width)
-    local x1, y1, x2, y2 = gfx.TextBounds(0, 0, txt)
-    if x2 < max_width then
-        return 1
-    else
-        return max_width / x2
-    end
-end
+local resultPanel = {
+	cache = { scaledW = 0, scaledH = 0 },
+	graph = { h = 0, y = 0 },
+	jacketSize = 0,
+	labels = nil,
+	orders = {
+		song = {
+			'title',
+			'artist',
+			'effector',
+			'difficulty',
+		},
+		stat = {
+			row = {
+				{
+					'grade',
+					'clear',
+					'criticalWindow',
+					'nearWindow',
+				},
+				{
+					'critical',
+					'near',
+					'early',
+					'late',
+					'error',
+					'maxChain',
+				},
+			},
+		},
+	},
+	padding = {
+		x = { double = 0, full = 0 },
+		y = { double = 0, full = 0 },
+	},
+	panel = {
+		image = cacheImage('results/panel.png'),
+		maxWidth = 0,
+		w = 0,
+		h = 0,
+		x = 0,
+		y = 0,
+	},
+	songInfo = nil,
+	stats = nil,
+	timers = {
+		artist = 0,
+		effector = 0,
+		title = 0,
+	},
+	text = { x = { 0, 0 }, y = 0 },
 
-function drawScaledText(txt, x, y, max_width)
-    local text_scale = getTextScale(txt, max_width)
-    
-    if text_scale == 1 then
-        gfx.BeginPath()
-        gfx.Text(txt, x, y)
-        return
-    end
-    
-    gfx.Save()
-    
-    gfx.Translate(x, y)
-    gfx.Scale(text_scale, 1)
-    
-    gfx.BeginPath()
-    gfx.Text(txt, 0, 0)
-    
-    gfx.Restore()
-end
+	setSizes = function(self)
+		if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
+			self.jacketSize = scaledW / 6.5;
 
-function drawLine(x1,y1,x2,y2,w,r,g,b)
-    gfx.BeginPath()
-    gfx.MoveTo(x1,y1)
-    gfx.LineTo(x2,y2)
-    gfx.StrokeColor(r,g,b)
-    gfx.StrokeWidth(w)
-    gfx.Stroke()
-end
+			self.panel.w = scaledW / (scaledW / self.panel.image.w);
+			self.panel.h = scaledH - (scaledH / 10);
+			self.panel.x = (((not singleplayer) or (#allScores > 1)) and (scaledW / 20))
+				or ((scaledW / 2) - (self.panel.w / 2));
+			self.panel.y = scaledH / 20;
 
-function getScoreBadgeDesc(s)
-    if s.badge == 1 then
-        if s.flags & 1 ~= 0 then return "crash"
-        else return string.format("%.1f%%", s.gauge * 100)
-        end
-    elseif 2 <= s.badge and s.badge <= 4 and s.misses < 10 then
-        return string.format("%d-%d", s.goods, s.misses)
-    end
-    return ""
-end
+			self.padding.x.full = self.panel.w / 24;
+			self.padding.x.double = self.padding.x.full * 2;
+
+			self.padding.y.full = self.panel.h / 24;
+			self.padding.y.double = self.padding.y.full * 2;
+
+			self.panel.maxWidth = self.panel.w
+				- self.padding.x.double
+				- (self.padding.x.full * 1.75)
+				- 4;
+			
+			self.text.x[1] = self.padding.x.double + self.jacketSize + self.padding.x.full;
+			self.text.x[2] = self.padding.x.double;
+			self.text.y = (self.padding.y.double * 0.75) + self.jacketSize;
+			
+
+			self.cache.scaledW = scaledW;
+			self.cache.scaledH = scaledH;
+		end
+	end,
+
+	setLabels = function(self)
+		if (not self.labels) then
+			font.medium();
+
+			self.labels = {
+				btbbtc = cacheLabel('[BT-B]  +  [BT-C]', 20),
+				openCollections = cacheLabel('OPEN SONG COLLECTIONS', 20),
+			};
+
+			for key, name in pairs(CONSTANTS.song) do
+				self.labels[key] = cacheLabel(name, 18);
+			end
+
+			for key, name in pairs(CONSTANTS.stats) do
+				self.labels[key] = cacheLabel(name, 18);
+			end
+		end
+	end,
+
+	setSongInfo = function(self)
+		if (not self.songInfo) then
+			self.songInfo = {};
+
+			for key, value in pairs(songInfo) do
+				font[value.font]();
+
+				self.songInfo[key] = cacheLabel(value.value, value.size);
+			end
+		end
+	end,
+
+	setStats = function(self)
+		if (not self.stats) then
+			self.stats = {};
+
+			for key, value in pairs(allScores.myScore) do
+				font[value.font]();
+
+				if (key == 'score') then
+					self.stats[key] = {
+						cacheLabel(string.sub(value.value, 1, 4), value.size[1]),
+						cacheLabel(string.sub(value.value, -4), value.size[2]),
+					};
+				else
+					self.stats[key] = cacheLabel(value.value, value.size);
+				end
+			end
+		end
+	end,
+
+	getSpacing = function(self, order)
+		local totalWidth = 0;
+
+		for _, name in ipairs(order) do
+			totalWidth = totalWidth + self.labels[name].w;
+		end
+
+		return (self.panel.maxWidth - totalWidth) / (#order - 1);
+	end,
+
+	drawNavigation = function(self)
+		gfx.BeginPath();
+		align.left();
+
+		fill.normal();
+		self.labels.btbbtc:draw({
+			x = self.panel.x,
+			y = scaledH - (scaledH / 20) + (self.labels.btbbtc.h - 6),
+		});
+
+		fill.white();
+		self.labels.openCollections:draw({
+			x = self.panel.x + self.labels.btbbtc.w + 8,
+			y = scaledH - (scaledH / 20) + (self.labels.btbbtc.h - 6) + 1,
+		});
+	end,
+
+	drawSongInfo = function(self, deltaTime)
+		local maxWidth = self.panel.maxWidth - (self.jacketSize + self.padding.x.full);
+		local x = self.text.x[1];
+		local y = self.padding.y.full - 5;
+
+		gfx.Save();
+
+		gfx.Translate(self.panel.x, self.panel.y);
+
+		gfx.BeginPath();
+		gfx.StrokeWidth(1);
+		gfx.StrokeColor(60, 110, 160, 255);
+		gfx.ImageRect(
+			self.padding.x.double,
+			self.padding.y.full,
+			self.jacketSize,
+			self.jacketSize,
+			jacket,
+			1,
+			0
+		);
+		gfx.Stroke();
+
+		gfx.BeginPath();
+		align.left();
+
+		for _, name in ipairs(self.orders.song) do
+			fill.normal();
+			self.labels[name]:draw({ x = x, y = y });
+
+			if (name == 'difficulty') then
+				self.labels.bpm:draw({
+					x = self.panel.w - (self.padding.x.double * 3),
+					y = y,
+				});
+			end
+
+			y = y + (self.labels[name].h * 1.5);
+
+			if (self.songInfo[name].w > maxWidth) then
+				self.timers[name] = self.timers[name] + deltaTime;
+
+				drawScrollingLabel(
+					self.timers[name],
+					self.songInfo[name],
+					maxWidth,
+					x,
+					y,
+					scalingFactor,
+					{255, 255, 255, 255}
+				);
+			else
+				fill.white();
+				self.songInfo[name]:draw({ x = x, y = y });
+			end
+			
+			if (name == 'difficulty') then
+				self.songInfo.level:draw({
+					x = x + self.songInfo[name].w + 8,
+					y = y,
+				});
+			end
+
+			if (name ~= 'difficulty') then
+				y = y + self.songInfo[name].h + (self.labels[name].h * 1.5);
+			end
+		end
+
+		self.songInfo.bpm:draw({
+			x = self.panel.w - (self.padding.x.double * 3),
+			y = y,
+		});
+
+		gfx.Restore();
+	end,
+
+	drawStats = function(self)
+		local x = self.text.x[2] - 2;
+		local y = self.text.y;
+
+		gfx.Save();
+
+		gfx.Translate(self.panel.x, self.panel.y);
+
+		gfx.BeginPath();
+		align.left();
+
+		fill.normal();
+		self.labels.score:draw({ x = x, y = y });
+
+		self.labels.name:draw({
+			x = self.panel.w - (self.padding.x.full * 1.75) - 4 - self.stats.name.w,
+			y = y,
+		});
+
+		align.right();
+		
+		fill.white();
+		self.stats.name:draw({
+			x = self.panel.w - (self.padding.x.full * 1.75) - 4,
+			y = y + (self.labels.name.h * 1.5),
+		});
+		
+		y = y + (self.labels.score.h * 0.5);
+
+		align.left();
+
+		self.stats.score[1]:draw({ x = x - 6, y = y });
+
+		fill.normal();
+		self.stats.score[2]:draw({
+			x = x - 6 + self.stats.score[1].w,
+			y = y + (self.stats.score[2].h / 4) - 3,
+		});
+
+		y = y + (self.stats.score[1].h * 1.0625);
+
+		local statX = x;
+		local statY = y + (self.labels.grade.h * 1.5);
+		local spacing = self:getSpacing(self.orders.stat.row[1]);
+
+		for _, name in ipairs(self.orders.stat.row[1]) do
+			fill.normal();
+			self.labels[name]:draw({ x = statX, y = y });
+
+			fill.white();
+			self.stats[name]:draw({ x = statX, y = statY });
+	
+			statX = statX + self.labels[name].w + spacing;
+		end
+
+		y = y + (self.labels.grade.h * 2) + (self.stats.grade.h * 2);
+
+		statX = x;
+		statY = y + (self.labels.critical.h * 1.5);
+		spacing = self:getSpacing(self.orders.stat.row[2]);
+
+		for _, name in ipairs(self.orders.stat.row[2]) do
+			fill.normal();
+			self.labels[name]:draw({ x = statX, y = y });
+
+			fill.white();
+			self.stats[name]:draw({ x = statX + 1, y = statY });
+	
+			statX = statX + self.labels[name].w + spacing;
+		end
+
+		self.graph.y = statY + (self.labels.critical.h * 2.5) + (self.stats.critical.h * 2.5);
+		self.graph.h = self.panel.h - self.graph.y;
+
+		gfx.Restore();
+	end,
+
+	render = function(self, deltaTime)
+		gfx.Save();
+
+		self:setSizes();
+
+		self:setLabels();
+
+		self:setSongInfo();
+
+		self:setStats();
+
+		if (not allScores.myScore) then return end
+
+		self.panel.image:draw({
+			x = self.panel.x,
+			y = self.panel.y,
+			w = self.panel.w,
+			h = self.panel.h,
+			a = 0.5,
+		});
+
+		self:drawSongInfo(deltaTime);
+
+		self:drawStats();
+
+		self:drawNavigation();
+
+		gfx.Restore();
+	end,
+};
+
+local graphs = {
+	cache = { scaledW = 0, scaledH = 0 },
+	duration = 0,
+	hitDeltaScale = 1,
+	hitStats = false,
+	histogram = {},
+	hoverScale = 0,
+	labels = nil,
+	earliest = 0,
+	latest = 0,
+	pressedBTA = false,
+	stats = nil,
+	statOrder = {
+		'gauge',
+		'meanDelta',
+		'medianDelta',
+	},
+	w = {
+		left = 0,
+		right = 0,
+		total = 0,
+	},
+	h = 0,
+	x = 0,
+	y = 0,
+
+	setSizes = function(self)
+		if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
+			self.w.total = resultPanel.panel.maxWidth;
+			self.w.left = self.w.total * 0.7;
+			self.w.right = self.w.total * 0.3;
+			self.h = resultPanel.graph.h;
+			self.x = resultPanel.panel.x + resultPanel.padding.x.double;
+			self.y = resultPanel.graph.y;
+
+			self.cache.scaledW = scaledW;
+			self.cache.scaledH = scaledH;
+		end
+	end,
+
+	setLabels = function(self)
+		if (not self.labels) then
+			font.medium();
+
+			self.labels = {
+				earliest = cacheLabel('EARLIEST', 18),
+				latest = cacheLabel('LATEST', 18),
+				mean = cacheLabel('MEAN', 18),
+				median = cacheLabel('MEDIAN', 18),
+			};
+		end
+	end,
+
+	setStats = function(self)
+		if (not self.stats) then
+			font.number();
+
+			self.stats = {
+				currentGauge = cacheLabel('0', 18),
+				earliest = cacheLabel(
+					string.format('%.1f ms', self.earliest),
+					18
+				),
+				latest = cacheLabel(
+					string.format('%.1f ms', self.latest),
+					18
+				),
+			};
+
+			for _, name in ipairs(self.statOrder) do
+				local value = allScores.myScore[name];
+
+				font[value.font]();
+
+				self.stats[name] = cacheLabel(value.value, value.size);
+			end
+		end
+	end,
+
+	handleButton = function(self)
+		if ((not self.pressedBTA) and game.GetButton(game.BUTTON_BTA)) then
+			if ((self.hitDeltaScale + 0.2) > 3) then
+				self.hitDeltaScale = 0.6;
+			else
+				self.hitDeltaScale = self.hitDeltaScale + 0.2;
+			end
+		end
+
+		self.pressedBTA = game.GetButton(game.BUTTON_BTA);
+	end,
+
+	drawGaugeGraph = function(self, initialX, initialY, w, h, a, focusPoint, hoverScale)
+		if (not focusPoint) then
+			focusPoint = 0;
+			hoverScale = 1;
+		end
+
+		local samples = gaugeSamples;
+		local y = initialY + 1;
+
+		if (#samples == 0) then return end
+
+		local leftIndex = math.floor(
+			(#samples / w) * ((-focusPoint / hoverScale) + focusPoint)
+		);
+
+		leftIndex = math.max(1, math.min(#samples, leftIndex));
+
+		gfx.BeginPath();
+		gfx.StrokeWidth(2);
+		gfx.MoveTo(initialX, y + h - (h * samples[leftIndex]));
+
+		for i = (leftIndex + 1), #samples do
+			local x = (i * w) / #samples;
+
+			x = (x - focusPoint) * hoverScale + focusPoint;
+
+			if (x > w) then break end
+
+			gfx.LineTo(initialX + x, y + h - (h * samples[i]));
+		end
+
+		if (gaugeType & 1 ~= 0) then
+			gfx.StrokeColor(255, 155, 55, a);
+			gfx.Stroke();
+		else
+			gfx.Scissor(initialX, y + (h * 0.3), w, h * 0.7);
+			gfx.StrokeColor(55, 155, 255, a);
+			gfx.Stroke();
+			gfx.ResetScissor();
+
+			gfx.Scissor(initialX, y - 10, w, 10 + (h * 0.3));
+			gfx.StrokeColor(255, 55, 205, a);
+			gfx.Stroke();
+			gfx.ResetScissor();
+		end
+	end,
+
+	drawGraphLines = function(self, x, y, w, h)
+		local maximumDisplay = (h / 2) / self.hitDeltaScale;
+
+		gfx.StrokeWidth(1);
+
+		gfx.BeginPath();
+		gfx.StrokeColor(255, 255, 255, 150);
+		gfx.MoveTo(x, y + (h / 2));
+		gfx.LineTo(x + w, y + (h / 2));
+		gfx.Stroke();
+
+		gfx.BeginPath();
+		gfx.StrokeColor(60, 110, 160, 50);
+
+		for i = -math.floor(maximumDisplay / 10), math.floor(maximumDisplay / 10) do
+			local lineY = y + (h / 2) + (i * 10 * self.hitDeltaScale);
+
+			if (i ~= 0) then
+				gfx.MoveTo(x, lineY);
+				gfx.LineTo(x + w, lineY);
+			end
+		end
+
+		gfx.Stroke();
+	end,
+
+	drawHistogram = function(self, x, y, w, h)
+		if (not self.hitStats) then return end
+
+		local maximumDisplay = math.floor((h / 2) / self.hitDeltaScale);
+
+		local mode = 0;
+		local modeCount = 0;
+
+		for i = (-maximumDisplay - 1), (maximumDisplay + 1) do
+			if (not self.histogram[i]) then
+				self.histogram[i] = 0;
+			end
+		end
+
+		for i = -maximumDisplay, maximumDisplay do
+			local count = self.histogram[i - 1]
+				+ (self.histogram[i] * 2)
+				+ (self.histogram[i + 1]);
+
+			if (count > modeCount) then
+				mode = i;
+				modeCount = count;
+			end
+		end
+
+		gfx.BeginPath();
+		gfx.StrokeWidth(1.5);
+		gfx.StrokeColor(60, 110, 160, 255);
+		gfx.MoveTo(x, y);
+
+		for i = -maximumDisplay, maximumDisplay do
+			local count = self.histogram[i - 1]
+				+ (self.histogram[i] * 2)
+				+ (self.histogram[i + 1]);
+
+			gfx.LineTo(
+				x + (w * (count / modeCount)),
+				y + (h / 2) + (i * self.hitDeltaScale)
+			);
+		end
+
+		gfx.LineTo(x, y + h);
+		gfx.Stroke();
+	end,
+
+	drawHitGraph = function(self, initialX, initialY, w, h, focusPoint, hoverScale)
+		if (not self.hitStats) then return end
+
+		if (not focusPoint) then
+			focusPoint = 0;
+		end
+
+		if (not hoverScale) then
+			hoverScale = 1;
+		end
+
+		for i = 1, #self.hitStats do
+			local hitStat = self.hitStats[i];
+			local x = (((hitStat.timeFrac * w) - focusPoint) * hoverScale) + focusPoint;
+
+			if (x >= 0) then
+				if (x > w) then break end
+
+				local y = (h / 2) + (hitStat.delta * self.hitDeltaScale);
+
+				if (y < 0) then
+					y = 6;
+				elseif (y > h) then
+					y = h;
+				end
+
+				gfx.BeginPath();
+
+				if (hitStat.rating == 2) then
+					gfx.FillColor(85, 155, 255, 150);
+				elseif (hitStat.rating == 1) then
+					gfx.FillColor(255, 55, 255, 150);
+				elseif (hitStat.rating == 0) then
+					gfx.FillColor(255, 0, 0, 150);
+				end
+
+				gfx.Circle(initialX + x, initialY + y, 3);
+				gfx.Fill();
+			end
+		end
+	end,
+
+	drawStats = function(self)
+		local x = self.x + (self.w.total / 2);
+		local y = self.y + self.h + 12;
+		local spacing = (self.w.total / 2)
+			- self.labels.mean.w
+			- self.labels.median.w;
+
+		gfx.BeginPath();
+		align.left();
+
+		fill.normal();
+		self.labels.mean:draw({ x = x, y = y });
+
+		fill.white();
+		self.stats.meanDelta:draw({ x = x + self.labels.mean.w + 16, y = y });
+
+		x = self.x + self.w.total;
+
+		align.right();
+
+		self.stats.medianDelta:draw({ x = x - 4, y = y });
+
+		fill.normal();
+		self.labels.median:draw({ x = x - 4 - self.stats.medianDelta.w - 16, y = y });
+	end,
+
+	drawLeftGraph = function(self, x, y, w, h)
+		local mouseX = (mousePosX / scalingFactor) - moveX;
+		local mouseY = (mousePosY / scalingFactor) - moveY;
+
+		local isHovering = (x <= mouseX)
+			and (y <= mouseY)
+			and (mouseX <= x + w)
+			and (mouseY <= y + h);
+		
+		local currentTime = self.duration;
+		local focusPoint = 0;
+		local hoverScale = 1;
+
+		if (isHovering) then
+			focusPoint = mouseX - x;
+			hoverScale = self.hoverScale
+
+			currentTime = self.duration * (focusPoint / w);
+
+			self:drawLine(mouseX, y, mouseX, y + h, 1, 255, 255, 255, 150);
+		end
+
+		font.number();
+		resultPanel.songInfo.duration:update({
+			new = string.format(
+				'%dm %02d.%01ds',
+				currentTime // 60000,
+				(currentTime // 1000) % 60,
+				(currentTime // 100) % 10
+			),
+			size = 18,
+		});
+
+		self:drawHitGraph(x, y, w, h, focusPoint, hoverScale);
+
+		gfx.BeginPath();
+		align.left();
+		fill.white();
+		
+		resultPanel.songInfo.duration:draw({ x = self.x, y = self.y + self.h + 12 });
+
+		if (#gaugeSamples > 1) then
+			if (hoverScale == 1) then
+				self:drawGaugeGraph(x, y, w, h, 255);
+			else
+				self:drawGaugeGraph(x, y, w, h, 50, focusPoint, hoverScale);
+				self:drawGaugeGraph(x, y, w, h, 255);
+
+				local samples = gaugeSamples;
+				local gaugeIndex = math.floor(1
+					+ (#samples / w)
+					* (((mouseX - x - focusPoint) / hoverScale) + focusPoint)
+				);
+				
+				gaugeIndex = math.max(1, math.min(#samples, gaugeIndex));
+
+				local gaugeY = h - (h * samples[gaugeIndex]);
+
+				font.number();
+				self.stats.currentGauge:update({
+					new = string.format('%d%%', math.floor(samples[gaugeIndex] * 100))
+				});
+
+				gfx.BeginPath();
+				fill.white(150);
+				gfx.Circle(mouseX, y + gaugeY + 2, 4);
+				gfx.Fill();
+
+				gfx.BeginPath();
+				align.left();
+				fill.white();
+				self.stats.currentGauge:draw({ x = mouseX + 8, y = y + gaugeY - 12 });
+			end
+
+			gfx.BeginPath();
+			fill.white();
+			align.left();
+			self.stats.gauge:draw({ x = x + 4, y = y });
+		end
+	end,
+
+	drawRightGraph = function(self, x, y, w, h)
+		if (not self.hitStats) then return end
+
+		self:drawHistogram(x, y, w, h);
+
+		gfx.BeginPath();
+		align.left();
+
+		fill.normal();
+		self.labels.earliest:draw({ x = x + 6, y = y });
+
+		self.labels.latest:draw({ x = x + 6, y = y + h - self.labels.latest.h - 6 });
+
+		align.right();
+		fill.white();
+		self.stats.earliest:draw({ x = x + w - 4, y = y });
+
+		self.stats.latest:draw({ x = x + w - 4, y = y + h - self.labels.latest.h - 6 });
+	end,
+
+	drawLine = function(self, x1, y1, x2, y2, w, r, g, b, a)
+		gfx.BeginPath();
+		gfx.StrokeColor(r, g, b, a);
+		gfx.StrokeWidth(w);
+
+		gfx.MoveTo(x1, y1);
+		gfx.LineTo(x2, y2);
+
+		gfx.Stroke();
+	end,
+
+	render = function(self, deltaTime)
+		self:setSizes();
+
+		self:setLabels();
+
+		self:setStats();
+
+		self:handleButton();
+
+		gfx.Save();
+
+		gfx.BeginPath();
+		fill.dark(120);
+		gfx.Rect(self.x, self.y, self.w.total, self.h);
+		gfx.Fill();
+
+		self:drawGraphLines(self.x, self.y, self.w.total, self.h);
+
+		self:drawLeftGraph(self.x, self.y, self.w.left, self.h);
+
+		self:drawRightGraph(self.x + self.w.left, self.y, self.w.right, self.h);
+
+		self:drawStats();
+
+		gfx.Restore();
+	end
+};
+
+local scoreList = {
+	bounds = { lower = 0, upper = 0 },
+	cache = { scaledW = 0, scaledH = 0 },
+	cursor = {
+		alpha = 0,
+		flickerTimer = 0,
+		index = selectedScore,
+		pos = 0,
+		timer = 0,
+		y = {},
+	},
+	easing = {
+    scrollbar = {
+      duration = 0.2,
+      initial = 0,
+      timer = 0,
+    },
+	},
+	labels = nil,
+	maxWidth = 0,
+	multiplayerScore = 1,
+	orders = {
+		sp = {
+			row = {
+				{
+					'timestamp',
+					'gauge',
+					'criticalWindow',
+					'nearWindow'
+				},
+				{
+					'grade',
+					'clear',
+					'critical',
+					'near',
+					'error'
+				},
+			},
+		},
+		mp = {
+			row = {
+				{
+					'critical',
+					'near',
+					'early',
+					'late',
+					'error',
+					'maxChain',
+				},
+			},
+		},
+	},
+	padding = { x = 0, y = 0 },
+	pressed = { FXL = false, FXR = false },
+	scrollbar = {
+		pos = 0,
+		w = 0,
+		h = 0,
+		x = 0,
+		y = 0
+	},
+	spacing = 0,
+	timer = 0,
+	viewLimit = 4,
+	w = 0,
+	h = { base = 0, selected = 0 },
+	x = 0,
+	y = 0,
+
+	setSizes = function(self)
+		if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
+			self.x = (scaledW / 20) + resultPanel.panel.image.w + (scaledW / 40);
+			self.y = scaledH / 20;
+			self.w = scaledW - (scaledW / 20) - self.x;
+			self.h.base = scaledH / 7;
+			self.h.selected = self.h.base * 2.125;
+
+			self.padding.x = self.w / 20;
+			self.padding.y = self.h.base / 7.5;
+
+			self.maxWidth = self.w - (self.padding.x * 2);
+
+			self.scrollbar.w = 8;
+			self.scrollbar.h = scaledH - (scaledH / 10);
+			self.scrollbar.x = scaledW - (scaledW / 40) - 4;
+			self.scrollbar.y = scaledH / 20;
+
+			self.spacing = (scaledH
+				- (scaledH / 10)
+				- ((self.h.base * (self.viewLimit - 1)) + self.h.selected)
+			) / (self.viewLimit - 1);
+
+			self.cursor.y = {};
+
+			self.cache.scaledW = scaledW;
+			self.cache.scaledH = scaledH;
+		end
+	end,
+
+	setLabels = function(self)
+		if (not self.labels) then
+			font.medium();
+
+			self.labels = {
+				fxlfxr = cacheLabel('[FX-L]  /  [FX-R]', 20),
+				selectScore = cacheLabel('SELECT SCORE', 20),
+			};
+
+			for key, name in pairs(CONSTANTS.stats) do
+				self.labels[key] = cacheLabel(name, 18);
+			end
+		end
+	end,
+
+	setStats = function(self)
+		if (not self.stats) then
+			self.stats = {};
+
+			for i, score in ipairs(allScores) do
+				font.number();
+
+				self.stats[i] = {
+					place = cacheLabel(i, 90),
+				};
+
+				for key, value in pairs(score) do
+					font[value.font]();
+
+					if (key == 'score') then
+						self.stats[i][key] = {
+							cacheLabel(string.sub(value.value, 1, 4), value.size[1]),
+							cacheLabel(string.sub(value.value, -4), value.size[2]),
+						};
+					else
+						self.stats[i][key] = cacheLabel(value.value, value.size);
+					end
+				end
+			end
+		end
+	end,
+
+	updateStats = function(self, index)
+		font.number();
+
+		self.stats[index] = {
+			place = cacheLabel(i, 90),
+		};
+
+		local score = allScores[index];
+
+		for key, value in pairs(score) do
+			font[value.font]();
+
+			if (key == 'score') then
+				self.stats[index][key] = {
+					cacheLabel(string.sub(value.value, 1, 4), value.size[1]),
+					cacheLabel(string.sub(value.value, -4), value.size[2]),
+				};
+			else
+				self.stats[index][key] = cacheLabel(value.value, value.size);
+			end
+		end
+	end,
+
+	setScrollbarPos = function(self, completion)
+    self.easing.scrollbar.initial = self.scrollbar.pos;
+    self.easing.scrollbar.timer = self.easing.scrollbar.duration;
+		self.scrollbar.pos = self.scrollbar.y + (completion * (self.scrollbar.h - 32));
+	end,
+	
+	getScrollbarPos = function(self)
+    return easing.outQuad(
+      self.easing.scrollbar.duration - self.easing.scrollbar.timer,
+      self.easing.scrollbar.initial,
+      self.scrollbar.pos - self.easing.scrollbar.initial,
+      self.easing.scrollbar.duration
+    );
+	end,
+	
+	getSpacing = function(self, order, scale)
+		local totalWidth = 0;
+
+		for _, name in ipairs(order) do
+			totalWidth = totalWidth + self.labels[name].w;
+		end
+
+		return ((self.maxWidth * scale) - totalWidth) / (#order - 1);
+	end,
+
+	updateStats = function(self, i)
+		local score = allScores[i];
+
+		for key, value in pairs(score) do
+			font[value.font]();
+
+			if (key == 'score') then
+				self.stats[i][key] = {
+					cacheLabel(string.sub(value.value, 1, 4), value.size[1]),
+					cacheLabel(string.sub(value.value, -4), value.size[2]),
+				};
+			else
+				self.stats[i][key] = cacheLabel(value.value, value.size);
+			end
+		end
+	end,
+
+	handleNavigation = function(self, deltaTime)
+		local cursorIndex =
+			((selectedScore % self.viewLimit > 0) and (selectedScore % self.viewLimit))
+		 	or self.viewLimit;
+		local lowerBound, upperBound = help.getPageBounds(
+			self.viewLimit,
+			#allScores,
+			selectedScore
+		);
+
+		if (singleplayer and #allScores >= 2) then
+			if ((not self.pressed.FXL) and game.GetButton(game.BUTTON_FXL)) then
+				if ((selectedScore - 1) < 1) then
+					selectedScore = #allScores;
+				else
+					selectedScore = selectedScore - 1;
+				end
+			end
+
+			if ((not self.pressed.FXR) and game.GetButton(game.BUTTON_FXR)) then
+				if ((selectedScore + 1) > #allScores) then
+					selectedScore = 1;
+				else
+					selectedScore = selectedScore + 1;
+				end
+			end
+
+			self.pressed.FXL = game.GetButton(game.BUTTON_FXL);
+			self.pressed.FXR = game.GetButton(game.BUTTON_FXR);
+		end
+
+		self.cursor.index = cursorIndex;
+		self.bounds.lower = lowerBound;
+		self.bounds.upper = upperBound;
+
+		self:setScrollbarPos((selectedScore - 1) / (#allScores - 1));
+	end,
+
+	drawCursor = function(self, deltaTime)
+		self.cursor.timer = self.cursor.timer + deltaTime;
+		self.cursor.flickerTimer = self.cursor.flickerTimer + deltaTime;
+	
+		self.cursor.alpha = math.floor(self.cursor.flickerTimer * 30) % 2;
+	
+		if (self.cursor.flickerTimer >= 0.3) then
+			self.cursor.alpha = math.abs(0.8 * math.cos(self.cursor.timer * 5)) + 0.2;
+		end
+
+		self.cursor.pos = self.cursor.pos
+			- (self.cursor.pos - self.cursor.y[self.cursor.index])
+			* deltaTime
+			* 36;
+
+		local scoreIndex =
+			((selectedScore % self.viewLimit > 0) and (selectedScore % self.viewLimit))
+			or self.viewLimit;
+		local s = 16;
+		local h = ((self.cursor.index == scoreIndex) and self.h.selected)
+			or self.h.base;
+		local x = self.x;
+		local y = self.cursor.pos;
+
+		gfx.Save();
+	
+		gfx.BeginPath();
+		gfx.StrokeWidth(2);
+		gfx.StrokeColor(255, 255, 255, math.floor(255 * self.cursor.alpha));
+		
+		gfx.MoveTo(x - (s * 1.125), y);
+		gfx.LineTo(x - (s * 1.125), y - s);
+		gfx.LineTo(x, y - s);
+
+		gfx.MoveTo(x + self.w + (s * 1.125), y);
+		gfx.LineTo(x + self.w + (s * 1.125), y - s);
+		gfx.LineTo(x + self.w, y - s);
+
+		gfx.MoveTo(x - (s * 1.125), y + h);
+		gfx.LineTo(x - (s * 1.125), y + h + s);
+		gfx.LineTo(x, y + h + s);
+
+		gfx.MoveTo(x + self.w + (s * 1.125), y + h);
+		gfx.LineTo(x + self.w + (s * 1.125), y + h + s);
+		gfx.LineTo(x + self.w, y + h+ s);
+
+		gfx.Stroke();
+
+		gfx.Restore();
+	end,
+
+	drawNavigation = function(self)
+		local x = self.x;
+		local y = scaledH - (scaledH / 20) + (self.labels.fxlfxr.h - 6);
+
+		gfx.BeginPath();
+		align.left();
+
+		fill.normal();
+	
+		self.labels.fxlfxr:draw({ x = x, y = y });
+
+		fill.white();
+		self.labels.selectScore:draw({
+			x = x + self.labels.fxlfxr.w + 8,
+			y = y + 1,
+		});
+	end,
+
+	drawScore = function(self, i, initialY, isSelected)
+		local h = (isSelected and self.h.selected) or self.h.base;
+		local x = self.padding.x;
+		local y = self.padding.y + initialY;
+
+		gfx.BeginPath();
+		fill.dark(120);
+		gfx.Rect(0, initialY, self.w, h);
+		gfx.Fill();
+
+		gfx.BeginPath();
+		align.right();
+		fill.normal(40);
+		self.stats[i].place:draw({
+			x = self.w - self.padding.x + 8,
+			y = y - 1,
+		});
+
+		gfx.BeginPath();
+		align.left();
+
+		fill.normal();
+		self.labels.score:draw({ x = x + 1, y = y });
+	
+		if (isSelected) then
+			y = y + (self.labels.score.h * 0.75);
+		else
+			x = x + self.stats[i].score[1].w + self.stats[i].score[2].w + 56;
+
+			if (singleplayer) then
+				self.labels.timestamp:draw({ x = x, y = y });
+			else
+				self.labels.name:draw({ x = x, y = y });
+			end
+
+			y = y + (self.labels.score.h * 0.75);
+
+			fill.white();
+
+			if (singleplayer) then
+				self.stats[i].timestamp:draw({ x = x, y = y + 8 });
+			else
+				self.stats[i].name:draw({ x = x, y = y + 8 });
+			end
+
+			fill.normal();
+			self.labels.clear:draw({
+				x = x,
+				y = y + (self.labels.score.h * 2.5) + 2,
+			});
+
+			fill.white();
+			self.stats[i].clear:draw({
+				x = x,
+				y = y + (self.labels.score.h * 3.75) + 2,
+			});
+		end
+
+		x = self.padding.x;
+
+		fill.white();
+		self.stats[i].score[1]:draw({ x = x - 3, y = y });
+
+		fill.normal();
+		self.stats[i].score[2]:draw({
+			x = x + self.stats[i].score[1].w,
+			y = y + (self.stats[i].score[2].h * 0.25) - 3,
+		});
+
+		if (isSelected) then
+			y = y + self.stats[i].score[1].h * 1.125;
+
+			if (singleplayer) then
+				local statX = x;
+				local statY = y + (self.labels.timestamp.h * 1.5);
+				local spacing = self:getSpacing(self.orders.sp.row[1], 1);
+
+				for _, name in ipairs(self.orders.sp.row[1]) do
+					fill.normal();
+					self.labels[name]:draw({ x = statX, y = y });
+
+					fill.white();
+					self.stats[i][name]:draw({ x = statX, y = statY });
+
+					statX = statX + self.labels[name].w + spacing;
+				end
+
+				y = y + (self.labels.timestamp.h * 2) + (self.stats[i].timestamp.h * 2);
+
+				statX = x;
+				statY = y + (self.labels.critical.h * 1.5);
+				spacing = self:getSpacing(self.orders.sp.row[2], 1);
+
+				for _, name in ipairs(self.orders.sp.row[2]) do
+					fill.normal();
+					self.labels[name]:draw({ x = statX, y = y });
+
+					fill.white();
+					self.stats[i][name]:draw({ x = statX, y = statY });
+
+					statX = statX + self.labels[name].w + spacing;
+				end
+			else
+				fill.normal()
+				self.labels.name:draw({ x = x, y = y });
+
+				fill.white();
+				self.stats[i].name:draw({ x = x, y = y + (self.labels.name.h * 1.5) });
+
+				x = x + (self.labels.name.w * 3.5) + 1;
+
+				fill.normal()
+				self.labels.grade:draw({ x = x, y = y });
+
+				fill.white();
+				self.stats[i].grade:draw({ x = x, y = y + (self.labels.grade.h * 1.5) });
+
+				x = x + (self.labels.grade.w * 1.825) + 2;
+
+				fill.normal()
+				self.labels.gauge:draw({ x = x, y = y });
+
+				fill.white();
+				self.stats[i].gauge:draw({ x = x, y = y + (self.labels.gauge.h * 1.5) });
+
+				x = x + (self.labels.gauge.w * 2);
+
+				fill.normal()
+				self.labels.clear:draw({ x = x, y = y });
+
+				fill.white();
+				self.stats[i].clear:draw({ x = x, y = y + (self.labels.clear.h * 1.5) });
+
+				y = y + (self.labels.name.h * 2) + (self.stats[i].name.h * 2);
+
+				local statX = self.padding.x;
+				local statY = y + (self.labels.critical.h * 1.5);
+				local spacing = self:getSpacing(self.orders.mp.row[1], 1);
+
+				for _, name in ipairs(self.orders.mp.row[1]) do
+					fill.normal();
+					self.labels[name]:draw({ x = statX, y = y });
+
+					if (self.stats[i][name]) then
+						fill.white();
+						self.stats[i][name]:draw({ x = statX, y = statY });
+					end
+
+					statX = statX + self.labels[name].w + spacing;
+				end
+			end
+
+			return self.h.selected + self.spacing;
+		end
+
+		return self.h.base + self.spacing;
+	end,
+
+	drawScrollbar = function(self, deltaTime)
+		if (self.easing.scrollbar.timer > 0) then
+      self.easing.scrollbar.timer = math.max(self.easing.scrollbar.timer - deltaTime, 0);
+		end
+		
+    local y = self:getScrollbarPos();
+
+		gfx.BeginPath();
+		fill.dark(120);
+		gfx.Rect(
+			self.scrollbar.x,
+			self.scrollbar.y,
+			self.scrollbar.w,
+			self.scrollbar.h
+		);
+		gfx.Fill();
+
+		gfx.BeginPath();
+		fill.normal();
+		gfx.Rect(self.scrollbar.x, y, 8, 32);
+		gfx.Fill();
+	end,
+
+	render = function(self, deltaTime)
+		self:setSizes();
+
+		self:setLabels();
+
+		self:setStats();
+
+		self:handleNavigation(deltaTime);
+
+		local y = 0;
+
+		if (not self.cursor.y[self.viewLimit]) then
+			for i = 1, self.viewLimit do
+				self.cursor.y[i] = self.y + ((self.h.base + self.spacing) * (i - 1));
+			end
+		end
+
+		gfx.Save();
+
+		gfx.Translate(self.x, self.y);
+
+		for i = self.bounds.lower, self.bounds.upper do
+			y = y + self:drawScore(i, y, i == selectedScore);
+		end
+
+		gfx.Translate(-self.x, -self.y);
+
+		self:drawCursor(deltaTime);
+
+		if (#allScores > self.viewLimit) then
+			self:drawScrollbar(deltaTime);
+		end
+
+		self:drawNavigation();
+
+		gfx.Restore();
+	end,
+};
+
+local screenshot = {
+	labels = nil,
+	path = '',
+	timer = 0,
+
+	setLabels = function(self)
+		if (not self.labels) then
+			font.normal();
+
+			self.labels = {
+				path = cacheLabel('', 24),
+				saved = cacheLabel('SCREENSHOT SAVED TO', 24),
+			};
+		end
+	end,
+
+	drawNotification = function(self, deltaTime);
+		self:setLabels();
+
+		if (self.timer > 0) then
+			self.timer = math.max(self.timer - deltaTime, 0);
+
+			font.normal();
+			self.labels.path:update({ new = self.path });
+
+			gfx.Save();
+
+			gfx.Translate(8, 4);
+
+			gfx.BeginPath();
+			align.left();
+			
+			fill.normal();
+			self.labels.saved:draw({ x = 0, y = 0 });
+
+			fill.white();
+			self.labels.path:draw({ x = self.labels.saved.w + 16, y = 0 });
+
+			gfx.Restore();
+		end
+	end,
+};
 
 result_set = function()
-    highScores = { }
-    currentAdded = false
-    
-    chartTitle = result.title
-    if result.realTitle ~= nil and result.playerName ~= nil then chartTitle = result.realTitle end
-    
-    if result.duration ~= nil then
-        chartDuration = result.duration
-        chartDurationText = string.format("%dm %02d.%01ds", chartDuration // 60000, (chartDuration // 1000) % 60, (chartDuration // 100) % 10)
-        hitGraphHoverScale = math.max(chartDuration / 10000, 5)
-    else
-        chartDuration = 0
-        chartDurationText = ""
-        hitGraphHoverScale = 10
-    end
-    
-    if result.uid == nil then --local scores
-        for i,s in ipairs(result.highScores) do
-            newScore = { }
-            if currentAdded == false and result.score > s.score then
-                newScore.score = string.format("%08d", result.score)
-                newScore.badge = result.badge
-                newScore.badgeDesc = getScoreBadgeDesc(result)
-                newScore.color = {255, 127, 0}
-                newScore.subtext = "Now"
-                newScore.xoff = 0
-                table.insert(highScores, newScore)
-                newScore = { }
-                currentAdded = true
-            end
-            newScore.score = string.format("%08d", s.score)
-            newScore.badge = s.badge
-            newScore.badgeDesc = getScoreBadgeDesc(s)
-            newScore.color = {0, 127, 255}
-            newScore.xoff = 0
-            if s.timestamp > 0 then
-                newScore.subtext = os.date("%Y-%m-%d %H:%M:%S", s.timestamp)
-            else 
-                newScore.subtext = ""
-            end
-            
-            if highestScore < s.score then
-                highestScore = s.score
-            end
-            
-            table.insert(highScores, newScore)
-        end
+	singleplayer = result.uid == nil;
 
-        if currentAdded == false then
-            newScore = { }
-            newScore.score = string.format("%08d", result.score)
-            newScore.badge = result.badge
-            newScore.badgeDesc = getScoreBadgeDesc(result)
-            newScore.color = {255, 127, 0}
-            newScore.subtext = "Now"
-            newScore.xoff = 0
-            table.insert(highScores, newScore)
-            newScore = { }
-            currentAdded = true
-        end
-    else --multi scores
-        showHiScore = true
-        for i,s in ipairs(result.highScores) do
-            newScore = { }
-            if s.uid == result.uid then 
-                newScore.color = {255, 127, 0}
-            else
-                newScore.color = {0, 127, 255}
-            end
+	if (not songInfo) then
+		songInfo = help.formatSongInfo(result);
 
-            if result.displayIndex + 1 == i then
-                newScore.xoff = -20
-            else
-                newScore.xoff = 0
-            end
+		if (result.jacketPath and (result.jacketPath ~= '')) then
+			jacket = gfx.LoadImageJob(result.jacketPath, jacketFallback, 0, 0);
+		end
+	end
 
-            newScore.score = string.format("%08d", s.score)
-            newScore.badge = s.badge
-            newScore.badgeDesc = getScoreBadgeDesc(s)
-            newScore.subtext = s.name
-            
-            if highestScore < s.score then
-                highestScore = s.score
-            end
-            
-            table.insert(highScores, newScore)
-        end
-    end
-    
-    if result.jacketPath ~= nil and result.jacketPath ~= "" then
-        jacketImg = gfx.CreateImage(result.jacketPath, 0)
-    end
-    
-    gradeImg = gfx.CreateSkinImage(string.format("score/%s.png", result.grade), 0)
-    if gradeImg ~= nil then
-        local gradew, gradeh = gfx.ImageSize(gradeImg)
-        gradeAR = gradew / gradeh
-    end
-    
-    if 1 <= result.badge and result.badge <= 5 then
-        badgeImg = badgeImages[result.badge]
-    end
-    
-    if result.autoplay then clearTextBase = "AUTOPLAY"
-    elseif result.hitWindow ~= nil and result.hitWindow.type == 0 then clearTextBase = "EXPAND JUDGE"
-    elseif result.badge == 0 then clearTextBase = "NOT SAVED"
-    elseif result.badge == 1 then clearTextBase = "PLAYED"
-    elseif result.badge == 2 then clearTextBase = "CLEAR"
-    elseif result.badge == 3 then clearTextBase = "HARD CLEAR"
-    elseif result.badge == 4 then clearTextBase = "FULL COMBO"
-    elseif result.badge == 5 then clearTextBase = "PERFECT"
-    else clearTextBase = ""
-    end
-    
-    if result.playbackSpeed ~= nil and result.playbackSpeed ~= 1.00 then
-        if clearTextBase == "" then clearText = string.format("x%.2f play", result.playbackSpeed)
-        else clearText = string.format("%s (x%.2f play)", clearTextBase, result.playbackSpeed)
-        end
-    else
-        clearText = clearTextBase
-    end
-    
-    if result.uid ~= nil and result.playerName ~= nil and result.isSelf ~= true then
-        clearText = string.format("By %s", result.playerName)
-    end
-    
-    if result.speedModType ~= nil then
-        if result.speedModType == 0 then
-            speedMod = "XMOD"
-            speedModValue = string.format("%.2f", result.speedModValue)
-        elseif result.speedModType == 1 then
-            speedMod = "MMOD"
-            speedModValue = string.format("%.1f", result.speedModValue)
-        elseif result.speedModType == 2 then
-            speedMod = "CMOD"
-            speedModValue = string.format("%.1f", result.speedModValue)
-        else
-            speedMod = ""
-            speedModValue = ""
-        end
-    else
-        speedMod = ""
-        speedModValue = ""
-    end
+	if (not allScores.myScore) then
+		allScores.myScore = help.formatScore(result);
+	end
 
-    hasHitStat = result.noteHitStats ~= nil and #result.noteHitStats > 0
-    
-    hitWindowPerfect = 46
-    hitWindowGood = 92
-    critText = "CRIT"
-    nearText = "NEAR"
-        
-    if result.hitWindow ~= nil then
-        hitWindowPerfect = result.hitWindow.perfect
-        hitWindowGood = result.hitWindow.good
-        
-        if hitWindowPerfect ~= 46 or hitWindowGood ~= 92 then
-            critText = string.format("%02dms CRIT", hitWindowPerfect)
-            nearText = string.format("%02dms NEAR", hitWindowGood)
-        end
-    end
-    
-    hitHistogram = {}
-    
-    if hasHitStat then
-        for i = 1, #result.noteHitStats do
-            local hitStat = result.noteHitStats[i]
-            if hitStat.rating == 1 or hitStat.rating == 2 then
-                if hitHistogram[hitStat.delta] == nil then hitHistogram[hitStat.delta] = 0 end
-                hitHistogram[hitStat.delta] = hitHistogram[hitStat.delta] + 1
-                
-                if hitStat.delta < hitMinDelta then hitMinDelta = hitStat.delta end
-                if hitStat.delta > hitMaxDelta then hitMaxDelta = hitStat.delta end
-            end
-        end
-    end
-end
+	if (singleplayer) then
+		for i, highScore in ipairs(result.highScores) do
+			allScores[i] = help.formatHighScore(highScore);
+		end
+	else
+		local currentIndex = result.displayIndex + 1;
 
-draw_shotnotif = function(x,y)
-    gfx.LoadSkinFont("NotoSans-Regular.ttf")
-    gfx.Save()
-    gfx.Translate(x,y)
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
-    gfx.BeginPath()
-    gfx.Rect(0,0,200,40)
-    gfx.FillColor(30,30,30)
-    gfx.StrokeColor(255,128,0)
-    gfx.Fill()
-    gfx.Stroke()
-    gfx.FillColor(255,255,255)
-    gfx.FontSize(15)
-    gfx.Text("Screenshot saved to:", 3,5)
-    gfx.Text(shotPath, 3,20)
-    gfx.Restore()
-end
+		selectedScore = currentIndex;
 
----------------------
--- Subcomponents --
----------------------
+		scoreList.stats = nil;
 
-draw_stat = function(x,y,w,h, name, value, format,r,g,b)
-    gfx.Save()
-    gfx.Translate(x,y)
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
-    gfx.FontSize(h)
-    gfx.Text(name .. ":",0, 0)
-    gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP)
-    gfx.Text(string.format(format, value),w, 0)
-    gfx.BeginPath()
-    gfx.MoveTo(0,h)
-    gfx.LineTo(w,h)
-    if r then gfx.StrokeColor(r,g,b) 
-    else gfx.StrokeColor(200,200,200) end
-    gfx.StrokeWidth(1)
-    gfx.Stroke()
-    gfx.Restore()
-    return y + h + 5
-end
+		for i, highScore in ipairs(result.highScores) do
+			if (i == currentIndex) then
+				allScores[i] = help.formatScore(result);
+			elseif (not loadedScores[i]) then
+				allScores[i] = help.formatHighScore(highScore);
+			end
+		end
+	end
 
-draw_score = function(score, x, y, w, h, pre)
-    local center = x + w * 0.54
-    local prefix = ""
-    if pre ~= nil then prefix = pre end
+	if (singleplayer or result.isSelf) then
+		gaugeSamples = get(result, 'gaugeSamples', {});
+		gaugeType = get(result, 'flags', 0);
 
-    gfx.LoadSkinFont("NovaMono.ttf")
-    gfx.BeginPath()
-    gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT)
-    gfx.FontSize(h)
-    gfx.Text(string.format("%s%04d", prefix, score // 10000), center-h/70, y)
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT)
-    gfx.FontSize(h*0.75)
-    gfx.Text(string.format("%04d", score % 10000), center+h/70, y)
-end
+		local duration = get(result, 'duration');
 
-draw_highscores = function(full)
-    gfx.FillColor(255,255,255)
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT)
-    gfx.LoadSkinFont("NotoSans-Regular.ttf")
-    gfx.FontSize(30)
-    gfx.Text("High Scores",510,30)
-    gfx.StrokeWidth(1)
-    for i,s in ipairs(highScores) do
-        gfx.Save()
-        gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
-        gfx.BeginPath()
-        local ypos =  45 + (i - 1) * 80
-        if ypos > desh then
-            break
-        end
-        gfx.Translate(510 + s.xoff, ypos)
-        gfx.RoundedRectVarying(0, 0, 260, 70,0,0,25,0)
-        gfx.FillColor(15,15,15)
-        gfx.StrokeColor(s.color[1], s.color[2], s.color[3])
-        gfx.Fill()
-        gfx.Stroke()
-        gfx.BeginPath()
-        gfx.FillColor(255,255,255)
-        gfx.FontSize(25)
-        gfx.Text(string.format("#%d",i), 5, 5)
-        
-        if s.badge ~= nil and 1 <= s.badge and s.badge <= 5 then
-            gfx.BeginPath()
-            gfx.ImageRect(37, 7, 36, 36, badgeImages[s.badge], 1, 0)
-            
-            if full then
-                gfx.BeginPath()
-                gfx.FontSize(15)
-                gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_BOTTOM)
-                gfx.Text(s.badgeDesc, 55, 52)
-            end
-        end
-        
-        draw_score(s.score, 55, 42, 215, 60)
-        
-        gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_TOP)
-        gfx.LoadSkinFont("NotoSans-Regular.ttf")
-        gfx.FontSize(20)
-        gfx.Text(s.subtext, 135, 45)
-        gfx.Restore()
-    end
-end
+		if (duration) then
+			graphs.duration = duration;
+			graphs.hoverScale = math.max(duration / 10000, 5);
+		else
+			graphs.hoverScale = 10;
+		end
 
-draw_gauge_graph = function(x, y, w, h, alpha, xfocus, xscale)
-    if alpha == nil then alpha = 160 end
-    if xfocus == nil then
-        xfocus = 0
-        xscale = 1
-    end
-    
-    local leftIndex = math.floor(#result.gaugeSamples/w * (-xfocus / xscale + xfocus))
-    leftIndex = math.max(1, math.min(#result.gaugeSamples, leftIndex))
-    
-    gfx.BeginPath()
-    gfx.MoveTo(x, y + h - h * result.gaugeSamples[leftIndex])
-    
-    for i = leftIndex+1, #result.gaugeSamples do
-        local gaugeX = i * w / #result.gaugeSamples
-        gaugeX = (gaugeX - xfocus) * xscale + xfocus
-        gfx.LineTo(x + gaugeX,y + h - h * result.gaugeSamples[i])
-        
-        if gaugeX > w then break end
-    end
-    
-    gfx.StrokeWidth(2.0)
-    if result.flags & 1 ~= 0 then
-        gfx.StrokeColor(255,80,0,alpha)
-        gfx.Stroke()
-    else
-        gfx.StrokeColor(0,180,255,alpha)
-        gfx.Scissor(x, y + h * 0.3, w, h * 0.7)
-        gfx.Stroke()
-        gfx.ResetScissor()
-        gfx.Scissor(x,y-10,w,10+h*0.3)
-        gfx.StrokeColor(255,0,255,alpha)
-        gfx.Stroke()
-        gfx.ResetScissor()
-    end
-end
+		graphs.hitStats = get(result, 'noteHitStats');
+		graphs.histogram = {};
 
-draw_hit_graph_lines = function(x, y, w, h)
-    local maxDispDelta = h/2 / hitDeltaScale
-    
-    gfx.StrokeWidth(1)
-    
-    gfx.BeginPath()
-    gfx.StrokeColor(128, 255, 128, 128)
-    gfx.MoveTo(x, y+h/2)
-    gfx.LineTo(x+w, y+h/2)
-    gfx.Stroke()
-    
-    gfx.BeginPath()
-    gfx.StrokeColor(64, 128, 64, 64)
-    
-    for i = -math.floor(maxDispDelta / 10), math.floor(maxDispDelta / 10) do
-        local lineY = y + h/2 + i*10*hitDeltaScale
-        
-        if i ~= 0 then
-            gfx.MoveTo(x, lineY)
-            gfx.LineTo(x+w, lineY)
-        end
-    end
-    
-    gfx.Stroke()
-end
+		if (graphs.hitStats and (#graphs.hitStats > 0)) then
+			for i = 1, #graphs.hitStats do
+				local hitStat = graphs.hitStats[i];
 
-draw_hit_graph = function(x, y, w, h, xfocus, xscale)
-    if not hasHitStat or hitDeltaScale == 0.0 then
-        return
-    end
-    
-    if xfocus == nil then xfocus = 0 end
-    if xscale == nil then xscale = 1 end
-    
-    draw_hit_graph_lines(x, y, w, h)
-    
-    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
-    gfx.FontSize(12)
-    
-    for i = 1, #result.noteHitStats do
-        local hitStat = result.noteHitStats[i]
-        local hitStatX = (hitStat.timeFrac*w - xfocus)*xscale + xfocus
-        
-        if 0 <= hitStatX then
-            if hitStatX > w then break end
-            
-            local hitStatY = h/2 + hitStat.delta * hitDeltaScale
-            if hitStatY < 0 then hitStatY = 0
-            elseif hitStatY > h then hitStatY = h
-            end
-            
-            local hitStatSize = 1
-            
-            if hitStat.rating == 2 then
-                hitStatSize = 1.25
-                gfx.FillColor(255, 150, 0, 160)
-            elseif hitStat.rating == 1 then
-                hitStatSize = 1.75
-                gfx.FillColor(255, 0, 200, 128)
-            elseif hitStat.rating == 0 then
-                hitStatSize = 2
-                gfx.FillColor(255, 0, 0, 128)
-            end
-            
-            gfx.BeginPath()
-            if xscale > 1 then
-                gfx.Text(laneNames[hitStat.lane + 1], x+hitStatX, y+hitStatY)
-            else
-                gfx.Rect(x+hitStatX-hitStatSize/2, y+hitStatY-hitStatSize/2, hitStatSize, hitStatSize)
-                gfx.Fill()
-            end
-        end
-    end
-end
+				if ((hitStat.rating == 1) or (hitStat.rating == 2)) then
+					if (not graphs.histogram[hitStat.delta]) then
+						graphs.histogram[hitStat.delta] = 0;
+					end
 
-draw_left_graph = function(x, y, w, h)
-    local mx, my = game.GetMousePos()
-    mx = mx / scale - moveX
-    my = my / scale - moveY
-    
-    local mhit = x <= mx and mx <= x+w and y <= my and my <= y+h
-    local hit_xfocus = 0
-    local hit_xscale = 1
-    
-    gfx.BeginPath()
-    gfx.Rect(x, y, w, h)
-    gfx.FillColor(255, 255, 255, 32)
-    gfx.Fill()
-    
-    local chartDurationDisp = string.format("Duration: %s", chartDurationText)
-    
-    if mhit then
-        hit_xfocus = mx - x
-        hit_xscale = hitGraphHoverScale
-        
-        local currPos = chartDuration * ((mx - x) / w)
-        chartDurationDisp = string.format("%dm %02d.%01ds / %s" , currPos // 60000, (currPos // 1000) % 60, (currPos // 100) % 10, chartDurationText)
-        
-        drawLine(mx, y, mx, y+h, 1, 64, 96, 64)
-    end
-    
-    gfx.FontSize(17)
-    gfx.FillColor(64, 128, 64, 96)
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
-    
-    gfx.BeginPath()
-    gfx.Text(chartDurationDisp, x+5, y)
-    
-    if result.bpm ~= nil then
-        gfx.BeginPath()
-        gfx.Text(string.format("BPM: %s", result.bpm), x+5, y+15)
-    end
-    
-    draw_hit_graph(x, y, w, h, hit_xfocus, hit_xscale)
-    if hit_xscale == 1 then
-        draw_gauge_graph(x, y, w, h)
-    else
-        draw_gauge_graph(x, y, w, h, 64, hit_xfocus, hit_xscale)
-        draw_gauge_graph(x, y, w, h)
-        
-        local gaugeInd = math.floor(1 + #result.gaugeSamples/w * ((mx-x - hit_xfocus) / hit_xscale + hit_xfocus))
-        gaugeInd = math.max(1, math.min(#result.gaugeSamples, gaugeInd))
-        
-        local gaugeY = h - h * result.gaugeSamples[gaugeInd]
-        
-        gfx.StrokeColor(255, 0, 0, 196)
-        gfx.FillColor(255, 255, 255, 196)
-        gfx.FontSize(16)
-        
-        gfx.BeginPath()
-        gfx.Circle(mx, y + gaugeY, 2)
-        gfx.Stroke()
-        
-        gfx.BeginPath()
-        gfx.Text(string.format("%.1f%%", result.gaugeSamples[gaugeInd]*100), mx, y + gaugeY - 10)
-    end
-    
-    -- hitDeltaAbs is unavailable for multiplayers
-    if result.uid ~= nil then
-        gfx.FontSize(16)
-        gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM)
-        gfx.BeginPath()
-        gfx.FillColor(255, 255, 255, 128)
-        gfx.Text(string.format("Mean: %.1f ms, Median: %d ms", result.meanHitDelta, result.medianHitDelta), x+4, y+h)
-    elseif hasHitStat then
-        gfx.FontSize(16)
-        gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM)
-        gfx.BeginPath()
-        gfx.FillColor(255, 255, 255, 128)
-        gfx.Text(string.format("Mean deviation: %.1fms", result.meanHitDeltaAbs), x+4, y+h)
-    end
-    
-    -- End gauge display
-    local endGauge = result.gauge
-    local endGaugeY = y + h - h * endGauge
-    
-    if endGaugeY > y+h - 10 then endGaugeY = y+h - 10
-    elseif endGaugeY < y + 10 then endGaugeY = y + 10
-    end
-    
-    local gaugeText = string.format("%.1f%%", endGauge*100)
-    
-    gfx.FontSize(20)
-    gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_MIDDLE)
-    local x1, y1, x2, y2 = gfx.TextBounds(x+w-6, endGaugeY, gaugeText)
-    
-    gfx.BeginPath()
-    gfx.FillColor(80, 80, 80, 128)
-    gfx.RoundedRect(x1-3, y1, x2-x1+6, y2-y1, 4)
-    gfx.Fill()
-    
-    gfx.BeginPath()
-    gfx.LoadSkinFont("NovaMono.ttf")
-    gfx.FillColor(255, 255, 255)
-    gfx.Text(gaugeText, x+w-6, endGaugeY)
-end
+					graphs.histogram[hitStat.delta] = graphs.histogram[hitStat.delta] + 1;
 
-draw_hit_histogram = function(x, y, w, h)
-    if not hasHitStat or hitDeltaScale == 0.0 then
-        return
-    end
-    
-    local maxDispDelta = math.floor(h/2 / hitDeltaScale)
-    
-    local mode = 0
-    local modeCount = 0
-    
-    for i = -maxDispDelta-1, maxDispDelta+1 do
-        if hitHistogram[i] == nil then hitHistogram[i] = 0 end
-    end
+					if (hitStat.delta < graphs.earliest) then
+						graphs.earliest = hitStat.delta;
+					end
 
-    for i = -maxDispDelta, maxDispDelta do
-        local count = hitHistogram[i-1] + hitHistogram[i]*2 + hitHistogram[i+1]
-        
-        if count > modeCount then
-            mode = i
-            modeCount = count
-        end
-    end
-    
-    gfx.StrokeWidth(1.5)
-    gfx.BeginPath()
-    gfx.StrokeColor(255, 255, 128, 96)
-    gfx.MoveTo(x, y)
-    for i = -maxDispDelta, maxDispDelta do
-        local count = hitHistogram[i-1] + hitHistogram[i]*2 + hitHistogram[i+1]
-        
-        gfx.LineTo(x + 0.9 * w * count / modeCount, y+h/2 + i*hitDeltaScale)
-    end
-    gfx.LineTo(x, y+h)
-    gfx.Stroke()
-end
-
-draw_right_graph = function(x, y, w, h)
-    if not hasHitStat or hitDeltaScale == 0.0 then
-        return
-    end
-    
-    gfx.BeginPath()
-    gfx.Rect(x, y, w, h)
-    gfx.FillColor(64, 64, 64, 32)
-    gfx.Fill()
-    
-    draw_hit_graph_lines(x, y, w, h)
-    draw_hit_histogram(x, y, w, h)
-    
-    local meanY = h/2 + hitDeltaScale * result.meanHitDelta
-    local medianY = h/2 + hitDeltaScale * result.medianHitDelta
-    
-    drawLine(x, y+meanY, x+w, y+meanY, 1.25, 255, 0, 0, 192)
-    drawLine(x, y+medianY, x+w, y+medianY, 1.25, 64, 64, 255, 192)
-    
-    gfx.LoadSkinFont("NovaMono.ttf")
-    
-    gfx.BeginPath()
-    if meanY < medianY then
-        gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM)
-    else
-        gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
-    end
-    gfx.FillColor(255, 128, 128)
-    gfx.FontSize(16)
-    gfx.Text(string.format("Mean: %.1f ms", result.meanHitDelta), x+2, y+meanY)
-    
-    gfx.BeginPath()
-    if medianY <= meanY then
-        gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM)
-    else
-        gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
-    end
-    gfx.FillColor(196, 196, 255)
-    gfx.FontSize(16)
-    gfx.Text(string.format("Median: %d ms", result.medianHitDelta), x+2, y+medianY)
-    
-    gfx.FillColor(255, 255, 255)
-    gfx.FontSize(15)
-    
-    gfx.BeginPath()
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
-    gfx.Text(string.format("Earliest: %d ms", hitMinDelta), x+5, y)
-    
-    gfx.BeginPath()
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM)
-    gfx.Text(string.format("Latest: %d ms", hitMaxDelta), x+5, y+h)
-end
-
-draw_laser_icon = function(x, y, s)
-    gfx.Save()
-    gfx.Translate(x, y)
-    
-    local r, g, b = game.GetLaserColor(0)
-    gfx.BeginPath()
-    gfx.FillColor(r, g, b, 96)
-    gfx.MoveTo(s*0.1, s*0.1)
-    gfx.LineTo(s*0.4, s*0.5)
-    gfx.LineTo(s*0.1, s*0.9)
-    gfx.LineTo(s*0.3, s*0.9)
-    gfx.LineTo(s*0.6, s*0.5)
-    gfx.LineTo(s*0.3, s*0.1)
-    gfx.LineTo(s*0.1, s*0.1)
-    gfx.Fill()
-    
-    local r, g, b = game.GetLaserColor(1)
-    gfx.BeginPath()
-    gfx.FillColor(r, g, b, 96)
-    gfx.MoveTo(s*0.7, s*0.1)
-    gfx.LineTo(s*0.4, s*0.5)
-    gfx.LineTo(s*0.7, s*0.9)
-    gfx.LineTo(s*0.9, s*0.9)
-    gfx.LineTo(s*0.6, s*0.5)
-    gfx.LineTo(s*0.9, s*0.1)
-    gfx.LineTo(s*0.7, s*0.1)
-    gfx.Fill()
-    
-    gfx.Restore()
-    
-    return x - s
-end
-
-draw_speed_icon = function(x, y, s)
-    if speedMod == "" then return x end
-    
-    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
-    gfx.FillColor(255, 255, 255)
-    
-    gfx.BeginPath()
-    gfx.FontSize(15)
-    gfx.Text(speedMod, x + s/2, y + s*0.3)
-    
-    gfx.BeginPath()
-    gfx.FontSize(20)
-    gfx.Text(speedModValue, x + s/2, y + s*0.65)
-    
-    return x - s
-end
-
-draw_hidsud_icon = function(x, y, s)
-    if result.hidsud == nil then
-        return x
-    end
-    
-    gfx.FontSize(15)
-    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
-    gfx.FillColor(255, 255, 255)
-    
-    gfx.BeginPath()
-    gfx.Text("SUDDEN", x + s/2, y + s*0.13)
-    gfx.Text("HIDDEN", x + s/2, y + s*0.62)
-    
-    gfx.BeginPath()
-    gfx.FontSize(13)
-    gfx.Text(string.format("%.2f fd %.1f", result.hidsud.suddenCutoff, result.hidsud.suddenFade), x + s/2, y + s*0.35)
-    gfx.Text(string.format("%.2f fd %.1f", result.hidsud.hiddenCutoff, result.hidsud.hiddenFade), x + s/2, y + s*0.84)
-    
-    return x - s
-end
-
-draw_mir_ran_icon = function(x, y, s)
-    if result.flags & 6 == 0 then return x end
-    
-    gfx.FontSize(20)
-    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
-    gfx.FillColor(255, 255, 255)
-    
-    if result.flags & 2 ~= 0 then
-        gfx.BeginPath()
-        gfx.Text("MIR", x + s/2, y + s*0.3)
-    end
-    
-    if result.flags & 4 ~= 0 then
-        gfx.BeginPath()
-        gfx.Text("RAN", x + s/2, y + s*0.7)
-    end
-    
-    return x - s
-end
-
----------------------
--- Main components --
----------------------
-
-draw_title = function(x, y, w, h)
-    local centerLineY = y+h*0.6
-    
-    gfx.LoadSkinFont("NotoSans-Regular.ttf")
-    
-    gfx.BeginPath()
-    gfx.FillColor(255, 255, 255)
-    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER)
-    
-    gfx.FontSize(48)
-    drawScaledText(chartTitle, x+w/2, centerLineY-18, w/2-5)
-    
-    drawLine(x+30, centerLineY, x+w-30,centerLineY, 1, 64, 64, 64)
-    
-    gfx.FontSize(27)
-    drawScaledText(result.artist, x+w/2, centerLineY+28, w/2-5)
-end
-
-draw_chart_info = function(x, y, w, h, full)
-    local jacket_size = 250
-    
-    local jacket_y = y+40
-    
-    if not full then
-        jacket_y = y
-        jacket_size = 300
-    end
-    
-    local jacket_x = x+(w-jacket_size)/2
-    
-    gfx.LoadSkinFont("NotoSans-Regular.ttf")
-    
-    gfx.BeginPath()
-    if jacketImg ~= nil then
-        gfx.ImageRect(jacket_x, jacket_y, jacket_size, jacket_size, jacketImg, 1, 0)
-    else
-        gfx.BeginPath()
-        gfx.FillColor(0, 0, 0, 128)
-        gfx.Rect(jacket_x, jacket_y, jacket_size, jacket_size)
-        gfx.Fill()
-        
-        gfx.BeginPath()
-        gfx.FillColor(255, 255, 255, math.floor(40+80*waveParam(4)))
-        gfx.FontSize(30)
-        gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
-        gfx.Text("No Image", x+w/2, jacket_y + jacket_size/2)
-    end
-    
-    if full then
-        gfx.BeginPath()
-        gfx.FillColor(255, 255, 255)
-        gfx.TextAlign(gfx.TEXT_ALIGN_CENTER)
-        gfx.FontSize(30)
-        gfx.Text(string.format("%s %02d", diffNames[result.difficulty + 1], result.level), x+w/2, y+30)
-    else
-        do
-            gfx.FontSize(20)
-            gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM)
-            
-            local level_text = string.format("%s %02d", diffNames[result.difficulty + 1], result.level)
-            local _a, _b, level_text_width, _c = gfx.TextBounds(0, 0, level_text)
-            local box_width = level_text_width
-            
-            local effector_text = ""
-            
-            if result.effector ~= nil and result.effector ~= "" then
-                effector_text = string.format("  by %s", result.effector)
-                
-                gfx.FontSize(16)
-                local _d, _e, effector_text_width, _f = gfx.TextBounds(0, 0, effector_text)
-                box_width = box_width + effector_text_width
-            end
-            
-            box_width = box_width + 10
-            if box_width > jacket_size then box_width = jacket_size end
-            
-            gfx.BeginPath()
-            gfx.FillColor(0, 0, 0, 200)
-            gfx.RoundedRectVarying(jacket_x, jacket_y, box_width, 25, 0, 0, 5, 0)
-            gfx.Fill()
-            
-            gfx.FillColor(255, 255, 255)
-            gfx.BeginPath()
-            gfx.FontSize(20)
-            gfx.Text(level_text, jacket_x+5, jacket_y+22)
-            
-            if effector_text ~= "" then
-                gfx.FontSize(16)
-                drawScaledText(effector_text, jacket_x+level_text_width+5, jacket_y+21, jacket_size-level_text_width-10)
-            end
-        end
-    
-        local graph_height = jacket_size * 0.3
-        local graph_y = jacket_y+jacket_size - graph_height
-    
-        gfx.BeginPath()
-        gfx.FillColor(0,0,0,200)
-        gfx.Rect(jacket_x, graph_y, jacket_size, graph_height)
-        gfx.Fill()
-        draw_gauge_graph(jacket_x, graph_y, jacket_size, graph_height)
-        
-        if gradeImg ~= nil then
-            gfx.BeginPath()
-            gfx.ImageRect(jacket_x+jacket_size-60*gradeAR, jacket_y+jacket_size-60, 60*gradeAR, 60, gradeImg, 1, 0)
-        end
-        
-        gfx.BeginPath()
-        gfx.FillColor(255,255,255)
-        gfx.FontSize(20)
-        gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_MIDDLE)
-        gfx.Text(string.format("%.1f%%", result.gauge*100), jacket_x+jacket_size+10, jacket_y+jacket_size-graph_height*result.gauge)
-        return
-    end
-    
-    draw_y = jacket_y + jacket_size + 27
-    
-    if result.effector ~= nil and result.effector ~= "" then
-        gfx.TextAlign(gfx.TEXT_ALIGN_CENTER)
-        gfx.FillColor(255, 255, 255)
-        gfx.FontSize(16)
-        gfx.Text("Effected by", x+w/2, draw_y)
-        gfx.FontSize(27)
-        drawScaledText(result.effector, x+w/2, draw_y+24, w/2-5)
-        draw_y = draw_y + 50
-    end
-    
-    if result.illustrator ~= nil and result.illustrator ~= "" then
-        gfx.TextAlign(gfx.TEXT_ALIGN_CENTER)
-        gfx.FontSize(16)
-        gfx.Text("Illustrated by", x+w/2, draw_y)
-        gfx.FontSize(27)
-        drawScaledText(result.illustrator, x+w/2, draw_y+24, w/2-5)
-        draw_y = draw_y + 50
-    end
-end
-
-draw_basic_hitstat = function(x, y, w, h, full)    
-    local grade_width = 70 * gradeAR
-    local stat_y = y
-    local stat_gap = 15
-    local stat_size = 30
-    local stat_width = w-8
-    
-    local showRetryCount = (result.retryCount ~= nil and result.retryCount > 0) or (result.mission ~= nil and result.mission ~= "")
-    
-    if full then
-        stat_gap = 6
-        stat_size = 25
-        stat_width = w-18
-        
-        if not showRetryCount then
-            stat_gap = 25
-            stat_y = stat_y + 15
-        end
-        
-        gfx.BeginPath()
-        gfx.ImageRect(x + (w-grade_width)/2 - 5, stat_y, grade_width, 70, gradeImg, 1, 0)
-        stat_y = stat_y + 85
-    else
-        stat_y = y + 12
-    
-        if not showRetryCount then
-            stat_gap = 30
-        end
-    end
-    
-    if clearTextBase ~= "" then
-        if clearTextBase == "PERFECT" then gfx.FillColor(255, 255, math.floor(120+125*waveParam(2.0)))
-        elseif clearTextBase == "FULL COMBO" then gfx.FillColor(255, 0, 200)
-        elseif result.badge == 0 then
-            local w = math.floor(128*waveParam(2.0))
-            gfx.FillColor(255, w, w)
-        else gfx.FillColor(255, 255, 255)
-        end
-        
-        gfx.BeginPath()
-        gfx.TextAlign(gfx.TEXT_ALIGN_CENTER)
-        gfx.FontSize(20)
-        gfx.Text(clearText, x+w/2 - 5, stat_y)
-    end
-    
-    stat_y = stat_y + 50
-    
-    if result.score == 10000000 then
-        gfx.FillColor(255, 255, math.floor(120+125*waveParam(2.0)))
-    else
-        gfx.FillColor(255, 255, 255)
-    end
-    
-    if full then
-        draw_score(result.score, x, stat_y, w, 72)
-        stat_y = stat_y + 19
-    else
-        stat_y = stat_y + 10
-        stat_gap = stat_gap - 8
-        draw_score(result.score, x, stat_y, w, 88)
-        stat_y = stat_y + 19
-    end
-    
-    if highestScore > 0 then
-        if highestScore > result.score then
-            gfx.FillColor(255, 32, 32)
-            draw_score(highestScore - result.score, x+w/2, stat_y, w/2, 25, "-")
-        elseif highestScore == result.score then
-            gfx.FillColor(128, 128, 128)
-            draw_score(0, x+w/2, stat_y, w/2, 25, utf8.char(0xB1))
-        else
-            gfx.FillColor(32, 255, 32)
-            draw_score(result.score - highestScore, x+w/2, stat_y, w/2, 25, "+")
-        end
-    end
-    
-    stat_y = stat_y + stat_gap
-    
-    gfx.FillColor(255, 255, 255)
-    
-    stat_y = draw_stat(x+4, stat_y, stat_width, stat_size, critText, result.perfects, "%d", 255, 150, 0)
-    stat_y = draw_stat(x+4, stat_y, stat_width, stat_size, nearText, result.goods, "%d", 255, 0, 200)
-    
-    local early_late_width = w/2-20
-    local late_x = x+stat_width-early_late_width
-    draw_stat(late_x-early_late_width-10, stat_y, early_late_width, stat_size-6, "EARLY", result.earlies, "%d", 255, 0, 255)
-    draw_stat(late_x, stat_y, early_late_width, stat_size-6, "LATE", result.lates, "%d", 0, 255, 255)
-    
-    stat_y = stat_y + stat_size + 5
-    stat_y = draw_stat(x+4, stat_y, stat_width, stat_size, "ERROR", result.misses, "%d", 255, 0, 0)
-    
-    stat_y = draw_stat(x+4, stat_y+15, stat_width, stat_size, "MAX COMBO", result.maxCombo, "%d", 255, 255, 0)
-    
-    if showRetryCount then
-        local retryCount = 0
-        if result.retryCount ~= nil then retryCount = result.retryCount end
-        
-        stat_y = draw_stat(x+4, stat_y+15, stat_width, stat_size-6, "RETRY", retryCount, "%d")
-        
-        if result.mission ~= nil and result.mission ~= "" then
-            gfx.LoadSkinFont("NotoSans-Regular.ttf")
-            gfx.TextAlign(gfx.TEXT_ALIGN_TOP + gfx.TEXT_ALIGN_LEFT)
-            
-            gfx.BeginPath()
-            gfx.FontSize(16)
-            gfx.Text(string.format("Mission: %s", result.mission), x+4, stat_y)
-        end
-    end
-end
-
-draw_graphs = function(x, y, w, h)    
-    if not hasHitStat or hitDeltaScale == 0.0 then
-        draw_left_graph(x, y, w, h)
-    else
-        draw_left_graph(x, y, w - w//4, h)
-        draw_right_graph(x + (w - w//4), y, w//4, h)
-    end
-end
-
-draw_guide = function(x, y, w, h, full)
-    gfx.LoadSkinFont("NotoSans-Regular.ttf")
-    
-    local fxLText = "FX-L: more info"
-    if full then
-        fxLText = "FX-L: simple view"
-    end
-    
-    local fxRText = "FX-R: toggle hiscore"
-    
-    gfx.FontSize(20)
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM)
-    
-    gfx.BeginPath()
-    gfx.FillColor(255, 255, 255, 96)
-    gfx.Text(string.format("%s, %s", fxLText, fxRText), x+5, y+h)
-end
-
-draw_icons = function(x, y, w, h)    
-    gfx.LoadSkinFont("NotoSans-Regular.ttf")
-    
-    local icon_x = x+w-h
-    
-    icon_x = draw_laser_icon(icon_x, y, h)
-    icon_x = draw_speed_icon(icon_x, y, h)
-    icon_x = draw_hidsud_icon(icon_x, y, h)
-    icon_x = draw_mir_ran_icon(icon_x, y, h)
+					if (hitStat.delta > graphs.latest) then
+						graphs.latest = hitStat.delta;
+					end
+				end
+			end
+		end
+	end
 end
 
 render = function(deltaTime)
-    currTime = currTime + deltaTime
-    
-    -- Note: these keys are also used for viewing other players' scores on multiplayer.
-    local fxLeft = game.GetButton(4)
-    local fxRight = game.GetButton(5)
-    
-    if prevFXLeft ~= fxLeft then
-        prevFXLeft = fxLeft
-        
-        if fxLeft then
-            if result.uid == nil then showStatsHit = not showStatsHit end
-            game.PlaySample("menu_click")
-        end
-    end
-    
-    if prevFXRight ~= fxRight then
-        prevFXRight = fxRight
-        
-        if fxRight then
-            if result.uid == nil then showHiScore = not showHiScore end
-            game.PlaySample("menu_click")
-        end
-    end
+	setupLayout();
 
-    local resx,resy = game.GetResolution()
-    
-    if resx ~= currResX or resy ~= currResY or showHiScore ~= prevShowHiScore then
-        prevShowHiScore = showHiScore
-        
-        if showHiScore then
-            desw = 770
-        else
-            desw = 500
-        end
-        
-        local scaleX = resx / desw
-        local scaleY = resy / desh
-    
-        scale = math.min(scaleX, scaleY)
-        
-        if scaleX > scaleY then
-            moveX = resx / (2*scale) - desw / 2
-            moveY = 0
-        else
-            moveX = 0
-            moveY = resy / (2*scale) - desh / 2
-        end
-        
-        currResX = resX
-        currResY = resY
-    end
-    
-    -- For better screenshot display
-    gfx.BeginPath()
-    gfx.FillColor(0, 0, 0)
-    gfx.Rect(0, 0, resx, resy)
-    gfx.Fill()
-    
-    -- Background image    
-    gfx.BeginPath()
-    gfx.ImageRect(0, 0, resx, resy, backgroundImage, 0.5, 0);
-    gfx.Scale(scale,scale)
-    gfx.Translate(moveX,moveY)
-    
-    gfx.BeginPath()
-    gfx.Rect(0,0,500,800)
-    gfx.FillColor(30,30,30,128)
-    gfx.Fill()
-    
-    -- Result
-    draw_title(0, 0, 500, 110)
-    
-    if showStatsHit then
-        draw_chart_info(0, 120, 280, 420, true)
-        draw_basic_hitstat(280, 120, 220, 420, true)
-        draw_graphs(0, 540, 500, 210)
-    else
-        draw_chart_info(0, 120, 500, 310, false)
-        draw_basic_hitstat(50, 430, 400, 400, false)
-    end
-    
-    if showGuide then
-        draw_guide(0, 750, 500, 50, showStatsHit)
-    end
-    
-    if showIcons and result.isSelf ~= false then
-        draw_icons(0, 750, 500, 50)
-    end
-    
-    if showHiScore then
-        draw_highscores(showStatsHit)
-    end
-    
-    -- Applause SFX
-    if result.badge > 1 and not played then
-        game.PlaySample("applause")
-        played = true
-    end
-    
-    -- Screenshot notification
-    shotTimer = math.max(shotTimer - deltaTime, 0)
-    if shotTimer > 1 then
-        draw_shotnotif(505,755);
-    end
+	mousePosX, mousePosY = game.GetMousePos();
+
+	background:draw({
+    x = 0,
+    y = 0,
+    w = scaledW,
+    h = scaledH,
+	});
+	
+	resultPanel:render(deltaTime);
+
+	if ((#allScores - 1) > 0) then
+		scoreList:render(deltaTime);
+	end
+
+	graphs:render(deltaTime);
+
+	screenshot:drawNotification(deltaTime);
+
+	if (previousScore ~= selectedScore) then
+		scoreList.cursor.flickerTimer = 0;
+
+		previousScore = selectedScore;
+	end
 end
 
 get_capture_rect = function()
-    local x = moveX * scale
-    local y = moveY * scale
-    local w = 500 * scale
-    local h = 800 * scale
-    return x,y,w,h
+	if (screenshotRegion == 'FULLSCREEN') then
+		resX, resY = game.GetResolution();
+
+		return 0, 0, resX, resY;
+	elseif (screenshotRegion == 'PANEL') then
+		return (resultPanel.panel.x * scalingFactor),
+			(resultPanel.panel.y * scalingFactor),
+			(resultPanel.panel.w * scalingFactor),
+			(resultPanel.panel.h * scalingFactor);
+	end
 end
 
 screenshot_captured = function(path)
-    shotTimer = 10;
-    shotPath = path;
-    game.PlaySample("shutter")
+	screenshot.timer = 5;
+	screenshot.path = string.upper(path);
 end
