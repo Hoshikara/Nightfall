@@ -1,3 +1,17 @@
+###### September 27, 2020
+- Completed work for Multiplayer screens, features to note:
+  - If host, hover over users to display host controls (transfer host or kick user)
+- Added Username and Score Difference displays to `Gameplay`
+- Added the following toggles to Skin Settings:
+  - User Info during `Gameplay` (both Username and Score Difference)
+  - Score Difference exclusively
+  - `[BT-A]` shortcut for Controls during `Song Select`
+  - `[FX-L]` shortcut for Hard Gauge during `Multiplayer`
+  - `[FX-R]` shortcut for Mirror Mode during `Multiplayer`
+- Added upscore display on `Results` info panel
+- Fixed scaling issues in `Song Select`
+- Fixed indexing of nil value in multiplayer `Results`
+
 ###### September 22, 2020
 - Completed work for Practice Mode, `gameplay` and `gamesettingsdialog` scripts updated
 - Completed work for Results screen, features to note:

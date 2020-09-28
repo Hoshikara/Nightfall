@@ -184,24 +184,30 @@ local _ = {
       action = 'CAPTURE SCREENSHOT',
       controller = '',
       keyboard = '[F12]',
-      lineBreak = true,
     },
   },
   multiplayer = {
     {
       action = 'TOGGLE GAUGE TYPE',
-      controller = '[FX-L]',
+      controller = '[FX-L] *',
       keyboard = '',
     },
     {
       action = 'TOGGLE MIRROR MODE',
-      controller = '[FX-R]',
+      controller = '[FX-R] *',
       keyboard = '',
     },
     {
       action = 'TOGGLE CHAT WINDOW',
       controller = '',
       keyboard = '[F8]',
+      lineBreak = true,
+    },
+    {
+      action = '',
+      controller = '* DISABLE IN SKIN SETTINGS',
+      keyboard = '',
+      note = true,
     },
   },
   nautica = {

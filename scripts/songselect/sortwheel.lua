@@ -22,13 +22,13 @@ setupLayout = function()
   if ((cache.resX ~= resX) or (cache.resY ~= resY)) then
     scaledW = 1920;
     scaledH = scaledW * (resY / resX);
-    scalingFactor = resX / scaledW;
+		scalingFactor = resX / scaledW;
+		
+		gfx.Scale(scalingFactor, scalingFactor);
 
     cache.resX = resX;
-    cache.resY = resY;
-  end
-
-  gfx.Scale(scalingFactor, scalingFactor);
+		cache.resY = resY;
+	end
 end
 
 local layout = {
@@ -50,7 +50,7 @@ local layout = {
   grid = {},
 	labels = nil,
 	
-	setAllSizes = function(self)
+	setSizes = function(self)
 		if (not self.labels) then
 			self.labels = {};
 	
@@ -126,19 +126,18 @@ setLabels = function()
 end
 
 drawCurrentSort = function(displaying)
+	local color = (displaying and 'normal') or 'white';
 	local x = layout.field[3].x;
 	local y = layout.field.y;
 
 	gfx.BeginPath();
 	align.left();
 
-	if (displaying) then
-		fill.normal();
-	else
-		fill.white();
-	end
-
-	labels[currentSort].name:draw({ x = x, y = y });
+	labels[currentSort].name:draw({
+		x = x,
+		y = y,
+		color = color,
+	});
 
 	gfx.Save();
 
@@ -150,13 +149,18 @@ drawCurrentSort = function(displaying)
 	);
 
 	gfx.BeginPath();
+	fill.dark(255 * 0.5);
+	gfx.MoveTo(1, 1);
+	gfx.LineTo(arrowWidth + 1, 1);
+	gfx.LineTo(
+		(arrowWidth / 2) + 1,
+		((labels[currentSort].direction == 'up') and 11) or -9
+	);
+	gfx.LineTo(1, 1);
+	gfx.Fill();
 
-	if (displaying) then
-		fill.normal();
-	else
-		fill.white();
-	end
-
+	gfx.BeginPath();
+	fill[color]();
 	gfx.MoveTo(0, 0);
 	gfx.LineTo(arrowWidth, 0);
 	gfx.LineTo((arrowWidth / 2), ((labels[currentSort].direction == 'up') and 10) or -10);
@@ -168,19 +172,19 @@ end
 
 drawSortLabel = function(index, y, isSelected)
 	local alpha = math.floor(255 * math.min(timer ^ 2, 1));
+	local color = (isSelected and 'normal') or 'white';
 	local padding = layout.dropdown.padding;
 	local x = layout.dropdown[3].x + padding;
 
 	gfx.BeginPath();
 	align.left();
 
-	if (isSelected) then
-		fill.normal(alpha);
-	else
-		fill.white(alpha);
-	end
-
-	labels[index].name:draw({ x = x, y = y });
+	labels[index].name:draw({
+		x = x,
+		y = y,
+		a = alpha,
+		color = color,
+	});
 
 	gfx.Save();
 
@@ -192,13 +196,18 @@ drawSortLabel = function(index, y, isSelected)
 	);
 
 	gfx.BeginPath();
+	fill.dark(255 * 0.5);
+	gfx.MoveTo(1, 1);
+	gfx.LineTo(arrowWidth + 1, 1);
+	gfx.LineTo(
+		(arrowWidth / 2) + 1,
+		((labels[currentSort].direction == 'up') and 11) or -9
+	);
+	gfx.LineTo(1, 1);
+	gfx.Fill();
 
-	if (isSelected) then
-		fill.normal(alpha);
-	else
-		fill.white(alpha);
-	end
-
+	gfx.BeginPath();
+	fill[color](alpha);
 	gfx.MoveTo(0, 0);
 	gfx.LineTo(arrowWidth, 0);
 	gfx.LineTo((arrowWidth / 2), ((labels[index].direction == 'up') and 10) or -10);
@@ -215,7 +224,7 @@ render = function(deltaTime, displaying)
 
 	setupLayout();
 
-	layout:setAllSizes();
+	layout:setSizes();
 
 	setLabels();
 
@@ -236,7 +245,7 @@ render = function(deltaTime, displaying)
 	end
 
 	gfx.BeginPath();
-	fill.black(230);
+	fill.dark(230);
 	gfx.Rect(
 		layout.dropdown[3].x,
 		initialY,

@@ -58,7 +58,7 @@ _.initializeInfo = function(self)
     height = 5,
     lengthScale = 1,
     nearWindow = nil,
-    position = string.upper(game.GetSkinSetting('hitErrorPosition')),
+    position = string.upper(game.GetSkinSetting('hitErrorPosition')) or 'OFF',
     scale = game.GetSkinSetting('hitErrorScale'),
   };
 end

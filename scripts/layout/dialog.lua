@@ -36,8 +36,8 @@ _.setSizes = function(self, scaledW, scaledH)
 	if (not self.images) then
 		self.images = {
 			dialogBox = cacheImage('dialog.png'),
-			button = cacheImage('song_select/button_long.png'),
-			buttonHover = cacheImage('song_select/button_long_hover.png'),
+			button = cacheImage('buttons/long.png'),
+			buttonHover = cacheImage('buttons/long_hover.png'),
 		};
 	end
 

@@ -6,13 +6,15 @@ local volforce = require('songselect/volforce');
 
 local background = cacheImage('bg.png');
 
-local jacketFallback = gfx.CreateSkinImage('song_select/loading.png', 0);
+local controlsShortcut = game.GetSkinSetting('controlsShortcut') or false;
+
+local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
 
 local previousDifficultyIndex = 1;
 local previousSongIndex = 1;
 
-game.LoadSkinSample('menu_click');
-game.LoadSkinSample('click-02');
+game.LoadSkinSample('click_difficulty');
+game.LoadSkinSample('click_song');
 game.LoadSkinSample('woosh');
 
 local cache = { resX = 0, resY = 0 };
@@ -132,6 +134,8 @@ local clears = {
 };
 
 do
+  font.normal();
+
   for index, clear in ipairs(CONSTANTS.clears) do
     clears.labels[index] = cacheLabel(clear, 24);
   end
@@ -411,17 +415,28 @@ local songGrid = {
 
     gfx.BeginPath();
     align.left();
-    fill.normal();
 
-    self.labels.collection:draw({ x = x, y = 0 });
+    self.labels.collection:draw({
+      x = x,
+      y = 0,
+      color = 'normal',
+    });
 
     x = x + self.labels.x[2];
 
-    self.labels.difficulty:draw({ x = x, y = 0 });
+    self.labels.difficulty:draw({
+      x = x,
+      y = 0,
+      color = 'normal',
+    });
 
     x = x + self.labels.x[3];
   
-    self.labels.sort:draw({ x = x, y = 0 });
+    self.labels.sort:draw({
+      x = x,
+      y = 0,
+      color = 'normal',
+    });
 
     gfx.Restore();
   end,
@@ -437,8 +452,10 @@ local songGrid = {
     gfx.BeginPath();
     align.middle();
     font.normal();
-    fill.white();
     gfx.FontSize(48);
+    fill.dark(255 * 0.5);
+    gfx.Text('NO SONGS FOUND', 1, 1);
+    fill.white();
     gfx.Text('NO SONGS FOUND', 0, 0);
 
     gfx.Restore();
@@ -476,11 +493,22 @@ local songGrid = {
     );
 
     gfx.BeginPath();
-    fill.normal();
     align.right();
-    self.labels.currentSong:draw({ x = -(self.labels.of.w + self.labels.totalSongs.w + 16), y = 0 });
-    self.labels.of:draw({ x = -(self.labels.totalSongs.w + 8), y = 0 });
-    self.labels.totalSongs:draw({ x = 0, y = 0 });
+    self.labels.currentSong:draw({
+      x = -(self.labels.of.w + self.labels.totalSongs.w + 16),
+      y = 0,
+      color = 'normal',
+    });
+    self.labels.of:draw({
+      x = -(self.labels.totalSongs.w + 8),
+      y = 0,
+      color = 'normal',
+    });
+    self.labels.totalSongs:draw({
+      x = 0,
+      y = 0,
+      color = 'normal',
+    });
 
     gfx.Restore();
   end,
@@ -599,9 +627,9 @@ local songInfo = {
   difficulties = nil,
   highScore = 0,
   images = {
-    button = cacheImage('song_select/button.png'),
-    buttonHover = cacheImage('song_select/button_hover.png'),
-    panel = cacheImage('song_select/panel.png')
+    button = cacheImage('buttons/short.png'),
+    buttonHover = cacheImage('buttons/short_hover.png'),
+    panel = cacheImage('common/panel.png')
   },
   jacketSize = 0,
   labels = nil,
@@ -665,6 +693,7 @@ local songInfo = {
       self.padding.y.quarter = self.padding.y.full / 4;
 
       self.cursor.x = self.padding.x.double + self.jacketSize + self.padding.x.full - 6;
+      self.cursor.y = {};
 
       self.panel.innerWidth = self.panel.w - (self.padding.x.double * 2);
 
@@ -693,17 +722,7 @@ local songInfo = {
         cacheLabel('', 90),
         cacheLabel('', 72)
       };
-      self.labels = {
-        order = {
-          conditional = { 'grade', 'clear' },
-          main = {
-            'title',
-            'artist',
-            'effector',
-            'bpm',
-          },
-        },
-      };
+      self.labels = {};
       self.levels = {};
 
       for index, level in pairs(CONSTANTS.levels) do
@@ -784,17 +803,18 @@ local songInfo = {
 
     gfx.BeginPath();
     align.left();
-    fill.normal();
 
     self.labels.difficulty:draw({
       x = self.padding.x.double + self.jacketSize + self.padding.x.full + 6,
-      y = self.padding.y.full - 4
+      y = self.padding.y.full - 4,
+      color = 'normal',
     });
 
-    for _, name in ipairs(self.labels.order.main) do
+    for _, name in ipairs(self.order.main) do
       self.labels[name]:draw({
         x = self.labels.x,
-        y = y
+        y = y,
+        color = 'normal',
       });
 
       y = y
@@ -813,8 +833,12 @@ local songInfo = {
       end
 
       if (grades:getGrade(difficulty)) then
-        for _, name in ipairs(self.labels.order.conditional) do
-          self.labels[name]:draw({ x = self.labels.x, y = y });
+        for _, name in ipairs(self.order.conditional) do
+          self.labels[name]:draw({
+            x = self.labels.x,
+            y = y,
+            color = 'normal',
+          });
 
           y = y 
             + baseLabelHeight
@@ -839,7 +863,6 @@ local songInfo = {
 
     gfx.BeginPath();
     align.left();
-    fill.white();
 
     for _, name in ipairs(self.order.main) do
       local currentLabel = ((name == 'effector') and songCache[id][name][self.selectedDifficulty])
@@ -856,10 +879,15 @@ local songInfo = {
           self.labels.x,
           y,
           scalingFactor,
-          {255, 255, 255, 255}
+          'white',
+          255
         );
       else
-        currentLabel:draw({ x = self.labels.x, y = y - 1 });
+        currentLabel:draw({
+          x = self.labels.x,
+          y = y - 1,
+          color = 'white',
+        });
       end
 
       y = y
@@ -874,7 +902,11 @@ local songInfo = {
       for _, name in ipairs(self.order.conditional) do
         local currentLabel = ((name == 'grade') and gradeLabel) or clearLabel;
 
-        currentLabel:draw({ x = self.labels.x, y = y });
+        currentLabel:draw({
+          x = self.labels.x,
+          y = y,
+          color = 'white',
+        });
 
         y = y
           + labelHeight[name]
@@ -897,16 +929,25 @@ local songInfo = {
       local y = scaledH - (scaledH / 20) - (self.padding.y.double * 2.15);
 
       align.left();
-      fill.normal();
-      self.labels.highScore:draw({ x = x, y = y });
+      self.labels.highScore:draw({
+        x = x,
+        y = y,
+        color = 'normal',
+      });
 
       y = y + (self.padding.y.quarter / 2) + 2;
 
-      fill.white();
-      self.highScore[1]:draw({ x = x - 4, y = y });
+      self.highScore[1]:draw({
+        x = x - 4,
+        y = y,
+        color = 'white',
+      });
 
-      fill.normal();
-      self.highScore[2]:draw({ x = x + self.highScore[1].w, y = y + self.padding.y.half - 6 });
+      self.highScore[2]:draw({
+        x = x + self.highScore[1].w,
+        y = y + self.padding.y.half - 6,
+        color = 'normal',
+      });
     end
 
     gfx.Restore();
@@ -921,22 +962,29 @@ local songInfo = {
     if (isSelected) then
       self.images.buttonHover:draw({ x = x, y = y });
     else
-      self.images.button:draw({ x = x, y = y, a = 0.45 });
+      self.images.button:draw({
+        x = x,
+        y = y,
+        a = 0.45,
+      });
     end
 
     if (currentDifficulty) then
       gfx.BeginPath();
       align.left();
-      fill.white(alpha);
       self.difficulties[currentDifficulty.difficulty + 1]:draw({
         x = x + 36,
         y = y + (self.images.button.h / 2.85),
+        a = alpha,
+        color = 'white',
       });
 
       align.right();
       self.levels[currentDifficulty.level]:draw({
         x = x + self.images.button.w - 36,
         y = y + (self.images.button.h / 2.85),
+        a = alpha,
+        color = 'white',
       });
     end
 
@@ -962,7 +1010,14 @@ local songInfo = {
 
     gfx.BeginPath();
 
-    cursor:drawDifficultyCursor(self.cursor.x, self.cursor.pos, 222, 74, 4, self.cursor.alpha);
+    cursor:drawDifficultyCursor(
+			self.cursor.x,
+			self.cursor.pos,
+			222,
+			74,
+			4,
+			self.cursor.alpha
+		);
 
     gfx.Restore();
   end,
@@ -1013,7 +1068,10 @@ local songInfo = {
         self.cursor.selected = index;
       end
 
-      self.cursor.y[index] = difficultyY;
+      if (not self.cursor.y[index]) then
+        self.cursor.y[index] = difficultyY;
+      end
+
       difficultyY = self:drawDifficulty(level, isSelected, difficultyY);
     end
 
@@ -1124,8 +1182,12 @@ local search = {
 
     gfx.BeginPath();
     align.left();
-    fill.normal(self.alpha);
-    self.labels.search:draw({ x = self.x + 8, y = self.y - 4 });
+    self.labels.search:draw({
+      x = self.x + 8,
+      y = self.y - 4,
+      a = self.alpha,
+      color = 'normal',
+    });
 
     if (shouldShow) then
       gfx.BeginPath();
@@ -1135,10 +1197,10 @@ local search = {
 
       gfx.BeginPath();
       align.left();
-      fill.white();
       self.labels.input:draw({
         x = self.x + 8,
         y = self.y + 20,
+        color = 'white',
         maxWidth = self.w - 24,
       });
     end
@@ -1178,34 +1240,65 @@ local miscInfo = {
       self.labels.volforce.value = cacheLabel('', 20);
     end
 
+    local forceValue = totalForce or game.GetSkinSetting('cachedVolforce') or 0;
     local y = self.labels.bta.h - 6;
+
+    font.number();
+    self.labels.volforce.value:update({ new = string.format('%.2f', forceValue) });
   
     gfx.Save();
   
     gfx.Translate((scaledW / 20) - 1, scaledH - (scaledH / 20));
 
-    gfx.BeginPath();
-    align.left();
-    fill.normal();
-    self.labels.bta:draw({ x = 0, y = y });
+    if (controlsShortcut) then
+      gfx.BeginPath();
+      align.left();
+      self.labels.bta:draw({
+        x = 0,
+        y = y,
+        color = 'normal',
+      });
 
-    fill.white();
-    self.labels.showControls:draw({ x = self.labels.bta.w + 8, y = y + 1 });
+      self.labels.showControls:draw({
+        x = self.labels.bta.w + 8,
+        y = y + 1,
+        color = 'white',
+      });
 
-    local forceValue = totalForce or game.GetSkinSetting('cachedVolforce');
+      gfx.Translate(songInfo.panel.w + 2, 0);
 
-    gfx.Translate(songInfo.panel.w + 2, 0);
+      font.number();
+      self.labels.volforce.value:update({ new = string.format('%.2f', forceValue) });
 
-    font.number();
-    self.labels.volforce.value:update({ new = string.format('%.2f', forceValue) });
+      gfx.BeginPath();
+      align.right();
+      self.labels.volforce.label:draw({
+        x = 0,
+        y = y,
+        color = 'normal',
+      });
 
-    gfx.BeginPath();
-    align.right();
-    fill.normal();
-    self.labels.volforce.label:draw({ x = 0, y = y });
+      self.labels.volforce.value:draw({
+        x = -(self.labels.volforce.label.w + 8),
+        y = y,
+        color = 'white',
+      });
+    else
+      gfx.BeginPath();
+      align.left();
 
-    fill.white();
-    self.labels.volforce.value:draw({ x = -(self.labels.volforce.label.w + 8), y = y });
+      self.labels.volforce.value:draw({
+        x = 0,
+        y = y,
+        color = 'white',
+      });
+
+      self.labels.volforce.label:draw({
+        x = self.labels.volforce.value.w + 8,
+        y = y,
+        color = 'normal',
+      });
+    end
 
     gfx.Restore();
   end
@@ -1240,7 +1333,7 @@ set_index = function(newSongIndex)
   songInfo:setSongIndex(newSongIndex);
 
   if (previousSongIndex ~= newSongIndex) then
-    game.PlaySample('menu_click');
+    game.PlaySample('click_song');
   end
 
   previousSongIndex = newSongIndex;
@@ -1251,7 +1344,7 @@ set_diff = function(newDifficultyIndex)
   songInfo:setDifficulty(newDifficultyIndex);
 
   if (previousDifficultyIndex ~= newDifficultyIndex) then
-    game.PlaySample('click-02');
+    game.PlaySample('click_difficulty');
   end
 
   previousDifficultyIndex = newDifficultyIndex;

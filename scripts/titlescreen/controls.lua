@@ -58,14 +58,13 @@ _.initializeButton = function(self)
   button.drawButton = function(self, x, y, i, isActive)
     gfx.BeginPath();
 
-    if (isActive) then
-      fill.normal()
-    else
-      fill.white(80);
-    end
-  
     align.left();
-    self[i].label:draw({ x = x, y = y });
+    self[i].label:draw({
+      x = x,
+      y = y,
+      a = (isActive and 255) or 80,
+      color = (isActive and 'normal') or 'white',
+    });
 
     if (_:mouseClipped(x - 20, y - 10, self[i].label.w + 40, self[i].label.h + 30)) then
       _.hoveredPage = i;
@@ -121,25 +120,38 @@ _.initializeControls = function(self)
 
     gfx.BeginPath();
     align.left();
-    fill.white();
 
-    _.controller:draw({ x = x, y = y });
-    _.keyboard:draw({ x = x + 350, y = y });
+    _.controller:draw({
+      x = x,
+      y = y,
+      color = 'white',
+    });
+    _.keyboard:draw({
+      x = x + 350,
+      y = y,
+      color = 'white',
+    });
 
     y = y + 60;
 
     for i = 1, #list do
-      if (list[i].note) then
-        fill.white();
-      else
-        fill.normal();
-      end
-      list[i].controller:draw({ x = x, y = y });
+      list[i].controller:draw({
+        x = x,
+        y = y,
+        color = (list[i].note and 'white') or 'normal',
+      });
 
-      list[i].keyboard:draw({ x = x + 350, y = y });
+      list[i].keyboard:draw({
+        x = x + 350,
+        y = y,
+        color = (list[i].note and 'white') or 'normal',
+      });
 
-      fill.white();
-      list[i].action:draw({ x = x + 700, y = y });
+      list[i].action:draw({
+        x = x + 700,
+        y = y,
+        color = 'white',
+      });
 
       if ((i ~= #list) and (not list[i].note)) then
         gfx.BeginPath();
@@ -222,8 +234,11 @@ _.render = function(self, deltaTime, showControls, selectedPage)
 
   gfx.BeginPath();
   align.left();
-  fill.white();
-  self.heading:draw({ x = x - 3, y = y });
+  self.heading:draw({
+    x = x - 3,
+    y = y,
+    color = 'white',
+  });
 
   self.buttonY = y + self.heading.h * 2;
   self.hoveredPage = nil;
@@ -255,16 +270,16 @@ _.render = function(self, deltaTime, showControls, selectedPage)
 
   gfx.BeginPath();
   align.left();
-  fill.normal();
   self.button.startEsc:draw({
     x = x,
-    y = y + self.layout.scaledH - (self.layout.scaledH / 7)
+    y = y + self.layout.scaledH - (self.layout.scaledH / 7),
+    color = 'normal',
   });
 
-  fill.white();
   self.button.close:draw({
     x = x + self.button.startEsc.w + 8,
-    y = y + self.layout.scaledH - (self.layout.scaledH / 7)
+    y = y + self.layout.scaledH - (self.layout.scaledH / 7),
+    color = 'white',
   });
 
   return self.hoveredPage;

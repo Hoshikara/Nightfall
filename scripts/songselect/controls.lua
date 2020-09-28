@@ -94,26 +94,43 @@ local _ = {
 
     gfx.BeginPath();
     align.left();
-    fill.white(alpha);
 
-    self.headings.controller:draw({ x = x, y = y });
-    self.headings.keyboard:draw({ x = x + 350, y = y });
+    self.headings.controller:draw({
+      x = x,
+      y = y,
+      a = alpha,
+      color = 'white',
+    });
+    self.headings.keyboard:draw({
+      x = x + 350,
+      y = y,
+      a = alpha,
+      color = 'white',
+    });
 
     y = y + 60;
 
     for i = 1, #list do
-      if (list[i].note) then
-        fill.white(alpha);
-      else
-        fill.normal(alpha);
-      end
+      list[i].controller:draw({
+        x = x,
+        y = y,
+        a = alpha,
+        color = (list[i].note and 'white') or 'normal',
+      });
 
-      list[i].controller:draw({ x = x, y = y });
+      list[i].keyboard:draw({
+        x = x + 350,
+        y = y,
+        a = alpha,
+        color = (list[i].note and 'white') or 'normal',
+      });
 
-      list[i].keyboard:draw({ x = x + 350, y = y });
-
-      fill.white(alpha);
-      list[i].action:draw({ x = x + 700, y = y });
+      list[i].action:draw({
+        x = x + 700,
+        y = y,
+        a = alpha,
+        color = 'white',
+      });
 
       if ((i ~= #list) and (not list[i].note)) then
         gfx.BeginPath();
@@ -135,14 +152,13 @@ local _ = {
 
     gfx.BeginPath();
 
-    if (isActive) then
-      fill.normal(255 * self.timer);
-    else
-      fill.white(80 * self.timer);
-    end
-  
     align.left();
-    heading:draw({ x = x, y = y });
+    heading:draw({
+      x = x,
+      y = y,
+      a = (isActive and (255 * self.timer)) or (80 * self.timer),
+      color = (isActive and 'normal') or 'white',
+    });
 
     if (heading.w > self.headings.maxWidth) then
       self.headings.maxWidth = heading.w;
@@ -165,8 +181,12 @@ local _ = {
 
     gfx.BeginPath();
     align.left();
-    fill.white(alpha);
-    self.headings.main:draw({ x = -3, y = 0 });
+    self.headings.main:draw({
+      x = -3,
+      y = 0,
+      a = alpha,
+      color = 'white',
+    });
 
     self.headingY = self.headings.main.h * 2;
 
@@ -197,13 +217,18 @@ local _ = {
 
     gfx.BeginPath();
     align.left();
-    fill.normal(alpha);
-    self.headings.btd:draw({ x = 0, y = self.scaledH - (self.scaledH / 7) });
+    self.headings.btd:draw({
+      x = 0,
+      y = self.scaledH - (self.scaledH / 7),
+      a = alpha,
+      color = 'normal',
+    });
 
-    fill.white(alpha)
     self.headings.next:draw({
       x = self.headings.btd.w + 8,
-      y = self.scaledH - (self.scaledH / 7) + 1
+      y = self.scaledH - (self.scaledH / 7) + 1,
+      a = alpha,
+      color = 'white',
     });
 
     gfx.Restore();

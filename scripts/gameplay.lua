@@ -29,7 +29,6 @@ do
 end
 
 local critLineBar = cacheImage('gameplay/crit_bar/crit_bar.png');
-local critLinePos = { 0.95, 0.75 };
 
 local difficulties = nil;
 
@@ -49,7 +48,7 @@ do
 	end
 end
 
-local earlatePosition = game.GetSkinSetting('earlatePosition');
+local earlatePosition = game.GetSkinSetting('earlatePosition') or 'BOTTOM';
 
 setEarlatePosition = function()
 	if (earlatePosition == 'OFF') then
@@ -257,10 +256,18 @@ local alerts = {
 			align.middle();
 
 			gfx.FillColor(self.colors.r[i], self.colors.g[i], self.colors.b[i], alpha);
-			self.labels[i]:draw({ x = 0, y = self.labels.y });
+			self.labels[i]:draw({
+				x = 0,
+				y = self.labels.y,
+				override = true,
+			});
 
 			fill.white(70 * self.alpha[i]);
-			self.labels[i]:draw({ x = 0, y = self.labels.y });
+			self.labels[i]:draw({
+				x = 0,
+				y = self.labels.y,
+				override = true,
+			});
 
 			gfx.ResetScissor();
 
@@ -342,15 +349,37 @@ local combo = {
 		if ((gameplay.comboState == 2) or (gameplay.comboState == 1)) then
 			gfx.BeginPath();
 			align.middle();
+
+			gfx.FillColor(4, 8, 12, 125);
+			self.labels.chain:draw({
+				x = x + 1,
+				y = y - (self.labels.chain.h * 2.25) + 1,
+				override = true,
+			});
 	
 			gfx.FillColor(255, 235, 100, 255);
-			self.labels.chain:draw({ x = x, y = y - (self.labels.chain.h * 2.25) });
+			self.labels.chain:draw({
+				x = x,
+				y = y - (self.labels.chain.h * 2.25),
+				override = true,
+			});
 	
 			for i = 1, 4 do
 				self.labels[i]:update({ new = digits[i] });
+
+				gfx.FillColor(4, 8, 12, math.floor(alpha[i] * 0.5));
+				self.labels[i]:draw({
+					x = self.x[i] + 1,
+					y = y + 1,
+					override = true,
+				});
 	
 				gfx.FillColor(255, 235, 100, alpha[i]);
-				self.labels[i]:draw({ x = self.x[i], y = y });
+				self.labels[i]:draw({
+					x = self.x[i],
+					y = y,
+					override = true,
+				});
 			end
 	
 			if (self.current >= self.burstValue) then
@@ -384,19 +413,46 @@ local combo = {
 					size = math.floor(64 * self.scale),
 				});
 	
-				self.labels.burst[i]:draw({ x = self.x[i], y = y });
+				self.labels.burst[i]:draw({
+					x = self.x[i],
+					y = y,
+					override = true,
+				});
 			end
 		else
 			gfx.BeginPath();
 			align.middle();
+
+			gfx.FillColor(4, 8, 12, 125);
+			self.labels.chain:draw({
+				x = x + 1,
+				y = y - (self.labels.chain.h * 2.5) + 1,
+				override = true,
+			});
+
 			gfx.FillColor(235, 235, 235, 255);
-			self.labels.chain:draw({ x = x, y = y - (self.labels.chain.h * 2.5) });
+			self.labels.chain:draw({
+				x = x,
+				y = y - (self.labels.chain.h * 2.5),
+				override = true,
+			});
 	
 			for i = 1, 4 do
 				self.labels[i]:update({ new = digits[i] });
+
+				gfx.FillColor(4, 8, 12, math.floor(alpha[i] * 0.5));
+				self.labels[i]:draw({
+					x = self.x[i] + 1,
+					y = y + 1,
+					override = true,
+				});
 	
 				gfx.FillColor(235, 235, 235, alpha[i]);
-				self.labels[i]:draw({ x = self.x[i], y = y });
+				self.labels[i]:draw({
+					x = self.x[i],
+					y = y,
+					override = true,
+				});
 			end
 		end
 	end,
@@ -456,14 +512,30 @@ local earlate = {
 
 		if (self.isLate) then
 			gfx.FillColor(150, 150, 150, 100);
-			self.labels.late:draw({ x = 0, y = 2 });
+			self.labels.late:draw({
+				x = 0,
+				y = 2,
+				override = true,
+			});
 			gfx.FillColor(105, 205, 255, math.floor(255 * self['alpha']));
-			self.labels.late:draw({ x = 0, y = 0 });
+			self.labels.late:draw({
+				x = 0,
+				y = 0,
+				override = true,
+			});
 		else
 			gfx.FillColor(150, 150, 150, 100);
-			self.labels.early:draw({ x = 0, y = 2 });
+			self.labels.early:draw({
+				x = 0,
+				y = 2,
+				override = true,
+			});
 			gfx.FillColor(255, 105, 255, math.floor(255 * self['alpha']));
-			self.labels.early:draw({ x = 0, y = 0 });
+			self.labels.early:draw({
+				x = 0,
+				y = 0,
+				override = true,
+			});
 		end
 
 		gfx.Restore();
@@ -559,19 +631,33 @@ local gauge = {
 
 		gfx.BeginPath();
 		align.right();
-		fill.white(introAlpha);
-		self.labels.percentage:draw({ x = -6, y = height - (height * gameplay.gauge) - 14 });
+		self.labels.percentage:draw({
+			x = -6,
+			y = height - (height * gameplay.gauge) - 14,
+			a = introAlpha,
+			color = 'white',
+
+		});
 
 		gfx.BeginPath();
-		fill.white(introAlpha);
 		gfx.Rotate(90);
 
 		if (gameplay.gaugeType == 0) then
 			align.right();
-			self.labels.effective:draw({ x = height + 3, y = -self.labels.h - 26 });
+			self.labels.effective:draw({
+				x = height + 3,
+				y = -self.labels.h - 26,
+				a = introAlpha,
+				color = 'white',
+			});
 		else
 			align.left();
-			self.labels.excessive:draw({ x = -4, y = -self.labels.h - 26 });
+			self.labels.excessive:draw({
+				x = -4,
+				y = -self.labels.h - 26,
+				a = introAlpha,
+				color = 'white',
+			});
 		end
 
 		gfx.Rotate(-90);
@@ -637,8 +723,11 @@ local practice = {
 
 		gfx.BeginPath();
 		align.middle();
-		fill.white();
-		self.labels.practiceMode:draw({ x = scaledW / 2, y = scaledH / 60 });
+		self.labels.practiceMode:draw({
+			x = scaledW / 2,
+			y = scaledH / 60,
+			color = 'white',
+		});
 
 		if (not self.practicing) then return end
 
@@ -651,83 +740,131 @@ local practice = {
 		gfx.BeginPath();
 		align.left();
 
-		fill.normal();
-		self.labels.mission.label:draw({ x = 0, y = y });
+		self.labels.mission.label:draw({
+			x = 0,
+			y = y,
+			color = 'normal',
+		});
 
 		y = y + self.labels.mission.label.h * 1.4;
 
-		fill.white();
 		self.labels.mission.description:draw({
 			x = 0,
 			y = y,
+			color = 'white',
 			maxWidth = scaledW / 4,
 		});
 
 		if (self.counts.plays > 0) then
 			y = y + (self.labels.mission.description.h * 3);
 
-			fill.normal();
-			self.labels.previousRun:draw({ x = 1, y = y });
+			self.labels.previousRun:draw({
+				x = 1,
+				y = y,
+				color = 'normal',
+			});
 
 			y = y + (self.labels.previousRun.h * 1.5);
 
-			self.labels.score.label:draw({ x = 1, y = y });
+			self.labels.score.label:draw({
+				x = 1,
+				y = y,
+				color = 'normal',
+			});
 
 			y = y + self.labels.score.label.h;
 
-			fill.white();
-			self.labels.score.values[1]:draw({ x = 0, y = y });
+			self.labels.score.values[1]:draw({
+				x = 0,
+				y = y,
+				color = 'white',
+			});
 
-			fill.normal();
-			self.labels.score.values[2]:draw({ x = self.labels.score.values[1].w, y = y + 12 });
+			self.labels.score.values[2]:draw({
+				x = self.labels.score.values[1].w,
+				y = y + 12,
+				color = 'normal',
+			});
 
 			y = y + (self.labels.score.values[1].h * 1.25);
 
-			fill.normal();
-			self.labels.near.label:draw({ x = 0, y = y });
+			self.labels.near.label:draw({
+				x = 0,
+				y = y,
+				color = 'normal',
+			 });
 
-			self.labels.miss.label:draw({ x = self.labels.near.label.w * 2, y = y });
+			self.labels.miss.label:draw({
+				x = self.labels.near.label.w * 2,
+				y = y,
+				color = 'normal',
+			});
 
 			y = y + self.labels.near.label.h;
 
-			fill.white();
-			self.labels.near.value:draw({ x = 0, y = y });
+			self.labels.near.value:draw({
+				x = 0,
+				y = y,
+				color = 'white',
+			});
 
-			self.labels.miss.value:draw({ x = self.labels.near.label.w * 2, y = y });
+			self.labels.miss.value:draw({
+				x = self.labels.near.label.w * 2,
+				y = y,
+				color = 'white',
+			});
 
 			y = y + self.labels.score.values[1].h;
 
-			fill.normal();
-			self.labels.hitDelta.label:draw({ x = 0, y = y });
+			self.labels.hitDelta.label:draw({
+				x = 0,
+				y = y,
+				color = 'normal',
+			});
 
 			y = y + self.labels.hitDelta.label.h;
 
-			fill.white();
-			self.labels.hitDelta.mean:draw({ x = 0, y = y });
+			self.labels.hitDelta.mean:draw({
+				x = 0,
+				y = y,
+				color = 'white',
+			});
 
-			fill.normal();
-			self.labels.hitDelta.plusMinus:draw({ x = self.labels.hitDelta.mean.w + 8, y = y });
+			self.labels.hitDelta.plusMinus:draw({
+				x = self.labels.hitDelta.mean.w + 8,
+				y = y,
+				color = 'normal',
+			});
 
-			fill.white();
 			self.labels.hitDelta.meanAbs:draw({
 				x = self.labels.hitDelta.mean.w
 					+ 8
 					+ self.labels.hitDelta.plusMinus.w,
 				y = y,
+				color = 'white',
 			});
 
 			y = y + (self.labels.mission.description.h * 3);
 
-			fill.normal();
-			self.labels.passRate.label:draw({ x = 0, y = y });
+			self.labels.passRate.label:draw({
+				x = 0,
+				y = y,
+				color = 'normal',
+			});
 
 			y = y + (self.labels.passRate.label.h * 1.5);
 
-			fill.white();
-			self.labels.passRate.value:draw({ x = 0, y = y });
+			self.labels.passRate.value:draw({
+				x = 0,
+				y = y,
+				color = 'white',
+			});
 
-			fill.normal();
-			self.labels.passRate.ratio:draw({ x = self.labels.passRate.value.w + 16, y = y });
+			self.labels.passRate.ratio:draw({
+				x = self.labels.passRate.value.w + 16,
+				y = y,
+				color = 'normal',
+			});
 		end
 
 		gfx.Restore();
@@ -785,25 +922,45 @@ local score = {
 		gfx.BeginPath();
 		align.right();
 
-		fill.white(introAlpha);
-		self.labels.score.label:draw({ x = -2, y = -(self.labels.score[1].h * 0.35) });
+		self.labels.score.label:draw({
+			x = -2,
+			y = -(self.labels.score[1].h * 0.35),
+			a = introAlpha,
+			color = 'white',
+		});
 
-		fill.normal(introAlpha);
-		self.labels.score[2]:draw({ x = 0, y = 20	});
+		self.labels.score[2]:draw({
+			x = 0,
+			y = 20,
+			a = introAlpha,
+			color = 'normal',
+		});
 
-		fill.white(introAlpha);
-		self.labels.score[1]:draw({ x = -(self.labels.score[2].w), y = 0 });
+		self.labels.score[1]:draw({
+			x = -(self.labels.score[2].w),
+			y = 0,
+			a = introAlpha,
+			color = 'white',
+		});
 
 		gfx.Translate(-3, self.labels.score[1].h - 6);
 
 		gfx.BeginPath();
 		align.right();
 
-		fill.white(introAlpha);
-		self.labels.maxChain.label:draw({ x = 0, y = 0 });
+		self.labels.maxChain.label:draw({
+			x = 0,
+			y = 0,
+			a = introAlpha,
+			color = 'white',
+		});
 
-		fill.normal(introAlpha);
-		self.labels.maxChain.chain:draw({ x = -(self.labels.maxChain.label.w + 12), y = 0 });
+		self.labels.maxChain.chain:draw({
+			x = -(self.labels.maxChain.label.w + 12),
+			y = 0,
+			a = introAlpha,
+			color = 'normal',
+		});
 		
 		gfx.Restore();
 	end
@@ -811,7 +968,7 @@ local score = {
 
 local songInfo = {
 	jacket = {
-		fallback = gfx.CreateSkinImage('song_select/loading.png', 0),
+		fallback = gfx.CreateSkinImage('common/loading.png', 0),
 		image = nil,
 		w = 180,
 		h = 180,
@@ -948,14 +1105,22 @@ local songInfo = {
 		gfx.Stroke();
 
 		gfx.BeginPath();
-		fill.white(255 * self.timers.fade);
 		align.left();
-		difficulties[gameplay.difficulty + 1]:draw({ x = 0, y = self.jacket.h + 8 });
+		difficulties[gameplay.difficulty + 1]:draw({
+			x = 0,
+			y = self.jacket.h + 8,
+			a = 255 * self.timers.fade,
+			color = 'white',
+		});
 
 		gfx.BeginPath();
 		align.right();
-		fill.normal(255 * self.timers.fade);
-		difficulties.level:draw({ x = self.jacket.w, y = self.jacket.h + 8 });
+		difficulties.level:draw({
+			x = self.jacket.w,
+			y = self.jacket.h + 8,
+			a = 255 * self.timers.fade,
+			color = 'normal',
+		});
 
 		self:drawDetails(
 			0,
@@ -969,7 +1134,6 @@ local songInfo = {
 
 		gfx.BeginPath();
 		align.left();
-		fill.white(introAlpha);
 
 		if (self.labels.title.w > length) then
 			self.timers.title = self.timers.title + deltaTime;
@@ -981,15 +1145,19 @@ local songInfo = {
 				x - 2,
 				y + 2,
 				scalingFactor,
-				{255, 255, 255, introAlpha}
+				'white',
+				introAlpha
 			);
 		else
-			self.labels.title:draw({ x = x - 2, y = y + 2 });
+			self.labels.title:draw({
+				x = x - 2,
+				y = y + 2,
+				a = introAlpha,
+				color = 'white',
+			});
 		end
 
 		y = y + (self.labels.title.h * 1.25);
-
-		fill.normal(introAlpha);
 
 		if (self.labels.artist.w > length) then
 			self.timers.artist = self.timers.artist + deltaTime;
@@ -1001,10 +1169,16 @@ local songInfo = {
 				x - 1,
 				y,
 				scalingFactor,
-				{60, 110, 160, introAlpha}
+				'normal',
+				introAlpha
 			);
 		else
-			self.labels.artist:draw({ x = x - 1, y = y });
+			self.labels.artist:draw({
+				x = x - 1,
+				y = y,
+				a = introAlpha,
+				color = 'normal',
+			});
 		end
 
 		y = y + (self.labels.artist.h * 1.75);
@@ -1026,41 +1200,103 @@ local songInfo = {
 		gfx.BeginPath();
 		align.right();
 	
-		fill.normal(introAlpha);
-		self.labels.bpm.value:draw({ x = x, y = y });
+		self.labels.bpm.value:draw({
+			x = x,
+			y = y,
+			a = introAlpha,
+			color = 'normal',
+		});
 
-		fill.white(introAlpha);
-		self.labels.bpm.label:draw({ x = x + self.stats.x, y = y - 1 });
+		self.labels.bpm.label:draw({
+			x = x + self.stats.x,
+			y = y - 1,
+			a = introAlpha,
+			color = 'white',
+		});
 
 
 		if (game.GetButton(game.BUTTON_STA) and showAdjustments) then
 			if (game.GetButton(game.BUTTON_BTB)) then
-				fill.normal(introAlpha);
-				self.labels.hidden.cutoff.value:draw({ x = x, y = y + self.stats.y });
-				self.labels.sudden.cutoff.value:draw({ x = x, y = y + self.stats.y * 2 });
+				self.labels.hidden.cutoff.value:draw({
+					x = x,
+					y = y + self.stats.y,
+					a = introAlpha,
+					color = 'normal',
+				});
+				self.labels.sudden.cutoff.value:draw({
+					x = x,
+					y = y + self.stats.y * 2,
+					a = introAlpha,
+					color = 'normal',
+				});
 
-				fill.white(introAlpha);
-				self.labels.hidden.cutoff.label:draw({ x = x + self.stats.x - 8, y = y + self.stats.y });
-				self.labels.sudden.cutoff.label:draw({ x = x + self.stats.x - 8, y = y + (self.stats.y * 2) });
+				self.labels.hidden.cutoff.label:draw({
+					x = x + self.stats.x - 8,
+					y = y + self.stats.y,
+					a = introAlpha,
+					color = 'white',
+				});
+				self.labels.sudden.cutoff.label:draw({
+					x = x + self.stats.x - 8,
+					y = y + (self.stats.y * 2),
+					a = introAlpha,
+					color = 'white',
+				});
 			elseif (game.GetButton(game.BUTTON_BTC)) then
-				fill.normal(introAlpha);
-				self.labels.hidden.fade.value:draw({ x = x, y = y + self.stats.y });
-				self.labels.sudden.fade.value:draw({ x = x, y = y + self.stats.y * 2 });
+				self.labels.hidden.fade.value:draw({
+					x = x,
+					y = y + self.stats.y,
+					a = introAlpha,
+					color = 'normal',
+				});
+				self.labels.sudden.fade.value:draw({
+					x = x,
+					y = y + self.stats.y * 2,
+					a = introAlpha,
+					color = 'normal',
+				});
 
-				fill.white(introAlpha);
-				self.labels.hidden.fade.label:draw({ x = x + self.stats.x - 8, y = y + self.stats.y });
-				self.labels.sudden.fade.label:draw({ x = x + self.stats.x - 8, y = y + (self.stats.y * 2) });
+				self.labels.hidden.fade.label:draw({
+					x = x + self.stats.x - 8,
+					y = y + self.stats.y,
+					a = introAlpha,
+					color = 'white',
+				});
+				self.labels.sudden.fade.label:draw({
+					x = x + self.stats.x - 8,
+					y = y + (self.stats.y * 2),
+					a = introAlpha,
+					color = 'white',
+				});
 			else
-				self.labels.hispeed.adjust:draw({ x = x + self.stats.x, y = y + self.stats.y });
+				self.labels.hispeed.adjust:draw({
+					x = x + self.stats.x,
+					y = y + self.stats.y,
+					a = introAlpha,
+					color = 'white',
+				});
 
-				fill.normal(introAlpha);
-				self.labels.hispeed.value:draw({ x = x, y = y + self.stats.y });
+				self.labels.hispeed.value:draw({
+					x = x,
+					y = y + self.stats.y,
+					a = introAlpha,
+					color = 'normal',
+				});
 			end
 		else
-			self.labels.hispeed.label:draw({ x = x + self.stats.x, y = y + self.stats.y });
+			self.labels.hispeed.label:draw({
+				x = x + self.stats.x,
+				y = y + self.stats.y,
+				a = introAlpha,
+				color = 'white',
+			});
 
-			fill.normal(introAlpha);
-			self.labels.hispeed.value:draw({ x = x, y = y + self.stats.y });
+			self.labels.hispeed.value:draw({
+				x = x,
+				y = y + self.stats.y,
+				a = introAlpha,
+				color = 'normal',
+			});
 		end
 
 		gfx.Restore();
@@ -1091,6 +1327,139 @@ local songInfo = {
 	end
 };
 
+local showScoreDifference = game.GetSkinSetting('showScoreDifference') or false;
+local showUserInfo = game.GetSkinSetting('showUserInfo') or false;
+local username = game.GetSkinSetting('displayName') or '';
+
+local userInfo = {
+	difference = 0,
+	labels = nil,
+	timer = 0,
+	x = {},
+
+	setLabels = function(self)
+		if (not self.labels) then
+			font.medium();
+
+			self.labels = {
+				player = cacheLabel('PLAYER', 18),
+				scoreDifference = cacheLabel('SCORE DIFFERENCE', 18),
+			};
+
+			font.normal();
+
+			if (gameplay.autoplay) then
+				self.labels.username = cacheLabel('AUTOPLAY', 40);
+			else
+				self.labels.username = cacheLabel(string.upper(username), 40);
+			end
+
+			font.number();
+
+			self.labels.prefixes = {
+				minus = cacheLabel('-', 44),
+				plus = cacheLabel('+', 44),
+			};
+
+			self.labels.score = {
+				cacheLabel('', 54),
+				cacheLabel('', 44),
+			};
+		end
+	end,
+
+	drawUserInfo = function(self, deltaTime)
+		self:setLabels();
+
+		local introShift = math.max(introTimer - 1, 0);
+		local introAlpha = math.floor(255 * (1 - (introShift ^ 1.5)));
+		local initialX = scaledW / 80;
+		local initialY = scaledH / 2.25;
+		local y = 0;
+
+		if (introShift < 0.5) then
+			self.timer = math.min(self.timer + (deltaTime * 6), 1);
+		end
+
+		gfx.Save();
+
+		gfx.Translate(initialX - ((scaledW / 40) * (introShift ^ 4)), initialY);
+
+		gfx.BeginPath();
+		align.left();
+
+		self.labels.player:draw({
+			x = 0,
+			y = y,
+			a = 255 * self.timer,
+			color = 'normal',
+		});
+
+		y = y + (self.labels.player.h * 1.125);
+
+		self.labels.username:draw({
+			x = 0,
+			y = y,
+			a = 255 * self.timer,
+			color = 'white',
+		});
+
+		if (showScoreDifference and gameplay.scoreReplays[1]) then
+			y = y + (self.labels.username.h * 1.75);
+
+			local difference = score.current - gameplay.scoreReplays[1].currentScore;
+			local differenceString = string.format('%08d', math.abs(difference));
+			local prefix = ((difference < 0) and 'minus') or 'plus';
+
+			font.number();
+
+			self.labels.score[1]:update({ new = string.sub(differenceString, 1, 4) });
+			self.labels.score[2]:update({ new = string.sub(differenceString, -4) });
+
+			if (not self.x[1]) then
+				self.x[1] = self.labels.prefixes.plus.w + 4;
+				self.x[2] = self.x[1] + self.labels.score[1].w + 2;
+			end
+
+			gfx.BeginPath();
+			align.left();
+
+			self.labels.scoreDifference:draw({
+				x = 0,
+				y = y,
+				a = 255 * self.timer,
+				color = 'normal',
+			});
+
+			y = y + self.labels.scoreDifference.h;
+
+			self.labels.prefixes[prefix]:draw({
+				x = ((prefix == 'plus') and 0) or 9,
+				y = y + ((prefix == 'plus' and (self.labels.prefixes.plus.h * 0.125))
+				or 3),
+				a = 255 * self.timer,
+				color = 'white',
+			});
+
+			self.labels.score[1]:draw({
+				x = self.x[1],
+				y = y,
+				a = 255 * self.timer,
+				color = 'white',
+			});
+
+			self.labels.score[2]:draw({
+				x = self.x[2],
+				y = y + (self.labels.score[2].h * 0.25) - 3,
+				a = 255 * self.timer,
+				color = 'normal',
+			});
+		end
+
+		gfx.Restore();
+	end,
+};
+
 render = function(deltaTime);
 	gfx.ResetTransform();
 
@@ -1106,6 +1475,13 @@ render = function(deltaTime);
 	score:drawScore(deltaTime);
 
 	songInfo:drawSongInfo(deltaTime);
+
+	if (showUserInfo
+		and (not gameplay.multiplayer)
+		and (gameplay.practice_setup == nil)
+	) then
+		userInfo:drawUserInfo(deltaTime);
+	end
 
 	hitError:render(deltaTime, scaledW, scaledH);
 
@@ -1157,8 +1533,12 @@ render_outro = function(deltaTime, clearStatus)
 
 		gfx.BeginPath();
 		align.middle();
-		fill.white(255 * math.min(outroTimer, 1));
-		clearStates[clearStatus]:draw({ x = scaledW / 2, y = scaledH / 2 });
+		clearStates[clearStatus]:draw({
+			x = scaledW / 2,
+			y = scaledH / 2,
+			a = 255 * math.min(outroTimer, 1),
+			color = 'white',
+		});
 
 		outroTimer = outroTimer + deltaTime;
 
@@ -1281,16 +1661,28 @@ local scoreboard = {
 			gfx.BeginPath();
 			align.left();
 	
-			fill.light(alpha);
-			self.labels[i].name:draw({ x = 1, y = y });
+			self.labels[i].name:draw({
+				x = 1,
+				y = y,
+				a = alpha,
+				color = 'light',
+			});
 	
 			y = y + (self.labels[i].name.h * 0.75);
 
-			fill.white(alpha);
-			self.labels[i].score[1]:draw({ x = 0, y = y });
+			self.labels[i].score[1]:draw({
+				x = 0,
+				y = y,
+				a = alpha,
+				color = 'white',
+			});
 	
-			fill.light(alpha);
-			self.labels[i].score[2]:draw({ x = self.labels[i].score[1].w, y = y + 12 });
+			self.labels[i].score[2]:draw({
+				x = self.labels[i].score[1].w,
+				y = y + 12,
+				a = alpha,
+				color = 'light',
+			});
 	
 			y = y + (self.labels[i].score[1].h * 1.25);
 		end

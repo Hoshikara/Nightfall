@@ -37,13 +37,13 @@ setupLayout = function()
   if ((cache.resX ~= resX) or (cache.resY ~= resY)) then
     scaledW = 1920;
     scaledH = scaledW * (resY / resX);
-    scalingFactor = resX / scaledW;
+		scalingFactor = resX / scaledW;
+		
+		gfx.Scale(scalingFactor, scalingFactor);
 
     cache.resX = resX;
-    cache.resY = resY;
-  end
-
-  gfx.Scale(scalingFactor, scalingFactor);
+		cache.resY = resY;
+	end
 end
 
 local layout = {
@@ -65,7 +65,7 @@ local layout = {
   grid = {},
 	labels = nil,
 	
-	setAllSizes = function(self)
+	setSizes = function(self)
 		if (not self.labels) then
 			self.labels = {};
 	
@@ -205,14 +205,14 @@ drawCurrentField = function(deltaTime, which, index, displaying)
 
 	if (displaying) then
 		if (choosingFolder and (which == 'folder')) then
-			color = {70, 120, 170, 255};
+			color = 'normal';
 		elseif ((not choosingFolder) and (which == 'level')) then
-			color = {70, 120, 170, 255};
+			color = 'normal';
 		else
-			color = {255, 255, 255, 255};
+			color = 'white';
 		end
 	else
-		color = {255, 255, 255, 255};
+		color = 'white';
 	end
 
 	if (doesOverflow) then
@@ -225,11 +225,15 @@ drawCurrentField = function(deltaTime, which, index, displaying)
 			x,
 			y,
 			scalingFactor,
-			color
+			color,
+			255
 		);
 	else
-		gfx.FillColor(unpack(color));
-		labels[which][current]:draw({ x = x, y = y });
+		labels[which][current]:draw({
+			x = x,
+			y = y,
+			color = color,
+		});
 	end
 end
 
@@ -248,9 +252,9 @@ drawFilterLabel = function(deltaTime, which, index, y, isSelected, key)
 	align.left();
 
 	if (isSelected) then
-		color = {70, 120, 170, alpha};
+		color = 'normal';
 	else
-		color = {255, 255, 255, alpha};
+		color = 'white';
 	end
 
 	if (allowScroll and doesOverflow) then
@@ -263,11 +267,16 @@ drawFilterLabel = function(deltaTime, which, index, y, isSelected, key)
 			x,
 			y,
 			scalingFactor,
-			color
+			color,
+			alpha
 		);
 	else 
-		gfx.FillColor(unpack(color));
-		labels[which][index]:draw({ x = x, y = y });
+		labels[which][index]:draw({
+			x = x,
+			y = y,
+			a = alpha,
+			color = color,
+		});
 	end
 
 	return labels[which][index].h + returnPadding;
@@ -278,7 +287,7 @@ render = function(deltaTime, displaying)
 
 	setupLayout();
 
-	layout:setAllSizes();
+	layout:setSizes();
 
 	setLabels(#filters.folder);
 
@@ -299,8 +308,6 @@ render = function(deltaTime, displaying)
 		end
 	
 		if ((timers.folder == 0) and (timers.level == 0)) then
-			gfx.Scale(1 / scalingFactor, 1 / scalingFactor);
-
 			return;
 		end
 	else
@@ -327,7 +334,7 @@ render = function(deltaTime, displaying)
 	end
 
 	gfx.BeginPath();
-	fill.black(230);
+	fill.dark(230);
 	gfx.Rect(
 		layout.dropdown[1].x,
 		initialY,

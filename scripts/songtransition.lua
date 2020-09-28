@@ -1,7 +1,7 @@
 
 local background = cacheImage('bg.png');
 
-local jacketFallback = gfx.CreateSkinImage('song_select/loading.png', 0);
+local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
 
 local cache = { resX = 0, resY = 0 };
 
@@ -170,17 +170,19 @@ drawTransition = function(deltaTime, isIntro);
 		gfx.BeginPath();
 		align.center();
 
-		fill.black(255 * flickerAlpha);
-		labels.title:draw({ x = 0, y = 256 });
+		labels.title:draw({
+			x = 0,
+			y = 255,
+			a = 255 * flickerAlpha,
+			color = 'white',
+		});
 
-		fill.white(255 * flickerAlpha);
-		labels.title:draw({ x = 0, y = 255 });
-
-		fill.black(255 * flickerAlpha);
-		labels.artist:draw({ x = 0, y = 256 + labels.title.h * 1.75 });
-
-		fill.normal(255 * flickerAlpha);
-		labels.artist:draw({ x = 0, y = 255 + labels.title.h * 1.75 });
+		labels.artist:draw({
+			x = 0,
+			y = 255 + labels.title.h * 1.75,
+			a = 255 * flickerAlpha,
+			color = 'normal',
+		});
 	end
 
 	gfx.Restore();

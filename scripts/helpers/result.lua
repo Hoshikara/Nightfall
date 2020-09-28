@@ -75,35 +75,11 @@ local getMedianDelta = function(current)
 end
 
 local getName = function(current)
-  local displayName = game.GetSkinSetting('displayName');
+  local displayName = game.GetSkinSetting('displayName') or 'GUEST';
   local playerName = get(current, 'playerName');
   local scoreName = get(current, 'name');
 
   return string.upper(scoreName or playerName or displayName);
-end
-
-local getPageBounds = function(viewLimit, totalItems, selected)
-  local minimum = 1;
-  local maximum = ((totalItems < viewLimit) and totalItems) or viewLimit;
-  local pages = {};
-  local pageCount = math.ceil(totalItems / viewLimit);
-
-  for i = 1, pageCount do
-    pages[i] = {
-      lower = minimum,
-      upper = maximum,
-    };
-
-    minimum = maximum + 1;
-    maximum = (((maximum + viewLimit) < totalItems) and (maximum + viewLimit))
-      or totalItems;
-  end
-
-  for _, bounds in ipairs(pages) do
-    if ((selected >= bounds.lower) and (selected <= bounds.upper)) then
-      return bounds.lower, bounds.upper;
-    end
-  end
 end
 
 local getScoreIndex = function(current)
@@ -147,7 +123,7 @@ local formatHighScore = function(current)
     criticalWindow = {
       font = 'number',
       size = 24,
-      value = string.format('%d ms', get(current, 'hitWindow.perfect', 46)),
+      value = string.format('±%d ms', get(current, 'hitWindow.perfect', 46)),
     },
     gauge = {
       font = 'number',
@@ -177,7 +153,7 @@ local formatHighScore = function(current)
     nearWindow = {
       font = 'number',
       size = 24,
-      value = string.format('%d ms', get(current, 'hitWindow.good', 92)),
+      value = string.format('±%d ms', get(current, 'hitWindow.good', 92)),
     },
     score = {
       font = 'number',

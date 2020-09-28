@@ -224,18 +224,21 @@ local _ = {
       {
         label = 'CRITICAL WINDOW',
         values = {
+          type = 'WINDOW',
           value = '',
         },
       },
       {
         label = 'NEAR WINDOW',
         values = {
+          type = 'WINDOW',
           value = '',
         },
       },
       {
         label = 'HOLD WINDOW',
         values = {
+          type = 'WINDOW',
           value = '',
         },
       },

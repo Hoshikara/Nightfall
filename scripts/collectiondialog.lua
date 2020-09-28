@@ -116,7 +116,6 @@ drawButton = function(deltaTime, label, isSelected, y)
 	
 	gfx.BeginPath();
 	align.left();
-	fill.white(alpha);
 
 	if (label.w > (w - 90)) then
 		buttonScrollTimer = buttonScrollTimer + deltaTime;
@@ -128,10 +127,16 @@ drawButton = function(deltaTime, label, isSelected, y)
 			layout.x.outerRight - w + 55,
 			y + label.h + 8,
 			scalingFactor,
-			{255, 255, 255, alpha}
+			'white',
+			alpha
 		);
 	else
-		label:draw({ x = layout.x.outerRight - w + 55, y = y + label.h + 8 });
+		label:draw({
+			x = layout.x.outerRight - w + 55,
+			y = y + label.h + 8,
+			a = alpha,
+			color = 'white',
+		});
 	end
 
 	gfx.Restore();
@@ -149,7 +154,7 @@ drawInput = function()
 	gfx.BeginPath();
 	gfx.StrokeWidth(1);
 	gfx.StrokeColor(60, 110, 160, math.floor(255 * timer));
-	fill.dark(100 * timer);
+	fill.dark(255 * timer);
 	gfx.Rect(x, y, layout.w.middle, layout.h.outer / 6);
 	gfx.Fill();
 	gfx.Stroke();
@@ -169,15 +174,20 @@ drawInput = function()
 	gfx.BeginPath();
 	align.left();
 
-	fill.normal(255 * timer);
-	labels.collectionName:draw({ x = layout.x.middleLeft, y = labelY });
+	labels.collectionName:draw({
+		x = layout.x.middleLeft,
+		y = labelY,
+		a = 255 * timer,
+		color = 'normal',
+	});
 
 	labelY = labelY + (labels.collectionName.h * 2);
 
-	fill.white(255 * timer);
 	labels.input:draw({
 		x = x + 8,
 		y = labelY + 7,
+		a = 255 * timer,
+		color = 'white',
 		maxWidth = layout.w.middle - 22,
 	});
 
@@ -186,13 +196,18 @@ drawInput = function()
 	gfx.BeginPath();
 	align.right();
 
-	fill.white(255 * timer);
-	labels.confirm:draw({ x = layout.x.middleRight + 2, y = labelY + labels.confirm.h });
+	labels.confirm:draw({
+		x = layout.x.middleRight + 2,
+		y = labelY + labels.confirm.h,
+		a = 255 * timer,
+		color = 'white',
+	});
 
-	fill.normal(255 * timer);
 	labels.enter:draw({
 		x = layout.x.middleRight - labels.enter.w - 16,
-		y = labelY + labels.enter.h
+		y = labelY + labels.enter.h,
+		a = 255 * timer,
+		color = 'normal',
 	});
 
 	gfx.Restore();
@@ -211,8 +226,12 @@ drawSongInfo = function(deltaTime)
 	gfx.BeginPath();
 	align.left();
 
-	fill.normal(alpha);
-	labels.title:draw({ x = x, y = y });
+	labels.title:draw({
+		x = x,
+		y = y,
+		a = alpha,
+		color = 'normal',
+	});
 
 	y = y + (labels.title.h * 1.25);
 
@@ -226,17 +245,26 @@ drawSongInfo = function(deltaTime)
 			x + 2,
 			y,
 			scalingFactor,
-			{255, 255, 255, alpha}
+			'white',
+			alpha
 		);
 	else
-		fill.white(alpha);
-		title:draw({ x = x, y = y });
+		title:draw({
+			x = x,
+			y = y,
+			a = alpha,
+			color = 'white',
+		});
 	end
 
 	y = y + (title.h * 1.5);
 
-	fill.normal(alpha);
-	labels.artist:draw({ x = x, y = y });
+	labels.artist:draw({
+		x = x,
+		y = y,
+		a = alpha,
+		color = 'normal',
+	});
 
 	y = y + (labels.artist.h * 1.5);
 	
@@ -250,11 +278,16 @@ drawSongInfo = function(deltaTime)
 			x + 2,
 			y,
 			scalingFactor,
-			{255, 255, 255, alpha}
+			'white',
+			alpha
 		);
 	else
-		fill.white(alpha);
-		artist:draw({ x = x, y = y });
+		artist:draw({
+			x = x,
+			y = y,
+			a = alpha,
+			color = 'white',
+		});
 	end
 
 	gfx.Restore();

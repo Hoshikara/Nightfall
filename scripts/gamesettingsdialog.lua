@@ -4,6 +4,8 @@ local SONG_SELECT_CONSTANTS = require('constants/songwheel');
 local controls = require('songselect/controls');
 local layout = require('layout/dialog');
 
+local controlsShortcut = game.GetSkinSetting('controlsShortcut') or false;
+
 local timer = 0;
 
 local cache = { resX = 0, resY = 0 };
@@ -112,7 +114,24 @@ drawArrows = function(initialX, initialY, minBounded, maxBounded);
 
 	gfx.Save();
 
-	gfx.Scale(scalingFactor, scalingFactor);
+	if (SettingsDiag.tabs[1].name == 'Offsets') then
+		gfx.Scale(scalingFactor, scalingFactor);
+	end
+
+	gfx.BeginPath();
+
+	if (minBounded) then
+		fill.dark(25 * timer);
+	else
+		fill.dark(125 * timer);
+	end
+
+	gfx.MoveTo(x1 + 1, y + 1);
+	gfx.LineTo(x1 + 1, y + 13);
+	gfx.LineTo(x1 - 9, y + 7)
+	gfx.LineTo(x1 + 1, y + 1);
+	
+	gfx.Fill();
 
 	gfx.BeginPath();
 
@@ -127,6 +146,22 @@ drawArrows = function(initialX, initialY, minBounded, maxBounded);
 	gfx.LineTo(x1 - 10, y + 6)
 	gfx.LineTo(x1, y);
 	
+	gfx.Fill();
+
+
+	gfx.BeginPath();
+
+	if (maxBounded) then
+		fill.dark(25 * timer);
+	else
+		fill.dark(125 * timer);
+	end
+
+	gfx.MoveTo(x2 + 1, y + 1);
+	gfx.LineTo(x2 + 1, y + 13);
+	gfx.LineTo(x2 + 11, y + 7)
+	gfx.LineTo(x2 + 1, y + 1);
+
 	gfx.Fill();
 
 	gfx.BeginPath();
@@ -194,8 +229,12 @@ local practiceModeDialog = {
 	
 		gfx.BeginPath();
 		align.left();
-		fill.normal(255 * timer);
-		label:draw({ x = self.layout.info.x1 - 2, y = self.layout.info.y });
+		label:draw({
+			x = self.layout.info.x1 - 2,
+			y = self.layout.info.y,
+			a = 255 * timer,
+			color = 'normal',
+		});
 	end,
 
 	drawSettings = function(self)
@@ -214,21 +253,24 @@ local practiceModeDialog = {
 			gfx.BeginPath();
 			align.left();
 	
-			if (isSelected) then
-				fill.white(255 * timer);
-			else
-				fill.white(50 * timer);
-			end
-	
-			settingLabels[index].label:draw({ x = x, y = y });
+			settingLabels[index].label:draw({
+				x = x,
+				y = y,
+				a = (isSelected and (255 * timer)) or (50 * timer),
+				color = 'white',
+			});
 	
 			if ((setting.value ~= nil) and values) then
 				self:drawSettingValue(setting, values, y, isSelected);
 			elseif ((setting.value == nil) and isSelected) then
 				gfx.BeginPath();
 				align.right();
-				fill.normal(255 * timer);
-				self.labels.start:draw({ x = self.layout.info.x2, y = y - 1 });
+				self.labels.start:draw({
+					x = self.layout.info.x2,
+					y = y - 1,
+					a = 255 * timer,
+					color = 'normal',
+				});
 			end
 	
 			y = y + (settingLabels[index].label.h * 1.75);
@@ -236,17 +278,13 @@ local practiceModeDialog = {
 	end,
 
 	drawSettingValue = function(self, setting, values, y, isSelected)
+		local alpha = (isSelected and (255 * timer)) or (50 * timer);
 		local x = self.layout.info.x2;
 	
 		gfx.BeginPath();
 		align.right();
 		
-		if (isSelected) then
-			fill.white(255 * timer);
-		else
-			fill.white(50 * timer);
-		end
-	
+
 		if (setting.type == 'int') then
 			font.number();
 	
@@ -254,16 +292,31 @@ local practiceModeDialog = {
 				if (values.type == 'TIME') then
 					values.value:update({ new = string.format('%s ms', tostring(setting.value)) });
 
-					values.value:draw({ x = x, y = y });
+					values.value:draw({
+						x = x,
+						y = y,
+						a = alpha,
+						color = 'white',
+					});
 				elseif (values.type == 'PERCENTAGE') then
 					values.value:update({ new = string.format('%s%%', tostring(setting.value)) });
 
-					values.value:draw({ x = x, y = y });
+					values.value:draw({
+						x = x,
+						y = y,
+						a = alpha,
+						color = 'white',
+					});
 				end
 			else
 				values.value:update({ new = tostring(setting.value) });
 
-				values.value:draw({ x = x, y = y });
+				values.value:draw({
+					x = x,
+					y = y,
+					a = alpha,
+					color = 'white',
+				});
 			end
 	
 			if (isSelected) then
@@ -282,19 +335,34 @@ local practiceModeDialog = {
 	
 			values.value:update({ new = formatted });
 	
-			values.value:draw({ x = x, y = y });
+			values.value:draw({
+				x = x,
+				y = y,
+				a = alpha,
+				color = 'white',
+			});
 	
 			if (isSelected) then
 				drawArrows(x, y, setting.value == setting.min, setting.value == setting.max);
 			end
 		elseif (setting.type == 'enum') then
-			values[setting.value]:draw({ x = x, y = y });
+			values[setting.value]:draw({
+				x = x,
+				y = y,
+				a = alpha,
+				color = 'white',
+			});
 	
 			if (isSelected) then
 				drawArrows(x, y, false, false);
 			end
 		elseif (setting.type == 'toggle') then
-			values[tostring(setting.value)]:draw({ x = x, y = y });
+			values[tostring(setting.value)]:draw({
+				x = x,
+				y = y,
+				a = alpha,
+				color = 'white',
+			});
 	
 			if (isSelected) then
 				drawArrows(x, y, false, false);
@@ -318,18 +386,34 @@ local practiceModeDialog = {
 		gfx.BeginPath();
 	
 		align.left();
-		fill.normal(255 * timer);
-		self.labels.fxl:draw({ x = x1, y = y - 1 });
+		self.labels.fxl:draw({
+			x = x1,
+			y = y - 1,
+			a = 255 * timer,
+			color = 'normal',
+		});
 
-		fill.white(255 * timer);
-		previousLabel:draw({ x = x1 + self.labels.fxl.w + 8, y = y });
+		previousLabel:draw({
+			x = x1 + self.labels.fxl.w + 8,
+			y = y,
+			a = 255 * timer,
+			color = 'white',
+		});
 
 		align.right();
-		fill.white(255 * timer);
-		nextLabel:draw({ x = x2, y = y });
+		nextLabel:draw({
+			x = x2,
+			y = y,
+			a = 255 * timer,
+			color = 'white',
+		});
 
-		fill.normal(255 * timer);
-		self.labels.fxr:draw({ x = x2 - nextLabel.w - 8, y = y - 1 });
+		self.labels.fxr:draw({
+			x = x2 - nextLabel.w - 8,
+			y = y - 1,
+			a = 255 * timer,
+			color = 'normal',
+		});
 	end,
 
 	render = function(self)
@@ -383,27 +467,44 @@ local songSelectDialog = {
 		local previous = (((currentTab - 1) >= 1) and (currentTab - 1)) or 5;
 		local previousLabel = self.labels.navigation[previous];
 	
+		local alpha = 255 * timer;
 		local x1 = layout.x.middleLeft;
 		local x2 = layout.x.outerRight;
 		local y = layout.y.bottom + 12;
 	
 		gfx.BeginPath();
-	
+
 		align.left();
 	
-		fill.normal(255 * timer);
-		self.labels.fxl:draw({ x = x1, y = y - 1 });
+		self.labels.fxl:draw({
+			x = x1,
+			y = y - 1,
+			a = alpha,
+			color = 'normal',
+		});
 
-		fill.white(255 * timer);
-		previousLabel:draw({ x = x1 + self.labels.fxr.w + 8, y = y });
+		previousLabel:draw({
+			x = x1 + self.labels.fxr.w + 8,
+			y = y,
+			a = alpha,
+			color = 'white',
+		});
 	
 		align.right();
 
-		fill.white(255 * timer);
-		nextLabel:draw({ x = x2, y = y });
+		nextLabel:draw({
+			x = x2,
+			y = y,
+			a = alpha,
+			color = 'white',
+		});
 
-		fill.normal(255 * timer);
-		self.labels.fxr:draw({ x = x2 - nextLabel.w - 8, y = y - 1 });
+		self.labels.fxr:draw({
+			x = x2 - nextLabel.w - 8,
+			y = y - 1,
+			a = alpha,
+			color = 'normal',
+		});
 	end,
 
 	drawHeading = function(self)
@@ -413,8 +514,12 @@ local songSelectDialog = {
 	
 		gfx.BeginPath();
 		align.left();
-		fill.normal(255 * timer);
-		label:draw({ x = x, y = y });
+		label:draw({
+			x = x,
+			y = y,
+			a = 255 * timer,
+			color = 'normal',
+		});
 	end,
 
 	drawSettings = function(self)
@@ -433,21 +538,24 @@ local songSelectDialog = {
 			gfx.BeginPath();
 			align.left();
 	
-			if (isSelected) then
-				fill.white(255 * timer);
-			else
-				fill.white(50 * timer);
-			end
-	
-			settingLabels[index].label:draw({ x = x, y = y });
+			settingLabels[index].label:draw({
+				x = x,
+				y = y,
+				a = (isSelected and (255 * timer)) or (50 * timer),
+				color = 'white',
+			});
 	
 			if ((setting.value ~= nil) and values) then
 				self:drawSettingValue(setting, values, y, isSelected);
 			elseif ((setting.value == nil) and isSelected) then
 				gfx.BeginPath();
 				align.right();
-				fill.normal(255 * timer);
-				self.labels.start:draw({ x = layout.x.middleRight, y = y });
+				self.labels.start:draw({
+					x = layout.x.middleRight,
+					y = y,
+					a = 255 * timer,
+					color = 'normal',
+				});
 			end
 	
 			y = y + (settingLabels[index].label.h * 1.75);
@@ -455,22 +563,31 @@ local songSelectDialog = {
 	end,
 	
 	drawSettingValue = function(self, setting, values, y, isSelected)
+		local alpha = (isSelected and (255 * timer)) or (50 * timer);
 		local x = layout.x.middleRight;
 	
 		gfx.BeginPath();
 		align.right();
 		
-		if (isSelected) then
-			fill.white(255 * timer);
-		else
-			fill.white(50 * timer);
-		end
-	
 		if (setting.type == 'int') then
 			font.number();
-			values.value:update({ new = string.format('%s ms', tostring(setting.value)) });
+
+			if (get(values, 'type', '') == 'WINDOW') then
+				values.value:update({
+					new = string.format('±%s ms', tostring(setting.value)),
+				});
+			else
+				values.value:update({
+					new = string.format('%s ms', tostring(setting.value)),
+				});
+			end
 	
-			values.value:draw({ x = x, y = y });
+			values.value:draw({
+				x = x,
+				y = y,
+				a = alpha,
+				color = 'white',
+			});
 	
 			if (isSelected) then
 				drawArrows(x, y, setting.value == setting.min, setting.value == setting.max );
@@ -488,19 +605,34 @@ local songSelectDialog = {
 	
 			values.value:update({ new = formatted });
 	
-			values.value:draw({ x = x, y = y });
+			values.value:draw({
+				x = x,
+				y = y,
+				a = alpha,
+				color = 'white',
+			});
 	
 			if (isSelected) then
 				drawArrows(x, y, setting.value == setting.min, setting.value == setting.max );
 			end
 		elseif (setting.type == 'enum') then
-			values[setting.value]:draw({ x = x, y = y });
+			values[setting.value]:draw({
+				x = x,
+				y = y,
+				a = alpha,
+				color = 'white',
+			});
 	
 			if (isSelected) then
 				drawArrows(x, y, false, false);
 			end
 		elseif (setting.type == 'toggle') then
-			values[tostring(setting.value)]:draw({ x = x, y = y });
+			values[tostring(setting.value)]:draw({
+				x = x,
+				y = y,
+				a = alpha,
+				color = 'white',
+			});
 	
 			if (isSelected) then
 				drawArrows(x, y, false, false);
@@ -521,13 +653,20 @@ local songSelectDialog = {
 
 		gfx.ForceRender();
 
-		controls:render(deltaTime, displaying, scaledW, scaledH);
+		if (controlsShortcut) then
+			controls:render(deltaTime, displaying, scaledW, scaledH);
+		end
 
 		gfx.Save();
 
 		gfx.Scale(scalingFactor, scalingFactor);
 
-		layout.images.dialogBox:draw({ x = scaledW / 2, y = scaledH / 2, a = timer, centered = true });
+		layout.images.dialogBox:draw({
+			x = scaledW / 2,
+			y = scaledH / 2,
+			a = timer,
+			centered = true
+		});
 		
 		gfx.Restore();
 

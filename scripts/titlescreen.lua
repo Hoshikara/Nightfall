@@ -29,12 +29,16 @@ local showUpdatePrompt = false;
 local updateChecked = false;
 
 local introTimer = 1;
+local introSamplePlayed = false;
 local menuLoaded = false;
 
 local hoveredPage = nil;
 local showControls = false;
 
-local background = cacheImage('main_menu/menu_bg.png');
+local background = cacheImage('bg.png');
+
+game.LoadSkinSample('click_button');
+game.LoadSkinSample('intro');
 
 local cache = { resX = 0, resY = 0 };
 
@@ -72,6 +76,12 @@ mouseClipped = function(x, y, w, h)
 end
 
 loadMenu = function(deltaTime)
+	if (not introSamplePlayed) then
+		game.PlaySample('intro');
+
+		introSamplePlayed = true;
+	end
+
 	if (not updateChecked) then
 		updateUrl, updateVersion = game.UpdateAvailable();
 
@@ -81,7 +91,7 @@ loadMenu = function(deltaTime)
 		end
 	end
 
-	introTimer = math.max(introTimer - (deltaTime / 3), 0);
+	introTimer = math.max(introTimer - (deltaTime / 1.8), 0);
 
 	gfx.BeginPath();
 	fill.black(255 * introTimer);
@@ -112,8 +122,8 @@ local buttons = {
 		x = 0,
 	},
 	images = {
-		button = cacheImage('main_menu/button.png'),
-		buttonHover = cacheImage('main_menu/button_hover.png'),
+		button = cacheImage('buttons/normal.png'),
+		buttonHover = cacheImage('buttons/normal_hover.png'),
 	},
 	labels = nil,
 	spacing = 0,
@@ -231,10 +241,11 @@ local buttons = {
 
 		gfx.BeginPath();
 		align.left();
-		fill.white(textAlpha);
 		self.labels[page][i].label:draw({
 			x = self.x[i] + (self.images.button.w / 8) + 4,
 			y = self.y + (self.images.button.h / 2) - 12,
+			a = textAlpha,
+			color = 'white',
 		});
 	end,
 
@@ -334,26 +345,39 @@ local title = {
 		local y = self.y;
 
 		gfx.BeginPath();
-		fill.white(alpha);
-	
 		align.left();
-		self.labels.unnamed:draw({ x = self.x, y = y });
+		self.labels.unnamed:draw({
+			x = self.x,
+			y = y,
+			a = alpha,
+			color = 'white',
+		});
 
 		y = y + self.labels.unnamed.h * 0.7;
 
-		self.labels.soundVoltex:draw({ x = self.x, y = y });
+		self.labels.soundVoltex:draw({
+			x = self.x,
+			y = y,
+			a = alpha,
+			color = 'white',
+		});
 
 		y = y + self.labels.soundVoltex.h;
 
 		align.right();
-		self.labels.clone:draw({ x = self.x + self.labels.soundVoltex.w, y = y });
+		self.labels.clone:draw({
+			x = self.x + self.labels.soundVoltex.w,
+			y = y,
+			a = alpha,
+			color = 'white',
+		});
 	end
 };
 
 local updatePrompt = {
 	buttons = {
-		normal = cacheImage('main_menu/button_short.png'),
-		hover = cacheImage('main_menu/button_short_hover.png'),
+		normal = cacheImage('buttons/short.png'),
+		hover = cacheImage('buttons/short_hover.png'),
 		spacing = 0,
 		x = {},
 		y = 0,
@@ -441,10 +465,11 @@ local updatePrompt = {
 
 		gfx.BeginPath();
 		align.left();
-		fill.white(alpha);
 		button.label:draw({
 			x = self.buttons.x[i] + (self.buttons.normal.w / 6) + 2,
 			y = self.buttons.y + (self.buttons.normal.h / 2) - 12,
+			a = alpha,
+			color = 'white',
 		});
 	end,
 
@@ -497,8 +522,12 @@ local updatePrompt = {
 
 		gfx.BeginPath();
 		align.left();
-		fill.white(255 * self.timer);
-		self.labels.heading:draw({ x = dialog.x.outerLeft, y = dialog.y.top - 8 });
+		self.labels.heading:draw({
+			x = dialog.x.outerLeft,
+			y = dialog.y.top - 8,
+			a = 255 * self.timer,
+			color = 'white',
+		});
 
 		for i, button in ipairs(self.labels) do
 			self:drawButton(i, button);
@@ -517,7 +546,7 @@ render = function(deltaTime)
 		x = 0,
 		y = 0,
 		w = scaledW,
-		h = scaledH
+		h = scaledH,
 	});
 
 	if (not menuLoaded) then
@@ -546,7 +575,6 @@ render = function(deltaTime)
 	hoveredPage = controls:render(deltaTime, showControls, activeButton);
 
 	if (previousButton ~= activeButton) then
-		-- PLAY SAMPLE HERE
 		if (showUpdatePrompt) then
 			updatePrompt.cursor.flickerTimer = 0;
 		else
@@ -595,7 +623,7 @@ button_pressed = function(button)
 		elseif (showUpdatePrompt) then
 			activeButton = 1;
 			showUpdatePrompt = false;
-		elseif (activePage ~= 'mainMenu' and buttons.activePage ~= 'mainMenu') then
+		elseif ((activePage ~= 'mainMenu') and (buttons.activePage ~= 'mainMenu')) then
 			activeButton = 1;
 			activePage = 'mainMenu';
 			buttons.activePage = activePage;

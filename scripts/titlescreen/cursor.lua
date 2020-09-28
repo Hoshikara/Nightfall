@@ -2,7 +2,7 @@ local _ = {};
 
 _.drawCursor = function(self, x, y, w, h, s, a);
 	gfx.BeginPath();
-	gfx.StrokeWidth(2);
+	gfx.StrokeWidth(1.5);
 	gfx.StrokeColor(255, 255, 255, math.floor(255 * a));
 
 	gfx.MoveTo(

@@ -1,5 +1,5 @@
 {
-	"GENERAL": {
+	"========== GENERAL ==========": {
 		"type": "label"
 	},
 	"displayName": {
@@ -7,8 +7,24 @@
 		"label": "Display Name",
 		"default": "Guest"
 	},
-	"separator_a": {},
-	"GAMEPLAY": {
+	"": {
+		"type": "label"
+	},
+	"========== SONG SELECT ==========": {
+		"type": "label"
+	},
+	"Controls": {
+		"type": "label"
+	},
+	"controlsShortcut": {
+		"label": "[BT-A] for Controls",
+		"type": "bool",
+		"default": true
+	},
+	" ": {
+		"type": "label"
+	},
+	"========== GAMEPLAY ==========": {
 		"type": "label"
 	},
 	"Early / Late": {
@@ -25,6 +41,9 @@
 			"UPPER",
 			"UPPER+"
 		]
+	},
+	"  ": {
+		"type": "label"
 	},
 	"Hit Error": {
 		"type": "label"
@@ -47,8 +66,26 @@
 		"max": 2.0,
 		"min": 0.5
 	},
-	"separator_b": {},
-	"RESULTS": {
+	"   ": {
+		"type": "label"
+	},
+	"User Info": {
+		"type": "label"
+	},
+	"showUserInfo": {
+		"label": "Display User Info",
+		"type": "bool",
+		"default": true
+	},
+	"showScoreDifference": {
+		"label": "Display Score Difference",
+		"type": "bool",
+		"default": true
+	},
+	"    ": {
+		"type": "label"
+	},
+	"========== RESULTS ==========": {
 		"type": "label"
 	},
 	"dateFormat": {
@@ -61,17 +98,41 @@
 			"YEAR-MONTH-DAY"
 		]
 	},
+	"     ": {
+		"type": "label"
+	},
 	"screenshotRegion": {
 		"type": "selection",
 		"label": "Screenshot Region",
-		"default": "FULLSCREEN",
+		"default": "PANEL",
 		"values": [
 			"FULLSCREEN",
 			"PANEL"
 		]
 	},
-	"separator_c": {},
-	"DEVELOPER SETTINGS (DO NOT MODIFY)": {
+	"      ": {
+		"type": "label"
+	},
+	"========== MULTIPLAYER ==========": {
+		"type": "label"
+	},
+	"Lobby": {
+		"type": "label"
+	},
+	"toggleHard": {
+		"label": "[FX-L] for Hard Gauge",
+		"type": "bool",
+		"default": true
+	},
+	"toggleMirror": {
+		"label": "[FX-R] for Mirror Mode",
+		"type": "bool",
+		"default": true
+	},
+	"       ": {
+		"type": "label"
+	},
+	"========== DEVELOPER SETTINGS (DO NOT MODIFY) ==========": {
 		"type": "label"
 	},
 	"cachedFolder": {

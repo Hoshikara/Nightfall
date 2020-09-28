@@ -119,28 +119,28 @@ cacheImage = function(path)
   local w, h = gfx.ImageSize(image);
 
   return {
-    ['image'] = image,
-    ['w'] = w,
-    ['h'] = h,
+    image = image,
+    w = w,
+    h = h,
 
     draw = function(self, params)
-      local a = params['a'] or 1;
-      local w = params['w'] or self['w'];
-      local h = params['h'] or self['h'];
+      local a = params.a or 1;
+      local w = params.w or self.w;
+      local h = params.h or self.h;
 
-      w = (params['s'] and (params['s'] * w)) or w;
-      h = (params['s'] and (params['s'] * h)) or h;
+      w = (params.s and (params.s * w)) or w;
+      h = (params.s and (params.s * h)) or h;
   
-      local x = (params['centered'] and (params['x'] - (w / 2))) or params['x'];
-      local y = (params['centered'] and (params['y'] - (h / 2))) or params['y'];
+      local x = (params.centered and (params.x - (w / 2))) or params.x;
+      local y = (params.centered and (params.y - (h / 2))) or params.y;
 
       gfx.BeginPath();
 
-      if (params['blendOp']) then
-        gfx.GlobalCompositeOperation(params['blendOp']);
+      if (params.blendOp) then
+        gfx.GlobalCompositeOperation(params.blendOp);
       end
 
-      gfx.ImageRect(x, y, w, h, self['image'], a, 0);
+      gfx.ImageRect(x, y, w, h, self.image, a, 0);
     end
   };
 end
@@ -158,9 +158,19 @@ cacheLabel = function(str, size)
     draw = function(self, params);
       local x = params.x or 0;
       local y = params.y or 0;
+      local a = params.a or 255;
+      local color = params.color or 'white';
       local maxWidth = params.maxWidth or -1;
-  
-      gfx.DrawLabel(self.label, x, y, maxWidth);
+
+      if (params.override) then
+        gfx.DrawLabel(self.label, x, y, maxWidth);
+      else
+        fill.dark(a * 0.5);
+        gfx.DrawLabel(self.label, x + 1, y + 1, maxWidth);
+    
+        fill[color](a);
+        gfx.DrawLabel(self.label, x, y, maxWidth);
+      end
     end,
 
     update = function(self, params)
@@ -218,7 +228,7 @@ drawErrorPrompt = function(message)
   gfx.Restore();
 end
 
-drawScrollingLabel = function(timer, label, maxWidth, x, y, scale, color)
+drawScrollingLabel = function(timer, label, maxWidth, x, y, scale, color, a)
   local labelX = label.w * 1.2;
   local duration = (labelX / 80) * 0.75;
   local phase = math.max((timer % (duration + 1.5)) - 1.5, 0) / duration;
@@ -230,10 +240,18 @@ drawScrollingLabel = function(timer, label, maxWidth, x, y, scale, color)
 
   align.left();
 
-  gfx.FillColor(unpack(color));
-
-  label:draw({ x = x - (phase * labelX), y = y });
-  label:draw({ x = x - (phase * labelX) + labelX, y = y });
+  label:draw({
+    x = x - (phase * labelX),
+    y = y,
+    a = a,
+    color = color,
+  });
+  label:draw({
+    x = x - (phase * labelX) + labelX,
+    y = y,
+    a = a,
+    color = color,
+  });
 
   gfx.ResetScissor();
 
@@ -245,7 +263,7 @@ get = function(tbl, path, default)
 end
 
 getDateFormat = function()
-  local dateFormat = game.GetSkinSetting('dateFormat');
+  local dateFormat = game.GetSkinSetting('dateFormat') or 'DAY-MONTH-YEAR';
 
   if (dateFormat == 'DAY-MONTH-YEAR') then
     return '%d-%m-%y';

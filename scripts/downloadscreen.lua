@@ -3,7 +3,7 @@ json = require('lib/json');
 local header = {}
 header["user-agent"] = "unnamed_sdvx_clone"
 
-local jacketFallback = gfx.CreateSkinImage("song_select/loading.png", 0)
+local jacketFallback = gfx.CreateSkinImage("common/loading.png", 0)
 local diffColors = {{50,50,127}, {50,127,50}, {127,50,50}, {127, 50, 127}}
 local entryW = 770
 local entryH = 320

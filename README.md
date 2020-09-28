@@ -13,3 +13,5 @@ Preview images
 ![gameplay](./preview/gameplay.png)
 
 ![results](./preview/results.png)
+
+![multiplayer](./preview/multiplayer.png)
