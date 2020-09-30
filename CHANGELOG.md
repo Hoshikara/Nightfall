@@ -1,3 +1,8 @@
+###### September 30, 2020
+- Modified `Gameplay` appearance slightly
+- Fixed Multiplayer results crashes (hopefully)
+- Fixed Multiplayer scoreboard during gameplay updating with incorrect names
+
 ###### September 27, 2020
 - Completed work for Multiplayer screens, features to note:
   - If host, hover over users to display host controls (transfer host or kick user)
@@ -15,8 +20,8 @@
 ###### September 22, 2020
 - Completed work for Practice Mode, `gameplay` and `gamesettingsdialog` scripts updated
 - Completed work for Results screen, features to note:
-  - Increase hit graph scale with BT-A
-  - Select from list of highscores (or player scores for Multiplayer) with FX-L/FX-R
+  - Increase hit graph scale with `[BT-A]`
+  - Select from list of highscores (or player scores for Multiplayer) with `[FX-L]` / `[FX-R]`
   - Select screenshot region from Skin Settings: `fullscreen` or `panel`
 - Moved `Singleplayer` and `Multiplayer` main menu buttons to a separate 'screen' to make room for upcoming `Challenges` feature
 - Added new 'Controls' page for Practice Mode controls and basic setup
@@ -31,7 +36,7 @@
 
 ###### September 12, 2020
 - Completed work for gameplay screen, including multiplayer scoreboard
-- Changed accessiblity for 'Controls' screen during Song Select: Hold BT-A to show, and press BT-D to navigate pages
+- Changed accessiblity for 'Controls' screen during Song Select: Hold `[BT-A]` to show, and press `[BT-D]` to navigate pages
   - 'General', 'Gameplay', and 'Results' pages added
   - Previous controller icon and hover behavior removed
 - Added an outline to Search and Collection Name input fields when active

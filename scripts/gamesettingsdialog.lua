@@ -203,13 +203,13 @@ local practiceModeDialog = {
 	setSizes = function(self)
 		if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
 			self.layout.panel.w = scaledW / 2.4;
-			self.layout.panel.h = scaledH / 1.85;
+			self.layout.panel.h = scaledH / 1.925;
 			self.layout.panel.x = 0;
-			self.layout.panel.y = scaledH / 3.6;
+			self.layout.panel.y = scaledH / 4.25;
 
 			self.layout.info.x1 = scaledW / 100;
 			self.layout.info.x2 = self.layout.panel.w - (self.layout.info.x1 * 4);
-			self.layout.info.y = scaledH / 3.5;
+			self.layout.info.y = scaledH / 4.1;
 
 			self.layout.navigation.y = self.layout.panel.y + self.layout.panel.h - 48;
 

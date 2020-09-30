@@ -13,6 +13,10 @@ local previousScore = nil;
 local selectedScore = 1;
 
 local allScores = {};
+local loadedScores = {};
+
+local myScore = nil;
+
 local singleplayer = true;
 local songInfo = nil;
 
@@ -121,7 +125,7 @@ local resultPanel = {
 
 			self.panel.w = scaledW / (scaledW / self.panel.image.w);
 			self.panel.h = scaledH - (scaledH / 10);
-			self.panel.x = (((not singleplayer) or (#allScores > 1)) and (scaledW / 20))
+			self.panel.x = (((not singleplayer) or (#allScores > 0)) and (scaledW / 20))
 				or ((scaledW / 2) - (self.panel.w / 2));
 			self.panel.y = scaledH / 20;
 
@@ -152,7 +156,7 @@ local resultPanel = {
 
 			self.labels = {
 				btbbtc = cacheLabel('[BT-B]  +  [BT-C]', 20),
-				openCollections = cacheLabel('OPEN SONG COLLECTIONS', 20),
+				songCollections = cacheLabel('SONG COLLECTIONS', 20),
 			};
 
 			for key, name in pairs(CONSTANTS.song) do
@@ -181,7 +185,7 @@ local resultPanel = {
 		if (not self.stats) then
 			self.stats = {};
 
-			for key, value in pairs(allScores.myScore) do
+			for key, value in pairs(myScore) do
 				font[value.font]();
 
 				if (key == 'score') then
@@ -225,7 +229,7 @@ local resultPanel = {
 			color = 'normal',
 		});
 
-		self.labels.openCollections:draw({
+		self.labels.songCollections:draw({
 			x = self.panel.x + self.labels.btbbtc.w + 8,
 			y = scaledH - (scaledH / 20) + (self.labels.btbbtc.h - 6) + 1,
 			color = 'white',
@@ -435,7 +439,7 @@ local resultPanel = {
 
 		self:setStats();
 
-		if (not allScores.myScore) then return end
+		if (not myScore) then return end
 
 		self.panel.image:draw({
 			x = self.panel.x,
@@ -525,7 +529,7 @@ local graphs = {
 			};
 
 			for _, name in ipairs(self.statOrder) do
-				local value = allScores.myScore[name];
+				local value = myScore[name];
 
 				font[value.font]();
 
@@ -970,6 +974,7 @@ local scoreList = {
 		y = 0
 	},
 	spacing = 0,
+	stats = nil,
 	timer = 0,
 	viewLimit = 4,
 	w = 0,
@@ -1049,29 +1054,6 @@ local scoreList = {
 		end
 	end,
 
-	updateStats = function(self, index)
-		font.number();
-
-		self.stats[index] = {
-			place = cacheLabel(i, 90),
-		};
-
-		local score = allScores[index];
-
-		for key, value in pairs(score) do
-			font[value.font]();
-
-			if (key == 'score') then
-				self.stats[index][key] = {
-					cacheLabel(string.sub(value.value, 1, 4), value.size[1]),
-					cacheLabel(string.sub(value.value, -4), value.size[2]),
-				};
-			else
-				self.stats[index][key] = cacheLabel(value.value, value.size);
-			end
-		end
-	end,
-
 	setScrollbarPos = function(self, completion)
     self.easing.scrollbar.initial = self.scrollbar.pos;
     self.easing.scrollbar.timer = self.easing.scrollbar.duration;
@@ -1097,23 +1079,6 @@ local scoreList = {
 		return ((self.maxWidth * scale) - totalWidth) / (#order - 1);
 	end,
 
-	updateStats = function(self, i)
-		local score = allScores[i];
-
-		for key, value in pairs(score) do
-			font[value.font]();
-
-			if (key == 'score') then
-				self.stats[i][key] = {
-					cacheLabel(string.sub(value.value, 1, 4), value.size[1]),
-					cacheLabel(string.sub(value.value, -4), value.size[2]),
-				};
-			else
-				self.stats[i][key] = cacheLabel(value.value, value.size);
-			end
-		end
-	end,
-
 	handleNavigation = function(self, deltaTime)
 		local cursorIndex =
 			((selectedScore % self.viewLimit > 0) and (selectedScore % self.viewLimit))
@@ -1124,7 +1089,7 @@ local scoreList = {
 			selectedScore
 		);
 
-		if (singleplayer and #allScores >= 2) then
+		if (singleplayer and #allScores > 1) then
 			if ((not self.pressed.FXL) and game.GetButton(game.BUTTON_FXL)) then
 				if ((selectedScore - 1) < 1) then
 					selectedScore = #allScores;
@@ -1566,8 +1531,8 @@ result_set = function()
 		end
 	end
 
-	if (not allScores.myScore) then
-		allScores.myScore = help.formatScore(result);
+	if (not myScore) then
+		myScore = help.formatScore(result);
 	end
 
 	if (singleplayer) then
@@ -1585,13 +1550,40 @@ result_set = function()
 
 		selectedScore = currentIndex;
 
-		scoreList.stats = nil;
+		if (#result.highScores ~= #allScores) then
+			allScores = {};
+			loadedScores = {};
 
-		for i, highScore in ipairs(result.highScores) do
-			if (i == currentIndex) then
-				allScores[i] = help.formatScore(result);
-			else
-				allScores[i] = help.formatHighScore(highScore);
+			if (scoreList.stats) then
+				scoreList.stats = nil;
+			end
+		end
+
+		if (not loadedScores[currentIndex]) then
+			allScores[currentIndex] = help.formatScore(result);
+
+			if (scoreList.stats) then
+				font.number();
+
+				scoreList.stats[currentIndex].early:update({
+					new = allScores[currentIndex].early.value;
+				});
+				scoreList.stats[currentIndex].late:update({
+					new = allScores[currentIndex].late.value;
+				});
+				scoreList.stats[currentIndex].maxChain:update({
+					new = allScores[currentIndex].maxChain.value;
+				});
+			end
+
+			loadedScores[currentIndex] = true;
+		end
+
+		if (#result.highScores ~= #loadedScores) then
+			for i, highScore in ipairs(result.highScores) do
+				if (not loadedScores[i]) then
+					allScores[i] = help.formatScore(highScore);
+				end
 			end
 		end
 	end
@@ -1650,7 +1642,7 @@ render = function(deltaTime)
 	
 	resultPanel:render(deltaTime);
 
-	if ((#allScores - 1) > 0) then
+	if (#allScores > 0) then
 		scoreList:render(deltaTime);
 	end
 

@@ -174,12 +174,12 @@ local formatScore = function(current)
   extendedScore.early = {
     font = 'number',
     size = 24,
-    value = get(current, 'earlies', ''),
+    value = get(current, 'earlies', '-'),
   };
   extendedScore.late = {
     font = 'number',
     size = 24,
-    value = get(current, 'lates', ''),
+    value = get(current, 'lates', '-'),
   };
   extendedScore.maxChain = {
     font = 'number',
