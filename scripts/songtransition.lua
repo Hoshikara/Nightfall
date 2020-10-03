@@ -158,7 +158,15 @@ drawTransition = function(deltaTime, isIntro);
 
 	gfx.Translate(scaledW / 2, scaledH / 2);
 
-	drawDetails(-240, -360, 480, 480, 32, flickerAlpha);
+	drawCursor({
+		x = -240,
+		y = -360,
+		w = 480,
+		h = 480,
+		alpha = flickerAlpha,
+		size = 26,
+		stroke = 2,
+	});
 
 	gfx.BeginPath();
 	gfx.StrokeWidth(2);

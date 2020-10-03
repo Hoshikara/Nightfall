@@ -68,9 +68,14 @@ local _ = {
       keyboard = '[ ` ]',
     },
     {
-      action = 'DELETE SONG',
+      action = 'DELETE DIFFICULTY',
       controller = '',
       keyboard = '[DEL]',
+    },
+    {
+      action = 'DELETE SONG',
+      controller = '',
+      keyboard = '[SHIFT]  +  [DEL]',
     },
     {
       action = 'PREVIOUS SONG PAGE',

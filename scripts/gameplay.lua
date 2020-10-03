@@ -1,9 +1,9 @@
 local CONSTANTS = require('constants/gameplay');
 
-local detail = require('gameplay/detail');
 local hitAnimation = require('gameplay/hitanimation');
 local hitError = require('gameplay/hiterror');
 local laserAnimation = require('gameplay/laseranimation');
+local number = require('common/number');
 
 hitAnimation:initializeAll();
 hitError:initializeAll();
@@ -181,8 +181,8 @@ local alerts = {
 	alpha = { 0, 0 },
 	labels = nil,
 	timers = {
-		[1] = -2,
-		[2] = -2,
+		[1] = -1.5,
+		[2] = -1.5,
 		fade = { 0, 0 },
 		pulse = { 0, 0 },
 		start = { false, false },
@@ -222,7 +222,7 @@ local alerts = {
 		};
 
 		for i = 1, 2 do
-			self.timers[i] = math.max(self.timers[i] - deltaTime, -2);
+			self.timers[i] = math.max(self.timers[i] - deltaTime, -1.5);
 
 			if (self.timers[i] > 0) then
 				self.timers.start[i] = true;
@@ -234,7 +234,7 @@ local alerts = {
 				self.alpha[i] = math.abs(0.8 * math.cos(self.timers.pulse[i] * 10)) + 0.2;
 			end
 
-			if (self.timers[i] == -2) then
+			if (self.timers[i] == -1.5) then
 				self.timers.start[i] = false;
 			
 				self.timers.fade[i] = math.max(self.timers.fade[i] - (deltaTime * 6), 0);
@@ -271,14 +271,15 @@ local alerts = {
 
 			gfx.ResetScissor();
 
-			detail:drawAlertDetail(
-				-64 * self.timers.fade[i],
-				-64 * self.timers.fade[i],
-				128 * self.timers.fade[i],
-				128 * self.timers.fade[i],
-				12,
-				math.floor(255 * self.timers.fade[i])
-			);
+			drawCursor({
+				x = -64 * self.timers.fade[i],
+				y = -64 * self.timers.fade[i],
+				w = 128 * self.timers.fade[i],
+				h = 128 * self.timers.fade[i],
+				alpha = self.timers.fade[i],
+				size = 16,
+				stroke = 2,
+			});
 		end
 
 		gfx.Restore();
@@ -711,10 +712,10 @@ local practice = {
 			self.labels.near.value = cacheLabel('0', 24);
 			self.labels.passRate.ratio = cacheLabel('0', 24);
 			self.labels.passRate.value = cacheLabel('0', 24);
-			self.labels.score.values = {
-				cacheLabel('0', 46),
-				cacheLabel('0', 36),
-			};
+			self.labels.score.value = number.create({
+				isScore = true,
+				sizes = { 46, 36 },
+			});
 		end
 	end,
 
@@ -774,19 +775,14 @@ local practice = {
 
 			y = y + self.labels.score.label.h;
 
-			self.labels.score.values[1]:draw({
-				x = 0,
-				y = y,
-				color = 'white',
+			self.labels.score.value:draw({
+				offset = 6,
+				x = -1,
+				y1 = y,
+				y2 = y + 10,
 			});
 
-			self.labels.score.values[2]:draw({
-				x = self.labels.score.values[1].w,
-				y = y + 10,
-				color = 'normal',
-			});
-
-			y = y + (self.labels.score.values[1].h * 1.25);
+			y = y + (self.labels.score.value.labels[1].h * 1.25);
 
 			self.labels.near.label:draw({
 				x = 0,
@@ -814,7 +810,7 @@ local practice = {
 				color = 'white',
 			});
 
-			y = y + (self.labels.score.values[1].h * 0.75);
+			y = y + (self.labels.score.value.labels[1].h * 0.75);
 
 			self.labels.hitDelta.label:draw({
 				x = 0,
@@ -872,8 +868,12 @@ local practice = {
 	end
 };
 
-local score = {
+local scoreInfo = {
 	current = 0,
+	score = number.create({
+		isScore = true,
+		sizes = { 100, 80 }
+	}),
 	labels = nil,
 
 	setLabels = function(self)
@@ -881,40 +881,31 @@ local score = {
 			font.normal();
 		
 			self.labels = {
-				score = {
-					label = cacheLabel('SCORE', 48),
-				},
+				score = cacheLabel('SCORE', 48),
 				maxChain = {
 					label = cacheLabel('MAXIMUM CHAIN', 24),
 				},
 			};
-
-			font.number();
 			
-			self.labels.maxChain.chain = cacheLabel('', 24);
-			self.labels.score[1] = cacheLabel('', 100);
-			self.labels.score[2] = cacheLabel('', 80);
+			self.labels.maxChain.value = number.create({
+				digits = 4,
+				isScore = false,
+				sizes = { 24 },
+			});
 		end
-	end,
-
-	updateLabels = function(self)
-		local scoreString = string.format('%08d', self.current);
-
-		font.number();
-		self.labels.maxChain.chain:update({ new = string.format('%04d', combo.max) });
-		self.labels.score[1]:update({ new = string.sub(scoreString, 1, 4) });
-		self.labels.score[2]:update({ new = string.sub(scoreString, -4) });
 	end,
 
 	drawScore = function(self, deltaTime)
 		self:setLabels();
 
-		self:updateLabels();
-	
 		local introShift = math.max(introTimer - 1, 0);
 		local introAlpha = math.floor(255 * (1 - (introShift ^ 1.5)));
 		local x = scaledW - (scaledW / 36);
 		local y = scaledH / 14;
+
+		self.score:setInfo({ value = self.current });
+
+		self.labels.maxChain.value:setInfo({ value = combo.max });
 
 		gfx.Save();
 
@@ -923,32 +914,22 @@ local score = {
 		gfx.BeginPath();
 		align.right();
 
-		self.labels.score.label:draw({
-			x = -(self.labels.score[1].w
-				+ self.labels.score[2].w
-				- self.labels.score.label.w
-				- 4
-			),
-			y = -(self.labels.score[1].h * 0.35) + 4,
+		self.labels.score:draw({
+			x = -(self.labels.score.w * 1.675) + 2,
+			y = -(self.score.labels[1].h * 0.35) + 4,
 			a = introAlpha,
 			color = 'normal',
 		});
 
-		self.labels.score[2]:draw({
-			x = 0,
-			y = 20,
+		self.score:draw({
+			offset = 0,
+			x = -(scaledW / 4.75) + 1,
+			y1 = 0, 
+			y2 = 20,
 			a = introAlpha,
-			color = 'normal',
 		});
 
-		self.labels.score[1]:draw({
-			x = -(self.labels.score[2].w),
-			y = 0,
-			a = introAlpha,
-			color = 'white',
-		});
-
-		gfx.Translate(-3, self.labels.score[1].h - 6);
+		gfx.Translate(-3, self.score.labels[1].h - 6);
 
 		gfx.BeginPath();
 		align.right();
@@ -960,11 +941,11 @@ local score = {
 			color = 'white',
 		});
 
-		self.labels.maxChain.chain:draw({
-			x = -(self.labels.maxChain.label.w + 8),
+		self.labels.maxChain.value:draw({
+			x = -(self.labels.maxChain.label.w * 1.25 + 4),
 			y = 0,
-			a = introAlpha,
-			color = 'normal',
+			alpha = introAlpha,
+			color = 'normal'
 		});
 		
 		gfx.Restore();
@@ -1365,10 +1346,10 @@ local userInfo = {
 				plus = cacheLabel('+', 36),
 			};
 
-			self.labels.score = {
-				cacheLabel('', 46),
-				cacheLabel('', 36),
-			};
+			self.labels.difference = number.create({
+				isScore = true,
+				sizes = { 46, 36 }
+			});
 		end
 	end,
 
@@ -1411,19 +1392,10 @@ local userInfo = {
 		if (showScoreDifference and gameplay.scoreReplays[1]) then
 			y = y + (self.labels.username.h * 1.75);
 
-			local difference = score.current - gameplay.scoreReplays[1].currentScore;
-			local differenceString = string.format('%08d', math.abs(difference));
+			local difference = scoreInfo.current - gameplay.scoreReplays[1].currentScore;
 			local prefix = ((difference < 0) and 'minus') or 'plus';
 
-			font.number();
-
-			self.labels.score[1]:update({ new = string.sub(differenceString, 1, 4) });
-			self.labels.score[2]:update({ new = string.sub(differenceString, -4) });
-
-			if (not self.x[1]) then
-				self.x[1] = self.labels.prefixes.plus.w + 4;
-				self.x[2] = self.x[1] + self.labels.score[1].w + 2;
-			end
+			self.labels.difference:setInfo({ value = math.abs(difference) });
 
 			gfx.BeginPath();
 			align.left();
@@ -1445,18 +1417,12 @@ local userInfo = {
 				color = 'white',
 			});
 
-			self.labels.score[1]:draw({
-				x = self.x[1],
-				y = y,
+			self.labels.difference:draw({
+				offset = 6,
+				x = self.labels.prefixes.plus.w + 4,
+				y1 = y,
+				y2 = y + 10,
 				a = 255 * self.timer,
-				color = 'white',
-			});
-
-			self.labels.score[2]:draw({
-				x = self.x[2],
-				y = y + (self.labels.score[2].h * 0.25),
-				a = 255 * self.timer,
-				color = 'normal',
 			});
 		end
 
@@ -1476,7 +1442,7 @@ render = function(deltaTime);
 	earlate:drawEarlate(deltaTime);
 	gauge:drawGauge(deltaTime);
 
-	score:drawScore(deltaTime);
+	scoreInfo:drawScore(deltaTime);
 
 	songInfo:drawSongInfo(deltaTime);
 
@@ -1555,10 +1521,10 @@ render_outro = function(deltaTime, clearStatus)
 end
 
 laser_alert = function(rightAlert)
-	if ((rightAlert) and (alerts.timers[2] < -1.5)) then
-		alerts.timers[2] = 1.5;
-	elseif (alerts.timers[1] < 1.5) then
-		alerts.timers[1] = 1.5;
+	if ((rightAlert) and (alerts.timers[2] < -1)) then
+		alerts.timers[2] = 1;
+	elseif (alerts.timers[1] < -1) then
+		alerts.timers[1] = 1;
 	end
 end
 
@@ -1579,7 +1545,7 @@ update_combo = function(newCombo)
 end
 
 update_score = function(newScore)
-	score.current = newScore;
+	scoreInfo.current = newScore;
 end
 
 ----------------------------------------
@@ -1633,12 +1599,10 @@ local scoreboard = {
 					name = cacheLabel('NAME', 24),
 				};
 	
-				font.number();
-	
-				self.labels[i].score = {
-					cacheLabel('', 46),
-					cacheLabel('', 36),
-				};
+				self.labels[i].score = number.create({
+					isScore = true,
+					sizes = { 46, 36 },
+				});
 			end
 		end
 	end,
@@ -1656,16 +1620,12 @@ local scoreboard = {
 	
 		for i, user in ipairs(users) do
 			local alpha = ((user.id == gameplay.user_id) and 255) or 150;
-			local scoreText = string.format('%08d', user.score);
 
 			font.normal();
 
 			self.labels[i].name:update({ new = string.upper(user.name) });
 
-			font.number();
-
-			self.labels[i].score[1]:update({ new = string.sub(scoreText, 1, 4) });
-			self.labels[i].score[2]:update({ new = string.sub(scoreText, -4) });
+			self.labels[i].score:setInfo({ value = user.score });
 
 			gfx.BeginPath();
 			align.left();
@@ -1674,26 +1634,20 @@ local scoreboard = {
 				x = 1,
 				y = y,
 				a = alpha,
-				color = 'light',
+				color = 'normal',
 			});
 	
 			y = y + self.labels[i].name.h;
 
-			self.labels[i].score[1]:draw({
+			self.labels[i].score:draw({
+				offset = 6,
 				x = 0,
-				y = y,
+				y1 = y,
+				y2 = y + 10,
 				a = alpha,
-				color = 'white',
 			});
 	
-			self.labels[i].score[2]:draw({
-				x = self.labels[i].score[1].w,
-				y = y + 10,
-				a = alpha,
-				color = 'light',
-			});
-	
-			y = y + (self.labels[i].score[1].h * 1.25);
+			y = y + (self.labels[i].score.labels[1].h * 1.25);
 		end
 	
 		gfx.Restore();
@@ -1732,11 +1686,7 @@ practice_end_run = function(playCount, passCount, passed, scoreInfo)
 		new = string.format('%.1f%%', (passCount / playCount) * 100),
 	});
 
-	local scoreString = string.format('%08d', scoreInfo.score);
-
-	practice.labels.score.values[1]:update({ new = string.sub(scoreString, 1, 4) });
-
-	practice.labels.score.values[2]:update({ new = string.sub(scoreString, -4) });
+	practice.labels.score.value:setInfo({ value = scoreInfo.score });
 
 	practice.labels.miss.value:update({ new = scoreInfo.misses });
 

@@ -207,6 +207,40 @@ drawCenteredImage = function(params)
   gfx.ImageRect(x, y, w, h, params['image'], alpha, 0);
 end
 
+drawCursor = function(params);
+	local x = params.x or 0;
+	local y = params.y or 0;
+	local w = params.w or 0;
+	local h = params.h or 0;
+	local alpha = (params.alpha and math.floor(255 * params.alpha)) or 255;
+	local stroke = params.stroke or 1;
+  local size = params.size or 6;
+  local sizeY = size * 0.95;
+  local gap = size / (size * 1.05);
+
+	gfx.BeginPath();
+	gfx.StrokeWidth(stroke);
+	gfx.StrokeColor(255, 255, 255, alpha);
+
+	gfx.MoveTo(x - size - gap, y);
+	gfx.LineTo(x - size - gap, y - sizeY);
+	gfx.LineTo(x - gap, y - sizeY);
+
+	gfx.MoveTo(x + w + size + gap, y);
+	gfx.LineTo(x + w + size + gap, y - sizeY);
+	gfx.LineTo(x + w + gap, y - sizeY);
+
+	gfx.MoveTo(x - size - gap, y + h);
+	gfx.LineTo(x - size - gap, y + h + sizeY);
+	gfx.LineTo(x - gap, y + h + sizeY);
+
+	gfx.MoveTo(x + w + size + gap, y + h);
+	gfx.LineTo(x + w + size + gap, y + h + sizeY);
+	gfx.LineTo(x + w + gap, y + h + sizeY);
+
+	gfx.Stroke();
+end
+
 drawErrorPrompt = function(message)
   local resX, resY = game.GetResolution();
 

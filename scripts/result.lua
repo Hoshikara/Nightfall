@@ -2,6 +2,7 @@ local CONSTANTS = require('constants/result');
 
 local easing = require('lib/easing');
 local help = require('helpers/result');
+local number = require('common/number');
 local pages = require('common/pages');
 
 local background = cacheImage('bg.png');
@@ -16,6 +17,7 @@ local allScores = {};
 local loadedScores = {};
 
 local myScore = nil;
+local score = nil;
 
 local singleplayer = true;
 local songInfo = nil;
@@ -110,6 +112,10 @@ local resultPanel = {
 		x = 0,
 		y = 0,
 	},
+	score = number.create({
+		isScore = true,
+		sizes = { 90, 72 },
+	}),
 	songInfo = nil,
 	stats = nil,
 	timers = {
@@ -166,6 +172,17 @@ local resultPanel = {
 			for key, name in pairs(CONSTANTS.stats) do
 				self.labels[key] = cacheLabel(name, 18);
 			end
+
+			font.number();
+
+			if (upScore) then
+				self.labels.plus = cacheLabel('+', 30);
+
+				self.upScore = number.create({
+					isScore = true,
+					sizes = { 30, 24 },
+				});
+			end
 		end
 	end,
 
@@ -186,26 +203,12 @@ local resultPanel = {
 			self.stats = {};
 
 			for key, value in pairs(myScore) do
-				font[value.font]();
+				if (key ~= 'score') then
+					font[value.font]();
 
-				if (key == 'score') then
-					self.stats[key] = {
-						cacheLabel(string.sub(value.value, 1, 4), value.size[1]),
-						cacheLabel(string.sub(value.value, -4), value.size[2]),
-					};
-				else
 					self.stats[key] = cacheLabel(value.value, value.size);
 				end
 			end
-		end
-
-		if (upScore) then
-			font.number();
-
-			self.stats.upScore = {
-				cacheLabel(string.format('+ %s', string.sub(upScore, 1, 4)), 30),
-				cacheLabel(string.sub(upScore, -4), 24),
-			};
 		end
 	end,
 
@@ -326,6 +329,8 @@ local resultPanel = {
 		local x = self.text.x[2] - 2;
 		local y = self.text.y;
 
+		self.score:setInfo({ value = score });
+
 		gfx.Save();
 
 		gfx.Translate(self.panel.x, self.panel.y);
@@ -340,15 +345,19 @@ local resultPanel = {
 		});
 
 		if (upScore) then
-			self.stats.upScore[1]:draw({
-				x = x + self.stats.score[1].w + 8,
+			self.upScore:setInfo({ value = upScore });
+
+			self.labels.plus:draw({
+				x = x + (self.score.position[5] * 1.1),
 				y = y - 3,
 				color = 'white',
 			});
-			self.stats.upScore[2]:draw({
-				x = x + self.stats.score[1].w + 8 + self.stats.upScore[1].w + 2,
-				y = y + 3,
-				color = 'normal',
+
+			self.upScore:draw({
+				offset = 4,
+				x = x + (self.score.position[5] * 1.2) + 5,
+				y1 = y - 3,
+				y2 = y + 3
 			});
 		end
 
@@ -370,15 +379,14 @@ local resultPanel = {
 
 		align.left();
 
-		self.stats.score[1]:draw({ x = x - 6, y = y });
-
-		self.stats.score[2]:draw({
-			x = x - 6 + self.stats.score[1].w,
-			y = y + (self.stats.score[2].h / 4) - 3,
-			color = 'normal',
+		self.score:draw({
+			offset = 10,
+			x = x - 5,
+			y1 = y,
+			y2 = y + (self.score.labels[5].h / 4) - 3,
 		});
 
-		y = y + (self.stats.score[1].h * 1.0625);
+		y = y + (self.score.labels[1].h * 1.0625);
 
 		local statX = x;
 		local statY = y + (self.labels.grade.h * 1.5);
@@ -1039,14 +1047,14 @@ local scoreList = {
 				};
 
 				for key, value in pairs(score) do
-					font[value.font]();
-
 					if (key == 'score') then
-						self.stats[i][key] = {
-							cacheLabel(string.sub(value.value, 1, 4), value.size[1]),
-							cacheLabel(string.sub(value.value, -4), value.size[2]),
-						};
+						self.stats[i].score = number.create({
+							isScore = true,
+							sizes = { 90, 72 },
+						});
 					else
+						font[value.font]();
+
 						self.stats[i][key] = cacheLabel(value.value, value.size);
 					end
 				end
@@ -1135,35 +1143,18 @@ local scoreList = {
 		local scoreIndex =
 			((selectedScore % self.viewLimit > 0) and (selectedScore % self.viewLimit))
 			or self.viewLimit;
-		local s = 16;
-		local h = ((self.cursor.index == scoreIndex) and self.h.selected)
-			or self.h.base;
-		local x = self.x;
-		local y = self.cursor.pos;
 
 		gfx.Save();
-	
-		gfx.BeginPath();
-		gfx.StrokeWidth(2);
-		gfx.StrokeColor(255, 255, 255, math.floor(255 * self.cursor.alpha));
-		
-		gfx.MoveTo(x - (s * 1.125), y);
-		gfx.LineTo(x - (s * 1.125), y - s);
-		gfx.LineTo(x, y - s);
 
-		gfx.MoveTo(x + self.w + (s * 1.125), y);
-		gfx.LineTo(x + self.w + (s * 1.125), y - s);
-		gfx.LineTo(x + self.w, y - s);
-
-		gfx.MoveTo(x - (s * 1.125), y + h);
-		gfx.LineTo(x - (s * 1.125), y + h + s);
-		gfx.LineTo(x, y + h + s);
-
-		gfx.MoveTo(x + self.w + (s * 1.125), y + h);
-		gfx.LineTo(x + self.w + (s * 1.125), y + h + s);
-		gfx.LineTo(x + self.w, y + h+ s);
-
-		gfx.Stroke();
+		drawCursor({
+			x = self.x,
+			y = self.cursor.pos,
+			w = self.w,
+			h = (((self.cursor.index == scoreIndex) and self.h.selected) or self.h.base),
+			alpha = self.cursor.alpha,
+			size = 20,
+			stroke = 2,
+		});
 
 		gfx.Restore();
 	end,
@@ -1193,6 +1184,8 @@ local scoreList = {
 		local x = self.padding.x;
 		local y = self.padding.y + initialY;
 
+		self.stats[i].score:setInfo({ value = allScores[i].score });
+
 		gfx.BeginPath();
 		fill.dark(120);
 		gfx.Rect(0, initialY, self.w, h);
@@ -1219,7 +1212,7 @@ local scoreList = {
 		if (isSelected) then
 			y = y + (self.labels.score.h * 0.75);
 		else
-			x = x + self.stats[i].score[1].w + self.stats[i].score[2].w + 56;
+			x = self.stats[i].score.position[8] + 144;
 
 			if (singleplayer) then
 				self.labels.timestamp:draw({
@@ -1266,20 +1259,15 @@ local scoreList = {
 
 		x = self.padding.x;
 
-		self.stats[i].score[1]:draw({
+		self.stats[i].score:draw({
+			offset = 10,
 			x = x - 3,
-			y = y,
-			color = 'white',
-		});
-
-		self.stats[i].score[2]:draw({
-			x = x + self.stats[i].score[1].w,
-			y = y + (self.stats[i].score[2].h * 0.25) - 3,
-			color = 'normal',
+			y1 = y,
+			y2 = y + (self.stats[i].score.labels[1].h * 0.125) + 5,
 		});
 
 		if (isSelected) then
-			y = y + self.stats[i].score[1].h * 1.125;
+			y = y + self.stats[i].score.labels[1].h * 1.125;
 
 			if (singleplayer) then
 				local statX = x;
@@ -1533,12 +1521,14 @@ result_set = function()
 
 	if (not myScore) then
 		myScore = help.formatScore(result);
+
+		score = get(result, 'score', 0);
 	end
 
 	if (singleplayer) then
 		if (#result.highScores > 0) then
 			if (result.score > result.highScores[1].score) then
-				upScore = string.format('%08d',	result.score - result.highScores[1].score);
+				upScore = result.score - result.highScores[1].score;
 			end
 		end
 

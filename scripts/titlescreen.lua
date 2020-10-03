@@ -1,6 +1,5 @@
 local controller = require('common/controller');
 local controls = require('titlescreen/controls');
-local cursor = require('titlescreen/cursor');
 local dialog = require('layout/dialog');
 local easing = require('lib/easing');
 
@@ -259,20 +258,21 @@ local buttons = {
 			self.cursor.alpha = math.abs(0.8 * math.cos(self.cursor.timer * 5)) + 0.2;
 		end
 	
-		self.cursor.x = self.cursor.x - (self.cursor.x - x - 4) * deltaTime * 36;
+		self.cursor.x = self.cursor.x - (self.cursor.x - x) * deltaTime * 36;
 	
 		gfx.Save();
 	
 		gfx.BeginPath();
 	
-		cursor:drawCursor(
-			self.cursor.x,
-			self.y + (self.images.button.h / 2),
-			self.images.button.w - 24,
-			self.images.button.h - 24,
-			4,
-			self.cursor.alpha
-		);
+		drawCursor({
+			x = self.cursor.x + 10,
+			y = self.y + 10,
+			w = self.images.button.w - 20,
+			h = self.images.button.h - 20,
+			alpha = self.cursor.alpha,
+			size = 12,
+			stroke = 1.5,
+		});
 	
 		gfx.Restore();
 	end,
@@ -403,7 +403,7 @@ local updatePrompt = {
 				- (self.buttons.normal.w + self.buttons.spacing);
 			self.buttons.x[1] = self.buttons.x[2]
 			- (self.buttons.normal.w + self.buttons.spacing);
-			self.buttons.y = dialog.y.bottom - self.buttons.normal.h + 12;
+			self.buttons.y = dialog.y.bottom - self.buttons.normal.h + 10;
 
 			self.cache.scaledW = scaledW;
 			self.cache.scaledH = scaledH;
@@ -483,20 +483,19 @@ local updatePrompt = {
 			self.cursor.alpha = math.abs(0.8 * math.cos(self.cursor.timer * 5)) + 0.2;
 		end
 	
-		self.cursor.x = self.cursor.x - (self.cursor.x - x - 4) * deltaTime * 36;
+		self.cursor.x = self.cursor.x - (self.cursor.x - x) * deltaTime * 36;
 	
 		gfx.Save();
 	
-		gfx.BeginPath();
-	
-		cursor:drawCursor(
-			self.cursor.x,
-			self.buttons.y + (self.buttons.normal.h / 2),
-			self.buttons.normal.w - 24,
-			self.buttons.normal.h - 24,
-			4,
-			self.cursor.alpha
-		);
+		drawCursor({
+			x = self.cursor.x + 10,
+			y = self.buttons.y + 10,
+			w = self.buttons.normal.w - 20,
+			h = self.buttons.normal.h - 20,
+			alpha = self.cursor.alpha,
+			size = 10,
+			stroke = 1.5,
+		});
 	
 		gfx.Restore();
 	end,

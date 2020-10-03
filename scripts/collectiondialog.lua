@@ -1,4 +1,3 @@
-local buttonCursor = require('songselect/cursor');
 local layout = require('layout/dialog');
 
 menuOptions = {};
@@ -373,14 +372,15 @@ render = function(deltaTime)
 			drawButton(deltaTime, option.label, isSelected, buttonY);
 		end
 
-		buttonCursor:drawDifficultyCursor(
-			layout.x.outerRight - layout.images.button.w + 12,
-			layout.y.center,
-			427,
-			74,
-			4,
-			cursor.alpha
-		);
+		drawCursor({
+			x = layout.x.outerRight - layout.images.button.w + 20,
+			y = layout.y.center + 10,
+			w = layout.images.button.w - 20,
+			h = layout.images.button.h - 20,
+			alpha = cursor.alpha,
+			size = 12,
+			stroke = 1.5,
+		});
 
 		drawArrows();
 	end

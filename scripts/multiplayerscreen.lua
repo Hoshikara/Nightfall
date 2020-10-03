@@ -1,9 +1,9 @@
 local CONSTANTS_SONGWHEEL = require('constants/songwheel')
 local CONSTANTS_MULTI = require('constants/multiplayerscreen');
 
-local cursor = require('songselect/cursor');
 local dialogWindow = require('multiplayerscreen/dialogWindow');
 local json = require('lib/json');
+local number = require('common/number');
 local pages = require('common/pages');
 
 game.LoadSkinSample('click-02');
@@ -285,35 +285,17 @@ local roomList = {
 			* deltaTime
 			* 36;
 
-		local s = 14;
-		local w = self.room.w;
-		local h = self.room.h;
-		local x = self.room.x;
-		local y = self.cursor.pos;
-
 		gfx.Save();
 	
-		gfx.BeginPath();
-		gfx.StrokeWidth(1.5);
-		gfx.StrokeColor(255, 255, 255, math.floor(255 * self.cursor.alpha));
-		
-		gfx.MoveTo(x - (s * 1.125), y);
-		gfx.LineTo(x - (s * 1.125), y - s);
-		gfx.LineTo(x, y - s);
-
-		gfx.MoveTo(x + w + (s * 1.125), y);
-		gfx.LineTo(x + w + (s * 1.125), y - s);
-		gfx.LineTo(x + w, y - s);
-
-		gfx.MoveTo(x - (s * 1.125), y + h);
-		gfx.LineTo(x - (s * 1.125), y + h + s);
-		gfx.LineTo(x, y + h + s);
-
-		gfx.MoveTo(x + w + (s * 1.125), y + h);
-		gfx.LineTo(x + w + (s * 1.125), y + h + s);
-		gfx.LineTo(x + w, y + h + s);
-
-		gfx.Stroke();
+		drawCursor({
+			x = self.room.x,
+			y = self.room.y,
+			w = self.room.w,
+			h = self.room.h,
+			alpha = self.cursor.alpha,
+			size = 16,
+			stroke = 1.5,
+		});
 
 		gfx.Restore();
 	end,
@@ -679,14 +661,15 @@ local songInfo = {
 
     gfx.BeginPath();
 
-    cursor:drawDifficultyCursor(
-			self.cursor.x,
-			y,
-			222,
-			74,
-			4,
-			self.cursor.alpha
-		);
+		drawCursor({
+			x = self.cursor.x + 10,
+			y = y + 10,
+			w = self.images.button.w - 20,
+			h = self.images.button.h - 20,
+			alpha = self.cursor.alpha,
+			size = 12,
+			stroke = 1.5,
+		});
 
     gfx.Restore();
   end,
@@ -1025,10 +1008,10 @@ local lobby = {
 				font.number();
 
 				self.userInfo[i].level = cacheLabel('0', 30);
-				self.userInfo[i].score = {
-					[1] = cacheLabel('0', 30),
-					[2] = cacheLabel('0', 26)
-				};
+				self.userInfo[i].score = number.create({
+					isScore = true,
+					sizes = { 30, 26 },
+				});
 			end
 
 			self.userCount = #allUsers;
@@ -1055,12 +1038,7 @@ local lobby = {
 
 			self.userInfo[i].grade:update({ new = getGrade(currentUser.score) });
 
-			local scoreString = string.format('%08d', currentUser.score);
-
-			font.number();
-
-			self.userInfo[i].score[1]:update({ new = string.sub(scoreString, 1, -4) });
-			self.userInfo[i].score[2]:update({ new = string.sub(scoreString, -4) });
+			self.userInfo[i].score:setInfo({ value = currentUser.score });
 		end
 	end,
 
@@ -1325,15 +1303,11 @@ local lobby = {
 					});
 
 					if (i == 5) then
-						self.userInfo[userIndex].score[1]:draw({
+						self.userInfo[userIndex].score:draw({
+							offset = 2,
 							x = self.user.x[i],
-							y = infoY,
-							color = 'white',
-						});
-						self.userInfo[userIndex].score[2]:draw({
-							x = self.user.x[i] + self.userInfo[userIndex].score[1].w + 2,
-							y = infoY + 4,
-							color = 'normal',
+							y1 = infoY,
+							y2 = infoY + 4,
 						});
 					else
 						self.userInfo[userIndex][label]:draw({
@@ -1416,6 +1390,8 @@ render = function(deltaTime)
 
 	hoveredButton = nil;
 
+	playSounds(deltaTime);
+
 	background:draw({
 		x = 0,
 		y = 0,
@@ -1442,33 +1418,36 @@ render = function(deltaTime)
 	gfx.Restore();
 end
 
-local sound_time = 0;
-local sound_clip = nil;
-local sounds_left = 0;
-local sound_interval = 0;
+local soundDuration = 0;
+local soundClip = nil;
+local soundsRemaining = 0;
+local soundInterval = 0;
 
-function repeat_sound(clip, times, interval)
-    sound_clip = clip;
-    sound_time = 0;
-    sounds_left = times - 1;
-    sound_interval = interval;
-    game.PlaySample(clip)
+function repeatSound(clip, times, interval)
+	soundClip = clip;
+	soundDuration = 0;
+	soundsRemaining = times - 1;
+	soundInterval = interval;
+
+	game.PlaySample(clip);
 end
 
-function do_sounds(deltaTime)
-    if sound_clip == nil then
-        return
-    end
+function playSounds(deltaTime)
+	if (not soundClip) then return end
 
-    sound_time = sound_time + deltaTime;
-    if sound_time > sound_interval then
-        sound_time = sound_time - sound_interval;
-        game.PlaySample(sound_clip);
-        sounds_left = sounds_left - 1
-        if sounds_left <= 0 then
-            sound_clip = nil
-        end
-    end
+	soundDuration = soundDuration + deltaTime;
+
+	if soundDuration > soundInterval then
+		soundDuration = soundDuration - soundInterval;
+
+		game.PlaySample(soundClip);
+
+		soundsRemaining = soundsRemaining - 1;
+		
+		if (soundsRemaining <= 0) then
+			soundClip = nil;
+		end
+	end
 end
 
 changeHost = function(user)
@@ -1526,7 +1505,6 @@ end
 button_pressed = function(button)
 	if (button == game.BUTTON_STA) then
 		if (isStartingGame) then return end
-
 
 		if (screenState == 'setUsername') then
 			isLoading = true;
@@ -1646,15 +1624,15 @@ init_tcp = function()
 				and allReady
 				and (not previousAllReady)
 			) then
-				repeat_sound('click-02', 3, .1)
+				repeatSound('click-02', 3, .1);
 			end
 
 			if ((data.host == userId) and (host ~= userId)) then
-				repeat_sound('click-02', 3, .1)
+				repeatSound('click-02', 3, .1);
 			end
 
 			if ((data.song ~= nil) and (previousSong ~= data.song)) then
-				game.PlaySample('menu_click')
+				game.PlaySample('menu_click');
 				previousSong = data.song;
 			end
 
@@ -1671,7 +1649,7 @@ init_tcp = function()
 			mirrorMode = data.mirror_mode;
 			
 			if ((data.start_soon) and (not isStartingGame)) then
-				repeat_sound('click-01', 5, 1)
+				repeatSound('click-01', 5, 1);
 			end
 
 			isStartingGame = data.start_soon;

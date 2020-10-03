@@ -1,3 +1,6 @@
+###### October 2, 2020
+- Minor refactoring and visual adjustments for score displays and cursors
+
 ###### September 30, 2020
 - Modified `Gameplay` appearance slightly
 - Fixed Multiplayer results crashes (hopefully)

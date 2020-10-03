@@ -35,7 +35,7 @@ local _ = {
 _.setSizes = function(self, scaledW, scaledH)
 	if (not self.images) then
 		self.images = {
-			dialogBox = cacheImage('dialog.png'),
+			dialogBox = cacheImage('common/dialog.png'),
 			button = cacheImage('buttons/long.png'),
 			buttonHover = cacheImage('buttons/long_hover.png'),
 		};

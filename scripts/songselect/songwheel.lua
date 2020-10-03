@@ -1,7 +1,7 @@
 local CONSTANTS = require('constants/songwheel');
 
-local cursor = require('songselect/cursor');
 local easing = require('lib/easing');
+local number = require('common/number');
 local volforce = require('songselect/volforce');
 
 local background = cacheImage('bg.png');
@@ -401,7 +401,16 @@ local songGrid = {
 
     gfx.Translate(x, y);
 
-    cursor:drawSongCursor(0, 0, self.jacketSize, self.jacketSize, 8, self.cursor.alpha);
+
+    drawCursor({
+			x = 0,
+			y = 0,
+			w = self.jacketSize,
+			h = self.jacketSize,
+      alpha = self.cursor.alpha,
+      size = 18,
+			stroke = 1.5,
+		});
 
     gfx.Restore();
   end,
@@ -718,10 +727,10 @@ local songInfo = {
       font.number();
 
       self.difficulties = {};
-      self.highScore = {
-        cacheLabel('', 90),
-        cacheLabel('', 72)
-      };
+      self.highScore = number.create({
+        isScore = true,
+        sizes = { 90, 72 }
+      });
       self.labels = {};
       self.levels = {};
 
@@ -916,17 +925,12 @@ local songInfo = {
           - 4;
       end
 
-      local highScore = difficulty.scores[1].score;
-      local scoreText = string.format('%08d', highScore);
-
-      font.number();
-      self.highScore[1]:update({ new = string.sub(scoreText, 1, 4) });
-      self.highScore[2]:update({ new = string.sub(scoreText, -4) });
-      
       gfx.BeginPath();
 
       local x = self.labels.x + (self.padding.x.double * 2.4);
       local y = scaledH - (scaledH / 20) - (self.padding.y.double * 2.15);
+
+      self.highScore:setInfo({ value = difficulty.scores[1].score });
 
       align.left();
       self.labels.highScore:draw({
@@ -937,16 +941,11 @@ local songInfo = {
 
       y = y + (self.padding.y.quarter / 2) + 2;
 
-      self.highScore[1]:draw({
+      self.highScore:draw({
+        offset = 10,
         x = x - 4,
-        y = y,
-        color = 'white',
-      });
-
-      self.highScore[2]:draw({
-        x = x + self.highScore[1].w,
-        y = y + self.padding.y.half - 6,
-        color = 'normal',
+        y1 = y,
+        y2 = y + self.padding.y.half - 6,
       });
     end
 
@@ -1008,16 +1007,15 @@ local songInfo = {
 
     self.cursor.pos = self.cursor.pos - (self.cursor.pos - y) * deltaTime * 36;
 
-    gfx.BeginPath();
-
-    cursor:drawDifficultyCursor(
-			self.cursor.x,
-			self.cursor.pos,
-			222,
-			74,
-			4,
-			self.cursor.alpha
-		);
+    drawCursor({
+			x = self.cursor.x + 10,
+			y = self.cursor.pos + 10,
+			w = self.images.button.w - 20,
+			h = self.images.button.h - 20,
+      alpha = self.cursor.alpha,
+      size = 12,
+			stroke = 1.5,
+		});
 
     gfx.Restore();
   end,

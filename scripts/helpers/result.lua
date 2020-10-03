@@ -155,11 +155,7 @@ local formatHighScore = function(current)
       size = 24,
       value = string.format('±%d ms', get(current, 'hitWindow.good', 92)),
     },
-    score = {
-      font = 'number',
-      size = { 90, 72 },
-      value = string.format('%08d', get(current, 'score', 0)),
-    },
+    score = get(current, 'score', 0),
     timestamp = {
       font = 'number',
       size = 24,
