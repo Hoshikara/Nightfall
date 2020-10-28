@@ -111,53 +111,53 @@ end
 local formatHighScore = function(current)
   return {
     clear = {
-      font = 'normal',
+      font = 'Normal',
       size = 24,
       value = getClear(current),
     },
     critical = {
-      font = 'number',
+      font = 'Number',
       size = 24,
       value = get(current, 'perfects', '-'),
     },
     criticalWindow = {
-      font = 'number',
+      font = 'Number',
       size = 24,
       value = string.format('±%d ms', get(current, 'hitWindow.perfect', 46)),
     },
     gauge = {
-      font = 'number',
+      font = 'Number',
       size = 24,
       value = getGauge(current),
     },
     grade = {
-      font = 'normal',
+      font = 'Normal',
       size = 24,
       value = getGrade(current),
     },
     error = {
-      font = 'number',
+      font = 'Number',
       size = 24,
       value = get(current, 'misses', '-'),
     },
     name = {
-      font = 'normal',
+      font = 'Normal',
       size = 24,
       value = getName(current),
     },
     near = {
-      font = 'number',
+      font = 'Number',
       size = 24,
       value = get(current, 'goods', '-'),
     },
     nearWindow = {
-      font = 'number',
+      font = 'Number',
       size = 24,
       value = string.format('±%d ms', get(current, 'hitWindow.good', 92)),
     },
     score = get(current, 'score', 0),
     timestamp = {
-      font = 'number',
+      font = 'Number',
       size = 24,
       value = getTimestamp(current),
     },
@@ -168,27 +168,27 @@ local formatScore = function(current)
   local extendedScore = formatHighScore(current);
 
   extendedScore.early = {
-    font = 'number',
+    font = 'Number',
     size = 24,
     value = get(current, 'earlies', '-'),
   };
   extendedScore.late = {
-    font = 'number',
+    font = 'Number',
     size = 24,
     value = get(current, 'lates', '-'),
   };
   extendedScore.maxChain = {
-    font = 'number',
+    font = 'Number',
     size = 24,
     value = get(current, 'maxCombo', '-'),
   };
   extendedScore.meanDelta = {
-    font = 'number',
+    font = 'Number',
     size = 18,
     value = getMeanDelta(current),
   };
   extendedScore.medianDelta = {
-    font = 'number',
+    font = 'Number',
     size = 18,
     value = getMedianDelta(current),
   };
@@ -199,37 +199,37 @@ end
 local formatSongInfo = function(current)
   return {
     artist = {
-      font = 'jp',
+      font = 'JP',
       size = 30,
       value = string.upper(get(current, 'artist', '-')),
     },
     bpm = {
-      font = 'number',
+      font = 'Number',
       size = 24,
       value = get(current, 'bpm', '-'),
     },
     difficulty = {
-      font = 'normal',
+      font = 'Normal',
       size = 24,
       value = getDifficulty(current),
     },
     duration = {
-      font = 'number',
+      font = 'Number',
       size = 24,
       value = getDuration(current),
     },
     effector = {
-      font = 'jp',
+      font = 'JP',
       size = 24,
       value = string.upper(get(current, 'effector', '-')),
     },
     level = {
-      font = 'number',
+      font = 'Number',
       size = 24,
       value = get(current, 'level', '-'),
     },
     title = {
-      font = 'jp',
+      font = 'JP',
       size = 36,
       value = getTitle(current),
     },

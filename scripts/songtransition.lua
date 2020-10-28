@@ -1,5 +1,5 @@
 
-local background = cacheImage('bg.png');
+local background = Image.New('bg.png');
 
 local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
 
@@ -46,11 +46,11 @@ local labels = nil;
 
 setLabels = function()
 	if (not labels) then
-		font.jp();
+		Font.JP();
 
 		labels = {
-			artist = cacheLabel(string.upper(song.artist), 40),
-			title = cacheLabel(string.upper(song.title), 48),
+			artist = Label.New(string.upper(song.artist), 40),
+			title = Label.New(string.upper(song.title), 48),
 		};
 	end
 end
@@ -119,7 +119,7 @@ drawTransition = function(deltaTime, isIntro);
 		});
 
 		gfx.BeginPath();
-		fill.black(150 * timers.fade);
+		Fill.Black(150 * timers.fade);
 		gfx.Rect(0, 0, scaledW, scaledH);
 		gfx.Fill();
 
@@ -176,20 +176,20 @@ drawTransition = function(deltaTime, isIntro);
 
 	if (isIntro) then
 		gfx.BeginPath();
-		align.center();
+		FontAlign.Center();
 
 		labels.title:draw({
 			x = 0,
 			y = 255,
 			a = 255 * flickerAlpha,
-			color = 'white',
+			color = 'White',
 		});
 
 		labels.artist:draw({
 			x = 0,
 			y = 255 + labels.title.h * 1.75,
 			a = 255 * flickerAlpha,
-			color = 'normal',
+			color = 'Normal',
 		});
 	end
 

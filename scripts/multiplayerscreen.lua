@@ -1,13 +1,16 @@
 local CONSTANTS_SONGWHEEL = require('constants/songwheel')
 local CONSTANTS_MULTI = require('constants/multiplayerscreen');
 
-local dialogWindow = require('multiplayerscreen/dialogWindow');
-local json = require('lib/json');
-local number = require('common/number');
-local pages = require('common/pages');
+local Controller = require('common/controller');
+local Cursor = require('common/cursor');
+local DialogWindow = require('common/dialogwindow');
+local List = require('common/list');local ScoreNumber = require('common/scorenumber');
+local Scrollbar = require('common/scrollbar');
 
-game.LoadSkinSample('click-02');
+local json = require('lib/json');
+
 game.LoadSkinSample('click-01');
+game.LoadSkinSample('click-02');
 game.LoadSkinSample('menu_click');
 
 local allowClick = false;
@@ -16,7 +19,7 @@ local allReady;
 local allRooms = {};
 local allUsers = {};
 
-local background = cacheImage('bg.png');
+local background = Image.New('bg.png');
 
 local allowHardToggle = game.GetSkinSetting('toggleHard') or false;
 local allowMirrorToggle = game.GetSkinSetting('toggleMirror') or false;
@@ -110,26 +113,18 @@ getGrade = function(score)
 	end
 end
 
-local roomCreation = dialogWindow.create(CONSTANTS_MULTI.dialog.roomCreation);
-local passwordCreation = dialogWindow.create(CONSTANTS_MULTI.dialog.passwordCreation);
-local passwordRequired = dialogWindow.create(CONSTANTS_MULTI.dialog.passwordRequired);
-local usernameCreation = dialogWindow.create(CONSTANTS_MULTI.dialog.usernameCreation);
+local roomCreation = DialogWindow.New(CONSTANTS_MULTI.dialog.roomCreation);
+local passwordCreation = DialogWindow.New(CONSTANTS_MULTI.dialog.passwordCreation);
+local passwordRequired = DialogWindow.New(CONSTANTS_MULTI.dialog.passwordRequired);
+local usernameCreation = DialogWindow.New(CONSTANTS_MULTI.dialog.usernameCreation);
 
 local roomList = {
 	alpha = 0,
-	bounds = { lower = 0, upper = 0 },
 	cache = { scaledW = 0, scaledH = 0 },
-	cursor = {
-		alpha = 0,
-		flickerTimer = 0,
-		index = selectedRoomIndex,
-		pos = 0,
-		timer = 0,
-		y = {},
-	},
+	cursor = Cursor.New(),
 	images = {
-		button = cacheImage('buttons/normal.png'),
-		buttonHover = cacheImage('buttons/normal_hover.png'),
+		button = Image.New('buttons/normal.png'),
+		buttonHover = Image.New('buttons/normal_hover.png'),
 	},
 	info = nil,
 	labels = nil,
@@ -139,18 +134,22 @@ local roomList = {
 		'password',
 		'status',
 	},
-	room = {
+	list = {
+		margin = 0,
 		padding = 0,
-		spacing = {
-			inner = 0,
-			outer = 0,
-		},
+		spacing = 0,
+		timer = 0,
 		w = 0,
-		h = 0,
+		h = { base = 0, item = 0 },
 		x = 0,
-		y = 0,
+		y = {
+			base = 0,
+			current = 0,
+			previous = 0,
+		},
 	},
 	roomCount = 0,
+	scrollbar = Scrollbar.New(),
 	text = {},
 	timer = 0,
 	viewLimit = 5,
@@ -162,24 +161,39 @@ local roomList = {
 			self.x = scaledW / 20;
 			self.y = scaledH / 20;
 
-			self.room.w = scaledW / 1.75;
-			self.room.h = scaledH / 10;
-			self.room.x = (scaledW / 2) - (self.room.w / 2);
-			self.room.y = self.y + (self.labels.heading.h * 2.5);
-			self.room.padding = self.room.h / 4;
-			self.room.spacing.inner = (self.room.w - (self.room.padding * 2)) / 8;
-			self.room.spacing.outer = (scaledH
-				- (scaledH / 6)
-				- self.room.y
-				- (self.room.h * self.viewLimit)
-			) / (self.viewLimit - 1);
+			self.list.w = scaledW / 1.75;
+			self.list.h.base = scaledH - (scaledH / 3);
+
+			self.list.h.item = self.list.h.base // 6.5;
+
+			self.list.padding = self.list.h.item // 4;
+			self.list.spacing = (self.list.w - (self.list.padding * 2)) / 8;
+			self.list.margin = (self.list.h.base - (self.list.h.item * self.viewLimit))
+				/ (self.viewLimit - 1);
+
+			self.list.x = (scaledW / 2) - (self.list.w / 2);
+			self.list.y.base = scaledH / 6;
 
 			self.text[1] = 0;
-			self.text[2] = self.room.spacing.inner * 3.5;
-			self.text[3] = self.room.spacing.inner * 5;
-			self.text[4] = self.room.spacing.inner * 6.5;
+			self.text[2] = self.list.spacing * 3.5;
+			self.text[3] = self.list.spacing * 5;
+			self.text[4] = self.list.spacing * 6.5;
 
-			self.cursor.y = {};
+			self.cursor:setSizes({
+				x = self.list.x,
+				y = self.list.y.base,
+				w = self.list.w,
+				h = self.list.h.item,
+				margin = self.list.margin,
+			});
+
+			if (#allRooms > self.viewLimit) then
+				self.scrollbar:setSizes({
+					screenW = scaledW,
+					y = self.list.y.base,
+					h = self.list.h.base,
+				});
+			end
 
 			self.cache.scaledW = scaledW;
 			self.cache.scaledH = scaledH;
@@ -188,15 +202,15 @@ local roomList = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			font.medium();
+			Font.Medium();
 
 			self.labels = {
-				createRoom = cacheLabel('CREATE ROOM', 18),
+				createRoom = Label.New('CREATE ROOM', 18),
 			};
 
-			font.normal();
+			Font.Normal();
 
-			self.labels.heading = cacheLabel('MULTIPLAYER ROOMS', 60);
+			self.labels.heading = Label.New('MULTIPLAYER ROOMS', 60);
 		end
 	end,
 
@@ -208,28 +222,13 @@ local roomList = {
 				self.info[i] = {
 					capacity = string.format('%d  /  %d', room.current, room.max),
 					name = string.upper(room.name),
-				password = (room.password and 'YES') or 'NO',
+					password = (room.password and 'YES') or 'NO',
 					status = (room.ingame and 'IN GAME') or 'IN LOBBY',
 				};
 			end
 
 			self.roomCount = #allRooms;
 		end
-	end,
-
-	handleNavigation = function(self)
-		local cursorIndex = ((selectedRoomIndex % self.viewLimit > 0)
-			and (selectedRoomIndex % self.viewLimit))
-			or self.viewLimit;
-		local lowerBound, upperBound = pages.getPageBounds(
-			self.viewLimit,
-			#allRooms,
-			selectedRoomIndex
-		);
-
-		self.cursor.index = selectedRoomIndex;
-		self.bounds.lower = lowerBound;
-		self.bounds.upper = upperBound;
 	end,
 
 	drawButton = function(self)
@@ -259,43 +258,46 @@ local roomList = {
 		end
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
+		
 		self.labels.createRoom:draw({
 			x = x + 40,
 			y = y + 25,
 			a = (allowAction and 255) or 50,
-			color = 'white',
+			color = 'White',
 		});
 
 		gfx.Restore();
 	end,
 
-	drawCursor = function(self, deltaTime)
-		self.cursor.timer = self.cursor.timer + deltaTime;
-		self.cursor.flickerTimer = self.cursor.flickerTimer + deltaTime;
-	
-		self.cursor.alpha = math.floor(self.cursor.flickerTimer * 30) % 2;
-	
-		if (self.cursor.flickerTimer >= 0.3) then
-			self.cursor.alpha = math.abs(0.8 * math.cos(self.cursor.timer * 5)) + 0.2;
+	drawRoomList = function(self, deltaTime)
+		if (self.list.timer < 1) then
+			self.list.timer = math.min(self.list.timer + (deltaTime * 8), 1);
 		end
 
-		self.cursor.pos = self.cursor.pos
-			- (self.cursor.pos - self.cursor.y[selectedRoomIndex])
-			* deltaTime
-			* 36;
+		local change = (self.list.y.current - self.list.y.previous)
+			* Ease.OutQuad(self.list.timer);
+		local offset = self.list.y.previous + change;
+		local y = 0;
+
+		self.list.y.previous = offset;
 
 		gfx.Save();
-	
-		drawCursor({
-			x = self.room.x,
-			y = self.room.y,
-			w = self.room.w,
-			h = self.room.h,
-			alpha = self.cursor.alpha,
-			size = 16,
-			stroke = 1.5,
-		});
+
+		gfx.Scissor(
+			self.list.x,
+			self.list.y.base,
+			self.list.w,
+			self.list.h.base
+		);
+
+		gfx.Translate(self.list.x, self.list.y.base + offset);
+
+		for i = 1, #allRooms do
+			y = y + self:drawRoom(i, y);
+		end
+
+		gfx.ResetScissor();
 
 		gfx.Restore();
 	end,
@@ -303,60 +305,82 @@ local roomList = {
 	drawRoom = function(self, roomIndex, initialY)
 		if (not allRooms[roomIndex]) then return end
 
-		local x = self.room.x + self.room.padding;
-		local y = self.room.y + self.room.padding + initialY;
+		local x = self.list.padding;
+		local y = initialY + self.list.padding;
 
 		gfx.BeginPath();
-		fill.dark(120);
-		gfx.Rect(self.room.x, self.room.y + initialY, self.room.w, self.room.h);
+		Fill.Dark(120);
+		gfx.Rect(0, initialY, self.list.w, self.list.h.item);
 		gfx.Fill();
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 
 		for i, name in ipairs(self.order) do
-			font.medium();
+			Font.Medium();
 			gfx.FontSize(18);
 
-			fill.dark(255 * 0.5);
+			Fill.Dark(255 * 0.5);
 			gfx.Text(string.upper(name), x + self.text[i] + 1, y + 1);
 
-			fill.normal();
+			Fill.Normal();
 			gfx.Text(string.upper(name), x + self.text[i], y);
 
 			local infoY = ((name == 'capacity') and (y + 24)) or (y + 28);
 
 			if (name == 'capacity') then
-				font.number();
+				Font.Number();
 				gfx.FontSize(30);
 			else
-				font.normal();
+				Font.Normal();
 				gfx.FontSize(24);
 			end
 
-			fill.dark(255 * 0.5);
+			Fill.Dark(255 * 0.5);
 			gfx.Text(self.info[roomIndex][name], x + self.text[i] + 1, infoY + 1);
 
-			fill.white();
+			Fill.White();
 			gfx.Text(self.info[roomIndex][name], x + self.text[i], infoY);
 		end
 
-		if (mouseClipped(
-			self.room.x,
-			self.room.y + initialY,
-			self.room.w,
-			self.room.h
-		)) then
-			if (screenState == 'roomList') then
-				hoveredButton = function()
-					joinRoom(allRooms[roomIndex]);
-				end
+		return self.list.h.item + self.list.margin;
+	end,
 
-				selectedRoomIndex = roomIndex;
-			end
+	handleChange = function(self)
+		if (selectedRoomIndex > #allRooms) then
+			selectedRoomIndex = 1;
+		elseif (selectedRoomIndex < 1) then
+			selectedRoomIndex = #allRooms;
 		end
 
-		return self.room.h + self.room.spacing.outer;
+		if (self.selectedRoomIndex ~= selectedRoomIndex) then
+			self.selectedRoomIndex = selectedRoomIndex;
+
+			local currentPage = List.getCurrentPage({
+				current = self.selectedRoomIndex,
+				limit = self.viewLimit,
+				total = #allRooms,
+			});
+	
+			self.list.y.current = (self.list.h.base + self.list.margin)
+				* (currentPage - 1);
+			self.list.y.current = -self.list.y.current;
+	
+			self.list.timer = 0;
+
+			self.cursor:setPosition({
+				current = self.selectedRoomIndex,
+				total = self.viewLimit,
+				vertical = true,
+			});
+
+			self.cursor.timer.flicker = 0;
+	
+			self.scrollbar:setPosition({
+				current = self.selectedRoomIndex,
+				total = #allRooms,
+			});
+		end
 	end,
 
 	render = function(self, deltaTime)
@@ -376,35 +400,31 @@ local roomList = {
 
 		self:setInfo();
 
-		self:handleNavigation();
-		
 		gfx.Save();
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
+
 		self.labels.heading:draw({
 			x = self.x,
 			y = self.y,
 			a = self.alpha,
-			color = 'white',
+			color = 'White',
 		});
 
 		if (#allRooms > 0) then
-			local y = 0;
-
-			if (not self.cursor.y[self.viewLimit]) then
-				for i = 1, self.viewLimit do
-					self.cursor.y[i] = self.room.y
-						+ ((self.room.h + self.room.spacing.outer) * (i - 1));
-				end
-			end
-
-			for i = self.bounds.lower, self.bounds.upper do
-				y = y + self:drawRoom(i, y);
-			end
+			self:drawRoomList(deltaTime);
 
 			if (screenState == 'roomList') then
-				self:drawCursor(deltaTime);
+				self.cursor:render(deltaTime, {
+					size = 16,
+					stroke = 1.5,
+					vertical = true,
+				});
+
+				if (#allRooms > self.viewLimit) then
+					self.scrollbar:render(deltaTime);
+				end
 			end
 		end
 
@@ -412,8 +432,10 @@ local roomList = {
 			self:drawButton();
 		end
 
+		self:handleChange();
+
 		gfx.BeginPath();
-		fill.black(170 * self.timer);
+		Fill.Black(170 * self.timer);
 		gfx.Rect(0, 0, scaledW, scaledH);
 		gfx.Fill();
 
@@ -433,9 +455,9 @@ local songInfo = {
   },
 	difficulties = nil,
 	images = {
-    button = cacheImage('buttons/short.png'),
-    buttonHover = cacheImage('buttons/short_hover.png'),
-    panel = cacheImage('common/panel.png')
+    button = Image.New('buttons/short.png'),
+    buttonHover = Image.New('buttons/short_hover.png'),
+    panel = Image.New('common/panel.png')
 	},
 	jacketSize = 0,
 	labels = nil,
@@ -526,43 +548,43 @@ local songInfo = {
 			self.levels = {};
 			self.songInfo = {};
 
-			font.number();
+			Font.Number();
 
 			for i, level in ipairs(CONSTANTS_SONGWHEEL.levels) do
-				self.levels[i] = cacheLabel(level, 18);
+				self.levels[i] = Label.New(level, 18);
 			end
 
-			self.songInfo.bpm = cacheLabel('000', 24);
+			self.songInfo.bpm = Label.New('000', 24);
 
-			font.medium();
+			Font.Medium();
 
 			self.labels = {
-				hardGauge = cacheLabel('HARD GAUGE', 20),
-				mirrorMode = cacheLabel('MIRROR MODE', 20),
-				rotateHost = cacheLabel('ROTATE HOST', 20),
+				hardGauge = Label.New('HARD GAUGE', 20),
+				mirrorMode = Label.New('MIRROR MODE', 20),
+				rotateHost = Label.New('ROTATE HOST', 20),
 			};
 
 			for name, label in pairs(CONSTANTS_SONGWHEEL.labels.info) do
-				self.labels[name] = cacheLabel(label, 18);
+				self.labels[name] = Label.New(label, 18);
 			end
 
 			for i, difficulty in ipairs(CONSTANTS_SONGWHEEL.difficulties) do
-				self.difficulties[i] = cacheLabel(difficulty, 18);
+				self.difficulties[i] = Label.New(difficulty, 18);
 			end
 
-			font.normal();
+			Font.Normal();
 
-			self.songInfo.effector = cacheLabel('EFFECTOR', 24);
+			self.songInfo.effector = Label.New('EFFECTOR', 24);
 
-			self.labels.disabled = cacheLabel('DISABLED', 24);
-			self.labels.enabled = cacheLabel('ENABLED', 24);
-			self.labels.hard = cacheLabel('HARD', 24);
-			self.labels.normal = cacheLabel('NORMAL', 24);
+			self.labels.disabled = Label.New('DISABLED', 24);
+			self.labels.enabled = Label.New('ENABLED', 24);
+			self.labels.hard = Label.New('HARD', 24);
+			self.labels.normal = Label.New('Normal', 24);
 
-			font.jp();
+			Font.JP();
 
-			self.songInfo.artist = cacheLabel('ARTIST', 36);
-			self.songInfo.title = cacheLabel('TITLE', 36);
+			self.songInfo.artist = Label.New('ARTIST', 36);
+			self.songInfo.title = Label.New('TITLE', 36);
 		end
 	end,
 
@@ -599,19 +621,19 @@ local songInfo = {
 		gfx.Save();
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 
 		self.labels.difficulty:draw({
 			x = self.padding.x.double + self.jacketSize + self.padding.x.full + 6,
 			y = self.padding.y.full - 4,
-			color = 'normal',
+			color = 'Normal',
 		});
 
 		for _, name in ipairs(self.order) do
 			self.labels[name]:draw({
 				x = self.labels.x,
 				y = y,
-				color = 'normal',
+				color = 'Normal',
 			});
 
 			y = y
@@ -634,7 +656,7 @@ local songInfo = {
 			gfx.FillColor(255, 205, 0, math.floor(255 * a));
 		else
 			gfx.StrokeWidth(1);
-			fill.dark(150 * a);
+			Fill.Dark(150 * a);
 		end
 		
 		gfx.Rect(x, y, 24, 24);
@@ -693,20 +715,20 @@ local songInfo = {
 		if (currentDifficulty) then
 			gfx.BeginPath();
 
-			align.left();
+			FontAlign.Left();
 			self.difficulties[currentDifficulty.difficulty + 1]:draw({
 				x = x + 36,
 				y = y + (self.images.button.h / 2.85),
 				a = alpha,
-				color = 'white',
+				color = 'White',
 			});
 
-			align.right();
+			FontAlign.Right();
 			self.levels[currentDifficulty.level]:draw({
 				x = x + self.images.button.w - 36,
 				y = y + (self.images.button.h / 2.85),
 				a = alpha,
-				color = 'white',
+				color = 'White',
 			});
 		end
 
@@ -752,20 +774,20 @@ local songInfo = {
 		local baseHeight = self.labels.title.h;
 		local y = self.labels.y + baseHeight + self.padding.y.quarter - 8;
 
-		font.jp();
+		Font.JP();
 
 		self.songInfo.artist:update({ new = string.upper(selected_song.artist) });
 		self.songInfo.effector:update({ new = string.upper(selected_song.effector)} );
 		self.songInfo.title:update({ new = string.upper(selected_song.title) });
 
-		font.number();
+		Font.Number();
 
 		self.songInfo.bpm:update({ new = selected_song.bpm });
 
 		gfx.Save();
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 
 		for _, name in pairs(self.order) do
 			local doesOverflow = self.songInfo[name].w > self.panel.innerWidth;
@@ -780,14 +802,14 @@ local songInfo = {
 					self.labels.x,
 					y,
 					scalingFactor,
-					'white',
+					'White',
 					255
 				);
 			else
 				self.songInfo[name]:draw({
 					x = self.labels.x,
 					y = y - 1,
-					color = 'white',
+					color = 'White',
 				});
 			end
 
@@ -810,7 +832,7 @@ local songInfo = {
 		self.images.panel:draw({
 			x = 0,
 			y = 0,
-			a = 0.65,
+			a = 0.5,
 		});
 
 		self:drawLabels();
@@ -852,14 +874,14 @@ local songInfo = {
 		gfx.Save();
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 
 		self:drawButton(x, y + 1, 1, hardGauge, toggleHard, not isStartingGame);
 
 		self.labels.hardGauge:draw({
 			x = x + 32,
 			y = y,
-			color = 'white',
+			color = 'White',
 		});
 
 		x = x + 32 + self.labels.hardGauge.w + self.toggles.spacing;
@@ -869,7 +891,7 @@ local songInfo = {
 		self.labels.mirrorMode:draw({
 			x = x + 32,
 			y = y,
-			color = 'white',
+			color = 'White',
 		});
 
 
@@ -888,7 +910,7 @@ local songInfo = {
 			x = x + 32,
 			y = y,
 			a = ((host == userId) and 255) or 50,
-			color = 'white',
+			color = 'White',
 		});
 
 		gfx.Restore();
@@ -912,10 +934,10 @@ local songInfo = {
 local lobby = {
 	cache = { scaledW = 0, scaledH = 0 },
 	images = {
-		buttonM = cacheImage('buttons/medium.png'),
-		buttonMHover = cacheImage('buttons/medium_hover.png'),
-		buttonN = cacheImage('buttons/normal.png'),
-		buttonNHover = cacheImage('buttons/normal_hover.png'),
+		buttonM = Image.New('buttons/medium.png'),
+		buttonMHover = Image.New('buttons/medium_hover.png'),
+		buttonN = Image.New('buttons/normal.png'),
+		buttonNHover = Image.New('buttons/normal_hover.png'),
 	},
 	button = {
 		spacing = 0,
@@ -982,14 +1004,14 @@ local lobby = {
 		if (not self.labels) then
 			self.labels = {};
 
-			font.medium();
+			Font.Medium();
 
 			for name, label in pairs(CONSTANTS_MULTI.buttons) do
-				self.labels[name] = cacheLabel(label, 18);
+				self.labels[name] = Label.New(label, 18);
 			end
 
 			for name, label in pairs(CONSTANTS_MULTI.user) do
-				self.labels[name] = cacheLabel(label, 18);
+				self.labels[name] = Label.New(label, 18);
 			end
 		end
 	end,
@@ -997,18 +1019,18 @@ local lobby = {
 	setUserInfo = function(self)
 		if (#allUsers ~= self.userCount) then
 			for i = 1, #allUsers do
-				font.normal();
+				Font.Normal();
 
 				self.userInfo[i] = {
-					clear = cacheLabel('', 30),
-					grade = cacheLabel('', 30),
-					player = cacheLabel('', 30),
+					clear = Label.New('', 30),
+					grade = Label.New('', 30),
+					player = Label.New('', 30),
 				};
 
-				font.number();
+				Font.Number();
 
-				self.userInfo[i].level = cacheLabel('0', 30);
-				self.userInfo[i].score = number.create({
+				self.userInfo[i].level = Label.New('0', 30);
+				self.userInfo[i].score = ScoreNumber.New({
 					isScore = true,
 					sizes = { 30, 26 },
 				});
@@ -1019,18 +1041,18 @@ local lobby = {
 	end,
 
 	updateLabels = function(self, i, currentUser)
-		font.normal();
+		Font.Normal();
 
 		self.userInfo[i].player:update({ new = string.upper(currentUser.name) });
 		
 		if (currentUser.level ~= 0) then
-			font.number();
+			Font.Number();
 	
 			self.userInfo[i].level:update({ new = currentUser.level });
 		end
 
 		if (currentUser.score) then
-			font.normal();
+			Font.Normal();
 
 			self.userInfo[i].clear:update({
 				new = CONSTANTS_SONGWHEEL.clears[currentUser.clear]
@@ -1126,13 +1148,13 @@ local lobby = {
 		end
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 
 		self.labels[label]:draw({
 			x = self.button.x + 44,
 			y = self.button.y[1] + 25,
 			a = ((allowAction and isHoveringMain) and 255) or 150,
-			color = 'white',
+			color = 'White',
 		});
 
 		if (isHoveringSettings) then
@@ -1154,7 +1176,7 @@ local lobby = {
 			x = self.button.x + 44,
 			y = self.button.y[2] + 25,
 			a = (isHoveringSettings and 255) or 150,
-			color = 'white',
+			color = 'White',
 		});
 
 		gfx.Restore();
@@ -1178,7 +1200,7 @@ local lobby = {
 		);
 
 		gfx.BeginPath();
-		fill.dark(120);
+		Fill.Dark(120);
 		gfx.Rect(self.x, initialY, self.user.w, self.user.h);
 		gfx.Fill();
 
@@ -1200,7 +1222,7 @@ local lobby = {
 			x = x1 + 40,
 			y = y + 25,
 			a = (isHoveringHost and 255) or 150,
-			color = 'white',
+			color = 'White',
 		});
 
 		if (isHoveringKick) then
@@ -1221,7 +1243,7 @@ local lobby = {
 			x = x2 + 40,
 			y = y + 25,
 			a = (isHoveringKick and 255) or 150,
-			color = 'white',
+			color = 'White',
 		});
 	end,
 
@@ -1257,38 +1279,38 @@ local lobby = {
 			elseif (currentUser.ready) then
 				gfx.FillColor(16, 48, 24, 120);
 			else
-				fill.dark(120);
+				Fill.Dark(120);
 			end
 
 			gfx.Rect(self.x, initialY, self.user.w, self.user.h);
 			gfx.Fill();
 
 			gfx.BeginPath();
-			align.left();
+			FontAlign.Left();
 
 			self.labels[nameLabel]:draw({
 				x = self.user.x[1],
 				y = y,
-				color = 'normal',
+				color = 'Normal',
 			});
 
 			self.userInfo[userIndex].player:draw({
 				x = self.user.x[1],
 				y = infoY,
-				color = 'white'
+				color = 'White'
 			});
 
 			if (get(currentUser, 'level') ~= 0) then
 				self.labels.level:draw({
 					x = self.user.x[2],
 					y = y,
-					color = 'normal',
+					color = 'Normal',
 				});
 
 				self.userInfo[userIndex].level:draw({
 					x = self.user.x[2],
 					y = infoY,
-					color = 'white'
+					color = 'White'
 				});
 			end
 
@@ -1299,7 +1321,7 @@ local lobby = {
 					self.labels[label]:draw({
 						x = self.user.x[i],
 						y = y,
-						color = 'normal',
+						color = 'Normal',
 					});
 
 					if (i == 5) then
@@ -1313,7 +1335,7 @@ local lobby = {
 						self.userInfo[userIndex][label]:draw({
 							x = self.user.x[i],
 							y = infoY,
-							color = 'white',
+							color = 'White',
 						});
 					end
 				end
@@ -1349,7 +1371,6 @@ local lobby = {
 		gfx.Restore();
 	end,
 };
-
 
 handleTimers = function(deltaTime)
 	if (screenState == 'setUsername') then
@@ -1412,6 +1433,13 @@ render = function(deltaTime)
 	roomCreation:render(deltaTime, scaledW, scaledH);
 	passwordCreation:render(deltaTime, scaledW, scaledH);
 	passwordRequired:render(deltaTime, scaledW, scaledH);
+
+	if ((screenState == 'roomList') and (#allRooms > 1)) then
+		selectedRoomIndex = Controller:handleInput({
+			current = selectedRoomIndex,
+			total = #allRooms,
+		});
+	end
 
 	handleTimers(deltaTime);
 
@@ -1511,10 +1539,10 @@ button_pressed = function(button)
 
 			mpScreen.SaveUsername();
 		elseif (screenState == 'roomList') then
-			if (#allRooms == 0) then
-				createRoom();
-			else
+			if (allRooms[selectedRoomIndex]) then
 				joinRoom(allRooms[selectedRoomIndex]);
+			else
+				createRoom();
 			end
 		elseif (screenState == 'inRoom') then
 			if (host == userId) then
@@ -1547,7 +1575,7 @@ button_pressed = function(button)
 end
 
 key_pressed = function(key)
-	if (key == 27) then
+	if (key == CONSTANTS_MULTI.keys.esc) then
 		if (screenState == 'roomList') then
 			didExit = true;
 
@@ -1560,6 +1588,20 @@ key_pressed = function(key)
 		screenState = 'roomList';
 		selectedRoom = nil;
 		jacket = nil;
+	end
+
+	if (screenState == 'roomList') then
+		if (key == CONSTANTS_MULTI.keys.down) then
+			selectedRoomIndex = selectedRoomIndex + 1;
+		elseif (key == CONSTANTS_MULTI.keys.up) then
+			selectedRoomIndex = selectedRoomIndex - 1;
+		elseif (key == CONSTANTS_MULTI.keys.enter) then
+			if (allRooms[selectedRoomIndex]) then
+				joinRoom(allRooms[selectedRoomIndex]);
+			else
+				createRoom();
+			end
+		end
 	end
 end
 

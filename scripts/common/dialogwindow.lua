@@ -1,21 +1,21 @@
 local layout = require('layout/dialog');
 
-local create = function(strings)
+local New = function(strings)
   local labels = {};
 
-  font.normal();
+  Font.Normal();
 
-  labels.heading = cacheLabel(strings.heading, 48);
+  labels.heading = Label.New(strings.heading, 48);
   
-  font.medium();
+  Font.Medium();
 
-  labels.confirm = cacheLabel('CONFIRM', 18);
-  labels.enter = cacheLabel('[ENTER]', 18);
-  labels.inputLabel = cacheLabel(strings.inputLabel, 18);
+  labels.confirm = Label.New('CONFIRM', 18);
+  labels.enter = Label.New('[ENTER]', 18);
+  labels.inputLabel = Label.New(strings.inputLabel, 18);
   
-  font.jp();
+  Font.JP();
 
-  labels.inputText = cacheLabel('', 28);
+  labels.inputText = Label.New('', 28);
 
   return {
     cursor = {
@@ -31,7 +31,7 @@ local create = function(strings)
       self.cursor.alpha = self.timer
         * (math.abs(0.8 * math.cos(self.cursor.timer * 5)) + 0.2);
   
-      font.jp();
+      Font.JP();
       self.labels.inputText:update({ new = string.upper(textInput.text) });
   
       self.cursor.offset = math.min(
@@ -47,13 +47,13 @@ local create = function(strings)
       gfx.BeginPath();
       gfx.StrokeWidth(1);
       gfx.StrokeColor(60, 110, 160, math.floor(255 * self.timer));
-      fill.dark(255 * self.timer);
+      Fill.Dark(255 * self.timer);
       gfx.Rect(x, y, layout.w.middle, layout.h.outer / 6);
       gfx.Fill();
       gfx.Stroke();
   
       gfx.BeginPath();
-      fill.white(255 * self.cursor.alpha);
+      Fill.White(255 * self.cursor.alpha);
       gfx.Rect(
         x + 8 + self.cursor.offset,
         y + 10,
@@ -65,13 +65,13 @@ local create = function(strings)
       gfx.Save();
   
       gfx.BeginPath();
-      align.left();
+      FontAlign.Left();
   
       self.labels.inputLabel:draw({
         x = layout.x.middleLeft - 2,
         y = labelY,
         a = 255 * self.timer,
-        color = 'normal',
+        color = 'Normal',
       });
   
       labelY = labelY + (self.labels.inputLabel.h * 2);
@@ -80,27 +80,27 @@ local create = function(strings)
         x = x + 8,
         y = labelY + 7,
         a = 255 * self.timer,
-        color = 'white',
+        color = 'White',
         maxWidth = layout.w.middle - 22,
       });
   
       labelY = labelY + (layout.h.outer / 6);
   
       gfx.BeginPath();
-      align.right();
+      FontAlign.Right();
   
       self.labels.confirm:draw({
         x = layout.x.middleRight + 2,
         y = labelY + self.labels.confirm.h + 1,
         a = 255 * self.timer,
-        color = 'white',
+        color = 'White',
       });
   
       self.labels.enter:draw({
         x = layout.x.middleRight - self.labels.confirm.w - 8,
         y = labelY + self.labels.confirm.h,
         a = 255 * self.timer,
-        color = 'normal',
+        color = 'Normal',
       });
   
       gfx.Restore();
@@ -121,12 +121,12 @@ local create = function(strings)
       });
   
       gfx.BeginPath();
-      align.left();
+      FontAlign.Left();
       self.labels.heading:draw({
         x = layout.x.outerLeft,
         y = layout.y.top - (self.labels.heading.h * 0.25),
         a = 255 * self.timer,
-        color = 'white',
+        color = 'White',
       });
   
       self:drawInput(deltaTime);
@@ -136,6 +136,4 @@ local create = function(strings)
   };
 end
 
-return {
-  create = create,
-};
+return { New = New };

@@ -193,6 +193,16 @@ local _ = {
   },
   multiplayer = {
     {
+      action = 'SELECT ROOM',
+      controller = '[KNOB-L]  /  [KNOB-R]',
+      keyboard = '[UP]  /  [DOWN]'
+    },
+    {
+      action = 'ENTER ROOM',
+      controller = '[START]',
+      keyboard = '[ENTER]',
+    },
+    {
       action = 'TOGGLE GAUGE TYPE',
       controller = '[FX-L] *',
       keyboard = '',

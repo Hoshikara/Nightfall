@@ -1,14 +1,21 @@
-local controller = require('common/controller');
+local Controller = require('common/controller');
+local Cursor = require('common/cursor');
+
 local controls = require('titlescreen/controls');
 local dialog = require('layout/dialog');
 local easing = require('lib/easing');
 
 controls:initializeAll();
 
+game.LoadSkinSample('click_button');
+game.LoadSkinSample('intro');
+
 local activeButton = 1;
 local activePage = 'mainMenu';
 
 local allowClick = false;
+
+local background = Image.New('bg.png');
 
 local buttonCount = {
 	mainMenu = 5,
@@ -34,13 +41,9 @@ local menuLoaded = false;
 local hoveredPage = nil;
 local showControls = false;
 
-local background = cacheImage('bg.png');
-
-game.LoadSkinSample('click_button');
-game.LoadSkinSample('intro');
-
 local cache = { resX = 0, resY = 0 };
 
+local aspectRatio;
 local resX;
 local resY;
 local scaledW;
@@ -50,7 +53,9 @@ local scalingFactor;
 setupLayout = function()
   resX, resY = game.GetResolution();
 
-  if ((cache.resX ~= resX) or (cache.resY ~= resY)) then
+	if ((cache.resX ~= resX) or (cache.resY ~= resY)) then
+		aspectRatio = tonumber(string.format('%.4f', (resX / resY)));
+
     scaledW = 1920;
     scaledH = scaledW * (resY / resX);
     scalingFactor = resX / scaledW;
@@ -93,7 +98,7 @@ loadMenu = function(deltaTime)
 	introTimer = math.max(introTimer - (deltaTime / 1.8), 0);
 
 	gfx.BeginPath();
-	fill.black(255 * introTimer);
+	Fill.Black(255 * introTimer);
 	gfx.Rect(0, 0, scaledW, scaledH);
 	gfx.Fill();
 
@@ -114,18 +119,13 @@ end
 local buttons = {
 	activePage = 'mainMenu',
 	cache = { scaledH = 0, scaledW = 0 },
-	cursor = {
-		alpha = 0,
-		flickerTimer = 0,
-		timer = 0,
-		x = 0,
-	},
+	cursor = Cursor.New(),
 	images = {
-		button = cacheImage('buttons/normal.png'),
-		buttonHover = cacheImage('buttons/normal_hover.png'),
+		button = Image.New('buttons/normal.png'),
+		buttonHover = Image.New('buttons/normal_hover.png'),
 	},
 	labels = nil,
-	spacing = 0,
+	margin = 0,
 	x = {},
 	y = 0,
 
@@ -133,17 +133,25 @@ local buttons = {
 		if ((scaledW ~= self.cache.scaledW) or (scaledH ~= self.cache.scaledH)) then
 			local maxWidth = scaledW - (scaledW / 6);
 
-			self.spacing = (maxWidth - (self.images.button.w * 5)) / 4;
+			self.margin = (maxWidth - (self.images.button.w * 5)) / 4;
 			self.x[1] = scaledW / 20;
 			self.y = scaledH - (scaledH / 4);
 
 			local x = self.x[1];
 
 			for i = 2, 5 do
-				x = x + self.images.button.w + self.spacing;
+				x = x + self.images.button.w + self.margin;
 
 				self.x[i] = x;
 			end
+
+			self.cursor:setSizes({
+				x = self.x[1] + 10,
+				y = self.y + 10,
+				w = self.images.button.w - 20,
+				h = self.images.button.h - 20,
+				margin = self.margin + 20,
+			});
 
 			self.cache.scaledW = scaledW;
 			self.cache.scaledH = scaledH;
@@ -152,7 +160,7 @@ local buttons = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			font.medium();
+			Font.Medium();
 
 			self.labels = {
 				mainMenu = {
@@ -162,41 +170,40 @@ local buttons = {
 							activePage = 'playOptions';
 							self.activePage = activePage;
 						end,
-						label = cacheLabel('PLAY', 18)
+						label = Label.New('PLAY', 18)
 					},
 					{
 						action = Menu.DLScreen,
-						label = cacheLabel('NAUTICA', 18)
+						label = Label.New('NAUTICA', 18)
 					},
 					{
 						action = function()
 							activeButton = 1;
 							showControls = true;
 						end,
-						label = cacheLabel('CONTROLS', 18)
+						label = Label.New('CONTROLS', 18)
 					},
 					{
 						action = Menu.Settings,
-						label = cacheLabel('SETTINGS', 18)
+						label = Label.New('SETTINGS', 18)
 					},
 					{
 						action = Menu.Exit,
-						label = cacheLabel('EXIT', 18)
+						label = Label.New('EXIT', 18)
 					}
 				},
 				playOptions = {
 					{
 						action = Menu.Start,
-						label = cacheLabel('SINGLEPLAYER', 18)
+						label = Label.New('SINGLEPLAYER', 18)
 					},
 					{
 						action = Menu.Multiplayer,
-						label = cacheLabel('MULTIPLAYER', 18)
+						label = Label.New('MULTIPLAYER', 18)
 					},
 					{
-						action = function()
-						end,--Menu.Challenges,
-						label = cacheLabel('CHALLENGES', 18)
+						action = Menu.Challenges,
+						label = Label.New('CHALLENGES', 18)
 					},
 					{
 						action = function()
@@ -204,7 +211,7 @@ local buttons = {
 							activePage = 'mainMenu';
 							self.activePage = activePage;
 						end,
-						label = cacheLabel('MAIN MENU', 18)
+						label = Label.New('MAIN MENU', 18)
 					}
 				}
 			};
@@ -239,42 +246,13 @@ local buttons = {
 		end
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 		self.labels[page][i].label:draw({
 			x = self.x[i] + (self.images.button.w / 8) + 4,
 			y = self.y + (self.images.button.h / 2) - 12,
 			a = textAlpha,
-			color = 'white',
+			color = 'White',
 		});
-	end,
-
-	drawCursor = function(self, deltaTime, x)
-		self.cursor.timer = self.cursor.timer + deltaTime;
-		self.cursor.flickerTimer = self.cursor.flickerTimer + deltaTime;
-	
-		self.cursor.alpha = math.floor(self.cursor.flickerTimer * 30) % 2;
-	
-		if (self.cursor.flickerTimer >= 0.3) then
-			self.cursor.alpha = math.abs(0.8 * math.cos(self.cursor.timer * 5)) + 0.2;
-		end
-	
-		self.cursor.x = self.cursor.x - (self.cursor.x - x) * deltaTime * 36;
-	
-		gfx.Save();
-	
-		gfx.BeginPath();
-	
-		drawCursor({
-			x = self.cursor.x + 10,
-			y = self.y + 10,
-			w = self.images.button.w - 20,
-			h = self.images.button.h - 20,
-			alpha = self.cursor.alpha,
-			size = 12,
-			stroke = 1.5,
-		});
-	
-		gfx.Restore();
 	end,
 
 	render = function(self, deltaTime)
@@ -289,7 +267,17 @@ local buttons = {
 		end
 
 		if (menuLoaded and (not showControls) and (not showUpdatePrompt)) then
-			self:drawCursor(deltaTime, self.x[activeButton]);
+			self.cursor:setPosition({
+				current = activeButton,
+				total = 5,
+				horizontal = true,
+			});
+
+			self.cursor:render(deltaTime, {
+				size = 12,
+				stroke = 1.5,
+				horizontal = true,
+			});
 		end
 	end,
 };
@@ -305,7 +293,7 @@ local title = {
 	setSizes = function(self)
 		if ((scaledW ~= self.cache.scaledW) or (scaledH ~= self.cache.scaledH)) then
 			self.x = scaledW / 20;
-			self.y = scaledH / 5;
+			self.y = scaledH / 4;
 
 			self.cache.scaledW = scaledW;
 			self.cache.scaledH = scaledH;
@@ -314,20 +302,17 @@ local title = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			font.normal();
+			Font.Medium();
 
 			self.labels = {
-				unnamed = cacheLabel('UNNAMED', 64),
-				clone = cacheLabel('CLONE', 64)
+				game = Label.New('UNNAMED SDVX CLONE', 31),
 			};
 
-			font.bold();
-
-			self.labels.soundVoltex = cacheLabel('SOUND VOLTEX', 110);
+			self.labels.skin = Label.New('NIGHTFALL', 120);
 		end
 	end,
 
-	drawTitle = function(self, deltaTime)
+	render = function(self, deltaTime)
 		self:setSizes();
 
 		self:setLabels();
@@ -342,53 +327,37 @@ local title = {
 		end
 	
 		local alpha = (showControls and 30) or math.floor(255 * self.alpha);
-		local y = self.y;
 
 		gfx.BeginPath();
-		align.left();
-		self.labels.unnamed:draw({
-			x = self.x,
-			y = y,
+		FontAlign.Left();
+
+		self.labels.game:draw({
+			x = self.x + 8,
+			y = self.y,
 			a = alpha,
-			color = 'white',
+			color = 'Normal',
+			maxWidth = (self.labels.skin.w * 0.54) - 3,
 		});
-
-		y = y + self.labels.unnamed.h * 0.7;
-
-		self.labels.soundVoltex:draw({
+		
+		self.labels.skin:draw({
 			x = self.x,
-			y = y,
+			y = self.y + (self.labels.game.h * 0.25),
 			a = alpha,
-			color = 'white',
-		});
-
-		y = y + self.labels.soundVoltex.h;
-
-		align.right();
-		self.labels.clone:draw({
-			x = self.x + self.labels.soundVoltex.w,
-			y = y,
-			a = alpha,
-			color = 'white',
+			color = 'White',
 		});
 	end
 };
 
 local updatePrompt = {
 	buttons = {
-		normal = cacheImage('buttons/short.png'),
-		hover = cacheImage('buttons/short_hover.png'),
-		spacing = 0,
+		normal = Image.New('buttons/short.png'),
+		hover = Image.New('buttons/short_hover.png'),
+		margin = 0,
 		x = {},
 		y = 0,
 	},
 	cache = { scaledH = 0, scaledW = 0 },
-	cursor = {
-		alpha = 0,
-		flickerTimer = 0,
-		timer = 0,
-		x = 0,
-	},
+	cursor = Cursor.New(),
 	labels = nil,
 	timer = 0,
 
@@ -396,14 +365,22 @@ local updatePrompt = {
 		if ((scaledW ~= self.cache.scaledW) or (scaledH ~= self.cache.scaledH)) then
 			dialog:setSizes(scaledW, scaledH);
 
-			self.buttons.spacing = (dialog.w.outer - (self.buttons.normal.w * 3)) / 4;
+			self.buttons.margin = (dialog.w.outer - (self.buttons.normal.w * 3)) / 4;
 
 			self.buttons.x[3] = dialog.x.outerRight - self.buttons.normal.w;
 			self.buttons.x[2] = self.buttons.x[3]
-				- (self.buttons.normal.w + self.buttons.spacing);
+				- (self.buttons.normal.w + self.buttons.margin);
 			self.buttons.x[1] = self.buttons.x[2]
-			- (self.buttons.normal.w + self.buttons.spacing);
+			- (self.buttons.normal.w + self.buttons.margin);
 			self.buttons.y = dialog.y.bottom - self.buttons.normal.h + 10;
+
+			self.cursor:setSizes({
+				x = self.buttons.x[1] + 10,
+				y = self.buttons.y + 10,
+				w = self.buttons.normal.w - 20,
+				h = self.buttons.normal.h - 20,
+				margin = self.buttons.margin + 20,
+			});
 
 			self.cache.scaledW = scaledW;
 			self.cache.scaledH = scaledH;
@@ -412,16 +389,16 @@ local updatePrompt = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			font.medium();
+			Font.Medium();
 
 			self.labels = {
 				{
 					action = Menu.Update,
-					label = cacheLabel('UPDATE', 18)
+					label = Label.New('UPDATE', 18)
 				},
 				{
 					action = viewUpdate,
-					label = cacheLabel('VIEW', 18)
+					label = Label.New('VIEW', 18)
 				},
 				{
 					action = function()
@@ -429,13 +406,13 @@ local updatePrompt = {
 						activePage = 'mainMenu';
 						showUpdatePrompt = false;
 					end,
-					label = cacheLabel('CLOSE', 18)
+					label = Label.New('CLOSE', 18)
 				}
 			};
 
-			font.normal();
+			Font.Normal();
 
-			self.labels.heading = cacheLabel('A NEW UPDATE IS AVAILABLE!', 36);
+			self.labels.heading = Label.New('A NEW UPDATE IS AVAILABLE!', 36);
 		end
 	end,
 
@@ -464,40 +441,27 @@ local updatePrompt = {
 		end
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 		button.label:draw({
 			x = self.buttons.x[i] + (self.buttons.normal.w / 6) + 2,
 			y = self.buttons.y + (self.buttons.normal.h / 2) - 12,
 			a = alpha,
-			color = 'white',
+			color = 'White',
 		});
 	end,
 
-	drawCursor = function(self, deltaTime, x)
-		self.cursor.timer = self.cursor.timer + deltaTime;
-		self.cursor.flickerTimer = self.cursor.flickerTimer + deltaTime;
-	
-		self.cursor.alpha = math.floor(self.cursor.flickerTimer * 30) % 2;
-	
-		if (self.cursor.flickerTimer >= 0.3) then
-			self.cursor.alpha = math.abs(0.8 * math.cos(self.cursor.timer * 5)) + 0.2;
-		end
-	
-		self.cursor.x = self.cursor.x - (self.cursor.x - x) * deltaTime * 36;
-	
-		gfx.Save();
-	
-		drawCursor({
-			x = self.cursor.x + 10,
-			y = self.buttons.y + 10,
-			w = self.buttons.normal.w - 20,
-			h = self.buttons.normal.h - 20,
-			alpha = self.cursor.alpha,
+	drawCursor = function(self, deltaTime)
+		self.cursor:setPosition({
+			current = activeButton,
+			total = 3,
+			horizontal = true,
+		});
+
+		self.cursor:render(deltaTime, {
 			size = 10,
 			stroke = 1.5,
+			horizontal = true,
 		});
-	
-		gfx.Restore();
 	end,
 
 	render = function(self, deltaTime)
@@ -508,7 +472,7 @@ local updatePrompt = {
 		self.timer = math.min(self.timer + (deltaTime * 3), 1);
 
 		gfx.BeginPath();
-		fill.black(150 * self.timer);
+		Fill.Black(150 * self.timer);
 		gfx.Rect(0, 0, scaledW, scaledH);
 		gfx.Fill();
 
@@ -520,19 +484,19 @@ local updatePrompt = {
 		});
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 		self.labels.heading:draw({
 			x = dialog.x.outerLeft,
 			y = dialog.y.top - 8,
 			a = 255 * self.timer,
-			color = 'white',
+			color = 'White',
 		});
 
 		for i, button in ipairs(self.labels) do
 			self:drawButton(i, button);
 		end
 
-		self:drawCursor(deltaTime, self.buttons.x[activeButton]);
+		self:drawCursor(deltaTime);
 	end,
 };
 
@@ -552,10 +516,10 @@ render = function(deltaTime)
 		loadMenu(deltaTime);
 	end
 
-	activeButton = controller:handleInput(
-		activeButton,
-		(showControls and 8) or buttonCount[activePage]
-	);
+	activeButton = Controller:handleInput({
+		current = activeButton,
+		total = ((showControls and 8) or buttonCount[activePage]),
+	});
 
 	clickAction = nil;
 
@@ -567,24 +531,28 @@ render = function(deltaTime)
 
 			updatePrompt:render(deltaTime);
 		else
-			title:drawTitle(deltaTime);
+			title:render(deltaTime);
 		end
 	end
 
 	hoveredPage = controls:render(deltaTime, showControls, activeButton);
 
+	if (aspectRatio ~= 1.7778) then
+		drawResolutionWarning(6, scaledH - 24);
+	end
+
 	if (previousButton ~= activeButton) then
 		if (showUpdatePrompt) then
-			updatePrompt.cursor.flickerTimer = 0;
+			updatePrompt.cursor.timer.flicker = 0;
 		else
-			buttons.cursor.flickerTimer = 0;
+			buttons.cursor.timer.flicker = 0;
 		end
 		
 		previousButton = activeButton;
 	end
 
 	if (previousPage ~= activePage) then
-		buttons.cursor.flickerTimer = 0;
+		buttons.cursor.timer.flicker = 0;
 
 		previousPage = activePage;
 	end

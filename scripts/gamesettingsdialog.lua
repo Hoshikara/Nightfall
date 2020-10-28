@@ -64,20 +64,20 @@ generateLabels = function(constants)
 		tabs = {}
 	};
 
-	font.medium();
-	labels.fxl = cacheLabel('[FX-L]', 20);
-	labels.fxr = cacheLabel('[FX-R]', 20);
-	labels.start = cacheLabel('[START]', 24);
+	Font.Medium();
+	labels.fxl = Label.New('[FX-L]', 20);
+	labels.fxr = Label.New('[FX-R]', 20);
+	labels.start = Label.New('[START]', 24);
 
 	for index, tab in ipairs(constants.tabs) do
-		font.medium();
-		labels.navigation[index] = cacheLabel(tab, 20);
+		Font.Medium();
+		labels.navigation[index] = Label.New(tab, 20);
 
-		font.normal();
-		labels.tabs[index] = cacheLabel(tab, 48);
+		Font.Normal();
+		labels.tabs[index] = Label.New(tab, 48);
 	end
 
-	font.normal();
+	Font.Normal();
 
 	for tabIndex, currentTab in ipairs(SettingsDiag.tabs) do
 		labels.settings[tabIndex] = {};
@@ -86,7 +86,7 @@ generateLabels = function(constants)
 			local setting = constants.settings[tabIndex][settingIndex];
 
 			labels.settings[tabIndex][settingIndex] = {
-				label = cacheLabel(setting.label, 24),
+				label = Label.New(setting.label, 24),
 				indent = (setting.indent and true) or false,
 			};
 
@@ -97,7 +97,7 @@ generateLabels = function(constants)
 					if (key == 'type') then
 						labels.settings[tabIndex][settingIndex].values[key] = currentValue;
 					else 
-						labels.settings[tabIndex][settingIndex].values[key] = cacheLabel(currentValue, 24);
+						labels.settings[tabIndex][settingIndex].values[key] = Label.New(currentValue, 24);
 					end
 				end
 			end
@@ -121,9 +121,9 @@ drawArrows = function(initialX, initialY, minBounded, maxBounded);
 	gfx.BeginPath();
 
 	if (minBounded) then
-		fill.dark(25 * timer);
+		Fill.Dark(25 * timer);
 	else
-		fill.dark(125 * timer);
+		Fill.Dark(125 * timer);
 	end
 
 	gfx.MoveTo(x1 + 1, y + 1);
@@ -136,9 +136,9 @@ drawArrows = function(initialX, initialY, minBounded, maxBounded);
 	gfx.BeginPath();
 
 	if (minBounded) then
-		fill.white(50 * timer);
+		Fill.White(50 * timer);
 	else
-		fill.white(255 * timer);
+		Fill.White(255 * timer);
 	end
 
 	gfx.MoveTo(x1, y);
@@ -152,9 +152,9 @@ drawArrows = function(initialX, initialY, minBounded, maxBounded);
 	gfx.BeginPath();
 
 	if (maxBounded) then
-		fill.dark(25 * timer);
+		Fill.Dark(25 * timer);
 	else
-		fill.dark(125 * timer);
+		Fill.Dark(125 * timer);
 	end
 
 	gfx.MoveTo(x2 + 1, y + 1);
@@ -167,9 +167,9 @@ drawArrows = function(initialX, initialY, minBounded, maxBounded);
 	gfx.BeginPath();
 
 	if (maxBounded) then
-		fill.white(50 * timer);
+		Fill.White(50 * timer);
 	else
-		fill.white(255 * timer);
+		Fill.White(255 * timer);
 	end
 
 	gfx.MoveTo(x2, y);
@@ -228,12 +228,13 @@ local practiceModeDialog = {
 		local label = self.labels.tabs[SettingsDiag.currentTab];
 	
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
+		Font.Normal();
 		label:draw({
 			x = self.layout.info.x1 - 2,
 			y = self.layout.info.y,
 			a = 255 * timer,
-			color = 'normal',
+			color = 'Normal',
 		});
 	end,
 
@@ -251,25 +252,25 @@ local practiceModeDialog = {
 			local x = (settingLabels[index].indent and (self.layout.info.x1 + 24)) or self.layout.info.x1;
 	
 			gfx.BeginPath();
-			align.left();
+			FontAlign.Left();
 	
 			settingLabels[index].label:draw({
 				x = x,
 				y = y,
 				a = (isSelected and (255 * timer)) or (50 * timer),
-				color = 'white',
+				color = 'White',
 			});
 	
 			if ((setting.value ~= nil) and values) then
 				self:drawSettingValue(setting, values, y, isSelected);
 			elseif ((setting.value == nil) and isSelected) then
 				gfx.BeginPath();
-				align.right();
+				FontAlign.Right();
 				self.labels.start:draw({
 					x = self.layout.info.x2,
 					y = y - 1,
 					a = 255 * timer,
-					color = 'normal',
+					color = 'Normal',
 				});
 			end
 	
@@ -282,11 +283,10 @@ local practiceModeDialog = {
 		local x = self.layout.info.x2;
 	
 		gfx.BeginPath();
-		align.right();
+		FontAlign.Right();
 		
-
 		if (setting.type == 'int') then
-			font.number();
+			Font.Number();
 	
 			if (values.type) then
 				if (values.type == 'TIME') then
@@ -296,7 +296,7 @@ local practiceModeDialog = {
 						x = x,
 						y = y,
 						a = alpha,
-						color = 'white',
+						color = 'White',
 					});
 				elseif (values.type == 'PERCENTAGE') then
 					values.value:update({ new = string.format('%s%%', tostring(setting.value)) });
@@ -305,7 +305,7 @@ local practiceModeDialog = {
 						x = x,
 						y = y,
 						a = alpha,
-						color = 'white',
+						color = 'White',
 					});
 				end
 			else
@@ -315,7 +315,7 @@ local practiceModeDialog = {
 					x = x,
 					y = y,
 					a = alpha,
-					color = 'white',
+					color = 'White',
 				});
 			end
 	
@@ -325,7 +325,7 @@ local practiceModeDialog = {
 		elseif (setting.type == 'float') then
 			local formatted;
 	
-			font.number();
+			Font.Number();
 	
 			if (setting.max <= 1) then
 				formatted = string.format('%.f%%', (setting.value * 100));
@@ -339,29 +339,33 @@ local practiceModeDialog = {
 				x = x,
 				y = y,
 				a = alpha,
-				color = 'white',
+				color = 'White',
 			});
 	
 			if (isSelected) then
 				drawArrows(x, y, setting.value == setting.min, setting.value == setting.max);
 			end
 		elseif (setting.type == 'enum') then
+			Font.Normal();
+
 			values[setting.value]:draw({
 				x = x,
 				y = y,
 				a = alpha,
-				color = 'white',
+				color = 'White',
 			});
 	
 			if (isSelected) then
 				drawArrows(x, y, false, false);
 			end
 		elseif (setting.type == 'toggle') then
+			Font.Normal();
+
 			values[tostring(setting.value)]:draw({
 				x = x,
 				y = y,
 				a = alpha,
-				color = 'white',
+				color = 'White',
 			});
 	
 			if (isSelected) then
@@ -385,34 +389,34 @@ local practiceModeDialog = {
 	
 		gfx.BeginPath();
 	
-		align.left();
+		FontAlign.Left();
 		self.labels.fxl:draw({
 			x = x1,
 			y = y - 1,
 			a = 255 * timer,
-			color = 'normal',
+			color = 'Normal',
 		});
 
 		previousLabel:draw({
 			x = x1 + self.labels.fxl.w + 8,
 			y = y,
 			a = 255 * timer,
-			color = 'white',
+			color = 'White',
 		});
 
-		align.right();
+		FontAlign.Right();
 		nextLabel:draw({
 			x = x2,
 			y = y,
 			a = 255 * timer,
-			color = 'white',
+			color = 'White',
 		});
 
 		self.labels.fxr:draw({
 			x = x2 - nextLabel.w - 8,
 			y = y - 1,
 			a = 255 * timer,
-			color = 'normal',
+			color = 'Normal',
 		});
 	end,
 
@@ -430,7 +434,7 @@ local practiceModeDialog = {
 		gfx.Save();
 
 		gfx.BeginPath();
-		fill.black(230 * timer);
+		Fill.Black(230 * timer);
 		gfx.Rect(
 			self.layout.panel.x,
 			self.layout.panel.y,
@@ -474,36 +478,36 @@ local songSelectDialog = {
 	
 		gfx.BeginPath();
 
-		align.left();
+		FontAlign.Left();
 	
 		self.labels.fxl:draw({
 			x = x1,
 			y = y - 1,
 			a = alpha,
-			color = 'normal',
+			color = 'Normal',
 		});
 
 		previousLabel:draw({
 			x = x1 + self.labels.fxr.w + 8,
 			y = y,
 			a = alpha,
-			color = 'white',
+			color = 'White',
 		});
 	
-		align.right();
+		FontAlign.Right();
 
 		nextLabel:draw({
 			x = x2,
 			y = y,
 			a = alpha,
-			color = 'white',
+			color = 'White',
 		});
 
 		self.labels.fxr:draw({
 			x = x2 - nextLabel.w - 8,
 			y = y - 1,
 			a = alpha,
-			color = 'normal',
+			color = 'Normal',
 		});
 	end,
 
@@ -513,12 +517,12 @@ local songSelectDialog = {
 		local y = layout.y.top - (label.h / 1.25);
 	
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 		label:draw({
 			x = x,
 			y = y,
 			a = 255 * timer,
-			color = 'normal',
+			color = 'Normal',
 		});
 	end,
 
@@ -536,25 +540,25 @@ local songSelectDialog = {
 			local values = settingLabels[index].values;
 	
 			gfx.BeginPath();
-			align.left();
+			FontAlign.Left();
 	
 			settingLabels[index].label:draw({
 				x = x,
 				y = y,
 				a = (isSelected and (255 * timer)) or (50 * timer),
-				color = 'white',
+				color = 'White',
 			});
 	
 			if ((setting.value ~= nil) and values) then
 				self:drawSettingValue(setting, values, y, isSelected);
 			elseif ((setting.value == nil) and isSelected) then
 				gfx.BeginPath();
-				align.right();
+				FontAlign.Right();
 				self.labels.start:draw({
 					x = layout.x.middleRight,
 					y = y,
 					a = 255 * timer,
-					color = 'normal',
+					color = 'Normal',
 				});
 			end
 	
@@ -567,10 +571,10 @@ local songSelectDialog = {
 		local x = layout.x.middleRight;
 	
 		gfx.BeginPath();
-		align.right();
+		FontAlign.Right();
 		
 		if (setting.type == 'int') then
-			font.number();
+			Font.Number();
 
 			if (get(values, 'type', '') == 'WINDOW') then
 				values.value:update({
@@ -586,7 +590,7 @@ local songSelectDialog = {
 				x = x,
 				y = y,
 				a = alpha,
-				color = 'white',
+				color = 'White',
 			});
 	
 			if (isSelected) then
@@ -595,7 +599,7 @@ local songSelectDialog = {
 		elseif (setting.type == 'float') then
 			local formatted;
 	
-			font.number();
+			Font.Number();
 	
 			if (setting.max <= 1) then
 				formatted = string.format('%.f%%', (setting.value * 100));
@@ -609,29 +613,33 @@ local songSelectDialog = {
 				x = x,
 				y = y,
 				a = alpha,
-				color = 'white',
+				color = 'White',
 			});
 	
 			if (isSelected) then
 				drawArrows(x, y, setting.value == setting.min, setting.value == setting.max );
 			end
 		elseif (setting.type == 'enum') then
+			Font.Normal();
+
 			values[setting.value]:draw({
 				x = x,
 				y = y,
 				a = alpha,
-				color = 'white',
+				color = 'White',
 			});
 	
 			if (isSelected) then
 				drawArrows(x, y, false, false);
 			end
 		elseif (setting.type == 'toggle') then
+			Font.Normal();
+
 			values[tostring(setting.value)]:draw({
 				x = x,
 				y = y,
 				a = alpha,
-				color = 'white',
+				color = 'White',
 			});
 	
 			if (isSelected) then

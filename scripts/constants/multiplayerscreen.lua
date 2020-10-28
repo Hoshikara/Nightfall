@@ -31,6 +31,12 @@ local _ = {
       inputLabel = 'USERNAME',
     },
   },
+  keys = {
+    down = 1073741905,
+    enter = 13,
+    esc = 27,
+    up = 1073741906,
+  },
   user = {
     clear = 'CLEAR',
     grade = 'GRADE',

@@ -1,4 +1,4 @@
-local _ = {
+return {
 	cache = { scaledW = 0, scaledH = 0 },
 	button = {
 		w = 0,
@@ -30,39 +30,37 @@ local _ = {
 		top = 0,
 		bottom = 0,
 	},
+
+	setSizes = function(self, scaledW, scaledH)
+		if (not self.images) then
+			self.images = {
+				dialogBox = Image.New('common/dialog.png'),
+				button = Image.New('buttons/long.png'),
+				buttonHover = Image.New('buttons/long_hover.png'),
+			};
+		end
+	
+		if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
+			self.w.inner = scaledW / (1920 / 446); 
+			self.w.middle = scaledW / (1920 / 624);
+			self.w.outer = scaledW / (1920 / 800);
+			self.h.outer = scaledH / (1080 / 306);
+	
+			self.x.center = scaledW / 2;
+			self.y.center = scaledH / 2;
+	
+			self.x.innerLeft = self.x.center - (self.w.inner / 2);
+			self.x.middleLeft = self.x.center - (self.w.middle / 2);
+			self.x.outerLeft = self.x.center - (self.w.outer / 2);
+			self.x.innerRight = self.x.center + (self.w.inner / 2);
+			self.x.middleRight = self.x.center + (self.w.middle / 2);
+			self.x.outerRight = self.x.center + (self.w.outer / 2);
+	
+			self.y.top = self.y.center - (self.h.outer / 2);
+			self.y.bottom = self.y.center + (self.h.outer / 2);
+			
+			self.cache.scaledW = scaledW;
+			self.cache.scaledH = scaledH;
+		end
+	end,
 };
-
-_.setSizes = function(self, scaledW, scaledH)
-	if (not self.images) then
-		self.images = {
-			dialogBox = cacheImage('common/dialog.png'),
-			button = cacheImage('buttons/long.png'),
-			buttonHover = cacheImage('buttons/long_hover.png'),
-		};
-	end
-
-	if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
-		self.w.inner = scaledW / (1920 / 446); 
-		self.w.middle = scaledW / (1920 / 624);
-		self.w.outer = scaledW / (1920 / 800);
-		self.h.outer = scaledH / (1080 / 306);
-
-		self.x.center = scaledW / 2;
-		self.y.center = scaledH / 2;
-
-		self.x.innerLeft = self.x.center - (self.w.inner / 2);
-		self.x.middleLeft = self.x.center - (self.w.middle / 2);
-		self.x.outerLeft = self.x.center - (self.w.outer / 2);
-		self.x.innerRight = self.x.center + (self.w.inner / 2);
-		self.x.middleRight = self.x.center + (self.w.middle / 2);
-		self.x.outerRight = self.x.center + (self.w.outer / 2);
-
-		self.y.top = self.y.center - (self.h.outer / 2);
-		self.y.bottom = self.y.center + (self.h.outer / 2);
-		
-		self.cache.scaledW = scaledW;
-		self.cache.scaledH = scaledH;
-	end
-end
-
-return _;

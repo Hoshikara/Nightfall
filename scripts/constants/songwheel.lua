@@ -13,46 +13,16 @@ local _ = {
     'MAXIMUM',
   },
   grades = {
-    {
-      minimum = 9900000,
-      grade = 'S',
-    },
-    {
-      minimum = 9800000,
-      grade = 'AAA+',
-    },
-    {
-      minimum = 9700000,
-      grade = 'AAA',
-    },
-    {
-      minimum = 9500000,
-      grade = 'AA+',
-    },
-    {
-      minimum = 9300000,
-      grade = 'AA',
-    },
-    {
-      minimum = 9000000,
-      grade = 'A+',
-    },
-    {
-      minimum = 8700000,
-      grade = 'A',
-    },
-    {
-      minimum = 7500000,
-      grade = 'B',
-    },
-    {
-      minimum = 6500000,
-      grade = 'C',
-    },
-    {
-      minimum = 0,
-      grade = 'D',
-    },
+    { minimum = 9900000, grade = 'S' },
+    { minimum = 9800000, grade = 'AAA+' },
+    { minimum = 9700000, grade = 'AAA' },
+    { minimum = 9500000, grade = 'AA+' },
+    { minimum = 9300000, grade = 'AA' },
+    { minimum = 9000000, grade = 'A+' },
+    { minimum = 8700000, grade = 'A' },
+    { minimum = 7500000, grade = 'B' },
+    { minimum = 6500000, grade = 'C' },
+    { minimum = 0, grade = 'D' },
   },
   labels = {
     grid = {
@@ -63,7 +33,7 @@ local _ = {
     info = {
       artist = 'ARTIST',
       bpm = 'BPM',
-      clear= 'CLEAR',
+      clear = 'CLEAR',
       difficulty = 'DIFFICULTY',
       effector = 'EFFECTOR',
       grade = 'GRADE',
@@ -273,6 +243,14 @@ local _ = {
     },
     {
       name = 'DATE',
+      direction = 'up',
+    },
+    {
+      name = 'CLEAR',
+      direction = 'down',
+    },
+    {
+      name = 'CLEAR',
       direction = 'up',
     },
     {

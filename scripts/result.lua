@@ -1,16 +1,17 @@
 local CONSTANTS = require('constants/result');
 
-local easing = require('lib/easing');
-local help = require('helpers/result');
-local number = require('common/number');
-local pages = require('common/pages');
+local Cursor = require('common/cursor');
+local List = require('common/list');
+local ScoreNumber = require('common/scorenumber');
+local Scrollbar = require('common/scrollbar');
 
-local background = cacheImage('bg.png');
+local help = require('helpers/result');
+
+local background = Image.New('bg.png');
 
 local jacket = nil;
 local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
 
-local previousScore = nil;
 local selectedScore = 1;
 
 local allScores = {};
@@ -105,14 +106,14 @@ local resultPanel = {
 		y = { double = 0, full = 0 },
 	},
 	panel = {
-		image = cacheImage('results/panel.png'),
+		image = Image.New('common/panel_wide.png'),
 		maxWidth = 0,
 		w = 0,
 		h = 0,
 		x = 0,
 		y = 0,
 	},
-	score = number.create({
+	score = ScoreNumber.New({
 		isScore = true,
 		sizes = { 90, 72 },
 	}),
@@ -129,7 +130,7 @@ local resultPanel = {
 		if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
 			self.jacketSize = scaledW / 6.5;
 
-			self.panel.w = scaledW / (scaledW / self.panel.image.w);
+			self.panel.w = scaledW / (1920 / self.panel.image.w);
 			self.panel.h = scaledH - (scaledH / 10);
 			self.panel.x = (((not singleplayer) or (#allScores > 0)) and (scaledW / 20))
 				or ((scaledW / 2) - (self.panel.w / 2));
@@ -158,27 +159,27 @@ local resultPanel = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			font.medium();
+			Font.Medium();
 
 			self.labels = {
-				btbbtc = cacheLabel('[BT-B]  +  [BT-C]', 20),
-				songCollections = cacheLabel('SONG COLLECTIONS', 20),
+				btbbtc = Label.New('[BT-B]  +  [BT-C]', 20),
+				songCollections = Label.New('SONG COLLECTIONS', 20),
 			};
 
 			for key, name in pairs(CONSTANTS.song) do
-				self.labels[key] = cacheLabel(name, 18);
+				self.labels[key] = Label.New(name, 18);
 			end
 
 			for key, name in pairs(CONSTANTS.stats) do
-				self.labels[key] = cacheLabel(name, 18);
+				self.labels[key] = Label.New(name, 18);
 			end
 
-			font.number();
+			Font.Number();
 
 			if (upScore) then
-				self.labels.plus = cacheLabel('+', 30);
+				self.labels.plus = Label.New('+', 30);
 
-				self.upScore = number.create({
+				self.upScore = ScoreNumber.New({
 					isScore = true,
 					sizes = { 30, 24 },
 				});
@@ -191,9 +192,9 @@ local resultPanel = {
 			self.songInfo = {};
 
 			for key, value in pairs(songInfo) do
-				font[value.font]();
+				Font[value.font]();
 
-				self.songInfo[key] = cacheLabel(value.value, value.size);
+				self.songInfo[key] = Label.New(value.value, value.size);
 			end
 		end
 	end,
@@ -204,9 +205,9 @@ local resultPanel = {
 
 			for key, value in pairs(myScore) do
 				if (key ~= 'score') then
-					font[value.font]();
+					Font[value.font]();
 
-					self.stats[key] = cacheLabel(value.value, value.size);
+					self.stats[key] = Label.New(value.value, value.size);
 				end
 			end
 		end
@@ -222,20 +223,20 @@ local resultPanel = {
 		return (self.panel.maxWidth - totalWidth) / (#order - 1);
 	end,
 
-	drawNavigation = function(self)
+	drawControls = function(self)
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 
 		self.labels.btbbtc:draw({
 			x = self.panel.x,
 			y = scaledH - (scaledH / 20) + (self.labels.btbbtc.h - 6),
-			color = 'normal',
+			color = 'Normal',
 		});
 
 		self.labels.songCollections:draw({
 			x = self.panel.x + self.labels.btbbtc.w + 8,
 			y = scaledH - (scaledH / 20) + (self.labels.btbbtc.h - 6) + 1,
-			color = 'white',
+			color = 'White',
 		});
 	end,
 
@@ -263,20 +264,20 @@ local resultPanel = {
 		gfx.Stroke();
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 
 		for _, name in ipairs(self.orders.song) do
 			self.labels[name]:draw({
 				x = x,
 				y = y,
-				color = 'normal',
+				color = 'Normal',
 			});
 
 			if (name == 'difficulty') then
 				self.labels.bpm:draw({
 					x = self.panel.w - (self.padding.x.double * 3),
 					y = y,
-					color = 'normal',
+					color = 'Normal',
 				});
 			end
 
@@ -292,14 +293,14 @@ local resultPanel = {
 					x,
 					y,
 					scalingFactor,
-					'white',
+					'White',
 					255
 				);
 			else
 				self.songInfo[name]:draw({
 					x = x,
 					y = y,
-					color = 'white',
+					color = 'White',
 				});
 			end
 			
@@ -307,7 +308,7 @@ local resultPanel = {
 				self.songInfo.level:draw({
 					x = x + self.songInfo[name].w + 8,
 					y = y,
-					color = 'white',
+					color = 'White',
 				});
 			end
 
@@ -319,7 +320,7 @@ local resultPanel = {
 		self.songInfo.bpm:draw({
 			x = self.panel.w - (self.padding.x.double * 3),
 			y = y,
-			color = 'white',
+			color = 'White',
 		});
 
 		gfx.Restore();
@@ -336,12 +337,12 @@ local resultPanel = {
 		gfx.Translate(self.panel.x, self.panel.y);
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 
 		self.labels.score:draw({
 			x = x,
 			y = y,
-			color = 'normal',
+			color = 'Normal',
 		});
 
 		if (upScore) then
@@ -350,7 +351,7 @@ local resultPanel = {
 			self.labels.plus:draw({
 				x = x + (self.score.position[5] * 1.1),
 				y = y - 3,
-				color = 'white',
+				color = 'White',
 			});
 
 			self.upScore:draw({
@@ -362,22 +363,27 @@ local resultPanel = {
 		end
 
 		self.labels.name:draw({
-			x = self.panel.w - (self.padding.x.full * 1.75) - 4 - self.stats.name.w,
+			x = self.panel.w 
+				- (self.padding.x.full * 1.75)
+				- 4
+				- (((self.stats.name.w > self.labels.name.w) and self.stats.name.w)
+					or self.labels.name.w
+				),
 			y = y,
-			color = 'normal',
+			color = 'Normal',
 		});
 
-		align.right();
+		FontAlign.Right();
 		
 		self.stats.name:draw({
 			x = self.panel.w - (self.padding.x.full * 1.75) - 4,
 			y = y + (self.labels.name.h * 1.5),
-			color = 'white',
+			color = 'White',
 		});
 		
 		y = y + (self.labels.score.h * 0.5);
 
-		align.left();
+		FontAlign.Left();
 
 		self.score:draw({
 			offset = 10,
@@ -396,13 +402,13 @@ local resultPanel = {
 			self.labels[name]:draw({
 				x = statX,
 				y = y,
-				color = 'normal',
+				color = 'Normal',
 			});
 
 			self.stats[name]:draw({
 				x = statX,
 				y = statY,
-				color = 'white',
+				color = 'White',
 			});
 	
 			statX = statX + self.labels[name].w + spacing;
@@ -418,13 +424,13 @@ local resultPanel = {
 			self.labels[name]:draw({
 				x = statX,
 				y = y,
-				color = 'normal',
+				color = 'Normal',
 			});
 
 			self.stats[name]:draw({
 				x = statX + 1,
 				y = statY,
-				color = 'white',
+				color = 'White',
 			});
 	
 			statX = statX + self.labels[name].w + spacing;
@@ -461,7 +467,7 @@ local resultPanel = {
 
 		self:drawStats();
 
-		self:drawNavigation();
+		self:drawControls();
 
 		gfx.Restore();
 	end,
@@ -509,28 +515,28 @@ local graphs = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			font.medium();
+			Font.Medium();
 
 			self.labels = {
-				earliest = cacheLabel('EARLIEST', 18),
-				latest = cacheLabel('LATEST', 18),
-				mean = cacheLabel('MEAN', 18),
-				median = cacheLabel('MEDIAN', 18),
+				earliest = Label.New('EARLIEST', 18),
+				latest = Label.New('LATEST', 18),
+				mean = Label.New('MEAN', 18),
+				median = Label.New('MEDIAN', 18),
 			};
 		end
 	end,
 
 	setStats = function(self)
 		if (not self.stats) then
-			font.number();
+			Font.Number();
 
 			self.stats = {
-				currentGauge = cacheLabel('0', 18),
-				earliest = cacheLabel(
+				currentGauge = Label.New('0', 18),
+				earliest = Label.New(
 					string.format('%.1f ms', self.earliest),
 					18
 				),
-				latest = cacheLabel(
+				latest = Label.New(
 					string.format('%.1f ms', self.latest),
 					18
 				),
@@ -539,9 +545,9 @@ local graphs = {
 			for _, name in ipairs(self.statOrder) do
 				local value = myScore[name];
 
-				font[value.font]();
+				Font[value.font]();
 
-				self.stats[name] = cacheLabel(value.value, value.size);
+				self.stats[name] = Label.New(value.value, value.size);
 			end
 		end
 	end,
@@ -726,34 +732,34 @@ local graphs = {
 			- self.labels.median.w;
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 
 		self.labels.mean:draw({
 			x = x,
 			y = y,
-			color = 'normal',
+			color = 'Normal',
 		});
 
 		self.stats.meanDelta:draw({
 			x = x + self.labels.mean.w + 16,
 			y = y,
-			color = 'white',
+			color = 'White',
 		});
 
 		x = self.x + self.w.total;
 
-		align.right();
+		FontAlign.Right();
 
 		self.stats.medianDelta:draw({
 			x = x - 4,
 			y = y,
-			color = 'white',
+			color = 'White',
 		});
 
 		self.labels.median:draw({
 			x = x - 4 - self.stats.medianDelta.w - 16,
 			y = y,
-			color = 'normal',
+			color = 'Normal',
 		});
 	end,
 
@@ -779,7 +785,7 @@ local graphs = {
 			self:drawLine(mouseX, y, mouseX, y + h, 1, 255, 255, 255, 150);
 		end
 
-		font.number();
+		Font.Number();
 		resultPanel.songInfo.duration:update({
 			new = string.format(
 				'%dm %02d.%01ds',
@@ -793,12 +799,12 @@ local graphs = {
 		self:drawHitGraph(x, y, w, h, focusPoint, hoverScale);
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 		
 		resultPanel.songInfo.duration:draw({
 			x = self.x,
 			y = self.y + self.h + 12,
-			color = 'white',
+			color = 'White',
 		});
 
 		if (#gaugeSamples > 1) then
@@ -818,31 +824,31 @@ local graphs = {
 
 				local gaugeY = h - (h * samples[gaugeIndex]);
 
-				font.number();
+				Font.Number();
 				self.stats.currentGauge:update({
 					new = string.format('%d%%', math.floor(samples[gaugeIndex] * 100))
 				});
 
 				gfx.BeginPath();
-				fill.white(150);
+				Fill.White(150);
 				gfx.Circle(mouseX, y + gaugeY + 2, 4);
 				gfx.Fill();
 
 				gfx.BeginPath();
-				align.left();
+				FontAlign.Left();
 				self.stats.currentGauge:draw({
 					x = mouseX + 8,
 					y = y + gaugeY - 12,
-					color = 'white',
+					color = 'White',
 				});
 			end
 
 			gfx.BeginPath();
-			align.left();
+			FontAlign.Left();
 			self.stats.gauge:draw({
 				x = x + 4,
 				y = y,
-				color = 'white',
+				color = 'White',
 			});
 		end
 	end,
@@ -853,31 +859,31 @@ local graphs = {
 		self:drawHistogram(x, y, w, h);
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 
 		self.labels.earliest:draw({
 			x = x + 6,
 			y = y,
-			color = 'normal',
+			color = 'Normal',
 		});
 
 		self.labels.latest:draw({
 			x = x + 6,
 			y = y + h - self.labels.latest.h - 6,
-			color = 'normal',
+			color = 'Normal',
 		});
 
-		align.right();
+		FontAlign.Right();
 		self.stats.earliest:draw({
 			x = x + w - 4,
 			y = y,
-			color = 'white',
+			color = 'White',
 		});
 
 		self.stats.latest:draw({
 			x = x + w - 4,
 			y = y + h - self.labels.latest.h - 6,
-			color = 'white',
+			color = 'White',
 		});
 	end,
 
@@ -904,7 +910,7 @@ local graphs = {
 		gfx.Save();
 
 		gfx.BeginPath();
-		fill.dark(120);
+		Fill.Dark(120);
 		gfx.Rect(self.x, self.y, self.w.total, self.h);
 		gfx.Fill();
 
@@ -921,26 +927,30 @@ local graphs = {
 };
 
 local scoreList = {
-	bounds = { lower = 0, upper = 0 },
 	cache = { scaledW = 0, scaledH = 0 },
-	cursor = {
-		alpha = 0,
-		flickerTimer = 0,
-		index = selectedScore,
-		pos = 0,
-		timer = 0,
-		y = {},
-	},
-	easing = {
-    scrollbar = {
-      duration = 0.2,
-      initial = 0,
-      timer = 0,
-    },
-	},
+	cursor = Cursor.New(),
 	labels = nil,
-	maxWidth = 0,
-	multiplayerScore = 1,
+	list = {
+		maxWidth = 0,
+		margin = 0,
+		padding = { x = 0, y = 0 },
+		timer = 1,
+		w = 0,
+		h = {
+			base = 0,
+			item = {
+				collapsed = 0,
+				difference = 0,
+				expanded = 0,
+			},
+		},
+		x = 0,
+		y = {
+			base = 0,
+			current = 0,
+			previous = 0,
+		},
+	},
 	orders = {
 		sp = {
 			row = {
@@ -972,48 +982,53 @@ local scoreList = {
 			},
 		},
 	},
-	padding = { x = 0, y = 0 },
 	pressed = { FXL = false, FXR = false },
-	scrollbar = {
-		pos = 0,
-		w = 0,
-		h = 0,
-		x = 0,
-		y = 0
-	},
-	spacing = 0,
+	scrollbar = Scrollbar.New(),
+	selectedScore = 0,
 	stats = nil,
-	timer = 0,
 	viewLimit = 4,
-	w = 0,
-	h = { base = 0, selected = 0 },
-	x = 0,
-	y = 0,
 
 	setSizes = function(self)
 		if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
-			self.x = (scaledW / 20) + resultPanel.panel.image.w + (scaledW / 40);
-			self.y = scaledH / 20;
-			self.w = scaledW - (scaledW / 20) - self.x;
-			self.h.base = scaledH / 7;
-			self.h.selected = self.h.base * 2.125;
+			self.list.x = (scaledW / 20) + resultPanel.panel.w + (scaledW / 40);
+			self.list.y.base = (scaledH / 20);
 
-			self.padding.x = self.w / 20;
-			self.padding.y = self.h.base / 7.5;
+			self.list.w = scaledW
+				- (scaledW / 10)
+				- resultPanel.panel.w 
+				- (scaledW / 40);
+			self.list.h.base = scaledH - (scaledH / 10);
+			self.list.h.item.collapsed = scaledH // 7;
+			self.list.h.item.expanded = self.list.h.item.collapsed * 2.125;
+			self.list.h.item.difference = self.list.h.item.expanded
+				- self.list.h.item.collapsed;
 
-			self.maxWidth = self.w - (self.padding.x * 2);
+			local remainingHeight = self.list.h.base
+				- ((self.list.h.item.collapsed) * (self.viewLimit - 1))
+				- self.list.h.item.expanded;
 
-			self.scrollbar.w = 8;
-			self.scrollbar.h = scaledH - (scaledH / 10);
-			self.scrollbar.x = scaledW - (scaledW / 40) - 4;
-			self.scrollbar.y = scaledH / 20;
+			self.list.margin = remainingHeight / (self.viewLimit - 1);
 
-			self.spacing = (scaledH
-				- (scaledH / 10)
-				- ((self.h.base * (self.viewLimit - 1)) + self.h.selected)
-			) / (self.viewLimit - 1);
+			self.list.padding.x = self.list.w / 20;
+			self.list.padding.y = self.list.h.item.collapsed / 7.5;
 
-			self.cursor.y = {};
+			self.list.maxWidth = self.list.w - (self.list.padding.x * 2);
+
+			self.cursor:setSizes({
+				x = self.list.x,
+				y = self.list.y.base,
+				w = self.list.w,
+				h = self.list.h.item.expanded,
+				margin = self.list.margin,
+			});
+
+			if (#allScores > self.viewLimit) then
+				self.scrollbar:setSizes({
+					screenW = scaledW,
+					y = self.list.y.base,
+					h = self.list.h.base,
+				});
+			end
 
 			self.cache.scaledW = scaledW;
 			self.cache.scaledH = scaledH;
@@ -1022,15 +1037,15 @@ local scoreList = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			font.medium();
+			Font.Medium();
 
 			self.labels = {
-				fxlfxr = cacheLabel('[FX-L]  /  [FX-R]', 20),
-				selectScore = cacheLabel('SELECT SCORE', 20),
+				fxlfxr = Label.New('[FX-L]  /  [FX-R]', 20),
+				selectScore = Label.New('SELECT SCORE', 20),
 			};
 
 			for key, name in pairs(CONSTANTS.stats) do
-				self.labels[key] = cacheLabel(name, 18);
+				self.labels[key] = Label.New(name, 18);
 			end
 		end
 	end,
@@ -1040,43 +1055,28 @@ local scoreList = {
 			self.stats = {};
 
 			for i, score in ipairs(allScores) do
-				font.number();
+				Font.Number();
 
 				self.stats[i] = {
-					place = cacheLabel(i, 90),
+					place = Label.New(i, 90),
 				};
 
 				for key, value in pairs(score) do
 					if (key == 'score') then
-						self.stats[i].score = number.create({
+						self.stats[i].score = ScoreNumber.New({
 							isScore = true,
 							sizes = { 90, 72 },
 						});
 					else
-						font[value.font]();
+						Font[value.font]();
 
-						self.stats[i][key] = cacheLabel(value.value, value.size);
+						self.stats[i][key] = Label.New(value.value, value.size);
 					end
 				end
 			end
 		end
 	end,
 
-	setScrollbarPos = function(self, completion)
-    self.easing.scrollbar.initial = self.scrollbar.pos;
-    self.easing.scrollbar.timer = self.easing.scrollbar.duration;
-		self.scrollbar.pos = self.scrollbar.y + (completion * (self.scrollbar.h - 32));
-	end,
-	
-	getScrollbarPos = function(self)
-    return easing.outQuad(
-      self.easing.scrollbar.duration - self.easing.scrollbar.timer,
-      self.easing.scrollbar.initial,
-      self.scrollbar.pos - self.easing.scrollbar.initial,
-      self.easing.scrollbar.duration
-    );
-	end,
-	
 	getSpacing = function(self, order, scale)
 		local totalWidth = 0;
 
@@ -1084,19 +1084,282 @@ local scoreList = {
 			totalWidth = totalWidth + self.labels[name].w;
 		end
 
-		return ((self.maxWidth * scale) - totalWidth) / (#order - 1);
+		return ((self.list.maxWidth * scale) - totalWidth) / (#order - 1);
 	end,
 
-	handleNavigation = function(self, deltaTime)
-		local cursorIndex =
-			((selectedScore % self.viewLimit > 0) and (selectedScore % self.viewLimit))
-		 	or self.viewLimit;
-		local lowerBound, upperBound = pages.getPageBounds(
-			self.viewLimit,
-			#allScores,
-			selectedScore
+	drawControls = function(self)
+		local x = self.list.x;
+		local y = scaledH - (scaledH / 20) + (self.labels.fxlfxr.h - 6);
+
+		gfx.BeginPath();
+		FontAlign.Left();
+	
+		self.labels.fxlfxr:draw({
+			x = x,
+			y = y,
+			color = 'Normal',
+		});
+
+		self.labels.selectScore:draw({
+			x = x + self.labels.fxlfxr.w + 8,
+			y = y + 1,
+			color = 'White',
+		});
+	end,
+
+	drawScoreList = function(self, deltaTime)
+		if (self.list.timer < 1) then
+			self.list.timer = math.min(self.list.timer + (deltaTime * 8), 1);
+		end
+
+		local change = (self.list.y.current - self.list.y.previous)
+			* Ease.OutQuad(self.list.timer);
+		local offset = self.list.y.previous + change;
+		local y = 0;
+
+		self.list.y.previous = offset;
+
+		gfx.Save();
+
+		gfx.Scissor(
+			self.list.x,
+			self.list.y.base,
+			self.list.w,
+			self.list.h.base
 		);
 
+		gfx.Translate(self.list.x, self.list.y.base + offset);
+
+		for i = 1, #allScores do
+			local isSelected = i == selectedScore;
+
+			y = y + self:drawScore(i, y, isSelected);
+		end
+
+		gfx.ResetScissor();
+
+		gfx.Restore();
+	end,
+
+	drawScore = function(self, i, initialY, isSelected)
+		local h = (isSelected and self.list.h.item.expanded)
+			or self.list.h.item.collapsed;
+		local x = self.list.padding.x;
+		local y = initialY + self.list.padding.y;
+
+		self.stats[i].score:setInfo({ value = allScores[i].score });
+
+		gfx.BeginPath();
+		Fill.Dark(120);
+		gfx.Rect(0, initialY, self.list.w, h);
+		gfx.Fill();
+
+		gfx.BeginPath();
+		FontAlign.Right();
+
+		self.stats[i].place:draw({
+			x = self.list.w - self.list.padding.x + 8,
+			y = y - 1,
+			a = 40,
+			color = 'Normal',
+		});
+
+		gfx.BeginPath();
+		FontAlign.Left();
+
+		self.labels.score:draw({
+			x = x + 1,
+			y = y,
+			color = 'Normal',
+		});
+	
+		if (isSelected) then
+			y = y + (self.labels.score.h * 0.75);
+		else
+			x = self.stats[i].score.position[8] + 144;
+
+			if (singleplayer) then
+				self.labels.timestamp:draw({
+					x = x,
+					y = y,
+					color = 'Normal',
+				});
+			else
+				self.labels.name:draw({
+					x = x,
+					y = y,
+					color = 'Normal',
+				});
+			end
+
+			y = y + (self.labels.score.h * 0.75);
+
+			if (singleplayer) then
+				self.stats[i].timestamp:draw({
+					x = x,
+					y = y + 8,
+					color = 'White',
+				});
+			else
+				self.stats[i].name:draw({
+					x = x,
+					y = y + 8,
+					color = 'White',
+				});
+			end
+
+			self.labels.clear:draw({
+				x = x,
+				y = y + (self.labels.score.h * 2.5) + 2,
+				color = 'Normal',
+			});
+
+			self.stats[i].clear:draw({
+				x = x,
+				y = y + (self.labels.score.h * 3.75) + 2,
+				color = 'White',
+			});
+		end
+
+		x = self.list.padding.x;
+
+		self.stats[i].score:draw({
+			offset = 10,
+			x = x - 3,
+			y1 = y,
+			y2 = y + (self.stats[i].score.labels[1].h * 0.125) + 5,
+		});
+
+		if (isSelected) then
+			y = y + self.stats[i].score.labels[1].h * 1.125;
+
+			if (singleplayer) then
+				local statX = x;
+				local statY = y + (self.labels.timestamp.h * 1.5);
+				local spacing = self:getSpacing(self.orders.sp.row[1], 1);
+
+				for _, name in ipairs(self.orders.sp.row[1]) do
+					self.labels[name]:draw({
+						x = statX,
+						y = y,
+						color = 'Normal',
+					});
+
+					self.stats[i][name]:draw({
+						x = statX,
+						y = statY,
+						color = 'White',
+					});
+
+					statX = statX + self.labels[name].w + spacing;
+				end
+
+				y = y + (self.labels.timestamp.h * 2) + (self.stats[i].timestamp.h * 2);
+
+				statX = x;
+				statY = y + (self.labels.critical.h * 1.5);
+				spacing = self:getSpacing(self.orders.sp.row[2], 1);
+
+				for _, name in ipairs(self.orders.sp.row[2]) do
+					self.labels[name]:draw({
+						x = statX,
+						y = y,
+						color = 'Normal',
+					});
+
+					self.stats[i][name]:draw({
+						x = statX,
+						y = statY,
+						color = 'White',
+					});
+
+					statX = statX + self.labels[name].w + spacing;
+				end
+			else
+				self.labels.name:draw({
+					x = x,
+					y = y,
+					color = 'Normal',
+				});
+
+				self.stats[i].name:draw({
+					x = x,
+					y = y + (self.labels.name.h * 1.5),
+					color = 'White',
+				});
+
+				x = x + (self.labels.name.w * 3.5) + 1;
+
+				self.labels.grade:draw({
+					x = x,
+					y = y,
+					color = 'Normal',
+				});
+
+				self.stats[i].grade:draw({
+					x = x,
+					y = y + (self.labels.grade.h * 1.5),
+					color = 'White',
+				});
+
+				x = x + (self.labels.grade.w * 1.825) + 2;
+
+				self.labels.gauge:draw({
+					x = x,
+					y = y,
+					color = 'Normal',
+				});
+
+				self.stats[i].gauge:draw({
+					x = x,
+					y = y + (self.labels.gauge.h * 1.5),
+					color = 'White',
+				});
+
+				x = x + (self.labels.gauge.w * 2);
+
+				self.labels.clear:draw({
+					x = x,
+					y = y,
+					color = 'Normal',
+				});
+
+				self.stats[i].clear:draw({
+					x = x,
+					y = y + (self.labels.clear.h * 1.5),
+					color = 'White',
+				});
+
+				y = y + (self.labels.name.h * 2) + (self.stats[i].name.h * 2);
+
+				local statX = self.list.padding.x;
+				local statY = y + (self.labels.critical.h * 1.5);
+				local spacing = self:getSpacing(self.orders.mp.row[1], 1);
+
+				for _, name in ipairs(self.orders.mp.row[1]) do
+					self.labels[name]:draw({
+						x = statX,
+						y = y,
+						color = 'Normal',
+					});
+
+					if (self.stats[i][name]) then
+						self.stats[i][name]:draw({
+							x = statX,
+							y = statY,
+							color = 'White',
+						});
+					end
+
+					statX = statX + self.labels[name].w + spacing;
+				end
+			end
+		end
+
+		return h + self.list.margin;
+	end,
+
+	handleChange = function(self)
 		if (singleplayer and #allScores > 1) then
 			if ((not self.pressed.FXL) and game.GetButton(game.BUTTON_FXL)) then
 				if ((selectedScore - 1) < 1) then
@@ -1118,306 +1381,37 @@ local scoreList = {
 			self.pressed.FXR = game.GetButton(game.BUTTON_FXR);
 		end
 
-		self.cursor.index = cursorIndex;
-		self.bounds.lower = lowerBound;
-		self.bounds.upper = upperBound;
-
-		self:setScrollbarPos((selectedScore - 1) / (#allScores - 1));
-	end,
-
-	drawCursor = function(self, deltaTime)
-		self.cursor.timer = self.cursor.timer + deltaTime;
-		self.cursor.flickerTimer = self.cursor.flickerTimer + deltaTime;
-	
-		self.cursor.alpha = math.floor(self.cursor.flickerTimer * 30) % 2;
-	
-		if (self.cursor.flickerTimer >= 0.3) then
-			self.cursor.alpha = math.abs(0.8 * math.cos(self.cursor.timer * 5)) + 0.2;
-		end
-
-		self.cursor.pos = self.cursor.pos
-			- (self.cursor.pos - self.cursor.y[self.cursor.index])
-			* deltaTime
-			* 36;
-
-		local scoreIndex =
-			((selectedScore % self.viewLimit > 0) and (selectedScore % self.viewLimit))
-			or self.viewLimit;
-
-		gfx.Save();
-
-		drawCursor({
-			x = self.x,
-			y = self.cursor.pos,
-			w = self.w,
-			h = (((self.cursor.index == scoreIndex) and self.h.selected) or self.h.base),
-			alpha = self.cursor.alpha,
-			size = 20,
-			stroke = 2,
-		});
-
-		gfx.Restore();
-	end,
-
-	drawNavigation = function(self)
-		local x = self.x;
-		local y = scaledH - (scaledH / 20) + (self.labels.fxlfxr.h - 6);
-
-		gfx.BeginPath();
-		align.left();
-	
-		self.labels.fxlfxr:draw({
-			x = x,
-			y = y,
-			color = 'normal',
-		});
-
-		self.labels.selectScore:draw({
-			x = x + self.labels.fxlfxr.w + 8,
-			y = y + 1,
-			color = 'white',
-		});
-	end,
-
-	drawScore = function(self, i, initialY, isSelected)
-		local h = (isSelected and self.h.selected) or self.h.base;
-		local x = self.padding.x;
-		local y = self.padding.y + initialY;
-
-		self.stats[i].score:setInfo({ value = allScores[i].score });
-
-		gfx.BeginPath();
-		fill.dark(120);
-		gfx.Rect(0, initialY, self.w, h);
-		gfx.Fill();
-
-		gfx.BeginPath();
-		align.right();
-		self.stats[i].place:draw({
-			x = self.w - self.padding.x + 8,
-			y = y - 1,
-			a = 40,
-			color = 'normal',
-		});
-
-		gfx.BeginPath();
-		align.left();
-
-		self.labels.score:draw({
-			x = x + 1,
-			y = y,
-			color = 'normal',
-		});
-	
-		if (isSelected) then
-			y = y + (self.labels.score.h * 0.75);
-		else
-			x = self.stats[i].score.position[8] + 144;
-
-			if (singleplayer) then
-				self.labels.timestamp:draw({
-					x = x,
-					y = y,
-					color = 'normal',
-				});
-			else
-				self.labels.name:draw({
-					x = x,
-					y = y,
-					color = 'normal',
-				});
-			end
-
-			y = y + (self.labels.score.h * 0.75);
-
-			if (singleplayer) then
-				self.stats[i].timestamp:draw({
-					x = x,
-					y = y + 8,
-					color = 'white',
-				});
-			else
-				self.stats[i].name:draw({
-					x = x,
-					y = y + 8,
-					color = 'white',
-				});
-			end
-
-			self.labels.clear:draw({
-				x = x,
-				y = y + (self.labels.score.h * 2.5) + 2,
-				color = 'normal',
-			});
-
-			self.stats[i].clear:draw({
-				x = x,
-				y = y + (self.labels.score.h * 3.75) + 2,
-				color = 'white',
-			});
-		end
-
-		x = self.padding.x;
-
-		self.stats[i].score:draw({
-			offset = 10,
-			x = x - 3,
-			y1 = y,
-			y2 = y + (self.stats[i].score.labels[1].h * 0.125) + 5,
-		});
-
-		if (isSelected) then
-			y = y + self.stats[i].score.labels[1].h * 1.125;
-
-			if (singleplayer) then
-				local statX = x;
-				local statY = y + (self.labels.timestamp.h * 1.5);
-				local spacing = self:getSpacing(self.orders.sp.row[1], 1);
-
-				for _, name in ipairs(self.orders.sp.row[1]) do
-					self.labels[name]:draw({
-						x = statX,
-						y = y,
-						color = 'normal',
-					});
-
-					self.stats[i][name]:draw({
-						x = statX,
-						y = statY,
-						color = 'white',
-					});
-
-					statX = statX + self.labels[name].w + spacing;
-				end
-
-				y = y + (self.labels.timestamp.h * 2) + (self.stats[i].timestamp.h * 2);
-
-				statX = x;
-				statY = y + (self.labels.critical.h * 1.5);
-				spacing = self:getSpacing(self.orders.sp.row[2], 1);
-
-				for _, name in ipairs(self.orders.sp.row[2]) do
-					self.labels[name]:draw({
-						x = statX,
-						y = y,
-						color = 'normal',
-					});
-
-					self.stats[i][name]:draw({
-						x = statX,
-						y = statY,
-						color = 'white',
-					});
-
-					statX = statX + self.labels[name].w + spacing;
-				end
-			else
-				self.labels.name:draw({
-					x = x,
-					y = y,
-					color = 'normal',
-				});
-
-				self.stats[i].name:draw({
-					x = x,
-					y = y + (self.labels.name.h * 1.5),
-					color = 'white',
-				});
-
-				x = x + (self.labels.name.w * 3.5) + 1;
-
-				self.labels.grade:draw({
-					x = x,
-					y = y,
-					color = 'normal',
-				});
-
-				self.stats[i].grade:draw({
-					x = x,
-					y = y + (self.labels.grade.h * 1.5),
-					color = 'white',
-				});
-
-				x = x + (self.labels.grade.w * 1.825) + 2;
-
-				self.labels.gauge:draw({
-					x = x,
-					y = y,
-					color = 'normal',
-				});
-
-				self.stats[i].gauge:draw({
-					x = x,
-					y = y + (self.labels.gauge.h * 1.5),
-					color = 'white',
-				});
-
-				x = x + (self.labels.gauge.w * 2);
-
-				self.labels.clear:draw({
-					x = x,
-					y = y,
-					color = 'normal',
-				});
-
-				self.stats[i].clear:draw({
-					x = x,
-					y = y + (self.labels.clear.h * 1.5),
-					color = 'white',
-				});
-
-				y = y + (self.labels.name.h * 2) + (self.stats[i].name.h * 2);
-
-				local statX = self.padding.x;
-				local statY = y + (self.labels.critical.h * 1.5);
-				local spacing = self:getSpacing(self.orders.mp.row[1], 1);
-
-				for _, name in ipairs(self.orders.mp.row[1]) do
-					self.labels[name]:draw({
-						x = statX,
-						y = y,
-						color = 'normal',
-					});
-
-					if (self.stats[i][name]) then
-						self.stats[i][name]:draw({
-							x = statX,
-							y = statY,
-							color = 'white',
-						});
-					end
-
-					statX = statX + self.labels[name].w + spacing;
-				end
-			end
-
-			return self.h.selected + self.spacing;
-		end
-
-		return self.h.base + self.spacing;
-	end,
-
-	drawScrollbar = function(self, deltaTime)
-		if (self.easing.scrollbar.timer > 0) then
-      self.easing.scrollbar.timer = math.max(self.easing.scrollbar.timer - deltaTime, 0);
-		end
+		if (self.selectedScore ~= selectedScore) then
+			self.selectedScore = selectedScore;
 		
-    local y = self:getScrollbarPos();
+			local currentPage = List.getCurrentPage({
+				current = self.selectedScore,
+				limit = self.viewLimit,
+				total = #allScores,
+			});
 
-		gfx.BeginPath();
-		fill.dark(120);
-		gfx.Rect(
-			self.scrollbar.x,
-			self.scrollbar.y,
-			self.scrollbar.w,
-			self.scrollbar.h
-		);
-		gfx.Fill();
+			self.list.y.current = (self.list.h.base
+				- self.list.h.item.difference
+				+ self.list.margin
+			) * (currentPage - 1);
+			self.list.y.current = -self.list.y.current;
 
-		gfx.BeginPath();
-		fill.normal();
-		gfx.Rect(self.scrollbar.x, y, 8, 32);
-		gfx.Fill();
+			self.list.timer = 0;
+
+			self.cursor:setPosition({
+				current = self.selectedScore,
+				height = self.list.h.item.collapsed,
+				total = self.viewLimit,
+				vertical = true,
+			});
+
+			self.cursor.timer.flicker = 0;
+
+			self.scrollbar:setPosition({
+				current = self.selectedScore,
+				total = #allScores,
+			});
+		end
 	end,
 
 	render = function(self, deltaTime)
@@ -1427,33 +1421,23 @@ local scoreList = {
 
 		self:setStats();
 
-		self:handleNavigation(deltaTime);
-
-		local y = 0;
-
-		if (not self.cursor.y[self.viewLimit]) then
-			for i = 1, self.viewLimit do
-				self.cursor.y[i] = self.y + ((self.h.base + self.spacing) * (i - 1));
-			end
-		end
-
 		gfx.Save();
 
-		gfx.Translate(self.x, self.y);
+		self:drawScoreList(deltaTime);
 
-		for i = self.bounds.lower, self.bounds.upper do
-			y = y + self:drawScore(i, y, i == selectedScore);
-		end
-
-		gfx.Translate(-self.x, -self.y);
-
-		self:drawCursor(deltaTime);
+		self.cursor:render(deltaTime, {
+			size = 20,
+			stroke = 2,
+			vertical = true,
+		});
 
 		if (#allScores > self.viewLimit) then
-			self:drawScrollbar(deltaTime);
+			self.scrollbar:render(deltaTime);
 		end
 
-		self:drawNavigation();
+		self:drawControls();
+
+		self:handleChange();
 
 		gfx.Restore();
 	end,
@@ -1466,11 +1450,11 @@ local screenshot = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			font.normal();
+			Font.Normal();
 
 			self.labels = {
-				path = cacheLabel('', 24),
-				saved = cacheLabel('SCREENSHOT SAVED TO', 24),
+				path = Label.New('', 24),
+				saved = Label.New('SCREENSHOT SAVED TO', 24),
 			};
 		end
 	end,
@@ -1481,7 +1465,7 @@ local screenshot = {
 		if (self.timer > 0) then
 			self.timer = math.max(self.timer - deltaTime, 0);
 
-			font.normal();
+			Font.Normal();
 			self.labels.path:update({ new = self.path });
 
 			gfx.Save();
@@ -1489,18 +1473,18 @@ local screenshot = {
 			gfx.Translate(8, 4);
 
 			gfx.BeginPath();
-			align.left();
+			FontAlign.Left();
 			
 			self.labels.saved:draw({
 				x = 0,
 				y = 0,
-				color = 'normal',
+				color = 'Normal',
 			});
 
 			self.labels.path:draw({
 				x = self.labels.saved.w + 16,
 				y = 0,
-				color = 'white',
+				color = 'White',
 			});
 
 			gfx.Restore();
@@ -1553,7 +1537,7 @@ result_set = function()
 			allScores[currentIndex] = help.formatScore(result);
 
 			if (scoreList.stats) then
-				font.number();
+				Font.Number();
 
 				scoreList.stats[currentIndex].early:update({
 					new = allScores[currentIndex].early.value;
@@ -1639,12 +1623,6 @@ render = function(deltaTime)
 	graphs:render(deltaTime);
 
 	screenshot:drawNotification(deltaTime);
-
-	if (previousScore ~= selectedScore) then
-		scoreList.cursor.flickerTimer = 0;
-
-		previousScore = selectedScore;
-	end
 end
 
 get_capture_rect = function()

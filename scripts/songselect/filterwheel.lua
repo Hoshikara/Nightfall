@@ -1,8 +1,14 @@
-local CONSTANTS = require('constants/songwheel');
+local CONSTANTS_CHALWHEEL = require('constants/chalwheel');
+local CONSTANTS_SONGWHEEL = require('constants/songwheel');
+
+local GridLayout = require('layout/grid');
 
 local allowScroll = false;
 
 local initialY = -1000;
+
+local isSongSelect = true;
+local rendererSet = false;
 
 local currentFolder = game.GetSkinSetting('cachedFolder') or 1;
 local currentLevel = game.GetSkinSetting('cachedLevel') or 1;
@@ -46,73 +52,7 @@ setupLayout = function()
 	end
 end
 
-local layout = {
-	cache = { scaledW = 0, scaledH = 0 },
-  dropdown = {
-    [1] = {},
-    [2] = {},
-    [3] = {},
-    padding = 24,
-    start = 0,
-    y = 0,
-  },
-  field = {
-    [1] = {},
-    [2] = {},
-    [3] = {},
-    y = 0,
-  },
-  grid = {},
-	labels = nil,
-	
-	setSizes = function(self)
-		if (not self.labels) then
-			self.labels = {};
-	
-			font.medium();
-			for name, str in pairs(CONSTANTS.labels.grid) do
-				self.labels[name] = cacheLabel(str, 18);
-			end
-	
-			local tempLabel = cacheLabel('TEMPLABEL', 24);
-	
-			self.field.height = tempLabel.h;
-			self.labels.height = self.labels.sort.h;
-		end
-	
-		if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
-			self.jacketSize = scaledH / 4;
-			self.grid.gutter = self.jacketSize / 8;
-			self.grid.size = (self.jacketSize + self.grid.gutter) * 4;
-			self.grid.x = scaledW - self.grid.size + (self.grid.gutter * 7);
-		
-			self.labels.x = {
-				self.grid.x,
-				(self.jacketSize * 1.5) + self.grid.gutter,
-				(self.jacketSize / 2) + self.grid.gutter
-			};
-			self.labels.y = scaledH / 20;
-		
-			self.field[1].x = self.labels.x[1] - 4;
-			self.field[2].x = self.field[1].x + (self.jacketSize * 1.5) + self.grid.gutter;
-			self.field[3].x = self.field[2].x + (((self.jacketSize * 1.5) + self.grid.gutter) / 2);
-			self.field[1].maxWidth = (self.jacketSize * 1.65)	- (self.dropdown.padding * 2);
-			self.field.y = self.labels.y + (self.labels.height * 1.25);
-		
-			self.dropdown[1].x = self.field[1].x + 2;
-			self.dropdown[2].x = self.field[2].x;
-			self.dropdown[3].x = self.field[3].x;
-			self.dropdown[1].maxWidth = (self.jacketSize * 3)
-				+ (self.grid.gutter * 2)
-				- (self.dropdown.padding * 2);
-			self.dropdown.start = self.dropdown.padding - 7;
-			self.dropdown.y = self.field.y + (self.field.height * 1.25);
-			
-			self.cache.scaledW = scaledW;
-			self.cache.scaledH = scaledH;
-		end
-	end,
-};
+local layout = nil;
 
 local labels = nil;
 
@@ -133,10 +73,10 @@ setLabels = function(folderCount)
 
 		labelCount = 0;
 
-		font.normal();
+		Font.Normal();
 
 		for index, folder in ipairs(filters.folder) do
-			labels.folder[index] = cacheLabel(stringReplace(folder, prefixes), 24);
+			labels.folder[index] = Label.New(stringReplace(folder, prefixes), 24);
 
 			local width = labels.folder[index].w;
 
@@ -164,15 +104,17 @@ setLabels = function(folderCount)
 		for index, level in ipairs(filters.level) do
 			local currentLabel = stringReplace(level, prefixes);
 	
-			if (currentLabel ~= 'ALL') then
-				font.number();
+			if (currentLabel == 'ALL') then
+				Font.Normal();
+			elseif (currentLabel == '∞') then
+				Font.Number();
+			else
+				Font.Number();
 
 				currentLabel = string.format('%02d', tonumber(stringReplace(level, prefixes)));
-			else
-				font.normal();
 			end
 
-			labels.level[index] = cacheLabel(currentLabel, 24, 0);
+			labels.level[index] = Label.New(currentLabel, 24, 0);
 
 			local width = labels.level[index].w;
 
@@ -196,23 +138,25 @@ drawCurrentField = function(deltaTime, which, index, displaying)
 	local current = (isFolder and currentFolder) or currentLevel;
 	local doesOverflow = false;
 
+	if ((not labels[which]) or (not labels[which][current])) then return end
+
 	if (isFolder) then
 		doesOverflow = labels[which][current].w > layout.field[1].maxWidth;
 	end
 
 	gfx.BeginPath();
-	align.left();
+	FontAlign.Left();
 
 	if (displaying) then
 		if (choosingFolder and (which == 'folder')) then
-			color = 'normal';
+			color = 'Normal';
 		elseif ((not choosingFolder) and (which == 'level')) then
-			color = 'normal';
+			color = 'Normal';
 		else
-			color = 'white';
+			color = 'White';
 		end
 	else
-		color = 'white';
+		color = 'White';
 	end
 
 	if (doesOverflow) then
@@ -249,12 +193,12 @@ drawFilterLabel = function(deltaTime, which, index, y, isSelected, key)
 	local color;
 
 	gfx.BeginPath();
-	align.left();
+	FontAlign.Left();
 
 	if (isSelected) then
-		color = 'normal';
+		color = 'Normal';
 	else
-		color = 'white';
+		color = 'White';
 	end
 
 	if (allowScroll and doesOverflow) then
@@ -283,11 +227,21 @@ drawFilterLabel = function(deltaTime, which, index, y, isSelected, key)
 end
 
 render = function(deltaTime, displaying)
+	if (not rendererSet) then
+		isSongSelect = #filters.level == 21;
+
+		rendererSet = true;
+	end
+
+	if (not layout) then
+		layout = GridLayout.New(isSongSelect);
+	end
+
 	gfx.Save();
 
 	setupLayout();
 
-	layout:setSizes();
+	layout:setSizes(scaledW, scaledH);
 
 	setLabels(#filters.folder);
 
@@ -307,9 +261,7 @@ render = function(deltaTime, displaying)
 			timers.level = math.max(timers.level - (deltaTime * 6), 0);
 		end
 	
-		if ((timers.folder == 0) and (timers.level == 0)) then
-			return;
-		end
+		if ((timers.folder == 0) and (timers.level == 0)) then return end
 	else
 		if (choosingFolder) then
 			allowScroll = true;
@@ -334,14 +286,14 @@ render = function(deltaTime, displaying)
 	end
 
 	gfx.BeginPath();
-	fill.dark(230);
-	gfx.Rect(
+	Fill.Dark(230);
+	gfx.FastRect(
 		layout.dropdown[1].x,
 		initialY,
 		(layout.dropdown.padding * 2) + labels.folder.finalWidth,
 		(labels.folder.maxHeight + layout.dropdown.padding) * timers.folder
 	);
-	gfx.Rect(
+	gfx.FastRect(
 		layout.dropdown[2].x,
 		initialY,
 		(layout.dropdown.padding * 2) + labels.level.maxWidth,

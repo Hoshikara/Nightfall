@@ -14,56 +14,56 @@ local _ = {
 };
 
 _.initializeButton = function(self)
-  font.medium();
+  Font.Medium();
 
   local button = {
     [1] = {
-      label = cacheLabel('GENERAL', 36),
+      label = Label.New('GENERAL', 36),
       page = 'general'
     },
     [2] = {
-      label = cacheLabel('SONG SELECT', 36),
+      label = Label.New('SONG SELECT', 36),
       page = 'songSelect'
     },
     [3] = {
-      label = cacheLabel('GAMEPLAY SETTINGS', 36),
+      label = Label.New('GAMEPLAY SETTINGS', 36),
       page = 'gameplaySettings'
     },
     [4] = {
-      label = cacheLabel('GAMEPLAY', 36),
+      label = Label.New('GAMEPLAY', 36),
       page = 'gameplay'
     },
     [5] = {
-      label = cacheLabel('PRACTICE MODE', 36),
+      label = Label.New('PRACTICE MODE', 36),
       page = 'practiceMode'
     },
     [6] = {
-      label = cacheLabel('RESULTS', 36),
+      label = Label.New('RESULTS', 36),
       page = 'results'
     },
     [7] = {
-      label = cacheLabel('MULTIPLAYER', 36),
+      label = Label.New('MULTIPLAYER', 36),
       page = 'multiplayer'
     },
     [8] = {
-      label = cacheLabel('NAUTICA', 36),
+      label = Label.New('NAUTICA', 36),
       page = 'nautica'
     },
     activePage = 1,
-    startEsc = cacheLabel('[START]  /  [ESC]', 24),
-    close = cacheLabel('CLOSE', 24),
+    startEsc = Label.New('[START]  /  [ESC]', 24),
+    close = Label.New('CLOSE', 24),
     maxWidth = 0
   };
 
   button.drawButton = function(self, x, y, i, isActive)
     gfx.BeginPath();
 
-    align.left();
+    FontAlign.Left();
     self[i].label:draw({
       x = x,
       y = y,
       a = (isActive and 255) or 80,
-      color = (isActive and 'normal') or 'white',
+      color = (isActive and 'Normal') or 'White',
     });
 
     if (_:mouseClipped(x - 20, y - 10, self[i].label.w + 40, self[i].label.h + 30)) then
@@ -96,12 +96,12 @@ _.initializeControls = function(self)
     for i = 1, #CONTROL_LIST[category] do
       list[i] = {};
 
-      font.normal();
-      list[i].action = cacheLabel(CONTROL_LIST[category][i].action, 24);
+      Font.Normal();
+      list[i].action = Label.New(CONTROL_LIST[category][i].action, 24);
 
-      font.medium();
-      list[i].controller = cacheLabel(CONTROL_LIST[category][i].controller, 24);
-      list[i].keyboard = cacheLabel(CONTROL_LIST[category][i].keyboard, 24);
+      Font.Medium();
+      list[i].controller = Label.New(CONTROL_LIST[category][i].controller, 24);
+      list[i].keyboard = Label.New(CONTROL_LIST[category][i].keyboard, 24);
 
       if (CONTROL_LIST[category][i].lineBreak) then
         list[i].lineBreak = true;
@@ -119,17 +119,17 @@ _.initializeControls = function(self)
     local y = initialY;
 
     gfx.BeginPath();
-    align.left();
+    FontAlign.Left();
 
     _.controller:draw({
       x = x,
       y = y,
-      color = 'white',
+      color = 'White',
     });
     _.keyboard:draw({
       x = x + 350,
       y = y,
-      color = 'white',
+      color = 'White',
     });
 
     y = y + 60;
@@ -138,24 +138,24 @@ _.initializeControls = function(self)
       list[i].controller:draw({
         x = x,
         y = y,
-        color = (list[i].note and 'white') or 'normal',
+        color = (list[i].note and 'White') or 'Normal',
       });
 
       list[i].keyboard:draw({
         x = x + 350,
         y = y,
-        color = (list[i].note and 'white') or 'normal',
+        color = (list[i].note and 'White') or 'Normal',
       });
 
       list[i].action:draw({
         x = x + 700,
         y = y,
-        color = 'white',
+        color = 'White',
       });
 
       if ((i ~= #list) and (not list[i].note)) then
         gfx.BeginPath();
-        fill.normal(100);
+        Fill.Normal(100);
         gfx.FastRect(x + 1, y + 38, _.layout.scaledW / 1.65, 2);
         gfx.Fill();
       end
@@ -205,10 +205,10 @@ _.initializeAll = function(self, selection)
       and (self.mousePosY < scaledH);
   end
 
-  font.medium();
-  self.heading = cacheLabel('CONTROLS', 60);
-  self.controller = cacheLabel('CONTROLLER', 30);
-  self.keyboard = cacheLabel('KEYBOARD', 30);
+  Font.Medium();
+  self.heading = Label.New('CONTROLS', 60);
+  self.controller = Label.New('CONTROLLER', 30);
+  self.keyboard = Label.New('KEYBOARD', 30);
 
   self.button = self:initializeButton();
   self.controls = self:initializeControls();
@@ -225,7 +225,7 @@ _.render = function(self, deltaTime, showControls, selectedPage)
   self.mousePosX, self.mousePosY = game.GetMousePos();
 
   gfx.BeginPath();
-  fill.black(170);
+  Fill.Black(170);
   gfx.FastRect(0, 0, self.layout.scaledW, self.layout.scaledH);
   gfx.Fill();
 
@@ -233,11 +233,11 @@ _.render = function(self, deltaTime, showControls, selectedPage)
   local y = self.layout.scaledH / 20;
 
   gfx.BeginPath();
-  align.left();
+  FontAlign.Left();
   self.heading:draw({
     x = x - 3,
     y = y,
-    color = 'white',
+    color = 'White',
   });
 
   self.buttonY = y + self.heading.h * 2;
@@ -253,7 +253,7 @@ _.render = function(self, deltaTime, showControls, selectedPage)
   end
 
   gfx.BeginPath();
-  fill.white();
+  Fill.White();
   gfx.FastRect(
     x + self.button.maxWidth + 75,
     y + (self.heading.h * 2) + 10,
@@ -269,17 +269,17 @@ _.render = function(self, deltaTime, showControls, selectedPage)
   );
 
   gfx.BeginPath();
-  align.left();
+  FontAlign.Left();
   self.button.startEsc:draw({
     x = x,
     y = y + self.layout.scaledH - (self.layout.scaledH / 7),
-    color = 'normal',
+    color = 'Normal',
   });
 
   self.button.close:draw({
     x = x + self.button.startEsc.w + 8,
     y = y + self.layout.scaledH - (self.layout.scaledH / 7),
-    color = 'white',
+    color = 'White',
   });
 
   return self.hoveredPage;

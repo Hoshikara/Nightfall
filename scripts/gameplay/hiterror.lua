@@ -83,8 +83,8 @@ end
 
 _.render = function(self, deltaTime, desw, desh)
   if (self.info.critWindow == nil) then
-    self.info.critWindow = gameplay.hitWindow.perfect;
-    self.info.nearWindow = gameplay.hitWindow.good;
+    self.info.critWindow = get(gameplay, 'hitWindow.perfect', 46);
+    self.info.nearWindow = get(gameplay, 'hitWindow.good', 92);
   end
 
   if (self.info.desw ~= desw) then
@@ -135,7 +135,7 @@ _.render = function(self, deltaTime, desw, desh)
   gfx.Fill();
 
   gfx.BeginPath();
-  fill.white();
+  Fill.White();
   gfx.Rect(-0.8, -12, 1.6, 24);
   gfx.Fill();
 

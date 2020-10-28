@@ -1,10 +1,16 @@
-CONSTANTS = require('constants/songwheel');
+local CONSTANTS_CHALWHEEL = require('constants/chalwheel');
+local CONSTANTS_SONGWHEEL = require('constants/songwheel');
+
+local GridLayout = require('layout/grid');
 
 local arrowWidth = 12;
 
 local currentSort = 1;
 
 local initialY = -1000;
+
+local isSongSelect = true;
+local rendererSet = false;
 
 local timer = 0;
 
@@ -31,88 +37,25 @@ setupLayout = function()
 	end
 end
 
-local layout = {
-	cache = { scaledW = 0, scaledH = 0 },
-  dropdown = {
-    [1] = {},
-    [2] = {},
-    [3] = {},
-    padding = 24,
-    start = 0,
-    y = 0,
-  },
-  field = {
-    [1] = {},
-    [2] = {},
-    [3] = {},
-    y = 0,
-  },
-  grid = {},
-	labels = nil,
-	
-	setSizes = function(self)
-		if (not self.labels) then
-			self.labels = {};
-	
-			font.medium();
-			for name, str in pairs(CONSTANTS.labels.grid) do
-				self.labels[name] = cacheLabel(str, 18);
-			end
-	
-			local tempLabel = cacheLabel('TEMPLABEL', 24);
-	
-			self.field.height = tempLabel.h;
-			self.labels.height = self.labels.sort.h;
-		end
-	
-		if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
-			self.jacketSize = scaledH / 4;
-			self.grid.gutter = self.jacketSize / 8;
-			self.grid.size = (self.jacketSize + self.grid.gutter) * 4;
-			self.grid.x = scaledW - self.grid.size + (self.grid.gutter * 7);
-		
-			self.labels.x = {
-				self.grid.x,
-				(self.jacketSize * 1.5) + self.grid.gutter,
-				(self.jacketSize / 2) + self.grid.gutter
-			};
-			self.labels.y = scaledH / 20;
-		
-			self.field[1].x = self.labels.x[1] - 4;
-			self.field[2].x = self.field[1].x + (self.jacketSize * 1.5) + self.grid.gutter;
-			self.field[3].x = self.field[2].x + (((self.jacketSize * 1.5) + self.grid.gutter) / 2);
-			self.field[1].maxWidth = (self.jacketSize * 1.65)	- (self.dropdown.padding * 2);
-			self.field.y = self.labels.y + (self.labels.height * 1.25);
-		
-			self.dropdown[1].x = self.field[1].x + 2;
-			self.dropdown[2].x = self.field[2].x;
-			self.dropdown[3].x = self.field[3].x;
-			self.dropdown[1].maxWidth = (self.jacketSize * 3)
-				+ (self.grid.gutter * 2)
-				- (self.dropdown.padding * 2);
-			self.dropdown.start = self.dropdown.padding - 7;
-			self.dropdown.y = self.field.y + (self.field.height * 1.25);
-			
-			self.cache.scaledW = scaledW;
-			self.cache.scaledH = scaledH;
-		end
-	end,
-};
+local layout = nil;
 
 local labels = nil;
 
 setLabels = function()
 	if (not labels) then
+		local currentConstants = (isSongSelect and CONSTANTS_SONGWHEEL.sorts)
+			or CONSTANTS_CHALWHEEL.sorts;
+
 		labels = {
 			maxWidth = 0,
 			maxHeight = 0,
 		};
 
-		font.normal();
+		Font.Normal();
 
-		for index, current in ipairs(CONSTANTS.sorts) do
+		for index, current in ipairs(currentConstants) do
 			labels[index] = {
-				name = cacheLabel(current.name, 24),
+				name = Label.New(current.name, 24),
 				direction = current.direction
 			};
 
@@ -126,12 +69,12 @@ setLabels = function()
 end
 
 drawCurrentSort = function(displaying)
-	local color = (displaying and 'normal') or 'white';
+	local color = (displaying and 'Normal') or 'White';
 	local x = layout.field[3].x;
 	local y = layout.field.y;
 
 	gfx.BeginPath();
-	align.left();
+	FontAlign.Left();
 
 	labels[currentSort].name:draw({
 		x = x,
@@ -149,7 +92,7 @@ drawCurrentSort = function(displaying)
 	);
 
 	gfx.BeginPath();
-	fill.dark(255 * 0.5);
+	Fill.Dark(255 * 0.5);
 	gfx.MoveTo(1, 1);
 	gfx.LineTo(arrowWidth + 1, 1);
 	gfx.LineTo(
@@ -160,7 +103,7 @@ drawCurrentSort = function(displaying)
 	gfx.Fill();
 
 	gfx.BeginPath();
-	fill[color]();
+	Fill[color]();
 	gfx.MoveTo(0, 0);
 	gfx.LineTo(arrowWidth, 0);
 	gfx.LineTo((arrowWidth / 2), ((labels[currentSort].direction == 'up') and 10) or -10);
@@ -172,12 +115,12 @@ end
 
 drawSortLabel = function(index, y, isSelected)
 	local alpha = math.floor(255 * math.min(timer ^ 2, 1));
-	local color = (isSelected and 'normal') or 'white';
+	local color = (isSelected and 'Normal') or 'White';
 	local padding = layout.dropdown.padding;
 	local x = layout.dropdown[3].x + padding;
 
 	gfx.BeginPath();
-	align.left();
+	FontAlign.Left();
 
 	labels[index].name:draw({
 		x = x,
@@ -196,7 +139,7 @@ drawSortLabel = function(index, y, isSelected)
 	);
 
 	gfx.BeginPath();
-	fill.dark(255 * 0.5);
+	Fill.Dark(255 * 0.5);
 	gfx.MoveTo(1, 1);
 	gfx.LineTo(arrowWidth + 1, 1);
 	gfx.LineTo(
@@ -207,7 +150,7 @@ drawSortLabel = function(index, y, isSelected)
 	gfx.Fill();
 
 	gfx.BeginPath();
-	fill[color](alpha);
+	Fill[color](alpha);
 	gfx.MoveTo(0, 0);
 	gfx.LineTo(arrowWidth, 0);
 	gfx.LineTo((arrowWidth / 2), ((labels[index].direction == 'up') and 10) or -10);
@@ -220,11 +163,21 @@ drawSortLabel = function(index, y, isSelected)
 end
 
 render = function(deltaTime, displaying)
+	if (not rendererSet) then
+		isSongSelect = #sorts == 12;
+
+		rendererSet = true;
+	end
+
+	if (not layout) then
+		layout = GridLayout.New(isSongSelect);
+	end
+
 	gfx.Save();
 
 	setupLayout();
 
-	layout:setSizes();
+	layout:setSizes(scaledW, scaledH);
 
 	setLabels();
 
@@ -245,7 +198,7 @@ render = function(deltaTime, displaying)
 	end
 
 	gfx.BeginPath();
-	fill.dark(230);
+	Fill.Dark(230);
 	gfx.Rect(
 		layout.dropdown[3].x,
 		initialY,
@@ -256,9 +209,11 @@ render = function(deltaTime, displaying)
 
 	gfx.Translate(0, initialY + layout.dropdown.start);
 
+	local currentConstants = (isSongSelect and CONSTANTS_SONGWHEEL.sorts)
+		or CONSTANTS_CHALWHEEL.sorts;
 	local sortY = 0;
 
-	for sortIndex, _ in ipairs(CONSTANTS.sorts) do
+	for sortIndex, _ in ipairs(currentConstants) do
 		local isSelected = sortIndex == currentSort;
 
 		sortY = sortY + drawSortLabel(sortIndex, sortY, isSelected);

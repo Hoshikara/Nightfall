@@ -49,19 +49,19 @@ local labels = nil;
 
 setLabels = function()
 	if (not labels) then
-		font.medium();
+		Font.Medium();
 
 		labels = {
-			artist = cacheLabel('ARTIST', 18),
-			collectionName = cacheLabel('COLLECTION NAME', 18),
-			confirm = cacheLabel('CONFIRM', 18),
-			enter = cacheLabel('[ENTER]', 18),
-			title = cacheLabel('TITLE', 18),
+			artist = Label.New('ARTIST', 18),
+			collectionName = Label.New('COLLECTION NAME', 18),
+			confirm = Label.New('CONFIRM', 18),
+			enter = Label.New('[ENTER]', 18),
+			title = Label.New('TITLE', 18),
 		};
 
-		font.jp();
+		Font.JP();
 
-		labels.input = cacheLabel('', 28);
+		labels.input = Label.New('', 28);
 	end
 end
 
@@ -73,7 +73,7 @@ drawArrows = function()
 	local y2 = layout.y.center + 45;
 
 	gfx.BeginPath();
-	fill.white(timer * ((noHigher and 50) or 255));
+	Fill.White(timer * ((noHigher and 50) or 255));
 	gfx.MoveTo(x, y1);
 	gfx.LineTo(x - 12, y1);
 	gfx.LineTo(x - 6, y1 - 10);
@@ -81,7 +81,7 @@ drawArrows = function()
 	gfx.Fill();
 
 	gfx.BeginPath();
-	fill.white(timer * ((noLower and 50) or 255));
+	Fill.White(timer * ((noLower and 50) or 255));
 	gfx.MoveTo(x, y2);
 	gfx.LineTo(x - 12, y2);
 	gfx.LineTo(x - 6, y2 + 10);
@@ -114,7 +114,7 @@ drawButton = function(deltaTime, label, isSelected, y)
 	gfx.Scale(1 / scalingFactor, 1 / scalingFactor);
 	
 	gfx.BeginPath();
-	align.left();
+	FontAlign.Left();
 
 	if (label.w > (w - 90)) then
 		buttonScrollTimer = buttonScrollTimer + deltaTime;
@@ -126,7 +126,7 @@ drawButton = function(deltaTime, label, isSelected, y)
 			layout.x.outerRight - w + 55,
 			y + label.h + 8,
 			scalingFactor,
-			'white',
+			'White',
 			alpha
 		);
 	else
@@ -134,7 +134,7 @@ drawButton = function(deltaTime, label, isSelected, y)
 			x = layout.x.outerRight - w + 55,
 			y = y + label.h + 8,
 			a = alpha,
-			color = 'white',
+			color = 'White',
 		});
 	end
 
@@ -153,13 +153,13 @@ drawInput = function()
 	gfx.BeginPath();
 	gfx.StrokeWidth(1);
 	gfx.StrokeColor(60, 110, 160, math.floor(255 * timer));
-	fill.dark(255 * timer);
+	Fill.Dark(255 * timer);
 	gfx.Rect(x, y, layout.w.middle, layout.h.outer / 6);
 	gfx.Fill();
 	gfx.Stroke();
 
 	gfx.BeginPath();
-	fill.white(255 * cursor.alpha);
+	Fill.White(255 * cursor.alpha);
 	gfx.Rect(x + 8 + cursor.offset, y + 10, 2, (layout.h.outer / 6) - 20);
 	gfx.Fill();
 
@@ -167,17 +167,17 @@ drawInput = function()
 
 	gfx.Scale(1 / scalingFactor, 1 / scalingFactor);
 
-	font.jp();
+	Font.JP();
 	labels.input:update({ new = string.upper(dialog.newName) });
 
 	gfx.BeginPath();
-	align.left();
+	FontAlign.Left();
 
 	labels.collectionName:draw({
 		x = layout.x.middleLeft,
 		y = labelY,
 		a = 255 * timer,
-		color = 'normal',
+		color = 'Normal',
 	});
 
 	labelY = labelY + (labels.collectionName.h * 2);
@@ -186,27 +186,27 @@ drawInput = function()
 		x = x + 8,
 		y = labelY + 7,
 		a = 255 * timer,
-		color = 'white',
+		color = 'White',
 		maxWidth = layout.w.middle - 22,
 	});
 
 	labelY = labelY + (layout.h.outer / 6);
 
 	gfx.BeginPath();
-	align.right();
+	FontAlign.Right();
 
 	labels.confirm:draw({
 		x = layout.x.middleRight + 2,
 		y = labelY + labels.confirm.h,
 		a = 255 * timer,
-		color = 'white',
+		color = 'White',
 	});
 
 	labels.enter:draw({
 		x = layout.x.middleRight - labels.enter.w - 16,
 		y = labelY + labels.enter.h,
 		a = 255 * timer,
-		color = 'normal',
+		color = 'Normal',
 	});
 
 	gfx.Restore();
@@ -223,13 +223,13 @@ drawSongInfo = function(deltaTime)
 	gfx.Scale(1 / scalingFactor, 1 / scalingFactor);
 
 	gfx.BeginPath();
-	align.left();
+	FontAlign.Left();
 
 	labels.title:draw({
 		x = x,
 		y = y,
 		a = alpha,
-		color = 'normal',
+		color = 'Normal',
 	});
 
 	y = y + (labels.title.h * 1.25);
@@ -244,7 +244,7 @@ drawSongInfo = function(deltaTime)
 			x + 2,
 			y,
 			scalingFactor,
-			'white',
+			'White',
 			alpha
 		);
 	else
@@ -252,7 +252,7 @@ drawSongInfo = function(deltaTime)
 			x = x,
 			y = y,
 			a = alpha,
-			color = 'white',
+			color = 'White',
 		});
 	end
 
@@ -262,7 +262,7 @@ drawSongInfo = function(deltaTime)
 		x = x,
 		y = y,
 		a = alpha,
-		color = 'normal',
+		color = 'Normal',
 	});
 
 	y = y + (labels.artist.h * 1.5);
@@ -277,7 +277,7 @@ drawSongInfo = function(deltaTime)
 			x + 2,
 			y,
 			scalingFactor,
-			'white',
+			'White',
 			alpha
 		);
 	else
@@ -285,7 +285,7 @@ drawSongInfo = function(deltaTime)
 			x = x,
 			y = y,
 			a = alpha,
-			color = 'white',
+			color = 'White',
 		});
 	end
 
@@ -297,12 +297,12 @@ open = function()
 	menuOptions = {};
 	selectedIndex = 0;
 
-	font.medium();
+	Font.Medium();
 
 	if (#dialog.collections == 0) then
 		menuOptions[initialIndex] = {
 			action = createCollection('FAVOURITES'),
-			label = cacheLabel('ADD TO FAVOURITES', 18),
+			label = Label.New('ADD TO FAVOURITES', 18),
 		};
 	end
 
@@ -313,23 +313,23 @@ open = function()
 
 		menuOptions[i] = {
 			action = createCollection(collection.name),
-			label = cacheLabel(currentName, 18),
+			label = Label.New(currentName, 18),
 		};
 	end
 
 	table.insert(menuOptions, {
 		action = menu.ChangeState,
-		label = cacheLabel('CREATE COLLECTION', 18),
+		label = Label.New('CREATE COLLECTION', 18),
 	});
 	table.insert(menuOptions, {
 		action = menu.Cancel,
-		label = cacheLabel('CLOSE', 18),
+		label = Label.New('CLOSE', 18),
 	});
 
-	font.jp();
+	Font.JP();
 
-	artist = cacheLabel(string.upper(dialog.artist), 28);
-	title = cacheLabel(string.upper(dialog.title), 36);
+	artist = Label.New(string.upper(dialog.artist), 28);
+	title = Label.New(string.upper(dialog.title), 36);
 end
 
 render = function(deltaTime)

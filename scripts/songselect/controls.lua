@@ -47,12 +47,12 @@ local _ = {
         for i = 1, #CONTROL_LIST[category] do
           list[i] = {};
     
-          font.normal();
-          list[i].action = cacheLabel(CONTROL_LIST[category][i].action, 24);
+          Font.Normal();
+          list[i].action = Label.New(CONTROL_LIST[category][i].action, 24);
     
-          font.medium();
-          list[i].controller = cacheLabel(CONTROL_LIST[category][i].controller, 24);
-          list[i].keyboard = cacheLabel(CONTROL_LIST[category][i].keyboard, 24);
+          Font.Medium();
+          list[i].controller = Label.New(CONTROL_LIST[category][i].controller, 24);
+          list[i].keyboard = Label.New(CONTROL_LIST[category][i].keyboard, 24);
     
           if (CONTROL_LIST[category][i].lineBreak) then
             list[i].lineBreak = true;
@@ -68,20 +68,20 @@ local _ = {
 
   setHeadings = function(self)
     if (not self.headings) then
-      font.medium();
+      Font.Medium();
 
       self.headings = {
-        main = cacheLabel('CONTROLS', 60),
-        general = cacheLabel('GENERAL', 36),
-        songSelect = cacheLabel('SONG SELECT', 36),
-        gameplaySettings = cacheLabel('GAMEPLAY SETTINGS', 36),
-        gameplay = cacheLabel('GAMEPLAY', 36),
-        practiceMode = cacheLabel('PRACTICE MODE', 36),
-        results = cacheLabel('RESULTS', 36),
-        controller = cacheLabel('CONTROLLER', 30),
-        keyboard = cacheLabel('KEYBOARD', 30),
-        btd = cacheLabel('[BT-D]', 24),
-        next = cacheLabel('NEXT PAGE', 24),
+        main = Label.New('CONTROLS', 60),
+        general = Label.New('GENERAL', 36),
+        songSelect = Label.New('SONG SELECT', 36),
+        gameplaySettings = Label.New('GAMEPLAY SETTINGS', 36),
+        gameplay = Label.New('GAMEPLAY', 36),
+        practiceMode = Label.New('PRACTICE MODE', 36),
+        results = Label.New('RESULTS', 36),
+        controller = Label.New('CONTROLLER', 30),
+        keyboard = Label.New('KEYBOARD', 30),
+        btd = Label.New('[BT-D]', 24),
+        next = Label.New('NEXT PAGE', 24),
         maxWidth = 0
       };
     end
@@ -93,19 +93,19 @@ local _ = {
     local y = initialY;
 
     gfx.BeginPath();
-    align.left();
+    FontAlign.Left();
 
     self.headings.controller:draw({
       x = x,
       y = y,
       a = alpha,
-      color = 'white',
+      color = 'White',
     });
     self.headings.keyboard:draw({
       x = x + 350,
       y = y,
       a = alpha,
-      color = 'white',
+      color = 'White',
     });
 
     y = y + 60;
@@ -115,26 +115,26 @@ local _ = {
         x = x,
         y = y,
         a = alpha,
-        color = (list[i].note and 'white') or 'normal',
+        color = (list[i].note and 'White') or 'Normal',
       });
 
       list[i].keyboard:draw({
         x = x + 350,
         y = y,
         a = alpha,
-        color = (list[i].note and 'white') or 'normal',
+        color = (list[i].note and 'White') or 'Normal',
       });
 
       list[i].action:draw({
         x = x + 700,
         y = y,
         a = alpha,
-        color = 'white',
+        color = 'White',
       });
 
       if ((i ~= #list) and (not list[i].note)) then
         gfx.BeginPath();
-        fill.normal(100 * self.timer)
+        Fill.Normal(100 * self.timer)
         gfx.FastRect(x + 1, y + 38, self.scaledW / 1.65, 2);
         gfx.Fill();
       end
@@ -152,12 +152,12 @@ local _ = {
 
     gfx.BeginPath();
 
-    align.left();
+    FontAlign.Left();
     heading:draw({
       x = x,
       y = y,
       a = (isActive and (255 * self.timer)) or (80 * self.timer),
-      color = (isActive and 'normal') or 'white',
+      color = (isActive and 'Normal') or 'White',
     });
 
     if (heading.w > self.headings.maxWidth) then
@@ -171,7 +171,7 @@ local _ = {
     local alpha = math.floor(255 * self.timer);
 
     gfx.BeginPath()
-    fill.black(235 * self.timer);
+    Fill.Black(235 * self.timer);
     gfx.FastRect(0, 0, self.scaledW, self.scaledH);
     gfx.Fill();
 
@@ -180,12 +180,12 @@ local _ = {
     gfx.Translate(self.x, self.y);
 
     gfx.BeginPath();
-    align.left();
+    FontAlign.Left();
     self.headings.main:draw({
       x = -3,
       y = 0,
       a = alpha,
-      color = 'white',
+      color = 'White',
     });
 
     self.headingY = self.headings.main.h * 2;
@@ -200,7 +200,7 @@ local _ = {
     end
 
     gfx.BeginPath();
-    fill.white(alpha);
+    Fill.White(alpha);
     gfx.FastRect(
       self.headings.maxWidth + 75,
       (self.headings.main.h * 2) + 10,
@@ -216,19 +216,19 @@ local _ = {
     );
 
     gfx.BeginPath();
-    align.left();
+    FontAlign.Left();
     self.headings.btd:draw({
       x = 0,
       y = self.scaledH - (self.scaledH / 7),
       a = alpha,
-      color = 'normal',
+      color = 'Normal',
     });
 
     self.headings.next:draw({
       x = self.headings.btd.w + 8,
       y = self.scaledH - (self.scaledH / 7) + 1,
       a = alpha,
-      color = 'white',
+      color = 'White',
     });
 
     gfx.Restore();

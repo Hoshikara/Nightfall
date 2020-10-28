@@ -1,5 +1,5 @@
 
-local background = cacheImage('bg.png');
+local background = Image.New('bg.png');
 
 local cache = { resX = 0, resY = 0 };
 
@@ -79,7 +79,7 @@ drawTransition = function(deltaTime, isIntro);
 		});
 
 		gfx.BeginPath();
-		fill.black(150 * timers.fade);
+		Fill.Black(150 * timers.fade);
 		gfx.Rect(0, 0, scaledW, scaledH);
 		gfx.Fill();
 

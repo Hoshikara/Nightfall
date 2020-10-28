@@ -1,16 +1,16 @@
-local create = function(params)
+local New = function(params)
   local labels = {};
 
-  font.number();
+  Font.Number();
 
   if (params.isScore) then
     for i = 1, 4 do
-      labels[i] = cacheLabel('0', params.sizes[1]);
-      labels[i + 4] = cacheLabel('0', params.sizes[2]);
+      labels[i] = Label.New('0', params.sizes[1]);
+      labels[i + 4] = Label.New('0', params.sizes[2]);
     end
   else
     for i = 1, params.digits do
-      labels[i] = cacheLabel('0', params.sizes[1]);
+      labels[i] = Label.New('0', params.sizes[1]);
     end
   end
 
@@ -40,7 +40,7 @@ local create = function(params)
       local x = params.x or 0;
       local alpha = params.a or 255;
 
-      font.number();
+      Font.Number();
 
       if (self.isScore) then
         local offset = params.offset or 0;
@@ -55,19 +55,19 @@ local create = function(params)
             x = x + self.position[i],
             y = y1,
             a = alpha * self.alpha[i],
-            color = 'white',
+            color = 'White',
           });
 
           self.labels[i + 4]:draw({
             x = x + offset + self.position[i + 4],
             y = y2,
             a = alpha * self.alpha[i + 4],
-            color = 'normal',
+            color = 'Normal',
           });
         end
       else
         local y = params.y or 0;
-        local color = params.color or 'normal';
+        local color = params.color or 'Normal';
 
         for i = 1, #self.labels do
           self.labels[i]:update({ new = self.digits[i] });
@@ -84,6 +84,4 @@ local create = function(params)
   };
 end
 
-return {
-  create = create,
-};
+return { New = New };

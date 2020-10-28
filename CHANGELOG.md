@@ -1,3 +1,9 @@
+###### October 28, 2020
+- Completed work for `Challenge Wheel`
+  - `Challenge Result` WIP
+  - only access if using beta build for USC courses (official courses not implemented at time of writing)
+- Refactored some `Song Select` components for better responsive sizing
+
 ###### October 2, 2020
 - Minor refactoring and visual adjustments for score displays and cursors
 

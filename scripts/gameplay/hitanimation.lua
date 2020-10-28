@@ -44,7 +44,14 @@ _.initializeHold = function(self)
     end
   end
 
-  hold.endingQueued = createTable(6, false);
+  hold.endingQueued = {
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+  };
 
   hold.drawHold = function(self, deltaTime, btn, inner, outer)
     gfx.Save();

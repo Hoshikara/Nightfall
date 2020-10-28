@@ -1,9 +1,10 @@
 local CONSTANTS = require('constants/gameplay');
 
+local ScoreNumber = require('common/scorenumber');
+
 local hitAnimation = require('gameplay/hitanimation');
 local hitError = require('gameplay/hiterror');
 local laserAnimation = require('gameplay/laseranimation');
-local number = require('common/number');
 
 hitAnimation:initializeAll();
 hitError:initializeAll();
@@ -18,33 +19,33 @@ local clearStates = nil;
 
 do
 	if (not clearStates) then
-		font.normal();
+		Font.Normal();
 
 		clearStates = {};
 
 		for i, clearState in ipairs(CONSTANTS.clearStates) do
-			clearStates[i] = cacheLabel(clearState, 60);
+			clearStates[i] = Label.New(clearState, 60);
 		end
 	end
 end
 
-local critLineBar = cacheImage('gameplay/crit_bar/crit_bar.png');
+local critLineBar = Image.New('gameplay/crit_bar/crit_bar.png');
 
 local difficulties = nil;
 
 do
 	if (not difficulties) then
-		font.medium();
+		Font.Medium();
 
 		difficulties = {};
 
 		for i, difficulty in ipairs(CONSTANTS.difficulties) do
-			difficulties[i] = cacheLabel(difficulty, 18);
+			difficulties[i] = Label.New(difficulty, 18);
 		end
 
-		font.number();
+		Font.Number();
 
-		difficulties.level = cacheLabel('', 18);
+		difficulties.level = Label.New('', 18);
 	end
 end
 
@@ -114,7 +115,7 @@ render_crit_base = function(deltaTime)
 	local length = (scaledW * 0.9) * scalingFactor;
 
 	gfx.BeginPath();
-	fill.black(200);
+	Fill.Black(200);
 	gfx.Rect(-scaledW, height / 2, scaledW * 2, scaledH);
 	gfx.Fill();
 
@@ -190,11 +191,11 @@ local alerts = {
 
 	drawAlerts = function(self, deltaTime)
 		if (not self.labels) then
-			font.normal();
+			Font.Normal();
 
 			self.labels = {
-				[1] = cacheLabel('L', 120),
-				[2] = cacheLabel('R', 120),
+				[1] = Label.New('L', 120),
+				[2] = Label.New('R', 120),
 			};
 
 			self.labels.y = -(self.labels[1].h / 5.5);
@@ -253,7 +254,7 @@ local alerts = {
 			gfx.Scissor(-64, -64, 128, 128 * self.timers.fade[i]);
 
 			gfx.BeginPath();
-			align.middle();
+			FontAlign.Middle();
 
 			gfx.FillColor(self.colors.r[i], self.colors.g[i], self.colors.b[i], alpha);
 			self.labels[i]:draw({
@@ -262,7 +263,7 @@ local alerts = {
 				override = true,
 			});
 
-			fill.white(70 * self.alpha[i]);
+			Fill.White(70 * self.alpha[i]);
 			self.labels[i]:draw({
 				x = 0,
 				y = self.labels.y,
@@ -307,11 +308,11 @@ local combo = {
 				burst = {},
 			};
 	
-			font.number();
+			Font.Number();
 	
 			for i = 1, 4 do
-				self.labels[i] = cacheLabel('0', 64);
-				self.labels.burst[i] = cacheLabel('0', 64);
+				self.labels[i] = Label.New('0', 64);
+				self.labels.burst[i] = Label.New('0', 64);
 			end
 	
 			local w = self.labels[1].w * 0.85;
@@ -323,9 +324,9 @@ local combo = {
 				x + (w * 2),
 			};
 	
-			font.medium();
+			Font.Medium();
 		
-			self.labels.chain = cacheLabel('CHAIN', 22);
+			self.labels.chain = Label.New('CHAIN', 22);
 		end
 	
 		self.timer = math.max(self.timer - deltaTime, 0);
@@ -345,11 +346,11 @@ local combo = {
 			self.current % 10,
 		};
 	
-		font.number();
+		Font.Number();
 	
 		if ((gameplay.comboState == 2) or (gameplay.comboState == 1)) then
 			gfx.BeginPath();
-			align.middle();
+			FontAlign.Middle();
 
 			gfx.FillColor(4, 8, 12, 125);
 			self.labels.chain:draw({
@@ -422,7 +423,7 @@ local combo = {
 			end
 		else
 			gfx.BeginPath();
-			align.middle();
+			FontAlign.Middle();
 
 			gfx.FillColor(4, 8, 12, 125);
 			self.labels.chain:draw({
@@ -468,11 +469,11 @@ local earlate = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			font.normal();
+			Font.Normal();
 
 			self.labels = {
-				early = cacheLabel('EARLY', 36),
-				late = cacheLabel('LATE', 36),
+				early = Label.New('EARLY', 36),
+				late = Label.New('LATE', 36),
 			};
 		end
 	end,
@@ -509,7 +510,7 @@ local earlate = {
 		gfx.Translate(x, y);
 
 		gfx.BeginPath();
-		align.middle();
+		FontAlign.Middle();
 
 		if (self.isLate) then
 			gfx.FillColor(150, 150, 150, 100);
@@ -550,15 +551,15 @@ local gauge = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			font.normal();
+			Font.Normal();
 
 			self.labels = {
-				effective = cacheLabel('EFFECTIVE RATE', 24),
-				excessive = cacheLabel('EXCESSIVE RATE', 24),
+				effective = Label.New('EFFECTIVE RATE', 24),
+				excessive = Label.New('EXCESSIVE RATE', 24),
 			};
 
-			font.number();
-			self.labels.percentage = cacheLabel('0', 24);
+			Font.Number();
+			self.labels.percentage = Label.New('0', 24);
 
 			self.labels.h = self.labels.effective.h;
 		end
@@ -578,7 +579,7 @@ local gauge = {
 
 		self.alpha = math.abs(1 * math.cos(self.timer * 2));
 
-		font.number();
+		Font.Number();
 		self.labels.percentage:update({
 			new = string.format(format, math.floor(gameplay.gauge * 100))
 		});
@@ -607,7 +608,7 @@ local gauge = {
 		gfx.Fill();
 
 		gfx.BeginPath();
-		fill.white((introAlpha / 5) * self.alpha)
+		Fill.White((introAlpha / 5) * self.alpha)
 		gfx.Rect(0, height, 18, -(height * gameplay.gauge));
 		gfx.Fill();
 
@@ -620,7 +621,7 @@ local gauge = {
 		gfx.Stroke();
 
 		gfx.BeginPath();
-		fill.white(introAlpha);
+		Fill.White(introAlpha);
 
 		if (gameplay.gaugeType == 0) then
 			gfx.Rect(0, height * 0.3, 18, 3);
@@ -631,12 +632,12 @@ local gauge = {
 		gfx.Fill();
 
 		gfx.BeginPath();
-		align.right();
+		FontAlign.Right();
 		self.labels.percentage:draw({
 			x = -6,
 			y = height - (height * gameplay.gauge) - 14,
 			a = introAlpha,
-			color = 'white',
+			color = 'White',
 
 		});
 
@@ -644,20 +645,20 @@ local gauge = {
 		gfx.Rotate(90);
 
 		if (gameplay.gaugeType == 0) then
-			align.right();
+			FontAlign.Right();
 			self.labels.effective:draw({
 				x = height + 3,
 				y = -self.labels.h - 26,
 				a = introAlpha,
-				color = 'white',
+				color = 'White',
 			});
 		else
-			align.left();
+			FontAlign.Left();
 			self.labels.excessive:draw({
 				x = -4,
 				y = -self.labels.h - 26,
 				a = introAlpha,
-				color = 'white',
+				color = 'White',
 			});
 		end
 
@@ -674,45 +675,45 @@ local practice = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			font.medium();
+			Font.Medium();
 
 			self.labels = {
 				hitDelta = {
-					label = cacheLabel('MEAN HIT DELTA', 18)
+					label = Label.New('MEAN HIT DELTA', 18)
 				},
 				miss = {
-					label = cacheLabel('MISS', 18)
+					label = Label.New('MISS', 18)
 				},
 				mission = {
-					label = cacheLabel('MISSION', 24),
-					description = cacheLabel('', 24)
+					label = Label.New('MISSION', 24),
+					description = Label.New('', 24)
 				},
 				near = {
-					label = cacheLabel('NEAR', 18)
+					label = Label.New('NEAR', 18)
 				},
 				passRate = {
-					label = cacheLabel('PASS RATE', 24)
+					label = Label.New('PASS RATE', 24)
 				},
-				previousRun = cacheLabel('PREVIOUS PLAY', 24),
+				previousRun = Label.New('PREVIOUS PLAY', 24),
 				score = {
-					label = cacheLabel('SCORE', 18)
+					label = Label.New('SCORE', 18)
 				},
 			};
 
-			font.normal();
+			Font.Normal();
 
-			self.labels.practiceMode = cacheLabel('PRACTICE MODE', 36);
+			self.labels.practiceMode = Label.New('PRACTICE MODE', 36);
 
-			font.number();
+			Font.Number();
 
-			self.labels.hitDelta.plusMinus = cacheLabel('±', 24)
-			self.labels.hitDelta.mean = cacheLabel('0', 24);
-			self.labels.hitDelta.meanAbs = cacheLabel('0', 24);
-			self.labels.miss.value = cacheLabel('0', 24);
-			self.labels.near.value = cacheLabel('0', 24);
-			self.labels.passRate.ratio = cacheLabel('0', 24);
-			self.labels.passRate.value = cacheLabel('0', 24);
-			self.labels.score.value = number.create({
+			self.labels.hitDelta.plusMinus = Label.New('±', 24)
+			self.labels.hitDelta.mean = Label.New('0', 24);
+			self.labels.hitDelta.meanAbs = Label.New('0', 24);
+			self.labels.miss.value = Label.New('0', 24);
+			self.labels.near.value = Label.New('0', 24);
+			self.labels.passRate.ratio = Label.New('0', 24);
+			self.labels.passRate.value = Label.New('0', 24);
+			self.labels.score.value = ScoreNumber.New({
 				isScore = true,
 				sizes = { 46, 36 },
 			});
@@ -723,11 +724,11 @@ local practice = {
 		self:setLabels();
 
 		gfx.BeginPath();
-		align.middle();
+		FontAlign.Middle();
 		self.labels.practiceMode:draw({
 			x = scaledW / 2,
 			y = scaledH / 60,
-			color = 'white',
+			color = 'White',
 		});
 
 		if (not self.practicing) then return end
@@ -739,12 +740,12 @@ local practice = {
 		gfx.Translate(scaledW / 100, scaledH / 3);
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 
 		self.labels.mission.label:draw({
 			x = 0,
 			y = y,
-			color = 'normal',
+			color = 'Normal',
 		});
 
 		y = y + self.labels.mission.label.h * 1.4;
@@ -752,7 +753,7 @@ local practice = {
 		self.labels.mission.description:draw({
 			x = 0,
 			y = y,
-			color = 'white',
+			color = 'White',
 			maxWidth = scaledW / 4,
 		});
 
@@ -762,7 +763,7 @@ local practice = {
 			self.labels.previousRun:draw({
 				x = 1,
 				y = y,
-				color = 'normal',
+				color = 'Normal',
 			});
 
 			y = y + (self.labels.previousRun.h * 1.5);
@@ -770,7 +771,7 @@ local practice = {
 			self.labels.score.label:draw({
 				x = 1,
 				y = y,
-				color = 'normal',
+				color = 'Normal',
 			});
 
 			y = y + self.labels.score.label.h;
@@ -787,13 +788,13 @@ local practice = {
 			self.labels.near.label:draw({
 				x = 0,
 				y = y,
-				color = 'normal',
+				color = 'Normal',
 			 });
 
 			self.labels.miss.label:draw({
 				x = self.labels.near.label.w * 2,
 				y = y,
-				color = 'normal',
+				color = 'Normal',
 			});
 
 			y = y + (self.labels.near.label.h * 1.25);
@@ -801,13 +802,13 @@ local practice = {
 			self.labels.near.value:draw({
 				x = 0,
 				y = y,
-				color = 'white',
+				color = 'White',
 			});
 
 			self.labels.miss.value:draw({
 				x = self.labels.near.label.w * 2,
 				y = y,
-				color = 'white',
+				color = 'White',
 			});
 
 			y = y + (self.labels.score.value.labels[1].h * 0.75);
@@ -815,7 +816,7 @@ local practice = {
 			self.labels.hitDelta.label:draw({
 				x = 0,
 				y = y,
-				color = 'normal',
+				color = 'Normal',
 			});
 
 			y = y + (self.labels.hitDelta.label.h * 1.25);
@@ -823,13 +824,13 @@ local practice = {
 			self.labels.hitDelta.mean:draw({
 				x = 0,
 				y = y,
-				color = 'white',
+				color = 'White',
 			});
 
 			self.labels.hitDelta.plusMinus:draw({
 				x = self.labels.hitDelta.mean.w + 10,
 				y = y,
-				color = 'normal',
+				color = 'Normal',
 			});
 
 			self.labels.hitDelta.meanAbs:draw({
@@ -838,7 +839,7 @@ local practice = {
 					+ self.labels.hitDelta.plusMinus.w
 					+ 8,
 				y = y,
-				color = 'white',
+				color = 'White',
 			});
 
 			y = y + (self.labels.mission.description.h * 3);
@@ -846,7 +847,7 @@ local practice = {
 			self.labels.passRate.label:draw({
 				x = 0,
 				y = y,
-				color = 'normal',
+				color = 'Normal',
 			});
 
 			y = y + (self.labels.passRate.label.h * 1.5);
@@ -854,13 +855,13 @@ local practice = {
 			self.labels.passRate.value:draw({
 				x = 0,
 				y = y,
-				color = 'white',
+				color = 'White',
 			});
 
 			self.labels.passRate.ratio:draw({
 				x = self.labels.passRate.value.w + 16,
 				y = y,
-				color = 'normal',
+				color = 'Normal',
 			});
 		end
 
@@ -870,7 +871,7 @@ local practice = {
 
 local scoreInfo = {
 	current = 0,
-	score = number.create({
+	score = ScoreNumber.New({
 		isScore = true,
 		sizes = { 100, 80 }
 	}),
@@ -878,16 +879,16 @@ local scoreInfo = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			font.normal();
+			Font.Normal();
 		
 			self.labels = {
-				score = cacheLabel('SCORE', 48),
+				score = Label.New('SCORE', 48),
 				maxChain = {
-					label = cacheLabel('MAXIMUM CHAIN', 24),
+					label = Label.New('MAXIMUM CHAIN', 24),
 				},
 			};
 			
-			self.labels.maxChain.value = number.create({
+			self.labels.maxChain.value = ScoreNumber.New({
 				digits = 4,
 				isScore = false,
 				sizes = { 24 },
@@ -912,13 +913,13 @@ local scoreInfo = {
 		gfx.Translate(x + ((scaledW / 4) * (introShift ^ 4)), y);
 	
 		gfx.BeginPath();
-		align.right();
+		FontAlign.Right();
 
 		self.labels.score:draw({
 			x = -(self.labels.score.w * 1.675) + 2,
 			y = -(self.score.labels[1].h * 0.35) + 4,
 			a = introAlpha,
-			color = 'normal',
+			color = 'Normal',
 		});
 
 		self.score:draw({
@@ -932,20 +933,20 @@ local scoreInfo = {
 		gfx.Translate(-3, self.score.labels[1].h - 6);
 
 		gfx.BeginPath();
-		align.right();
+		FontAlign.Right();
 
 		self.labels.maxChain.label:draw({
 			x = 0,
 			y = 0,
 			a = introAlpha,
-			color = 'white',
+			color = 'White',
 		});
 
 		self.labels.maxChain.value:draw({
 			x = -(self.labels.maxChain.label.w * 1.25 + 4),
 			y = 0,
 			alpha = introAlpha,
-			color = 'normal'
+			color = 'Normal'
 		});
 		
 		gfx.Restore();
@@ -969,54 +970,54 @@ local songInfo = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			font.jp();
+			Font.JP();
 
 			self.labels = {
-				artist = cacheLabel(string.upper(gameplay.artist), 24),
+				artist = Label.New(string.upper(gameplay.artist), 24),
 				bpm = {},
 				hidden = {},
 				hispeed = {},
 				sudden = {},
-				title = cacheLabel(string.upper(gameplay.title), 30)
+				title = Label.New(string.upper(gameplay.title), 30)
 			};
 
-			font.normal();
+			Font.Normal();
 
-			self.labels.bpm.label = cacheLabel('BPM', 24);
-			self.labels.hispeed.label = cacheLabel('HI-SPEED', 24);
+			self.labels.bpm.label = Label.New('BPM', 24);
+			self.labels.hispeed.label = Label.New('HI-SPEED', 24);
 			self.labels.hidden = {
 				cutoff = {
-					label = cacheLabel('HIDDEN CUTOFF', 24),
+					label = Label.New('HIDDEN CUTOFF', 24),
 				},
 				fade = {
-					label = cacheLabel('HIDDEN FADE', 24),
+					label = Label.New('HIDDEN FADE', 24),
 				},
 			};
 			self.labels.sudden = {
 				cutoff = {
-					label = cacheLabel('SUDDEN CUTOFF', 24),
+					label = Label.New('SUDDEN CUTOFF', 24),
 				},
 				fade = {
-					label = cacheLabel('SUDDEN FADE', 24),
+					label = Label.New('SUDDEN FADE', 24),
 				},
 			};
 
 			self.stats.y = (self.labels.bpm.label.h * 1.375) - 1;
 
-			font.number();
+			Font.Number();
 
-			self.labels.bpm.value = cacheLabel('', 24);
-			self.labels.hispeed.adjust = cacheLabel('', 24);
-			self.labels.hispeed.value = cacheLabel('', 24);
-			self.labels.hidden.cutoff.value = cacheLabel('', 24);
-			self.labels.hidden.fade.value = cacheLabel('', 24);
-			self.labels.sudden.cutoff.value = cacheLabel('', 24);
-			self.labels.sudden.fade.value = cacheLabel('', 24);
+			self.labels.bpm.value = Label.New('', 24);
+			self.labels.hispeed.adjust = Label.New('', 24);
+			self.labels.hispeed.value = Label.New('', 24);
+			self.labels.hidden.cutoff.value = Label.New('', 24);
+			self.labels.hidden.fade.value = Label.New('', 24);
+			self.labels.sudden.cutoff.value = Label.New('', 24);
+			self.labels.sudden.fade.value = Label.New('', 24);
 		end
 	end,
 
 	updateLabels = function(self)
-		font.number();
+		Font.Number();
 
 		difficulties.level:update({ new = gameplay.level });
 
@@ -1091,21 +1092,21 @@ local songInfo = {
 		gfx.Stroke();
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 		difficulties[gameplay.difficulty + 1]:draw({
 			x = -1,
 			y = self.jacket.h + 6,
 			a = 255 * self.timers.fade,
-			color = 'white',
+			color = 'White',
 		});
 
 		gfx.BeginPath();
-		align.right();
+		FontAlign.Right();
 		difficulties.level:draw({
 			x = self.jacket.w + 2,
 			y = self.jacket.h + 6,
 			a = 255 * self.timers.fade,
-			color = 'normal',
+			color = 'Normal',
 		});
 
 		self:drawDetails(
@@ -1119,7 +1120,7 @@ local songInfo = {
 		local y = -10;
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 
 		if (self.labels.title.w > length) then
 			self.timers.title = self.timers.title + deltaTime;
@@ -1131,7 +1132,7 @@ local songInfo = {
 				x - 2,
 				y + 2,
 				scalingFactor,
-				'white',
+				'White',
 				introAlpha
 			);
 		else
@@ -1139,7 +1140,7 @@ local songInfo = {
 				x = x - 2,
 				y = y + 2,
 				a = introAlpha,
-				color = 'white',
+				color = 'White',
 			});
 		end
 
@@ -1155,7 +1156,7 @@ local songInfo = {
 				x - 1,
 				y,
 				scalingFactor,
-				'normal',
+				'Normal',
 				introAlpha
 			);
 		else
@@ -1163,19 +1164,19 @@ local songInfo = {
 				x = x - 1,
 				y = y,
 				a = introAlpha,
-				color = 'normal',
+				color = 'Normal',
 			});
 		end
 
 		y = y + (self.labels.artist.h * 1.75);
 
 		gfx.BeginPath();
-		fill.white(introAlpha / 5);
+		Fill.White(introAlpha / 5);
 		gfx.Rect(x, y - 2, length, 8);
 		gfx.Fill();
 
 		gfx.BeginPath();
-		fill.normal(introAlpha);
+		Fill.Normal(introAlpha);
 		gfx.Rect(x, y - 2, length * gameplay.progress, 8);
 		gfx.Rect(x + (length * gameplay.progress), y - 8, 2, 20);
 		gfx.Fill();
@@ -1184,20 +1185,20 @@ local songInfo = {
 		y = y + (self.labels.artist.h * 0.725);
 
 		gfx.BeginPath();
-		align.right();
+		FontAlign.Right();
 	
 		self.labels.bpm.value:draw({
 			x = x,
 			y = y,
 			a = introAlpha,
-			color = 'normal',
+			color = 'Normal',
 		});
 
 		self.labels.bpm.label:draw({
 			x = x + self.stats.x,
 			y = y - 1,
 			a = introAlpha,
-			color = 'white',
+			color = 'White',
 		});
 
 		if (game.GetButton(game.BUTTON_STA) and showAdjustments) then
@@ -1206,66 +1207,66 @@ local songInfo = {
 					x = x,
 					y = y + self.stats.y,
 					a = introAlpha,
-					color = 'normal',
+					color = 'Normal',
 				});
 				self.labels.sudden.cutoff.value:draw({
 					x = x,
 					y = y + self.stats.y * 2,
 					a = introAlpha,
-					color = 'normal',
+					color = 'Normal',
 				});
 
 				self.labels.hidden.cutoff.label:draw({
 					x = x + self.stats.x,
 					y = y + self.stats.y,
 					a = introAlpha,
-					color = 'white',
+					color = 'White',
 				});
 				self.labels.sudden.cutoff.label:draw({
 					x = x + self.stats.x,
 					y = y + (self.stats.y * 2),
 					a = introAlpha,
-					color = 'white',
+					color = 'White',
 				});
 			elseif (game.GetButton(game.BUTTON_BTC)) then
 				self.labels.hidden.fade.value:draw({
 					x = x,
 					y = y + self.stats.y,
 					a = introAlpha,
-					color = 'normal',
+					color = 'Normal',
 				});
 				self.labels.sudden.fade.value:draw({
 					x = x,
 					y = y + self.stats.y * 2,
 					a = introAlpha,
-					color = 'normal',
+					color = 'Normal',
 				});
 
 				self.labels.hidden.fade.label:draw({
 					x = x + self.stats.x,
 					y = y + self.stats.y,
 					a = introAlpha,
-					color = 'white',
+					color = 'White',
 				});
 				self.labels.sudden.fade.label:draw({
 					x = x + self.stats.x,
 					y = y + (self.stats.y * 2),
 					a = introAlpha,
-					color = 'white',
+					color = 'White',
 				});
 			else
 				self.labels.hispeed.adjust:draw({
 					x = x + self.stats.x,
 					y = y + self.stats.y,
 					a = introAlpha,
-					color = 'white',
+					color = 'White',
 				});
 
 				self.labels.hispeed.value:draw({
 					x = x,
 					y = y + self.stats.y,
 					a = introAlpha,
-					color = 'normal',
+					color = 'Normal',
 				});
 			end
 		else
@@ -1273,14 +1274,14 @@ local songInfo = {
 				x = x + self.stats.x,
 				y = y + self.stats.y,
 				a = introAlpha,
-				color = 'white',
+				color = 'White',
 			});
 
 			self.labels.hispeed.value:draw({
 				x = x,
 				y = y + self.stats.y,
 				a = introAlpha,
-				color = 'normal',
+				color = 'Normal',
 			});
 		end
 
@@ -1324,29 +1325,29 @@ local userInfo = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			font.medium();
+			Font.Medium();
 
 			self.labels = {
-				player = cacheLabel('PLAYER', 18),
-				scoreDifference = cacheLabel('SCORE DIFFERENCE', 18),
+				player = Label.New('PLAYER', 18),
+				scoreDifference = Label.New('SCORE DIFFERENCE', 18),
 			};
 
-			font.normal();
+			Font.Normal();
 
 			if (gameplay.autoplay) then
-				self.labels.username = cacheLabel('AUTOPLAY', 36);
+				self.labels.username = Label.New('AUTOPLAY', 36);
 			else
-				self.labels.username = cacheLabel(string.upper(username), 36);
+				self.labels.username = Label.New(string.upper(username), 36);
 			end
 
-			font.number();
+			Font.Number();
 
 			self.labels.prefixes = {
-				minus = cacheLabel('-', 46),
-				plus = cacheLabel('+', 36),
+				minus = Label.New('-', 46),
+				plus = Label.New('+', 36),
 			};
 
-			self.labels.difference = number.create({
+			self.labels.difference = ScoreNumber.New({
 				isScore = true,
 				sizes = { 46, 36 }
 			});
@@ -1371,13 +1372,13 @@ local userInfo = {
 		gfx.Translate(initialX - ((scaledW / 40) * (introShift ^ 4)), initialY);
 
 		gfx.BeginPath();
-		align.left();
+		FontAlign.Left();
 
 		self.labels.player:draw({
 			x = 0,
 			y = y,
 			a = 255 * self.timer,
-			color = 'normal',
+			color = 'Normal',
 		});
 
 		y = y + (self.labels.player.h * 1.125);
@@ -1386,7 +1387,7 @@ local userInfo = {
 			x = 0,
 			y = y,
 			a = 255 * self.timer,
-			color = 'white',
+			color = 'White',
 		});
 
 		if (showScoreDifference and gameplay.scoreReplays[1]) then
@@ -1398,13 +1399,13 @@ local userInfo = {
 			self.labels.difference:setInfo({ value = math.abs(difference) });
 
 			gfx.BeginPath();
-			align.left();
+			FontAlign.Left();
 
 			self.labels.scoreDifference:draw({
 				x = 0,
 				y = y,
 				a = 255 * self.timer,
-				color = 'normal',
+				color = 'Normal',
 			});
 
 			y = y + self.labels.scoreDifference.h;
@@ -1414,7 +1415,7 @@ local userInfo = {
 				y = y + ((prefix == 'plus' and (self.labels.prefixes.plus.h * 0.125))
 				or -4),
 				a = 255 * self.timer,
-				color = 'white',
+				color = 'White',
 			});
 
 			self.labels.difference:draw({
@@ -1497,17 +1498,17 @@ render_outro = function(deltaTime, clearStatus)
 
 	if (not gameplay.demoMode) then
 		gfx.BeginPath();
-		fill.black(150 * math.min(outroTimer, 1));
+		Fill.Black(150 * math.min(outroTimer, 1));
 		gfx.FastRect(0, 0, scaledW, scaledH);
 		gfx.Fill();
 
 		gfx.BeginPath();
-		align.middle();
+		FontAlign.Middle();
 		clearStates[clearStatus]:draw({
 			x = scaledW / 2,
 			y = scaledH / 2,
 			a = 255 * math.min(outroTimer, 1),
-			color = 'white',
+			color = 'White',
 		});
 
 		outroTimer = outroTimer + deltaTime;
@@ -1593,13 +1594,13 @@ local scoreboard = {
 			self.labels = {};
 	
 			for i, user in ipairs(users) do
-				font.normal();
+				Font.Normal();
 	
 				self.labels[i] = {
-					name = cacheLabel('NAME', 24),
+					name = Label.New('NAME', 24),
 				};
 	
-				self.labels[i].score = number.create({
+				self.labels[i].score = ScoreNumber.New({
 					isScore = true,
 					sizes = { 46, 36 },
 				});
@@ -1621,20 +1622,20 @@ local scoreboard = {
 		for i, user in ipairs(users) do
 			local alpha = ((user.id == gameplay.user_id) and 255) or 150;
 
-			font.normal();
+			Font.Normal();
 
 			self.labels[i].name:update({ new = string.upper(user.name) });
 
 			self.labels[i].score:setInfo({ value = user.score });
 
 			gfx.BeginPath();
-			align.left();
+			FontAlign.Left();
 	
 			self.labels[i].name:draw({
 				x = 1,
 				y = y,
 				a = alpha,
-				color = 'normal',
+				color = 'Normal',
 			});
 	
 			y = y + self.labels[i].name.h;
@@ -1667,7 +1668,7 @@ end
 practice_start = function(type, threshold, description)
 	practice.practicing = true;
 
-	font.normal();
+	Font.Normal();
 
 	practice.labels.mission.description:update({
 		new = string.upper(description),
@@ -1675,7 +1676,7 @@ practice_start = function(type, threshold, description)
 end
 
 practice_end_run = function(playCount, passCount, passed, scoreInfo)
-	font.number();
+	Font.Number();
 	
 	practice.counts.plays = playCount;
 	practice.counts.passes = passCount;

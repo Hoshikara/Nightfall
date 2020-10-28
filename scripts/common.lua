@@ -2,75 +2,151 @@ local _ = require('lib/luadash');
 
 gfx.LoadSkinFont('DFMGM.ttf');
 
-align = {
-  center = function()
-    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_TOP);
-  end,
-
-  left = function()
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
-  end,
-
-  middle = function()
-    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE);
-  end,
-
-  right = function()
-    gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
+Ease = {
+  OutQuad = function(progress)
+    return 1 - (1 - progress) * (1 - progress);
   end,
 };
 
-fill = {
-  black = function(alpha)
+Fill = {
+  Black = function(alpha)
     gfx.FillColor(0, 0, 0, (alpha and math.floor(alpha)) or 255);
   end,
 
-  dark = function(alpha)
+  Dark = function(alpha)
     gfx.FillColor(4, 8, 12, (alpha and math.floor(alpha)) or 255);
   end,
 
-  normal = function(alpha)
-    gfx.FillColor(60, 110, 160, (alpha and math.floor(alpha)) or 255);
-  end,
-
-  light = function(alpha)
+  Light = function(alpha)
     gfx.FillColor(80, 130, 180, (alpha and math.floor(alpha)) or 255);
   end,
 
-  white = function(alpha)
+  Normal = function(alpha)
+    gfx.FillColor(60, 110, 160, (alpha and math.floor(alpha)) or 255);
+  end,
+
+  White = function(alpha)
     gfx.FillColor(255, 255, 255, (alpha and math.floor(alpha)) or 255);
   end,
 };
 
-font = {
-  bold = function()
+Font = {
+  Bold = function()
     gfx.LoadSkinFont('GothamBold.ttf');
   end,
 
-  jp = function()
+  JP = function()
     gfx.LoadSkinFont('DFMGM.ttf');
   end,
 
-  medium = function()
+  Medium = function()
     gfx.LoadSkinFont('GothamMedium.ttf');
   end,
 
-  normal = function()
+  Mono = function()
+    gfx.LoadSkinFont('SFMonoMedium.ttf');
+  end,
+
+  Normal = function()
     gfx.LoadSkinFont('GothamBook.ttf');
   end,
 
-  number = function()
+  Number = function()
     gfx.LoadSkinFont('DigitalSerialBold.ttf');
   end,
 };
 
-unpack = function(table, i)
-  i = i or 1;
+FontAlign = {
+  Center = function()
+    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_TOP);
+  end,
 
-	if (table[i] ~= nil) then
-		return table[i], unpack(table, i + 1);
-	end
-end
+  Left = function()
+    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
+  end,
+
+  Middle = function()
+    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE);
+  end,
+
+  Right = function()
+    gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
+  end,
+};
+
+Image = {
+  New = function(path)
+    local image = gfx.CreateSkinImage(path, 0);
+    local w, h = gfx.ImageSize(image);
+  
+    return {
+      image = image,
+      w = w,
+      h = h,
+  
+      draw = function(self, params)
+        local a = params.a or 1;
+        local w = params.w or self.w;
+        local h = params.h or self.h;
+  
+        w = (params.s and (params.s * w)) or w;
+        h = (params.s and (params.s * h)) or h;
+    
+        local x = (params.centered and (params.x - (w / 2))) or params.x;
+        local y = (params.centered and (params.y - (h / 2))) or params.y;
+  
+        gfx.BeginPath();
+  
+        if (params.blendOp) then
+          gfx.GlobalCompositeOperation(params.blendOp);
+        end
+  
+        gfx.ImageRect(x, y, w, h, self.image, a, 0);
+      end
+    };
+  end,
+};
+
+Label = {
+  New = function(str, size)
+    local label = gfx.CreateLabel(str, size, 0);
+    local w, h = gfx.LabelSize(label);
+  
+    return {
+      label = label,
+      size = size,
+      w = w,
+      h = h,
+  
+      draw = function(self, params);
+        local x = params.x or 0;
+        local y = params.y or 0;
+        local a = params.a or 255;
+        local color = params.color or 'White';
+        local maxWidth = params.maxWidth or -1;
+  
+        if (params.override) then
+          gfx.DrawLabel(self.label, x, y, maxWidth);
+        else
+          Fill.Dark(a * 0.5);
+          gfx.DrawLabel(self.label, x + 1, y + 1, maxWidth);
+      
+          Fill[color](a);
+          gfx.DrawLabel(self.label, x, y, maxWidth);
+        end
+      end,
+  
+      update = function(self, params)
+        local new = params.new or '';
+        local size = params.size or self.size;
+  
+        gfx.UpdateLabel(self.label, new, size, 0);
+  
+        self.w, self.h = gfx.LabelSize(self.label);
+      end
+    };
+  end,
+};
 
 logInfo = function(tbl)
   local length = 0;
@@ -85,15 +161,15 @@ logInfo = function(tbl)
   gfx.Translate(5, 3);
 
   gfx.BeginPath();
-  gfx.FillColor(0, 255, 0, 50);
-  gfx.Rect(-100, -6, 5000, (y * length) + 9);
+  gfx.FillColor(0, 0, 0, 200);
+  gfx.Rect(-100, -6, 720, (y * length) + 9);
   gfx.Fill();
 
   gfx.BeginPath();
-  gfx.LoadSkinFont('FiraCode.ttf');
   gfx.FontSize(30);
-  align.left();
-  fill.white();
+  FontAlign.Left();
+  Fill.White();
+  Font.Mono();
 
   for k, v in pairs(tbl) do
     gfx.Text(string.format('%s: %s', k, v), 0, y * inc);
@@ -112,86 +188,6 @@ loadFrames = function(path, count)
   end
 
   return frames;
-end
-
-cacheImage = function(path)
-  local image = gfx.CreateSkinImage(path, 0);
-  local w, h = gfx.ImageSize(image);
-
-  return {
-    image = image,
-    w = w,
-    h = h,
-
-    draw = function(self, params)
-      local a = params.a or 1;
-      local w = params.w or self.w;
-      local h = params.h or self.h;
-
-      w = (params.s and (params.s * w)) or w;
-      h = (params.s and (params.s * h)) or h;
-  
-      local x = (params.centered and (params.x - (w / 2))) or params.x;
-      local y = (params.centered and (params.y - (h / 2))) or params.y;
-
-      gfx.BeginPath();
-
-      if (params.blendOp) then
-        gfx.GlobalCompositeOperation(params.blendOp);
-      end
-
-      gfx.ImageRect(x, y, w, h, self.image, a, 0);
-    end
-  };
-end
-
-cacheLabel = function(str, size)
-  local label = gfx.CreateLabel(str, size, 0);
-  local w, h = gfx.LabelSize(label);
-
-  return {
-    label = label,
-    size = size,
-    w = w,
-    h = h,
-
-    draw = function(self, params);
-      local x = params.x or 0;
-      local y = params.y or 0;
-      local a = params.a or 255;
-      local color = params.color or 'white';
-      local maxWidth = params.maxWidth or -1;
-
-      if (params.override) then
-        gfx.DrawLabel(self.label, x, y, maxWidth);
-      else
-        fill.dark(a * 0.5);
-        gfx.DrawLabel(self.label, x + 1, y + 1, maxWidth);
-    
-        fill[color](a);
-        gfx.DrawLabel(self.label, x, y, maxWidth);
-      end
-    end,
-
-    update = function(self, params)
-      local new = params.new or '';
-      local size = params.size or self.size;
-
-      gfx.UpdateLabel(self.label, new, size, 0);
-
-      self.w, self.h = gfx.LabelSize(self.label);
-    end
-  };
-end
-
-createTable = function(size, initial)
-  local table = {};
-
-  for i = 1, size do
-    table[i] = initial;
-  end
-
-  return table;
 end
 
 drawCenteredImage = function(params)
@@ -247,17 +243,29 @@ drawErrorPrompt = function(message)
   gfx.Save();
 
   gfx.BeginPath();
-  fill.black(200);
-  gfx.FastRect(0, 0, resX, 70);
-  gfx.Fill();
-
-  gfx.LoadSkinFont('FiraCode.ttf');
-  gfx.BeginPath();
-  align.middle();
-  fill.white();
+  gfx.FillColor(255, 55, 55, 255);
   gfx.FontSize(24);
+  FontAlign.Middle();
+  Font.Mono();
   gfx.FastText(message, resX / 2, 20);
-  gfx.FastText('Please update your game or contact me on Discord: Hoshikara#5973', resX / 2, 50);
+  gfx.FastText('PLEASE UPDATE YOUR GAME OR CONTACT ME ON DISCORD: Hoshikara#5973', resX / 2, 50);
+
+  gfx.Restore();
+end
+
+drawResolutionWarning = function(x, y)
+  gfx.Save();
+
+  gfx.BeginPath();
+  gfx.FillColor(255, 55, 55, 255);
+  gfx.FontSize(24);
+  FontAlign.Left();
+  Font.Mono();
+  gfx.Text(
+    'NON 16:9 RESOLUTION DETECTED -- SKIN ELEMENTS MAY NOT RENDER AS INTENDED. ENTER FULLSCREEN WITH  [ALT] + [ENTER]  IF THIS IS A MISTAKE',
+    x, 
+    y
+  );
 
   gfx.Restore();
 end
@@ -272,7 +280,7 @@ drawScrollingLabel = function(timer, label, maxWidth, x, y, scale, color, a)
   gfx.BeginPath();
   gfx.Scissor((x + 2) * scale, y * scale, maxWidth, label['h'] * 1.25);
 
-  align.left();
+  FontAlign.Left();
 
   label:draw({
     x = x - (phase * labelX),
