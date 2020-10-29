@@ -3,7 +3,6 @@ local Cursor = require('common/cursor');
 
 local controls = require('titlescreen/controls');
 local dialog = require('layout/dialog');
-local easing = require('lib/easing');
 
 controls:initializeAll();
 

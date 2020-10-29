@@ -1,3 +1,5 @@
+local help = require('helpers/songwheel');
+
 local New = function(params)
   return {
     alpha = 0,
@@ -32,24 +34,40 @@ local New = function(params)
 
     setPosition = function(self, params)
       local current = get(params, 'current', 1);
-      local height = get(params, 'height', self.h);
-      local index = get(params, 'total', 1);
-      local total = get(params, 'total', 1);
 
-      if ((current % total) > 0) then
-        index = current % total;
-      end
+      if (get(params, 'grid', false)) then
+        local column, row = help.getPosition(current);
 
-      if (get(params, 'vertical', false)) then
-        self.y.current = (height + self.margin) * (index - 1);
+        self.x.current = (self.h + self.margin) * row;
+        self.y.current = (self.h + self.margin) * column;
       else
-        self.x.current = (self.w + self.margin) * (index - 1);
+        local index = get(params, 'total', 1);
+        local total = get(params, 'total', 1);
+
+        if ((current % total) > 0) then
+          index = current % total;
+        end
+
+        if (get(params, 'vertical', false)) then
+          local height = get(params, 'height', self.h);
+
+          self.y.current = (height + self.margin) * (index - 1);
+        else
+          self.x.current = (self.w + self.margin) * (index - 1);
+        end
       end
 
       self.timer.ease = 0;
     end,
 
     render = function(self, deltaTime, params)
+      local size = get(params, 'size', 1);
+      local stroke = get(params, 'stroke', 1);
+      local changeX = 0;
+      local changeY = 0;
+      local offsetX = 0;
+      local offsetY = 0;
+
       if (self.timer.ease < 1) then
         self.timer.ease = math.min(self.timer.ease + (deltaTime * 8), 1);
       end
@@ -63,41 +81,39 @@ local New = function(params)
         self.alpha = math.abs(0.85 * math.cos(self.timer.phase * 5)) + 0.15;
       end
 
+      local ease = Ease.OutQuad(self.timer.ease);
+
+      if (get(params, 'grid', false)) then
+        changeX = (self.x.current - self.x.previous) * ease;
+        changeY = (self.y.current - self.y.previous) * ease;
+        offsetX = self.x.previous + changeX;
+        offsetY = self.y.previous + changeY;
+
+        self.x.previous = offsetX;
+        self.y.previous = offsetY;
+      elseif (get(params, 'vertical', false)) then
+        changeY = (self.y.current - self.y.previous) * ease;
+        offsetY = self.y.previous + changeY;
+
+        self.y.previous = offsetY;
+      else
+        changeX = (self.x.current - self.x.previous) * ease;
+        offsetX = self.x.previous + changeX;
+
+        self.x.previous = offsetX;
+      end
+
       gfx.Save();
 
-      if (params.vertical) then
-        local change = (self.y.current - self.y.previous)
-          * Ease.OutQuad(self.timer.ease);
-        local offset = self.y.previous + change;
-
-        self.y.previous = offset;
-
-        drawCursor({
-          w = self.w,
-          h = self.h,
-          x = self.x.base,
-          y = self.y.base + offset,
-          alpha = self.alpha,
-          size = params.size,
-          stroke = params.stroke,
-        });
-      else
-        local change = (self.x.current - self.x.previous)
-          * Ease.OutQuad(self.timer.ease);
-        local offset = self.x.previous + change;
-
-        self.x.previous = offset;
-
-        drawCursor({
-          w = self.w,
-          h = self.h,
-          x = self.x.base + offset,
-          y = self.y.base,
-          alpha = self.alpha,
-          size = params.size,
-          stroke = params.stroke,
-        });
-      end
+      drawCursor({
+        w = self.w,
+        h = self.h,
+        x = self.x.base + offsetX,
+        y = self.y.base + offsetY,
+        alpha = self.alpha,
+        size = size,
+        stroke = stroke,
+      });
 
       gfx.Restore();
     end,

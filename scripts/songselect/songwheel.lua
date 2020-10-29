@@ -1,8 +1,15 @@
+game.LoadSkinSample('click_difficulty');
+game.LoadSkinSample('click_song');
+
 local CONSTANTS = require('constants/songwheel');
 
+local List = require('common/list');
+local Cursor = require('common/cursor');
 local ScoreNumber = require('common/scorenumber');
+local Scrollbar = require('common/scrollbar');
+local SearchBar = require('common/searchbar');
 
-local easing = require('lib/easing');
+local help = require('helpers/songwheel');
 local volforce = require('songselect/volforce');
 
 local background = Image.New('bg.png');
@@ -11,12 +18,10 @@ local controlsShortcut = game.GetSkinSetting('controlsShortcut') or false;
 
 local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
 
-local previousDifficultyIndex = 1;
-local previousSongIndex = 1;
-
-game.LoadSkinSample('click_difficulty');
-game.LoadSkinSample('click_song');
-game.LoadSkinSample('woosh');
+local previousDifficulty = 1;
+local previousSong = 1;
+local selectedDifficulty = 1;
+local selectedSong = 1;
 
 local cache = { resX = 0, resY = 0 };
 
@@ -162,15 +167,8 @@ end
 
 local songInfo = {
   cache = { scaledW = 0, scaledH = 0 },
-  cursor = {
-    alpha = 0,
-    flickerTimer = 0,
-    pos = 0,
-    selected = 0,
-    timer = 0,
-    x = 0,
-    y = {},
-  },
+  cursor = Cursor.New(),
+  cursorIndex = { current = 0, previous = 0 },
   difficulties = nil,
   highScore = 0,
   images = {
@@ -212,13 +210,13 @@ local songInfo = {
     x = 0,
     y = 0,
   },
-  selectedDifficulty = 0,
-  selectedSongIndex = 0,
   scrollTimers = {
     artist = 0,
     effector = 0,
     title = 0,
   },
+  search = SearchBar.New(),
+  selectedDifficulty = 0,
 
   setSizes = function(self)
     if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
@@ -240,25 +238,35 @@ local songInfo = {
       self.padding.y.half = self.padding.y.full / 2;
       self.padding.y.quarter = self.padding.y.full / 4;
 
-      self.cursor.x = self.padding.x.double + self.jacketSize + self.padding.x.full - 6;
-      self.cursor.y = {};
-
       self.panel.innerWidth = self.panel.w - (self.padding.x.double * 2);
 
       self.labels.x = self.padding.x.double;
       self.labels.y = self.padding.y.double + self.jacketSize;
 
+      self.cursor:setSizes({
+        x = (scaledW / 20)
+          + self.padding.x.double
+          + self.jacketSize
+          + self.padding.x.full
+          + 14,
+        y = (scaledH / 20)
+          + self.padding.y.double
+          + self.labels.difficulty.h
+          - 14,
+        w = self.images.button.w - 20,
+        h = self.images.button.h - 20,
+        margin = (self.images.button.h / 5) + 20,
+      });
+
+      self.search:setSizes({
+        screenW = scaledW,
+        screenH = scaledH,
+        w = self.panel.w,
+      });
+
       self.cache.scaledW = scaledW;
       self.cache.scaledH = scaledH;
     end
-  end,
-
-  setDifficulty = function(self, newDifficulty)
-    if (self.selectedDifficulty ~= newDifficulty) then
-      self.cursor.flickerTimer = 0;
-    end
-
-    self.selectedDifficulty = newDifficulty;
   end,
 
   setLabels = function(self)
@@ -287,10 +295,6 @@ local songInfo = {
         self.labels[name] = Label.New(str, 18);
       end
     end
-  end,
-
-  setSongIndex = function(self, newSongIndex)
-    self.selectedSongIndex = newSongIndex;
   end,
 
   getDifficulty = function(self, difficulties, index)
@@ -496,7 +500,10 @@ local songInfo = {
   end,
 
   drawDifficulty = function(self, currentDifficulty, isSelected, y)
-    local x = self.cursor.x;
+    local x = self.padding.x.double
+      + self.jacketSize
+      + self.padding.x.full
+      + 4;
     local alpha = math.floor(255 * ((isSelected and 1) or 0.2));
 
     gfx.Save();
@@ -532,39 +539,11 @@ local songInfo = {
 
     gfx.Restore();
 
-    return (y + self.images.button.h + 6);
-  end,
-
-  drawCursor = function(self, deltaTime, y)
-    gfx.Save();
-
-    self.cursor.timer = self.cursor.timer + deltaTime;
-    self.cursor.flickerTimer = self.cursor.flickerTimer + deltaTime;
-
-    self.cursor.alpha = math.floor(self.cursor.flickerTimer * 30) % 2;
-    self.cursor.alpha = (self.cursor.alpha * 255) / 255;
-
-    if (self.cursor.flickerTimer >= 0.3) then
-      self.cursor.alpha = math.abs(0.8 * math.cos(self.cursor.timer * 5)) + 0.2;
-    end
-
-    self.cursor.pos = self.cursor.pos - (self.cursor.pos - y) * deltaTime * 36;
-
-    drawCursor({
-			x = self.cursor.x + 10,
-			y = self.cursor.pos + 10,
-			w = self.images.button.w - 20,
-			h = self.images.button.h - 20,
-      alpha = self.cursor.alpha,
-      size = 12,
-			stroke = 1.5,
-		});
-
-    gfx.Restore();
+    return self.images.button.h + (self.images.button.h / 5);
   end,
 
   drawSongInfoPanel = function(self, deltaTime)
-    local song = songwheel.songs[self.selectedSongIndex];
+    local song = songwheel.songs[selectedSong];
 
     gfx.Save();
 
@@ -601,26 +580,38 @@ local songInfo = {
 
     self:drawSongInfo(deltaTime, song.id, difficulty);
 
-    local difficultyY = self.padding.y.double + self.labels.difficulty.h - 24;
+    local y = self.padding.y.double + self.labels.difficulty.h - 24;
 
     for index = 1, 4 do
       local level = self:getDifficulty(song.difficulties, index);
       local isSelected = difficulty.difficulty == (index - 1);
 
       if (isSelected) then
-        self.cursor.selected = index;
+        self.cursorIndex.current = index;
       end
 
-      if (not self.cursor.y[index]) then
-        self.cursor.y[index] = difficultyY;
-      end
-
-      difficultyY = self:drawDifficulty(level, isSelected, difficultyY);
+      y = y + self:drawDifficulty(level, isSelected, y);
     end
 
-    self:drawCursor(deltaTime, self.cursor.y[self.cursor.selected]);
-    
     gfx.Restore();
+  end,
+
+  handleChange = function(self)
+    if (self.selectedDifficulty ~= selectedDifficulty) then
+      self.selectedDifficulty = selectedDifficulty;
+    end
+
+    if (self.cursorIndex.previous ~= self.cursorIndex.current) then
+      self.cursorIndex.previous = self.cursorIndex.current;
+
+      self.cursor:setPosition({
+        current = self.cursorIndex.current,
+        total = 4,
+        vertical = true,
+      });
+
+      self.cursor.timer.flicker = 0;
+    end
   end,
 
   render = function(self, deltaTime)
@@ -632,85 +623,86 @@ local songInfo = {
 
     self:drawSongInfoPanel(deltaTime);
 
+    self.cursor:render(deltaTime, {
+      size = 12,
+      stroke = 1.5,
+      vertical = true,
+    });
+
+    self:handleChange();
+
+    self.search:render(deltaTime, {
+      isActive = songwheel.searchInputActive,
+      searchText = songwheel.searchText,
+    });
+
     gfx.Restore();
   end
 };
 
 local songGrid = {
   cache = { scaledW = 0, scaledH = 0 },
-  cursor = {
-    alpha = 0,
-    animTimer = 0,
-    animTotal = 0.1,
-    displayPos = 0,
-    flickerTimer = 0,
-    pos = 0,
-    timer = 0,
-  },
-  easing = {
-    grid = {
-      duration = 0.2,
-      initial = 0,
-      timer = 0,
-    },
-    scrollbar = {
-      duration = 0.2,
-      initial = 0,
-      timer = 0,
-    },
-  },
+  cursor = Cursor.New(),
   grid = {
-    gutter = 0,
-    size = 0,
+    jacket = 0,
+    margin = 0,
+    timer = 1,
+    w = 0,
+    h = 0,
     x = 0,
-    y = 0,
+    y = {
+      base = 0,
+      current = 0,
+      previous = 0,
+    },
   },
-  jacketSize = 0,
   labels = nil,
-  numColumns = 3,
-  numRows = 3,
   order = {
     'collection',
     'difficulty',
     'sort',
   },
-  rowOffset = 0,
-  scrollbar = {
-    height = 0,
-    pos = 0,
-    x = 0,
-    y = 0,
-  },
-  selectedDifficulty = 0,
-  selectedSongIndex = 1,
+  scrollbar = Scrollbar.New(),
+  selectedSong = 1,
+  viewLimit = 9,
 
   setSizes = function(self)
     if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
-      self.grid.size = scaledW - ((scaledW / 20) * 3) - songInfo.panel.w;
+      self.grid.w = scaledW - ((scaledW / 20) * 3) - songInfo.panel.w;
+      self.grid.h = self.grid.w;
 
-      self.jacketSize = self.grid.size // 3.3;
+      self.grid.jacket = self.grid.w / 3.3;
 
-      self.grid.gutter = (self.grid.size - (self.jacketSize * 3)) // 2;
+      self.grid.margin = (self.grid.w - (self.grid.jacket * 3)) / 2;
+
       self.grid.x = (scaledW / 10) + songInfo.panel.w;
-      self.grid.y = scaledH - (scaledH / 20) - self.grid.size;
+      self.grid.y.base = scaledH - (scaledH / 20) - self.grid.h;
 
       self.labels.x = {};
       self.labels.x[1] = self.grid.x - 1;
-      self.labels.x[2] = self.labels.x[1] + (self.jacketSize * 1.5) + self.grid.gutter;
-      self.labels.x[3] = self.labels.x[2] + (self.jacketSize * 0.9); 
+      self.labels.x[2] = self.labels.x[1] + (self.grid.jacket * 1.5) + self.grid.margin;
+      self.labels.x[3] = self.labels.x[2] + (self.grid.jacket * 0.9); 
       self.labels.y = (scaledH / 20) - 2;
 
-      self.scrollbar.height = (self.jacketSize * 3) + (self.grid.gutter * 2);
-      self.scrollbar.x = self.grid.x + self.grid.size + (scaledW / 40) - 4;
-      self.scrollbar.y = self.grid.y;
+      self.cursor:setSizes({
+        x = self.grid.x,
+        y = self.grid.y.base,
+        w = self.grid.jacket,
+        h = self.grid.jacket,
+        margin = self.grid.margin,
+      });
+
+      if (#songwheel.songs > self.viewLimit) then
+        self.scrollbar:setSizes({
+          screenW = scaledW,
+          y = self.grid.y.base,
+          h = self.grid.h,
+        });
+      end
       
       self.cache.scaledW = scaledW;
       self.cache.scaledH = scaledH;
     end
-  end,
-
-  setDifficulty = function(self, newDifficulty)
-    self.selectedDifficulty = newDifficulty;
   end,
 
   setLabels = function(self)
@@ -730,157 +722,6 @@ local songGrid = {
       self.labels.currentSong = Label.New('', 18);
       self.labels.totalSongs = Label.New('', 18);
     end
-  end,
-
-  setRowOffset = function(self, newRowOffset)
-    self.easing.grid.initial = self.rowOffset;
-    self.easing.grid.timer = self.easing.grid.duration;
-    self.rowOffset = newRowOffset;
-  end,
-
-  setScrollbarPos = function(self, completion)
-    self.easing.scrollbar.initial = self.scrollbar.pos;
-    self.easing.scrollbar.timer = self.easing.scrollbar.duration;
-    self.scrollbar.pos = self.scrollbar.y + (completion * (self.scrollbar.height - 32));
-  end,
-
-  setSongIndex = function(self, newSongIndex)
-    local delta = newSongIndex - self.selectedSongIndex;
-
-    if ((delta < -1) or (delta > 1)) then
-      local newOffset = newSongIndex - 1;
-
-      self:setRowOffset(math.floor((newSongIndex - 1) / self.numColumns) * self.numColumns);
-      self.cursor.pos = (newSongIndex - 1) - self.rowOffset;
-      self.cursor.displayPos = self.cursor.pos;
-    else
-      local newCursorPos = self.cursor.pos + delta;
-
-      if (newCursorPos < 0) then
-        self:setRowOffset(self.rowOffset - self.numColumns);
-
-        newCursorPos = newCursorPos + self.numColumns;
-      elseif (newCursorPos >= (self.numColumns * self.numColumns)) then
-        self:setRowOffset(self.rowOffset + self.numColumns);
-
-        newCursorPos = newCursorPos - self.numColumns;
-      end
-
-      if (self.cursor.animTimer > 0) then
-        self.cursor.displayPos = easing.outQuad(
-          0.5 - self.cursor.animTimer,
-          self.cursor.displayPos,
-          self.cursor.pos - self.cursor.displayPos,
-          0.5
-        );
-      end
-
-      self.cursor.animTimer = self.cursor.animTotal;
-      self.cursor.pos = newCursorPos;
-    end
-
-    if (self.selectedSongIndex ~= newSongIndex) then
-      self.cursor.flickerTimer = 0;
-    end
-
-    self.selectedSongIndex = newSongIndex;
-
-    self:setScrollbarPos((self.rowOffset + self.cursor.pos) / (#songwheel.songs - 1));
-  end,
-
-  getCurrentRowOffset = function(self)
-    return easing.outQuad(
-      self.easing.grid.duration - self.easing.grid.timer,
-      self.easing.grid.initial,
-      self.rowOffset - self.easing.grid.initial,
-      self.easing.grid.duration
-    );
-  end,
-
-  getCursorPosition = function(self, position, yOffset)
-    local whichColumn = position % self.numColumns;
-    local whichRow = math.floor(position / self.numColumns) + (yOffset or 0);
-    local x = self.grid.x + whichColumn * (self.jacketSize + self.grid.gutter);
-    local y = self.grid.y + whichRow * (self.jacketSize + self.grid.gutter);
-
-    return x, y;
-  end,
-
-  getScrollbarPos = function(self)
-    return easing.outQuad(
-      self.easing.scrollbar.duration - self.easing.scrollbar.timer,
-      self.easing.scrollbar.initial,
-      self.scrollbar.pos - self.easing.scrollbar.initial,
-      self.easing.scrollbar.duration
-    );
-  end,
-
-  drawAllSongs = function(self, deltaTime)
-    if (self.easing.grid.timer > 0) then
-      self.easing.grid.timer = math.max(self.easing.grid.timer - deltaTime, 0);
-    end
-
-    for i = 0, (self.numRows + 1)  do
-      for v = 1, self.numColumns do
-        local tempIndex = ((i - 1) * 3) + v;
-        local index = self.rowOffset + tempIndex;
-        local yOffset = (self.rowOffset - self:getCurrentRowOffset()) / 3;
-
-        if (index <= #songwheel.songs) then
-          self:drawSong(deltaTime, tempIndex - 1, index, yOffset);
-        end
-      end
-    end
-  end,
-
-  drawCursor = function(self, deltaTime)
-    self.cursor.timer = self.cursor.timer + deltaTime;
-    self.cursor.flickerTimer = self.cursor.flickerTimer + deltaTime;
-
-    self.cursor.alpha = math.floor(self.cursor.flickerTimer * 30) % 2;
-    self.cursor.alpha = (self.cursor.alpha * 255) / 255;
-
-    if (self.cursor.flickerTimer >= 0.3) then
-      self.cursor.alpha = math.abs(0.8 * math.cos(self.cursor.timer * 5)) + 0.2;
-    end
-
-    local position = self.cursor.displayPos;
-
-    if (self.cursor.animTimer > 0) then
-      self.cursor.animTimer = self.cursor.animTimer - deltaTime;
-
-      if (self.cursor.animTimer <= 0) then
-        self.cursor.displayPos = self.cursor.pos;
-
-        position = self.cursor.pos;
-      else
-        position = easing.outQuad(
-          self.cursor.animTotal - self.cursor.animTimer,
-          self.cursor.displayPos,
-          self.cursor.pos - self.cursor.displayPos,
-          self.cursor.animTotal
-        );
-      end
-    end
-
-    local x, y = self:getCursorPosition(position);
-
-    gfx.Save();
-
-    gfx.Translate(x, y);
-
-
-    drawCursor({
-			x = 0,
-			y = 0,
-			w = self.jacketSize,
-			h = self.jacketSize,
-      alpha = self.cursor.alpha,
-      size = 18,
-			stroke = 1.5,
-		});
-
-    gfx.Restore();
   end,
 
   drawLabels = function(self)
@@ -904,8 +745,8 @@ local songGrid = {
     gfx.Save();
 
     gfx.Translate(
-      self.grid.x + (self.grid.size / 2),
-      self.grid.y + (self.grid.size / 2)
+      self.grid.x + (self.grid.w / 2),
+      self.grid.y.base + (self.grid.h / 2)
     );
 
     gfx.BeginPath();
@@ -920,30 +761,11 @@ local songGrid = {
     gfx.Restore();
   end,
 
-  drawScrollbar = function(self, deltaTime)
-    if (self.easing.scrollbar.timer > 0) then
-      self.easing.scrollbar.timer = math.max(self.easing.scrollbar.timer - deltaTime, 0);
-    end
-
-    local y = self:getScrollbarPos();
-    local barPos = ((y > 0) and y) or -100;
-
-    gfx.BeginPath();
-    Fill.Dark(120);
-    gfx.Rect(self.scrollbar.x, self.scrollbar.y, 8, self.scrollbar.height);
-    gfx.Fill();
-
-    gfx.BeginPath();
-    Fill.Normal();
-    gfx.Rect(self.scrollbar.x, barPos, 8, 32);
-    gfx.Fill();
-  end,
-
   drawSongAmount = function(self)
     Font.Number();
 
     self.labels.currentSong:update({
-      new = string.format('%04d', self.selectedSongIndex)
+      new = string.format('%04d', self.selectedSong)
     });
     self.labels.totalSongs:update({
       new = string.format('%04d', #songwheel.songs)
@@ -952,7 +774,7 @@ local songGrid = {
     gfx.Save();
 
     gfx.Translate(
-      self.grid.x + self.grid.size + (scaledW / 40) + 5,
+      self.grid.x + self.grid.w + (scaledW / 40) + 5,
       scaledH - (scaledH / 40) - 12
     );
 
@@ -977,45 +799,70 @@ local songGrid = {
     gfx.Restore();
   end,
 
-  drawSong = function(self, deltaTime, position, songIndex, yOffset)
-    if (songIndex < 1) then return end
+  drawSongGrid = function(self, deltaTime)
+    if (self.grid.timer < 1) then
+      self.grid.timer = math.min(self.grid.timer + (deltaTime * 8), 1);
+    end
 
-    local song = songwheel.songs[songIndex];
+    local change = (self.grid.y.current - self.grid.y.previous)
+      * Ease.OutQuad(self.grid.timer);
+    local offset = self.grid.y.previous + change;
+    local y = 0;
 
-    local isSelected = songIndex == self.selectedSongIndex;
-    local jacketAlpha = (isSelected and 1) or 0.2;
+    self.grid.y.previous = offset;
 
-    if (not song) then return end;
+    gfx.Save();
+
+    gfx.Scissor(
+      self.grid.x - 2,
+      self.grid.y.base - 2,
+      self.grid.w + 4,
+      self.grid.h + 4
+    );
+
+    gfx.Translate(self.grid.x, self.grid.y.base + offset);
+
+    for i = 1, #songwheel.songs do
+      local isSelected = i == self.selectedSong;
+      y = y + self:drawSong(i, y, isSelected);
+    end
+
+    gfx.ResetScissor();
+
+    gfx.Restore();
+  end,
+
+  drawSong = function(self, i, y, isSelected)
+    if (not songwheel.songs[i]) then return end
+
+    local alpha = (isSelected and 1) or 0.2;
+    local _, column = help.getPosition(i);
+    local x = (self.grid.jacket + self.grid.margin) * column;
+    local song = songwheel.songs[i];
 
     verifySongCache(song);
 
-    local difficulty = song.difficulties[self.selectedDifficulty];
+    local difficulty = song.difficulties[selectedDifficulty];
 
     if (not difficulty) then
       difficulty = song.difficulties[1];
     end
 
-    if ((not songCache[song.id][self.selectedDifficulty])
-      or (songCache[song.id][self.selectedDifficulty] == jacketFallback)) then
-        songCache[song.id][self.selectedDifficulty] = gfx.LoadImageJob(
-          difficulty.jacketPath,
-          jacketFallback,
-          0,
-          0
-        );
+    if ((not songCache[song.id][selectedDifficulty])
+      or (songCache[song.id][selectedDifficulty] == jacketFallback)
+    ) then
+      songCache[song.id][selectedDifficulty] = gfx.LoadImageJob(
+        difficulty.jacketPath,
+        jacketFallback,
+        0,
+        0
+      );
     end
 
-    local x, y = self:getCursorPosition(position, yOffset);
-    local offScreen = (y > (scaledH - (scaledH / 20))) or (y < (scaledH / 20));
-    
-    gfx.Save();
-
-    gfx.Translate(x, y);
-
-    if (songCache[song.id][self.selectedDifficulty]) then
+    if (songCache[song.id][selectedDifficulty]) then
       gfx.BeginPath();
       Fill.Black();
-      gfx.Rect(0, 0, self.jacketSize, self.jacketSize);
+      gfx.Rect(x, y, self.grid.jacket, self.grid.jacket);
       gfx.Fill();
 
       gfx.BeginPath();
@@ -1028,18 +875,53 @@ local songGrid = {
       end
 
       gfx.ImageRect(
-        0, 
-        0, 
-        self.jacketSize, 
-        self.jacketSize, 
-        songCache[song.id][self.selectedDifficulty], 
-        jacketAlpha,
+        x, 
+        y, 
+        self.grid.jacket, 
+        self.grid.jacket, 
+        songCache[song.id][selectedDifficulty], 
+        alpha,
         0
       );
       gfx.Stroke();
     end
 
-     gfx.Restore();
+    if (column == 2) then
+      return self.grid.jacket + self.grid.margin;
+    end
+
+    return 0;
+  end,
+
+  handleChange = function(self)
+    if (self.selectedSong ~= selectedSong) then
+      self.selectedSong = selectedSong;
+
+      local currentPage = List.getCurrentPage({
+        current = self.selectedSong,
+        limit = self.viewLimit,
+        total = #songwheel.songs,
+      });
+
+      self.grid.y.current = (self.grid.h + self.grid.margin)
+        * (currentPage - 1);
+      self.grid.y.current = -self.grid.y.current;
+      
+      self.grid.timer = 0;
+
+      self.cursor:setPosition({
+        current = self.selectedSong,
+        total = self.viewLimit,
+        grid = true,
+      });
+
+      self.cursor.timer.flicker = 0;
+
+      self.scrollbar:setPosition({
+        current = self.selectedSong,
+        total = #songwheel.songs,
+      });
+    end
   end,
 
   render = function(self, deltaTime)
@@ -1049,156 +931,27 @@ local songGrid = {
 
     gfx.Save();
 
-    gfx.Scissor(
-      self.grid.x - (self.grid.gutter * 0.9),
-      self.grid.y - (self.grid.gutter * 0.9),
-      self.grid.size + (self.grid.gutter * 1.8),
-      self.grid.size + (self.grid.gutter * 1.8)
-    )
+    self:drawLabels();
 
-    self:drawAllSongs(deltaTime);
+    if (#songwheel.songs > 0) then
+      self:drawSongGrid(deltaTime);
 
-    if (songwheel.songs[self.selectedSongIndex]) then
-      self:drawCursor(deltaTime);
+      self.cursor:render(deltaTime, {
+        size = 18,
+        stroke = 1.5,
+        grid = true,
+      });
+
+      if (#songwheel.songs > self.viewLimit) then
+        self.scrollbar:render(deltaTime);
+      end
+
+      self:drawSongAmount();
     else
       self:drawNoSongMessage();
     end
 
-    gfx.ResetScissor();
-
-    if (songwheel.songs[self.selectedSongIndex]) then
-      self:drawSongAmount();
-    end
-
-    self:drawLabels();
-
-    if (#songwheel.songs > 9) then
-      self:drawScrollbar(deltaTime);
-    end
-
-    gfx.Restore();
-  end
-};
-
-local search = {
-  alpha = 0,
-  cache = { scaledW = 0, scaledH = 0 },
-  cursor = { alpha = 0, timer = 0 },
-  index = 1,
-  labels = nil,
-  w = 0,
-  h = 0,
-  x = 0,
-  y = 0,
-  timer = 0,
-
-  setSizes = function(self)
-    if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
-      self.w = songInfo.panel.w + 6;
-      self.h = scaledH / 22;
-      self.x = scaledW / 20;
-      self.y = scaledH / 40;
-
-      self.cache.scaledW = scaledW;
-      self.cache.scaledH = scaledH;
-    end
-  end,
-
-  setLabels = function(self)
-    if (not self.labels) then
-      Font.Medium();
-
-      self.labels = {
-        search = Label.New('SEARCH', 18),
-      };
-
-      Font.JP();
-
-      self.labels.input = Label.New('', 24);
-    end
-  end,
-
-  drawSearch = function(self, deltaTime)
-    gfx.Save();
-  
-    local acceptInput = songwheel.searchInputActive;
-    local shouldShow = (string.len(songwheel.searchText) > 0)
-      or songwheel.searchInputActive;
-
-    if (shouldShow) then
-      self.timer = math.min(self.timer + (deltaTime * 6), 1);
-      self.cursor.timer = self.cursor.timer + deltaTime;
-    elseif (self.timer > 0 and (not shouldShow)) then
-      self.timer = math.max(self.timer - (deltaTime * 6), 0);
-      self.cursor.timer = 0;
-    end
-
-    self.alpha = math.floor(255 * math.min(self.timer * 2, 1));
-    self.cursor.alpha = (acceptInput and math.abs(0.9 * math.cos(self.cursor.timer * 5)) + 0.1) or 0;
-
-    Font.JP();
-
-    self.labels.input:update({ new = string.upper(songwheel.searchText) });
-
-    local cursorOffset = math.min(self.labels.input.w + 2, self.w - 24);
-
-    if (self.index ~= ((acceptInput and 0) or 1)) then
-      game.PlaySample('woosh');
-    end
-
-    self.index = (acceptInput and 0) or 1;
-
-    gfx.BeginPath();
-    Fill.Black(150);
-    gfx.FastRect(self.x + 2, self.y - 6, (self.w - 8) * self.timer, self.h + 12);
-    gfx.Fill();
-
-    if (acceptInput) then
-      gfx.BeginPath();
-      gfx.StrokeWidth(2);
-      gfx.StrokeColor(60, 110, 160, self.alpha);
-      Fill.Black(0);
-      gfx.Rect(self.x + 2, self.y - 6, (self.w - 8) * self.timer, self.h + 12);
-      gfx.Fill();
-      gfx.Stroke();
-    end
-
-    gfx.BeginPath();
-    FontAlign.Left();
-    self.labels.search:draw({
-      x = self.x + 7,
-      y = self.y - 4,
-      a = self.alpha,
-      color = 'Normal',
-    });
-
-    if (shouldShow) then
-      gfx.BeginPath();
-      Fill.White(255 * self.cursor.alpha);
-      gfx.FastRect(self.x + 8 + cursorOffset, self.y + (self.h / 2) - 4, 2, 28 );
-      gfx.Fill();
-
-      gfx.BeginPath();
-      FontAlign.Left();
-      self.labels.input:draw({
-        x = self.x + 8,
-        y = self.y + 20,
-        color = 'White',
-        maxWidth = self.w - 24,
-      });
-    end
-
-    gfx.Restore();
-  end,
-
-  render = function(self, deltaTime)
-    self:setSizes();
-
-    self:setLabels();
-
-    gfx.Save();
-
-    self:drawSearch(deltaTime);
+    self:handleChange();
 
     gfx.Restore();
   end
@@ -1304,7 +1057,6 @@ render = function(deltaTime)
 
   songInfo:render(deltaTime);
   songGrid:render(deltaTime);
-  search:render(deltaTime);
   miscInfo:render();
 
   gfx.Restore();
@@ -1314,26 +1066,24 @@ get_page_size = function()
   return 9;
 end
 
-set_index = function(newSongIndex)
-  songInfo:setSongIndex(newSongIndex);
-  songGrid:setSongIndex(newSongIndex);
+set_index = function(newSong)
+  selectedSong = newSong;
 
-  if (previousSongIndex ~= newSongIndex) then
+  if (previousSong ~= newSong) then
     game.PlaySample('click_song');
   end
 
-  previousSongIndex = newSongIndex;
+  previousSong = newSong;
 end
 
-set_diff = function(newDifficultyIndex)
-  songInfo:setDifficulty(newDifficultyIndex);
-  songGrid:setDifficulty(newDifficultyIndex);
+set_diff = function(newDifficulty)
+  selectedDifficulty = newDifficulty;
 
-  if (previousDifficultyIndex ~= newDifficultyIndex) then
+  if (previousDifficulty ~= newDifficulty) then
     game.PlaySample('click_difficulty');
   end
 
-  previousDifficultyIndex = newDifficultyIndex;
+  previousDifficulty = newDifficulty;
 end
 
 totalForce = nil;

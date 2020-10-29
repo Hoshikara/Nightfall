@@ -6,6 +6,7 @@ local CONSTANTS_SONGWHEEL = require('constants/songwheel');
 local Cursor = require('common/cursor');
 local List = require('common/list');
 local Scrollbar = require('common/scrollbar');
+local SearchBar = require('common/searchbar');
 
 local background = Image.New('bg.png');
 
@@ -158,8 +159,9 @@ local challengeInfo = {
     y = 0,
     h = 0,
   },
+  search = SearchBar.New(),
   selectedChallenge = 0,
-  timers = { title = 0 },
+  timer = { title = 0 },
   
   setSizes = function(self)
     if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
@@ -175,6 +177,12 @@ local challengeInfo = {
       self.padding.y.double = self.padding.y.full * 2;
 
       self.panel.innerWidth = self.panel.w - (self.padding.x.double * 2);
+
+      self.search:setSizes({
+        screenW = scaledW,
+        screenH = scaledH,
+        w = self.panel.w,
+      });
 
       self.cache.scaledW = scaledW;
       self.cache.scaledH = scaledH;
@@ -392,10 +400,10 @@ local challengeInfo = {
     y = y + labels.challenge.h * 1.25;
 
     if (title.w > self.panel.innerWidth) then
-      self.timers.title = self.timers.title + deltaTime;
+      self.timer.title = self.timer.title + deltaTime;
 
       drawScrollingLabel(
-        self.timers.title,
+        self.timer.title,
         title,
         self.panel.innerWidth,
         0,
@@ -449,6 +457,11 @@ local challengeInfo = {
     self:drawChallengeInfo(deltaTime);
 
     self:handleChange();
+
+    self.search:render(deltaTime, {
+      isActive = chalwheel.searchInputActive,
+      searchText = chalwheel.searchText,
+    });
 
     gfx.Restore();
   end,
@@ -752,130 +765,6 @@ local challengeList = {
   end,
 };
 
-local search = {
-  alpha = 0,
-  cache = { scaledW = 0, scaledH = 0 },
-  cursor = { alpha = 0, timer = 0 },
-  index = 1,
-  labels = nil,
-  w = 0,
-  h = 0,
-  x = 0,
-  y = 0,
-  timer = 0,
-
-  setSizes = function(self)
-    if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
-      self.w = challengeInfo.panel.w + 6;
-      self.h = scaledH / 22;
-      self.x = scaledW / 20;
-      self.y = scaledH / 40;
-
-      self.cache.scaledW = scaledW;
-      self.cache.scaledH = scaledH;
-    end
-  end,
-
-  setLabels = function(self)
-    if (not self.labels) then
-      Font.Medium();
-
-      self.labels = {
-        search = Label.New('SEARCH', 18),
-      };
-
-      Font.JP();
-
-      self.labels.input = Label.New('', 24);
-    end
-  end,
-
-  drawSearch = function(self, deltaTime)
-    gfx.Save();
-  
-    local acceptInput = chalwheel.searchInputActive;
-    local shouldShow = (string.len(chalwheel.searchText) > 0)
-      or chalwheel.searchInputActive;
-
-    if (shouldShow) then
-      self.timer = math.min(self.timer + (deltaTime * 6), 1);
-      self.cursor.timer = self.cursor.timer + deltaTime;
-    elseif (self.timer > 0 and (not shouldShow)) then
-      self.timer = math.max(self.timer - (deltaTime * 6), 0);
-      self.cursor.timer = 0;
-    end
-
-    self.alpha = math.floor(255 * math.min(self.timer * 2, 1));
-    self.cursor.alpha = (acceptInput and math.abs(0.9 * math.cos(self.cursor.timer * 5)) + 0.1) or 0;
-
-    Font.JP();
-
-    self.labels.input:update({ new = string.upper(chalwheel.searchText) });
-
-    local cursorOffset = math.min(self.labels.input.w + 2, self.w - 24);
-
-    if (self.index ~= ((acceptInput and 0) or 1)) then
-      game.PlaySample('woosh');
-    end
-
-    self.index = (acceptInput and 0) or 1;
-
-    gfx.BeginPath();
-    Fill.Black(150);
-    gfx.FastRect(self.x + 2, self.y - 6, (self.w - 8) * self.timer, self.h + 12);
-    gfx.Fill();
-
-    if (acceptInput) then
-      gfx.BeginPath();
-      gfx.StrokeWidth(2);
-      gfx.StrokeColor(60, 110, 160, self.alpha);
-      Fill.Black(0);
-      gfx.Rect(self.x + 2, self.y - 6, (self.w - 8) * self.timer, self.h + 12);
-      gfx.Fill();
-      gfx.Stroke();
-    end
-
-    gfx.BeginPath();
-    FontAlign.Left();
-    self.labels.search:draw({
-      x = self.x + 7,
-      y = self.y - 4,
-      a = self.alpha,
-      color = 'Normal',
-    });
-
-    if (shouldShow) then
-      gfx.BeginPath();
-      Fill.White(255 * self.cursor.alpha);
-      gfx.FastRect(self.x + 8 + cursorOffset, self.y + (self.h / 2) - 4, 2, 28 );
-      gfx.Fill();
-
-      gfx.BeginPath();
-      FontAlign.Left();
-      self.labels.input:draw({
-        x = self.x + 8,
-        y = self.y + 20,
-        color = 'White',
-        maxWidth = self.w - 24,
-      });
-    end
-
-    gfx.Restore();
-  end,
-
-  render = function(self, deltaTime)
-    self:setSizes();
-
-    self:setLabels();
-
-    gfx.Save();
-
-    self:drawSearch(deltaTime);
-
-    gfx.Restore();
-  end
-};
-
 local miscInfo = {
   labels = nil,
 
@@ -976,7 +865,6 @@ render = function(deltaTime)
 
   challengeInfo:render(deltaTime);
   challengeList:render(deltaTime);
-  search:render(deltaTime);
   miscInfo:render();
 
   gfx.Restore();

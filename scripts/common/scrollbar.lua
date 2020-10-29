@@ -42,7 +42,11 @@ local New = function()
         * Ease.OutQuad(self.timer);
       local offset = self.y.bar.previous + change;
 
-      self.y.bar.previous = offset;
+      if (tostring(offset) == '-nan(ind)') then
+        self.y.bar.previous = 0;
+      else
+        self.y.bar.previous = offset;
+      end
 
       gfx.Save();
 

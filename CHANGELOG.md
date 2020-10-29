@@ -1,3 +1,8 @@
+###### October 29, 2020
+- Refactored more `Song Select` components for reusability and design consistency
+- Removed unused `easing` library
+- Fixed a crash that occurred when list-like components are empty
+
 ###### October 28, 2020
 - Completed work for `Challenge Wheel`
   - `Challenge Result` WIP

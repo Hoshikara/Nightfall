@@ -25,6 +25,8 @@ local getCurrentPage = function(params)
       return page;
     end
   end
+
+  return 1;
 end
 
 return { getCurrentPage = getCurrentPage };
