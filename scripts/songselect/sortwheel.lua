@@ -69,6 +69,10 @@ setLabels = function()
 end
 
 drawCurrentSort = function(displaying)
+	if (currentSort > #labels) then
+		currentSort = 1;
+	end
+	
 	local color = (displaying and 'Normal') or 'White';
 	local x = layout.field[3].x;
 	local y = layout.field.y;
