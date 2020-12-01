@@ -85,6 +85,12 @@ generateLabels = function(constants)
 		for settingIndex, currentSetting in ipairs(currentTab.settings) do
 			local setting = constants.settings[tabIndex][settingIndex];
 
+			if (setting == nil) then
+				setting = {
+					label = string.upper(currentSetting.name),
+				};
+			end
+
 			labels.settings[tabIndex][settingIndex] = {
 				label = Label.New(setting.label, 24),
 				indent = (setting.indent and true) or false,
