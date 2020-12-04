@@ -29,89 +29,145 @@ setupLayout = function()
   end
 end
 
-confirmLabelAmount = function(tabs)
-	local tabCount = 0;
-	local settingCount = 0;
-
-	local tabLabelCount = 0;
-	local settingLabelCount = 0;
-
-	for _, tab in ipairs(SettingsDiag.tabs) do
-		tabCount = tabCount + 1;
-
-		for _, setting in ipairs(tab.settings) do
-			settingCount = settingCount + 1;
-		end
-	end
-
-	for _, tab in ipairs(tabs) do
-		tabLabelCount = tabLabelCount + 1;
-
-		for _, settings in ipairs(tab) do
-			settingLabelCount = settingLabelCount + 1;
-		end
-	end
-
-	return ((tabCount == tabLabelCount) and (settingCount == settingLabelCount));
-end
-
 generateLabels = function(constants)
-	local labels = {};
+	Font.Medium();
 
-	labels = {
+	local labels = {
+		controls = {
+			fxl = Label.New('[FX-L]', 20),
+			fxr = Label.New('[FX-R]', 20),
+			start = Label.New('[START]', 24),
+		},
 		navigation = {},
 		settings = {},
-		tabs = {}
+		tabs = {},
 	};
 
-	Font.Medium();
-	labels.fxl = Label.New('[FX-L]', 20);
-	labels.fxr = Label.New('[FX-R]', 20);
-	labels.start = Label.New('[START]', 24);
+	for tabIndex, currentTab in ipairs(SettingsDiag.tabs) do
+		local tabName = get(currentTab, 'name', '');
+		local tabConstants = constants[tabName];
+		local formattedTab = string.upper(tabName);
 
-	for index, tab in ipairs(constants.tabs) do
+		if (tabConstants) then
+			formattedTab = tabConstants.name;
+		end
+
 		Font.Medium();
-		labels.navigation[index] = Label.New(tab, 20);
+
+		labels.navigation[tabName] = Label.New(formattedTab, 20);
 
 		Font.Normal();
-		labels.tabs[index] = Label.New(tab, 48);
-	end
 
-	Font.Normal();
+		labels.tabs[tabName] = Label.New(formattedTab, 48);
 
-	for tabIndex, currentTab in ipairs(SettingsDiag.tabs) do
-		labels.settings[tabIndex] = {};
+		labels.settings[tabName] = {};
 
 		for settingIndex, currentSetting in ipairs(currentTab.settings) do
-			local setting = constants.settings[tabIndex][settingIndex];
+			local settingType = string.upper(get(currentSetting, 'type', ''));
+			local settingName = string.gsub(
+				get(currentSetting, 'name', ''),
+				' %((.*)%)',
+				''
+			);
+			local settingConstants = {};
 
-			if (setting == nil) then
-				setting = {
-					label = string.upper(currentSetting.name),
-				};
+			if (tabConstants) then
+				settingConstants = tabConstants[settingName];
 			end
 
-			labels.settings[tabIndex][settingIndex] = {
-				label = Label.New(setting.label, 24),
-				indent = (setting.indent and true) or false,
+			local formattedSetting = get(
+				settingConstants,
+				'name',
+				string.upper(settingName)
+			);
+
+			local tempTable = {
+				indent = get(settingConstants, 'indent', false),
+				name = Label.New(formattedSetting, 24),
+				special = get(settingConstants, 'special', ''),
+				type = settingType,
 			};
 
-			if ((currentSetting.value ~= nil) and setting.values) then
-				labels.settings[tabIndex][settingIndex].values = {};
+			if (settingType == 'INT') then
+				tempTable.value = Label.New('', 24);
+			elseif (settingType == 'FLOAT') then
+				tempTable.value = Label.New('t', 24);
+			elseif (settingType == 'ENUM') then
+				local options = get(currentSetting, 'options', {});
 
-				for key, currentValue in pairs(setting.values) do
-					if (key == 'type') then
-						labels.settings[tabIndex][settingIndex].values[key] = currentValue;
-					else 
-						labels.settings[tabIndex][settingIndex].values[key] = Label.New(currentValue, 24);
+				if (settingConstants.name) then
+					options = settingConstants.options;
+				end
+
+				tempTable.value = {};
+
+				for optionIndex, currentOption in ipairs(options) do
+					tempTable.value[optionIndex] = Label.New(currentOption, 24);
+				end
+			elseif (settingType == 'TOGGLE') then
+				if (settingConstants.name) then
+					if (settingConstants.invert) then
+						tempTable.value = {
+							['true'] = Label.New('DISABLED', 24),
+							['false'] = Label.New('ENABLED', 24),
+						};
+					else
+						tempTable.value = {
+							['true'] = Label.New('ENABLED', 24),
+							['false'] = Label.New('DISABLED', 24),
+						};
 					end
+				else
+					tempTable.value = {
+						['true'] = Label.New('TRUE', 24),
+						['false'] = Label.New('FALSE', 24),
+					};
 				end
 			end
+			
+			labels.settings[tabName][settingName] = tempTable;
 		end
 	end
 
 	return labels;
 end
+
+local current = {
+	setting = { index = 0, name = '' },
+	settings = {},
+	tab = {
+		index = 0,
+		name = '',
+		next = '',
+		previous = '',
+	},
+
+	update = function(self)
+		self.setting.index = SettingsDiag.currentSetting;
+		self.tab.index = SettingsDiag.currentTab;
+
+		self.settings = SettingsDiag.tabs[self.tab.index].settings;
+
+		self.setting.name = string.gsub(
+			self.settings[self.setting.index].name,
+			' %((.*)%)',
+			''
+		);
+		self.tab.name = SettingsDiag.tabs[self.tab.index].name;
+
+		if ((self.tab.index + 1) > #SettingsDiag.tabs) then
+			self.tab.next = SettingsDiag.tabs[1].name;
+		else
+			self.tab.next = SettingsDiag.tabs[self.tab.index + 1].name;
+		end
+
+		if ((self.tab.index - 1) < 1) then
+			self.tab.previous = SettingsDiag.tabs[#SettingsDiag.tabs].name;
+		else
+			self.tab.previous = SettingsDiag.tabs[self.tab.index - 1].name;
+		end
+	end
+};
 
 drawArrows = function(initialX, initialY, minBounded, maxBounded);
 	local x1 = initialX + 28;
@@ -226,12 +282,12 @@ local practiceModeDialog = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			self.labels = generateLabels(GAMEPLAY_CONSTANTS);
+			self.labels = generateLabels(GAMEPLAY_CONSTANTS.settings);
 		end
 	end,
 
 	drawHeading = function(self)
-		local label = self.labels.tabs[SettingsDiag.currentTab];
+		local label = self.labels.tabs[current.tab.name];
 	
 		gfx.BeginPath();
 		FontAlign.Left();
@@ -245,150 +301,111 @@ local practiceModeDialog = {
 	end,
 
 	drawSettings = function(self)
-		local currentSetting = SettingsDiag.currentSetting;
-		local currentTab = SettingsDiag.currentTab;
-		local settings = SettingsDiag.tabs[currentTab].settings;
-		local settingLabels = self.labels.settings[currentTab];
-	
-		local y = self.layout.info.y + (self.labels.tabs[SettingsDiag.currentTab].h * 1.75);
-	
-		for index, setting in ipairs(settings) do
-			local isSelected = currentSetting == index;
-			local values = settingLabels[index].values;
-			local x = (settingLabels[index].indent and (self.layout.info.x1 + 24)) or self.layout.info.x1;
-	
+		local labels = self.labels.settings[current.tab.name];
+
+		local y = self.layout.info.y + (self.labels.tabs[current.tab.name].h * 1.75);
+
+		for i, rawSetting in ipairs(current.settings) do
+			local setting = labels[string.gsub(
+				rawSetting.name,
+				' %((.*)%)',
+				''
+			)];
+			local isSelected = i == current.setting.index;
+			local x = (setting.indent and (self.layout.info.x1 + 24))
+				or self.layout.info.x1;
+			local alpha = (isSelected and (255 * timer)) or (50 * timer);
+
 			gfx.BeginPath();
 			FontAlign.Left();
-	
-			settingLabels[index].label:draw({
+
+			setting.name:draw({
 				x = x,
 				y = y,
-				a = (isSelected and (255 * timer)) or (50 * timer),
+				a = alpha,
 				color = 'White',
 			});
-	
-			if ((setting.value ~= nil) and values) then
-				self:drawSettingValue(setting, values, y, isSelected);
-			elseif ((setting.value == nil) and isSelected) then
-				gfx.BeginPath();
-				FontAlign.Right();
-				self.labels.start:draw({
+
+			self:drawSettingValue(y, setting, rawSetting, isSelected, alpha);
+
+			y = y + (setting.name.h * 1.75);
+		end
+	end,
+
+	drawSettingValue = function(self, y, setting, rawSetting, isSelected, alpha)
+		local isOffset = string.find(string.upper(rawSetting.name), 'OFFSET') ~= nil;
+		local minBounded, maxBounded = false;
+		local params = {
+			x = self.layout.info.x2,
+			y = y,
+			a = alpha,
+			color = 'White',
+		};
+
+		gfx.BeginPath();
+		FontAlign.Right();
+
+		if ((setting.type == 'BUTTON') and (not rawSetting.value)) then
+			if (isSelected) then
+				self.labels.controls.start:draw({
 					x = self.layout.info.x2,
-					y = y - 1,
+					y = y,
 					a = 255 * timer,
 					color = 'Normal',
 				});
 			end
-	
-			y = y + (settingLabels[index].label.h * 1.75);
-		end
-	end,
-
-	drawSettingValue = function(self, setting, values, y, isSelected)
-		local alpha = (isSelected and (255 * timer)) or (50 * timer);
-		local x = self.layout.info.x2;
-	
-		gfx.BeginPath();
-		FontAlign.Right();
-		
-		if (setting.type == 'int') then
+		elseif (setting.type == 'INT') then
 			Font.Number();
-	
-			if (values.type) then
-				if (values.type == 'TIME') then
-					values.value:update({ new = string.format('%s ms', tostring(setting.value)) });
 
-					values.value:draw({
-						x = x,
-						y = y,
-						a = alpha,
-						color = 'White',
-					});
-				elseif (values.type == 'PERCENTAGE') then
-					values.value:update({ new = string.format('%s%%', tostring(setting.value)) });
-
-					values.value:draw({
-						x = x,
-						y = y,
-						a = alpha,
-						color = 'White',
-					});
-				end
-			else
-				values.value:update({ new = tostring(setting.value) });
-
-				values.value:draw({
-					x = x,
-					y = y,
-					a = alpha,
-					color = 'White',
+			if ((setting.special == 'TIME') or isOffset) then
+				setting.value:update({
+					new = string.format('%s ms', tostring(rawSetting.value)),
 				});
-			end
-	
-			if (isSelected) then
-				drawArrows(x, y, setting.value == setting.min, setting.value == setting.max);
-			end
-		elseif (setting.type == 'float') then
-			local formatted;
-	
-			Font.Number();
-	
-			if (setting.max <= 1) then
-				formatted = string.format('%.f%%', (setting.value * 100));
+			elseif (setting.special == 'PERCENTAGE') then
+				setting.value:update({
+					new = string.format('%s%%', tostring(rawSetting.value)),
+				});
 			else
-				formatted = string.format('%.2f', setting.value);
+				setting.value:update({ new = tostring(rawSetting.value) });
 			end
-	
-			values.value:update({ new = formatted });
-	
-			values.value:draw({
-				x = x,
-				y = y,
-				a = alpha,
-				color = 'White',
-			});
-	
-			if (isSelected) then
-				drawArrows(x, y, setting.value == setting.min, setting.value == setting.max);
+
+			setting.value:draw(params);
+
+			minBounded, maxBounded = rawSetting.value == rawSetting.min,
+				rawSetting.value == rawSetting.max;
+		elseif (setting.type == 'FLOAT') then
+			local formatted;
+
+			Font.Number();
+
+			if (setting.max <= 1) then
+				formatted = string.format('%.f%%', (rawSetting.value * 100));
+			else
+				formatted = string.format('%.2f', rawSetting.value);
 			end
-		elseif (setting.type == 'enum') then
+
+			setting.value:update({ new = formatted });
+
+			setting.value:draw(params);
+
+			minBounded, maxBounded = rawSetting.value == rawSetting.min,
+				rawSetting.value == rawSetting.max;
+		elseif (setting.type == 'ENUM') then
 			Font.Normal();
 
-			values[setting.value]:draw({
-				x = x,
-				y = y,
-				a = alpha,
-				color = 'White',
-			});
-	
-			if (isSelected) then
-				drawArrows(x, y, false, false);
-			end
-		elseif (setting.type == 'toggle') then
+			setting.value[rawSetting.value]:draw(params);
+		elseif (setting.type == 'TOGGLE') then
 			Font.Normal();
 
-			values[tostring(setting.value)]:draw({
-				x = x,
-				y = y,
-				a = alpha,
-				color = 'White',
-			});
-	
-			if (isSelected) then
-				drawArrows(x, y, false, false);
-			end
+			setting.value[tostring(rawSetting.value)]:draw(params);
+		end
+
+		if (isSelected and (setting.type ~= 'BUTTON')) then
+			drawArrows(self.layout.info.x2, y, minBounded, maxBounded);
 		end
 	end,
 
 	drawNavigation = function(self)
-		local currentTab = SettingsDiag.currentTab;
-	
-		local next = (((currentTab + 1) <= 5) and (currentTab + 1)) or 1;
-		local nextLabel = self.labels.navigation[next];
-	
-		local previous = (((currentTab - 1) >= 1) and (currentTab - 1)) or 5;
-		local previousLabel = self.labels.navigation[previous];
-	
 		local x1 = self.layout.info.x1;
 		local x2 = self.layout.info.x2 + 56;
 		local y = self.layout.navigation.y;
@@ -396,30 +413,32 @@ local practiceModeDialog = {
 		gfx.BeginPath();
 	
 		FontAlign.Left();
-		self.labels.fxl:draw({
+
+		self.labels.controls.fxl:draw({
 			x = x1,
 			y = y - 1,
 			a = 255 * timer,
 			color = 'Normal',
 		});
 
-		previousLabel:draw({
-			x = x1 + self.labels.fxl.w + 8,
+		self.labels.navigation[current.tab.previous]:draw({
+			x = x1 + self.labels.controls.fxl.w + 8,
 			y = y,
 			a = 255 * timer,
 			color = 'White',
 		});
 
 		FontAlign.Right();
-		nextLabel:draw({
+
+		self.labels.navigation[current.tab.next]:draw({
 			x = x2,
 			y = y,
 			a = 255 * timer,
 			color = 'White',
 		});
 
-		self.labels.fxr:draw({
-			x = x2 - nextLabel.w - 8,
+		self.labels.controls.fxr:draw({
+			x = x2 - self.labels.navigation[current.tab.next].w - 8,
 			y = y - 1,
 			a = 255 * timer,
 			color = 'Normal',
@@ -430,12 +449,6 @@ local practiceModeDialog = {
 		self:setSizes();
 
 		self:setLabels();
-
-		if (not confirmLabelAmount(self.labels.settings)) then
-			drawErrorPrompt('Invalid label amount in gamesettingsdialog.lua');
-			
-			return;
-		end
 
 		gfx.Save();
 
@@ -464,61 +477,12 @@ local songSelectDialog = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			self.labels = generateLabels(SONG_SELECT_CONSTANTS);
+			self.labels = generateLabels(SONG_SELECT_CONSTANTS.settings);
 		end
 	end,
 
-	drawNavigation = function(self)
-		local currentTab = SettingsDiag.currentTab;
-	
-		local next = (((currentTab + 1) <= 5) and (currentTab + 1)) or 1;
-		local nextLabel = self.labels.navigation[next];
-	
-		local previous = (((currentTab - 1) >= 1) and (currentTab - 1)) or 5;
-		local previousLabel = self.labels.navigation[previous];
-	
-		local alpha = 255 * timer;
-		local x1 = layout.x.middleLeft;
-		local x2 = layout.x.outerRight;
-		local y = layout.y.bottom + 12;
-	
-		gfx.BeginPath();
-
-		FontAlign.Left();
-	
-		self.labels.fxl:draw({
-			x = x1,
-			y = y - 1,
-			a = alpha,
-			color = 'Normal',
-		});
-
-		previousLabel:draw({
-			x = x1 + self.labels.fxr.w + 8,
-			y = y,
-			a = alpha,
-			color = 'White',
-		});
-	
-		FontAlign.Right();
-
-		nextLabel:draw({
-			x = x2,
-			y = y,
-			a = alpha,
-			color = 'White',
-		});
-
-		self.labels.fxr:draw({
-			x = x2 - nextLabel.w - 8,
-			y = y - 1,
-			a = alpha,
-			color = 'Normal',
-		});
-	end,
-
 	drawHeading = function(self)
-		local label = self.labels.tabs[SettingsDiag.currentTab];
+		local label = self.labels.tabs[current.tab.name];
 		local x = layout.x.outerLeft - 2;
 		local y = layout.y.top - (label.h / 1.25);
 	
@@ -533,137 +497,154 @@ local songSelectDialog = {
 	end,
 
 	drawSettings = function(self)
-		local currentSetting = SettingsDiag.currentSetting;
-		local currentTab = SettingsDiag.currentTab;
-		local settings = SettingsDiag.tabs[currentTab].settings;
-		local settingLabels = self.labels.settings[currentTab];
-	
+		local labels = self.labels.settings[current.tab.name];
+
 		local x = layout.x.middleLeft;
-		local y = layout.y.top + (self.labels.tabs[currentTab].h / 1.75);
-	
-		for index, setting in ipairs(settings) do
-			local isSelected = currentSetting == index;
-			local values = settingLabels[index].values;
-	
+		local y = layout.y.top + (self.labels.tabs[current.tab.name].h / 1.75);
+
+		for i, rawSetting in ipairs(current.settings) do
+			local setting = labels[string.gsub(
+				rawSetting.name,
+				' %((.*)%)',
+				''
+			)];
+			local isSelected = i == current.setting.index;
+			local alpha = (isSelected and (255 * timer)) or (50 * timer);
+
 			gfx.BeginPath();
 			FontAlign.Left();
-	
-			settingLabels[index].label:draw({
+
+			setting.name:draw({
 				x = x,
 				y = y,
-				a = (isSelected and (255 * timer)) or (50 * timer),
+				a = alpha,
 				color = 'White',
 			});
-	
-			if ((setting.value ~= nil) and values) then
-				self:drawSettingValue(setting, values, y, isSelected);
-			elseif ((setting.value == nil) and isSelected) then
-				gfx.BeginPath();
-				FontAlign.Right();
-				self.labels.start:draw({
+
+			self:drawSettingValue(y, setting, rawSetting, isSelected, alpha);
+
+			y = y + (setting.name.h * 1.75);
+		end
+	end,
+
+	drawSettingValue = function(self, y, setting, rawSetting, isSelected, alpha)
+		local isOffset = string.find(string.upper(rawSetting.name), 'OFFSET') ~= nil;
+		local minBounded, maxBounded = false, false;
+		local params = {
+			x = layout.x.middleRight,
+			y = y,
+			a = alpha,
+			color = 'White',
+		};
+
+		gfx.BeginPath();
+		FontAlign.Right();
+
+		if ((setting.type == 'BUTTON') and (not rawSetting.value)) then
+			if (isSelected) then
+				self.labels.controls.start:draw({
 					x = layout.x.middleRight,
 					y = y,
-					a = 255 * timer,
+					a = alpha,
 					color = 'Normal',
 				});
 			end
-	
-			y = y + (settingLabels[index].label.h * 1.75);
-		end
-	end,
-	
-	drawSettingValue = function(self, setting, values, y, isSelected)
-		local alpha = (isSelected and (255 * timer)) or (50 * timer);
-		local x = layout.x.middleRight;
-	
-		gfx.BeginPath();
-		FontAlign.Right();
-		
-		if (setting.type == 'int') then
+		elseif (setting.type == 'INT') then
 			Font.Number();
 
-			if (get(values, 'type', '') == 'WINDOW') then
-				values.value:update({
-					new = string.format('±%s ms', tostring(setting.value)),
+			if (setting.special == 'TIME WINDOW') then
+				setting.value:update({
+					new = string.format('±%s ms', tostring(rawSetting.value)),
+				});
+			elseif ((setting.special == 'TIME') or isOffset) then
+				setting.value:update({
+					new = string.format('%s ms', tostring(rawSetting.value)),
 				});
 			else
-				values.value:update({
-					new = string.format('%s ms', tostring(setting.value)),
-				});
+				setting.value:update({ new = tostring(rawSetting.value) });
 			end
-	
-			values.value:draw({
-				x = x,
-				y = y,
-				a = alpha,
-				color = 'White',
-			});
-	
-			if (isSelected) then
-				drawArrows(x, y, setting.value == setting.min, setting.value == setting.max );
-			end
-		elseif (setting.type == 'float') then
+
+			setting.value:draw(params);
+
+			minBounded, maxBounded = rawSetting.value == rawSetting.min,
+				rawSetting.value == rawSetting.max;
+		elseif (setting.type == 'FLOAT') then
 			local formatted;
-	
+
 			Font.Number();
-	
-			if (setting.max <= 1) then
-				formatted = string.format('%.f%%', (setting.value * 100));
+
+			if (rawSetting.max <= 1) then
+				formatted = string.format('%.f%%', (rawSetting.value * 100));
 			else
-				formatted = string.format('%.2f', setting.value);
+				formatted = string.format('%.2f', rawSetting.value);
 			end
-	
-			values.value:update({ new = formatted });
-	
-			values.value:draw({
-				x = x,
-				y = y,
-				a = alpha,
-				color = 'White',
-			});
-	
-			if (isSelected) then
-				drawArrows(x, y, setting.value == setting.min, setting.value == setting.max );
-			end
-		elseif (setting.type == 'enum') then
+
+			setting.value:update({ new = formatted });
+
+			setting.value:draw(params);
+
+			minBounded, maxBounded = rawSetting.value == rawSetting.min,
+				rawSetting.value == rawSetting.max;
+		elseif (setting.type == 'ENUM') then
 			Font.Normal();
 
-			values[setting.value]:draw({
-				x = x,
-				y = y,
-				a = alpha,
-				color = 'White',
-			});
-	
-			if (isSelected) then
-				drawArrows(x, y, false, false);
-			end
-		elseif (setting.type == 'toggle') then
+			setting.value[rawSetting.value]:draw(params);
+		elseif (setting.type == 'TOGGLE') then
 			Font.Normal();
 
-			values[tostring(setting.value)]:draw({
-				x = x,
-				y = y,
-				a = alpha,
-				color = 'White',
-			});
-	
-			if (isSelected) then
-				drawArrows(x, y, false, false);
-			end
+			setting.value[tostring(rawSetting.value)]:draw(params);
+		end
+
+		if (isSelected and (setting.type ~= 'BUTTON')) then
+			drawArrows(layout.x.middleRight, y, minBounded, maxBounded);
 		end
 	end,
 
-	render = function(self, deltaTime, displaying)
-		layout:setSizes(scaledW, scaledH);
+	drawNavigation = function(self)
+		local alpha = 255 * timer;
+		local x1 = layout.x.middleLeft;
+		local x2 = layout.x.outerRight;
+		local y = layout.y.bottom + 12;
 
+		gfx.BeginPath();
+
+		FontAlign.Left();
+	
+		self.labels.controls.fxl:draw({
+			x = x1,
+			y = y - 1,
+			a = alpha,
+			color = 'Normal',
+		});
+
+		self.labels.navigation[current.tab.previous]:draw({
+			x = x1 + self.labels.controls.fxr.w + 8,
+			y = y,
+			a = alpha,
+			color = 'White',
+		});
+	
+		FontAlign.Right();
+
+		self.labels.navigation[current.tab.next]:draw({
+			x = x2,
+			y = y,
+			a = alpha,
+			color = 'White',
+		});
+
+		self.labels.controls.fxr:draw({
+			x = x2 - self.labels.navigation[current.tab.next].w - 8,
+			y = y - 1,
+			a = alpha,
+			color = 'Normal',
+		});
+	end,
+	
+	render = function(self, deltaTime, displaying)
 		self:setLabels();
 
-		if (not confirmLabelAmount(self['labels']['settings'])) then
-			drawErrorPrompt('Invalid label amount in gamesettingsdialog.lua');
-			
-			return;
-		end
+		layout:setSizes(scaledW, scaledH);
 
 		gfx.ForceRender();
 
@@ -708,6 +689,8 @@ render = function(deltaTime, displaying)
 	if (displaying) then
 		timer = math.min(timer + (deltaTime * 8), 1);
 	end
+
+	current:update();
 
 	if (SettingsDiag.tabs[1].name == 'Main') then
 		practiceModeDialog:render();

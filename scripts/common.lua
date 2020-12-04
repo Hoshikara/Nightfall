@@ -237,22 +237,6 @@ drawCursor = function(params);
 	gfx.Stroke();
 end
 
-drawErrorPrompt = function(message)
-  local resX, resY = game.GetResolution();
-
-  gfx.Save();
-
-  gfx.BeginPath();
-  gfx.FillColor(255, 55, 55, 255);
-  gfx.FontSize(24);
-  FontAlign.Middle();
-  Font.Mono();
-  gfx.FastText(message, resX / 2, 20);
-  gfx.FastText('PLEASE UPDATE YOUR GAME OR CONTACT ME ON DISCORD: Hoshikara#5973', resX / 2, 50);
-
-  gfx.Restore();
-end
-
 drawResolutionWarning = function(x, y)
   gfx.Save();
 
