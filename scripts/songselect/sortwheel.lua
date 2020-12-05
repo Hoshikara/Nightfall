@@ -168,7 +168,7 @@ end
 
 render = function(deltaTime, displaying)
 	if (not rendererSet) then
-		isSongSelect = #sorts == 12;
+		isSongSelect = #sorts > 8;
 
 		rendererSet = true;
 	end

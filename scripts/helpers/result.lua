@@ -19,9 +19,11 @@ local getClear = function(current)
 end
 
 local getDifficulty = function(current)
-  local difficulty = get(current, 'difficulty', 0) + 1;
+  local jacketPath = get(current, 'jacketPath', '');
+  local difficulty = get(current, 'difficulty', 0);
+  local difficultyIndex = getDifficultyIndex(jacketPath, difficulty);
 
-  return CONSTANTS.difficulties[difficulty];
+  return CONSTANTS.difficulties[difficultyIndex];
 end
 
 local getDuration = function(current)

@@ -11,6 +11,10 @@ local _ = {
     'ADVANCED',
     'EXHAUST',
     'MAXIMUM',
+    'INFINITE',
+    'GRAVITY',
+    'HEAVENLY',
+    'VIVID',
   },
   grades = {
     { minimum = 9900000, grade = 'S' },

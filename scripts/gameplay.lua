@@ -298,6 +298,10 @@ local combo = {
 	timer = 0,
 
 	drawCombo = function(self, deltaTime)
+		if (gameplay.progress == 0) then
+			self.max = 0;
+		end
+
 		if (self.current == 0) then return end
 	
 		local x = scaledW / 2;
@@ -1060,6 +1064,11 @@ local songInfo = {
 
 		self:setLabels();
 
+		local difficultyIndex = getDifficultyIndex(
+			gameplay.jacketPath,
+			gameplay.difficulty
+		);
+
 		local introShift = math.max(introTimer - 1, 0);
 		local introAlpha = math.floor(255 * (1 - (introShift ^ 1.5)));
 		local initialX = scaledW / 32;
@@ -1093,7 +1102,7 @@ local songInfo = {
 
 		gfx.BeginPath();
 		FontAlign.Left();
-		difficulties[gameplay.difficulty + 1]:draw({
+		difficulties[difficultyIndex]:draw({
 			x = -1,
 			y = self.jacket.h + 6,
 			a = 255 * self.timers.fade,

@@ -14,6 +14,9 @@ local volforce = require('songselect/volforce');
 
 local background = Image.New('bg.png');
 
+local best20 = {};
+local best50 = {};
+
 local controlsShortcut = game.GetSkinSetting('controlsShortcut') or false;
 
 local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
@@ -125,14 +128,6 @@ local clears = {
   end
 };
 
-do
-  Font.Normal();
-
-  for index, clear in ipairs(CONSTANTS.clears) do
-    clears.labels[index] = Label.New(clear, 24);
-  end
-end
-
 local grades = {
   breakpoints = {},
 
@@ -154,8 +149,14 @@ local grades = {
   end
 };
 
+local bestLabels = { large = {}, small = {} };
+
 do
   Font.Normal();
+
+  for index, clear in ipairs(CONSTANTS.clears) do
+    clears.labels[index] = Label.New(clear, 24);
+  end
 
   for index, current in ipairs(CONSTANTS.grades) do
     grades.breakpoints[index] = {
@@ -163,6 +164,20 @@ do
       label = Label.New(current.grade, 24),
     };
   end
+
+  bestLabels.large.best = Label.New('BEST', 28);
+
+  Font.Medium();
+
+  bestLabels.small.best = Label.New('BEST', 18);
+
+  Font.Number();
+
+  bestLabels.large['20'] = Label.New('20', 28);
+  bestLabels.large['50'] = Label.New('50', 28);
+
+  bestLabels.small['20'] = Label.New('20', 18);
+  bestLabels.small['50'] = Label.New('50', 18);
 end
 
 local songInfo = {
@@ -344,7 +359,40 @@ local songInfo = {
       gfx.Stroke();
     end
 
+    if (best20[difficulty.id]) then
+      self:drawBestIndicator(self.padding.x.double, self.padding.y.full, '20');
+    elseif (best50[difficulty.id]) then
+      self:drawBestIndicator(self.padding.x.double, self.padding.y.full, '50');
+    end
+
     gfx.Restore();
+  end,
+
+  drawBestIndicator = function(self, x, y, range)
+    gfx.BeginPath();
+    Fill.Dark(255);
+    gfx.Rect(
+      x + 12,
+      y + 12,
+      141,
+      42
+    );
+    gfx.Fill();
+
+    gfx.BeginPath();
+    FontAlign.Left();
+
+    bestLabels.large.best:draw({
+      x = x + 20,
+      y = y + 15,
+      color = 'White',
+    });
+
+    bestLabels.large[range]:draw({
+      x = x + 20 + bestLabels.large.best.w + 12,
+      y = y + 15,
+      color = 'Normal',
+    });
   end,
 
   drawLabels = function(self, song)
@@ -519,9 +567,14 @@ local songInfo = {
     end
 
     if (currentDifficulty) then
+      local difficultyIndex = getDifficultyIndex(
+        currentDifficulty.jacketPath,
+        currentDifficulty.difficulty
+      );
+
       gfx.BeginPath();
       FontAlign.Left();
-      self.difficulties[currentDifficulty.difficulty + 1]:draw({
+      self.difficulties[difficultyIndex]:draw({
         x = x + 36,
         y = y + (self.images.button.h / 2.85),
         a = alpha,
@@ -835,7 +888,7 @@ local songGrid = {
   drawSong = function(self, i, y, isSelected)
     if (not songwheel.songs[i]) then return end
 
-    local alpha = (isSelected and 1) or 0.2;
+    local alpha = (isSelected and 1) or 0.5;
     local _, column = help.getPosition(i);
     local x = (self.grid.jacket + self.grid.margin) * column;
     local song = songwheel.songs[i];
@@ -884,6 +937,12 @@ local songGrid = {
         0
       );
       gfx.Stroke();
+
+      if (best20[difficulty.id]) then
+        self:drawBestIndicator(x, y, alpha, '20');
+      elseif (best50[difficulty.id]) then
+        self:drawBestIndicator(x, y, alpha, '50');
+      end
     end
 
     if (column == 2) then
@@ -891,6 +950,35 @@ local songGrid = {
     end
 
     return 0;
+  end,
+
+  drawBestIndicator = function(self, x, y, alpha, range);
+    gfx.BeginPath();
+    Fill.Dark(255 * math.min(alpha * 1.5, 1));
+    gfx.Rect(
+      x + 8,
+      y + 8,
+      98,
+      32
+    );
+    gfx.Fill();
+
+    gfx.BeginPath();
+    FontAlign.Left();
+
+    bestLabels.small.best:draw({
+      x = x + 16,
+      y = y + 12,
+      a = 255 * alpha,
+      color = 'White',
+    });
+
+    bestLabels.small[range]:draw({
+      x = x + 16 + bestLabels.small.best.w + 8,
+      y = y + 12,
+      a = 255 * math.min(alpha * 1.5, 1),
+      color = 'Normal',
+    });
   end,
 
   handleChange = function(self)
@@ -1119,10 +1207,18 @@ songs_changed = function(withAll)
 		return (l.force > r.force);
   end)
 
+  best20 = {};
+  best50 = {};
   totalForce = 0;
 
 	for i = 1, 50 do
-		if (diffs[i]) then
+    if (diffs[i]) then
+      if (i <= 20) then
+        best20[diffs[i].id] = true;
+      end
+      
+      best50[diffs[i].id] = true;
+
 			totalForce = totalForce + diffs[i].force;
 		end
   end

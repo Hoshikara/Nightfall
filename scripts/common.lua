@@ -318,6 +318,26 @@ getDateFormat = function()
   end
 end
 
+getDifficultyIndex = function(jacketPath, difficultyIndex)
+  if (jacketPath and difficultyIndex) then
+    local path = string.match(string.lower(jacketPath), '[/\\][^\\/]+$');
+
+    if ((difficultyIndex == 3) and path) then
+      if (string.find(path, 'inf')) then
+        return 5;
+      elseif (string.find(path, 'grv')) then
+        return 6;
+      elseif (string.find(path, 'hvn')) then
+        return 7;
+      elseif (string.find(path, 'vvd')) then
+        return 8
+      end
+    end
+  end
+
+  return difficultyIndex + 1;
+end
+
 getSign = function(val)
   return ((val > 0) and 1) or ((val < 0) and -1) or 0;
 end

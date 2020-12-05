@@ -713,10 +713,15 @@ local songInfo = {
 		end
 
 		if (currentDifficulty) then
+			local difficultyIndex = getDifficultyIndex(
+				currentDifficulty.jacketPath,
+				currentDifficulty.difficulty
+			);
+
 			gfx.BeginPath();
 
 			FontAlign.Left();
-			self.difficulties[currentDifficulty.difficulty + 1]:draw({
+			self.difficulties[difficultyIndex]:draw({
 				x = x + 36,
 				y = y + (self.images.button.h / 2.85),
 				a = alpha,

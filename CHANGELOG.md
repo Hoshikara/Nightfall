@@ -1,3 +1,9 @@
+###### December 5, 2020
+- Infinite/Gravity/Heavenly/Vivid difficulty names are now used if available
+- Added an indicator for Best 20/50 songs that contribute to volforce during Song Select
+- Fixed sort wheel not showing the correct labels for Song Select
+- Fixed maximum chain not resetting on chart restart (F5)
+
 ###### October 29, 2020
 - Refactored more `Song Select` components for reusability and design consistency
 - Removed unused `easing` library
