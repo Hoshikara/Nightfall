@@ -68,161 +68,98 @@ local _ = {
     '20',
   },
   settings = {
-    {
-      {
-        label = 'GLOBAL OFFSET',
-        values = {
-          value = '',
-        },
+    ['Offsets'] = {
+      name = 'OFFSETS',
+      ['Global Offset'] = {
+        name = 'GLOBAL  OFFSET',
+        special = 'TIME',
       },
-      {
-        label = 'INPUT OFFSET',
-        values = {
-          value = '',
-        },
+      ['Input Offset'] = {
+        name = 'INPUT OFFSET',
+        special = 'TIME',
       },
-      {
-        label = 'CURRENT SONG OFFSET',
-        values = {
-          value = '',
-        },
+      ['Song Offset'] = {
+        name = 'CURRENT SONG OFFSET',
+        special = 'TIME',
       },
     },
-    {
-      {
-        label = 'SPEED MOD',
-        values = {
+    ['HiSpeed'] = {
+      name = 'HI-SPEED',
+      ['Speed Mod'] = {
+        name = 'SPEED MOD',
+        options = {
           'XMOD',
           'MMOD',
           'CMOD',
         },
       },
-      {
-        label = 'HI-SPEED',
-        values = {
-          value = '',
-        },
-      },
-      {
-        label = 'MOD SPEED',
-        values = {
-          value = '',
-        },
-      },
+      ['HiSpeed'] = { name = 'HI-SPEED' },
+      ['ModSpeed'] = { name = 'MOD SPEED' },
     },
-    {
-      {
-        label = 'GAUGE TYPE',
-        values = {
+    ['Game'] = {
+      name = 'GAMEPLAY',
+      ['Gauge'] = {
+        name = 'GAUGE TYPE',
+        options = {
           'NORMAL',
           'HARD',
         },
       },
-      {
-        label = 'RANDOM MODE',
-        values = {
-          ['true'] = 'ENABLED',
-          ['false'] = 'DISABLED',
-        },
+      ['Random'] = {
+        invert = false,
+        name = 'RANDOM MODE',
       },
-      {
-        label = 'MIRROR MODE',
-        values = {
-          ['true'] = 'ENABLED',
-          ['false'] = 'DISABLED',
-        },
+      ['Mirror'] = {
+        invert = false,
+        name = 'MIRROR MODE',
       },
-      {
-        label = 'BACKGROUNDS',
-        values = {
-          ['true'] = 'DISABLED',
-          ['false'] = 'ENABLED',
-        },
+      ['Hide Backgrounds'] = {
+        invert = true,
+        name = 'BACKGROUNDS',
       },
-      {
-        label = 'SCORE DISPLAY MODE',
-        values = {
+      ['Score Display'] = {
+        name = 'SCORE DISPLAY MODE',
+        options = {
           'ADDITIVE',
           'SUBTRACTIVE',
           'AVERAGE',
         },
       },
-      {
-        label = 'AUTOPLAY',
+      ['Autoplay'] = { name = 'AUTOPLAY' },
+      ['Practice'] = { name = 'PRACTICE MODE' },
+    },
+    ['Hid/Sud'] = {
+      name = 'HIDDEN AND SUDDEN',
+      ['Enable Hidden / Sudden'] = {
+        invert = false,
+        name = 'STATUS',
       },
-      {
-        label = 'PRACTICE MODE',
+      ['Hidden Cutoff'] = { name = 'HIDDEN CUTOFF' },
+      ['Hidden Fade'] = { name = 'HIDDEN FADE' },
+      ['Sudden Cutoff'] = { name = 'SUDDEN CUTOFF' },
+      ['Sudden Fade'] = { name = 'SUDDEN FADE' },
+      ['Show Track Cover'] = {
+        invert = false,
+        name = 'TRACK COVER',
       },
     },
-    {
-      {
-        label = 'STATUS',
-        values = {
-          ['true'] = 'ENABLED',
-          ['false'] = 'DISABLED',
-        },
+    ['Judgement'] = {
+      name = 'HIT WINDOWS',
+      ['Crit Window'] = {
+        name = 'CRIT WINDOW',
+        special = 'TIME WINDOW',
       },
-      {
-        label = 'HIDDEN CUTOFF',
-        values = {
-          value = '',
-        },
+      ['Near Window'] = {
+        name = 'NEAR WINDOW',
+        special = 'TIME WINDOW',
       },
-      {
-        label = 'HIDDEN FADE',
-        values = {
-          value = '',
-        },
+      ['Hold Window'] = {
+        name = 'HOLD WINDOW',
+        special = 'TIME WINDOW',
       },
-      {
-        label = 'SUDDEN CUTOFF',
-        values = {
-          value = '',
-        },
-      },
-      {
-        label = 'SUDDEN FADE',
-        values = {
-          value = '',
-        },
-      },
-      {
-        label = 'TRACK COVER',
-        values = {
-          ['true'] = 'ENABLED',
-          ['false'] = 'DISABLED',
-        },
-      }
+      ['Set to NORMAL'] = { name = 'DEFAULT VALUES' },
+      ['Set to HARD'] = { name = 'HARD VALUES' },
     },
-    {
-      {
-        label = 'CRITICAL WINDOW',
-        values = {
-          type = 'WINDOW',
-          value = '',
-        },
-      },
-      {
-        label = 'NEAR WINDOW',
-        values = {
-          type = 'WINDOW',
-          value = '',
-        },
-      },
-      {
-        label = 'HOLD WINDOW',
-        values = {
-          type = 'WINDOW',
-          value = '',
-        },
-      },
-      {
-        label = 'DEFAULT VALUES',
-      },
-      {
-        label = 'HARD VALUES',
-      },
-    }
   },
   sorts = {
     {
@@ -273,13 +210,6 @@ local _ = {
       name = 'EFFECTOR',
       direction = 'up',
     },
-  },
-  tabs = {
-    'OFFSETS',
-    'HI-SPEED',
-    'GAME MODIFIERS',
-    'HIDDEN AND SUDDEN',
-    'HIT WINDOWS',
   },
 };
 
