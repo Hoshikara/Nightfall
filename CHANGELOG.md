@@ -1,3 +1,9 @@
+###### December 6, 2020
+- Added scrolling to collection wheel to prevent rendering off the screen
+- Fixed Best 20/50 indicator being cut off under certain conditions
+- Fixed sort wheel displaying with incorrect labels and position (hopefully)
+- Refactored `gamesettingsdialog` to prevent crashes from new/unknown settings
+
 ###### December 5, 2020
 - Infinite/Gravity/Heavenly/Vivid difficulty names are now used if available
 - Added an indicator for Best 20/50 songs that contribute to volforce during Song Select

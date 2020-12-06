@@ -1,5 +1,4 @@
-local CONSTANTS_CHALWHEEL = require('constants/chalwheel');
-local CONSTANTS_SONGWHEEL = require('constants/songwheel');
+local CONSTANTS = require('constants/songwheel');
 
 local GridLayout = require('layout/grid');
 
@@ -8,9 +7,6 @@ local arrowWidth = 12;
 local currentSort = 1;
 
 local initialY = -1000;
-
-local isSongSelect = true;
-local rendererSet = false;
 
 local timer = 0;
 
@@ -43,9 +39,6 @@ local labels = nil;
 
 setLabels = function()
 	if (not labels) then
-		local currentConstants = (isSongSelect and CONSTANTS_SONGWHEEL.sorts)
-			or CONSTANTS_CHALWHEEL.sorts;
-
 		labels = {
 			maxWidth = 0,
 			maxHeight = 0,
@@ -53,17 +46,28 @@ setLabels = function()
 
 		Font.Normal();
 
-		for index, current in ipairs(currentConstants) do
-			labels[index] = {
-				name = Label.New(current.name, 24),
-				direction = current.direction
-			};
+		for i, sort in ipairs(sorts) do
+			local label = CONSTANTS.sorts[sort];
 
-			if (labels[index].name.w > labels.maxWidth) then
-				labels.maxWidth = labels[index].name.w;
+			if (not label) then
+				label = {
+					name = string.upper(sort);
+					direction = (((i % 2) == 0) and 'DOWN') or 'UP',
+				};
 			end
 
-			labels.maxHeight = labels.maxHeight + labels[index].name.h + layout.dropdown.padding;
+			labels[i] = {
+				name = Label.New(label.name, 24),
+				direction = label.direction,
+			};
+
+			if (labels[i].name.w > labels.maxWidth) then
+				labels.maxWidth = labels[i].name.w;
+			end
+
+			labels.maxHeight = labels.maxHeight
+				+ labels[i].name.h
+				+ layout.dropdown.padding;
 		end
 	end
 end
@@ -92,7 +96,7 @@ drawCurrentSort = function(displaying)
 		x + labels[currentSort].name.w + arrowWidth,
 		y 
 			+ (labels[currentSort].name.h / 2)
-			+ (((labels[currentSort].direction == 'up') and 0) or 8)
+			+ (((labels[currentSort].direction == 'UP') and 0) or 8)
 	);
 
 	gfx.BeginPath();
@@ -101,7 +105,7 @@ drawCurrentSort = function(displaying)
 	gfx.LineTo(arrowWidth + 1, 1);
 	gfx.LineTo(
 		(arrowWidth / 2) + 1,
-		((labels[currentSort].direction == 'up') and 11) or -9
+		((labels[currentSort].direction == 'UP') and 11) or -9
 	);
 	gfx.LineTo(1, 1);
 	gfx.Fill();
@@ -110,7 +114,7 @@ drawCurrentSort = function(displaying)
 	Fill[color]();
 	gfx.MoveTo(0, 0);
 	gfx.LineTo(arrowWidth, 0);
-	gfx.LineTo((arrowWidth / 2), ((labels[currentSort].direction == 'up') and 10) or -10);
+	gfx.LineTo((arrowWidth / 2), ((labels[currentSort].direction == 'UP') and 10) or -10);
 	gfx.LineTo(0, 0);
 	gfx.Fill();
 
@@ -139,7 +143,7 @@ drawSortLabel = function(index, y, isSelected)
 		x + labels[index].name.w + arrowWidth,
 		y 
 			+ (labels[index].name.h / 2)
-			+ (((labels[index].direction == 'up') and 0) or 8)
+			+ (((labels[index].direction == 'UP') and 0) or 8)
 	);
 
 	gfx.BeginPath();
@@ -148,7 +152,7 @@ drawSortLabel = function(index, y, isSelected)
 	gfx.LineTo(arrowWidth + 1, 1);
 	gfx.LineTo(
 		(arrowWidth / 2) + 1,
-		((labels[currentSort].direction == 'up') and 11) or -9
+		((labels[currentSort].direction == 'UP') and 11) or -9
 	);
 	gfx.LineTo(1, 1);
 	gfx.Fill();
@@ -157,7 +161,7 @@ drawSortLabel = function(index, y, isSelected)
 	Fill[color](alpha);
 	gfx.MoveTo(0, 0);
 	gfx.LineTo(arrowWidth, 0);
-	gfx.LineTo((arrowWidth / 2), ((labels[index].direction == 'up') and 10) or -10);
+	gfx.LineTo((arrowWidth / 2), ((labels[index].direction == 'UP') and 10) or -10);
 	gfx.LineTo(0, 0);
 	gfx.Fill();
 
@@ -167,15 +171,14 @@ drawSortLabel = function(index, y, isSelected)
 end
 
 render = function(deltaTime, displaying)
-	if (not rendererSet) then
-		isSongSelect = #sorts > 8;
-
-		rendererSet = true;
+	if ((not layout) and sorts) then
+		-- sortwheel is rendered by songwheel and chalwheel, but there's no good
+		-- way to determine which of the two is rendering it besides checking
+		-- the amount of sorts available
+		layout = GridLayout.New(#sorts > 8);
 	end
 
-	if (not layout) then
-		layout = GridLayout.New(isSongSelect);
-	end
+	if (not layout) then return end
 
 	gfx.Save();
 
@@ -213,11 +216,9 @@ render = function(deltaTime, displaying)
 
 	gfx.Translate(0, initialY + layout.dropdown.start);
 
-	local currentConstants = (isSongSelect and CONSTANTS_SONGWHEEL.sorts)
-		or CONSTANTS_CHALWHEEL.sorts;
 	local sortY = 0;
 
-	for sortIndex, _ in ipairs(currentConstants) do
+	for sortIndex, _ in ipairs(sorts) do
 		local isSelected = sortIndex == currentSort;
 
 		sortY = sortY + drawSortLabel(sortIndex, sortY, isSelected);

@@ -2,14 +2,6 @@
 
 A custom landscape skin for [Unnamed SDVX Clone (USC)](https://github.com/Drewol/unnamed-sdvx-clone).
 
-## Preview Images
-![titlescreen](./preview/titlescreen.png)
-![controls](./preview/controls.png)
-![songselect](./preview/songselect.png)
-![gameplay](./preview/gameplay.png)
-![results](./preview/results.png)
-![multiplayer](./preview/multiplayer.png)
-
 ## Installation Guide
 ### Prerequisites
 Please make sure your game is up-to-date by either:
@@ -22,3 +14,11 @@ Please make sure your game is up-to-date by either:
 3. In USC, navigate to and select the skin from either:
     * `Settings > Display > Selected Skin`
     * `Settings > Skin Settings > Selected Skin`
+
+## Preview Images
+![titlescreen](./preview/titlescreen.png)
+![controls](./preview/controls.png)
+![songselect](./preview/songselect.png)
+![gameplay](./preview/gameplay.png)
+![results](./preview/results.png)
+![multiplayer](./preview/multiplayer.png)

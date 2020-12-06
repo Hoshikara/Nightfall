@@ -695,6 +695,7 @@ local songInfo = {
 
 local songGrid = {
   cache = { scaledW = 0, scaledH = 0 },
+  currentPage = 1,
   cursor = Cursor.New(),
   grid = {
     jacket = 0,
@@ -866,21 +867,13 @@ local songGrid = {
 
     gfx.Save();
 
-    gfx.Scissor(
-      self.grid.x - 2,
-      self.grid.y.base - 2,
-      self.grid.w + 4,
-      self.grid.h + 4
-    );
-
     gfx.Translate(self.grid.x, self.grid.y.base + offset);
 
     for i = 1, #songwheel.songs do
       local isSelected = i == self.selectedSong;
+
       y = y + self:drawSong(i, y, isSelected);
     end
-
-    gfx.ResetScissor();
 
     gfx.Restore();
   end,
@@ -892,6 +885,8 @@ local songGrid = {
     local _, column = help.getPosition(i);
     local x = (self.grid.jacket + self.grid.margin) * column;
     local song = songwheel.songs[i];
+    local isVisible = (i > ((self.currentPage - 1) * self.viewLimit))
+      and (i <= (self.currentPage * self.viewLimit));
 
     verifySongCache(song);
 
@@ -912,7 +907,7 @@ local songGrid = {
       );
     end
 
-    if (songCache[song.id][selectedDifficulty]) then
+    if (songCache[song.id][selectedDifficulty] and isVisible) then
       gfx.BeginPath();
       Fill.Black();
       gfx.Rect(x, y, self.grid.jacket, self.grid.jacket);
@@ -985,14 +980,14 @@ local songGrid = {
     if (self.selectedSong ~= selectedSong) then
       self.selectedSong = selectedSong;
 
-      local currentPage = List.getCurrentPage({
+      self.currentPage = List.getCurrentPage({
         current = self.selectedSong,
         limit = self.viewLimit,
         total = #songwheel.songs,
       });
 
       self.grid.y.current = (self.grid.h + self.grid.margin)
-        * (currentPage - 1);
+        * (self.currentPage - 1);
       self.grid.y.current = -self.grid.y.current;
       
       self.grid.timer = 0;

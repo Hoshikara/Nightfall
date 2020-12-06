@@ -1,4 +1,4 @@
-local _ = {
+return {
   clears = {
     'PLAYED',
     'NORMAL',
@@ -162,56 +162,17 @@ local _ = {
     },
   },
   sorts = {
-    {
-      name = 'TITLE',
-      direction = 'down',
-    },
-    {
-      name = 'TITLE',
-      direction = 'up',
-    },
-    {
-      name = 'SCORE',
-      direction = 'down',
-    },
-    {
-      name = 'SCORE',
-      direction = 'up',
-    },
-    {
-      name = 'DATE',
-      direction = 'down',
-    },
-    {
-      name = 'DATE',
-      direction = 'up',
-    },
-    {
-      name = 'CLEAR',
-      direction = 'down',
-    },
-    {
-      name = 'CLEAR',
-      direction = 'up',
-    },
-    {
-      name = 'ARTIST',
-      direction = 'down',
-    },
-    {
-      name = 'ARTIST',
-      direction = 'up',
-    },
-    {
-      name = 'EFFECTOR',
-      direction = 'down',
-    },
-    {
-      name = 'EFFECTOR',
-      direction = 'up',
-    },
+    ['Artist ^'] = { name = 'ARTIST', direction = 'UP' },
+    ['Artist v'] = { name = 'ARTIST', direction = 'DOWN' },
+    ['Badge ^'] = { name = 'BADGE', direction = 'UP' },
+    ['Badge v'] = { name = 'BADGE', direction = 'DOWN' },
+    ['Date ^'] = { name = 'DATE', direction = 'UP' },
+    ['Date v'] = { name = 'DATE', direction = 'DOWN' },
+    ['Effector ^'] = { name = 'EFFECTOR', direction = 'UP' },
+    ['Effector v'] = { name = 'EFFECTOR', direction = 'DOWN' },
+    ['Score ^'] = { name = 'SCORE', direction = 'UP' },
+    ['Score v'] = { name = 'SCORE', direction = 'DOWN' },
+    ['Title ^'] = { name = 'TITLE', direction = 'UP' },
+    ['Title v'] = { name = 'TITLE', direction = 'DOWN' }, 
   },
 };
-
-return _;
-

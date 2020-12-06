@@ -246,62 +246,65 @@ local challengeInfo = {
           y = infoY,
           color = 'Normal',
         });
+      
+        -- TODO: better error handling
+        if (info[name]) then
+          if (name == 'difficulty') then
+            local bpmX = infoX + labels[name].w * 2.25;
+          
+            labels.bpm:draw({
+              x = bpmX,
+              y = infoY,
+              color = 'Normal',
+            });
 
-        if (name == 'difficulty') then
-          local bpmX = infoX + labels[name].w * 2.25;
-        
-          labels.bpm:draw({
-            x = bpmX,
-            y = infoY,
-            color = 'Normal',
-          });
+            infoY = infoY + labels[name].h * 1.25;
 
-          infoY = infoY + labels[name].h * 1.25;
-
-          info[name]:draw({
-            x = infoX,
-            y = infoY,
-            color = 'White',
-          });
-
-          level:draw({
-            x = infoX + info[name].w + 8,
-            y = infoY,
-            color = 'White',
-          });
-
-          bpm:draw({
-            x = bpmX,
-            y = infoY,
-            color = 'White',
-          });
-        else
-          infoY = infoY + labels[name].h * 1.25;
-
-          if (info[name].w > maxWidth) then
-            scrollTimers[challenge.id][name] =
-              scrollTimers[challenge.id][name] + deltaTime;
-
-            drawScrollingLabel(
-              scrollTimers[challenge.id][name],
-              info[name],
-              maxWidth,
-              infoX,
-              infoY,
-              scalingFactor,
-              'White',
-              255
-            );
-          else
             info[name]:draw({
               x = infoX,
               y = infoY,
               color = 'White',
             });
-          end
-        end
 
-        infoY = infoY + info[name].h * 1.75;
+            level:draw({
+              x = infoX + info[name].w + 8,
+              y = infoY,
+              color = 'White',
+            });
+
+            bpm:draw({
+              x = bpmX,
+              y = infoY,
+              color = 'White',
+            });
+          else
+            infoY = infoY + labels[name].h * 1.25;
+
+            if (info[name].w > maxWidth) then
+              scrollTimers[challenge.id][name] =
+                scrollTimers[challenge.id][name] + deltaTime;
+
+              drawScrollingLabel(
+                scrollTimers[challenge.id][name],
+                info[name],
+                maxWidth,
+                infoX,
+                infoY,
+                scalingFactor,
+                'White',
+                255
+              );
+            else
+              info[name]:draw({
+                x = infoX,
+                y = infoY,
+                color = 'White',
+              });
+            end
+          end
+
+          infoY = infoY + info[name].h * 1.75;
+        end
       end
 
       if (i ~= #challenge.charts) then
