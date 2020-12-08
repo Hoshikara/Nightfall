@@ -1,3 +1,10 @@
+###### December 7, 2020
+- Added highest grade achieved onto the jackets of the song grid in `Song Select`
+- Modified track texture for less distinction between lanes
+- Modified BT textures for easier distinction when on top of FX chips or holds
+- Fixed track cover not covering lane fully/track invisible effect not working
+correctly
+
 ###### December 6, 2020
 - Added scrolling to collection wheel to prevent rendering off the screen
 - Fixed Best 20/50 indicator being cut off under certain conditions

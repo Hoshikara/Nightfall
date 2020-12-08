@@ -131,7 +131,7 @@ local clears = {
 local grades = {
   breakpoints = {},
 
-  getGrade = function(self, difficulty)
+  getGrade = function(self, difficulty, size)
     local label = nil;
 
     if (difficulty.scores[1]) then
@@ -139,7 +139,7 @@ local grades = {
 
       for _, breakpoint in ipairs(self.breakpoints) do
         if (highScore.score >= breakpoint.minimum) then
-          label = breakpoint.label;
+          label = breakpoint.label[size];
           break;
         end
       end
@@ -161,7 +161,10 @@ do
   for index, current in ipairs(CONSTANTS.grades) do
     grades.breakpoints[index] = {
       minimum = current.minimum,
-      label = Label.New(current.grade, 24),
+      label = {
+        large = Label.New(current.grade, 30),
+        small = Label.New(current.grade, 24),
+      },
     };
   end
 
@@ -432,7 +435,7 @@ local songInfo = {
         difficulty = song.difficulties[1];
       end
 
-      if (grades:getGrade(difficulty)) then
+      if (grades:getGrade(difficulty, 'small')) then
         for _, name in ipairs(self.order.conditional) do
           self.labels[name]:draw({
             x = self.labels.x,
@@ -457,7 +460,7 @@ local songInfo = {
     local baseLabelHeight = self.labels.title.h;
     local y = self.labels.y + baseLabelHeight + self.padding.y.quarter - 8;
     local clearLabel = clears:getClear(difficulty);
-    local gradeLabel = grades:getGrade(difficulty);
+    local gradeLabel = grades:getGrade(difficulty, 'small');
 
     gfx.Save();
 
@@ -700,6 +703,7 @@ local songGrid = {
   grid = {
     jacket = 0,
     margin = 0,
+    stats = { w = 0, h = 0 },
     timer = 1,
     w = 0,
     h = 0,
@@ -731,6 +735,9 @@ local songGrid = {
 
       self.grid.x = (scaledW / 10) + songInfo.panel.w;
       self.grid.y.base = scaledH - (scaledH / 20) - self.grid.h;
+
+      self.grid.stats.w = (self.grid.jacket // 2.2) - 8;
+      self.grid.stats.h = self.grid.jacket // 4;
 
       self.labels.x = {};
       self.labels.x[1] = self.grid.x - 1;
@@ -938,6 +945,15 @@ local songGrid = {
       elseif (best50[difficulty.id]) then
         self:drawBestIndicator(x, y, alpha, '50');
       end
+
+      if (grades:getGrade(difficulty, 'large')) then
+        self:drawGrade(
+          grades:getGrade(difficulty, 'large'),
+          x,
+          y,
+          alpha
+        );
+      end
     end
 
     if (column == 2) then
@@ -973,6 +989,38 @@ local songGrid = {
       y = y + 12,
       a = 255 * math.min(alpha * 1.5, 1),
       color = 'Normal',
+    });
+  end,
+
+  drawGrade = function(self, grade, initialX, initialY, alpha)
+    local x = initialX + self.grid.jacket - 8 - self.grid.stats.w;
+    local y = initialY + self.grid.jacket - 8 - self.grid.stats.h;
+
+    gfx.BeginPath();
+    Fill.Dark(255 * math.min(alpha * 1.5, 1));
+    gfx.Rect(
+      x,
+      y,
+      self.grid.stats.w,
+      self.grid.stats.h
+    );
+    gfx.Fill();
+
+    gfx.BeginPath();
+    FontAlign.Left();
+
+    self.labels.grade:draw({
+      x = x + 8,
+      y = y + 4,
+      a = 255 * math.min(alpha * 1.5, 1),
+      color = 'Normal',
+    });
+
+    grade:draw({
+      x = x + 8,
+      y = y + 4 + (self.labels.grade.h * 1.25),
+      a = 255 * alpha,
+      color = 'White',
     });
   end,
 

@@ -1,8 +1,11 @@
-#version 330
+#ifdef EMBEDDED
+varying vec2 fsTex;
+#else
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(location=1) in vec2 fsTex;
 layout(location=0) out vec4 target;
+#endif
 
 uniform sampler2D mainTex;
 uniform vec4 lCol;
@@ -14,7 +17,7 @@ void main()
 	vec4 mainColor = texture(mainTex, fsTex.xy);
     vec4 col = mainColor;
 
-    if(fsTex.y > hidden * 0.6)
+    if(fsTex.y > hidden)
     {
         //Red channel to color right lane
         //col.xyz = vec3(.9) * rCol.xyz * vec3(mainColor.x);

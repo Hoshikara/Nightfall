@@ -32,6 +32,7 @@ return {
     grid = {
       collection = 'COLLECTION',
       difficulty = 'DIFFICULTY',
+      grade = 'GRADE',
       sort = 'SORT',
     },
     info = {
