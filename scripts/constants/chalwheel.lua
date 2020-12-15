@@ -8,7 +8,7 @@ local _ = {
     completion = 'COMPLETION',
     difficulty = 'DIFFICULTY',
     grade = 'GRADE',
-    requirement = 'REQUIREMENT',
+    requirements = 'REQUIREMENTS',
     sort = 'SORT',
     title = 'TITLE',
   },

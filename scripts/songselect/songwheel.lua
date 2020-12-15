@@ -19,8 +19,6 @@ local best50 = {};
 
 local controlsShortcut = game.GetSkinSetting('controlsShortcut') or false;
 
-local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
-
 local previousDifficulty = 1;
 local previousSong = 1;
 local selectedDifficulty = 1;
@@ -75,6 +73,28 @@ do
     };
   end
 end
+
+local jacketCache = {
+  cache = {},
+  fallback = gfx.CreateSkinImage('common/loading.png', 0),
+
+  getJacket = function(self, jacketPath)
+    local jacket = self.cache[jacketPath];
+
+    if ((not jacket) or (jacket == self.fallback)) then
+      jacket = gfx.LoadImageJob(
+        jacketPath,
+        self.fallback,
+        scaledW / 5,
+        scaledW / 5
+      );
+
+      self.cache[jacketPath] = jacket;
+    end
+
+    return jacket;
+  end,
+};
 
 local songCache = {};
 
@@ -333,34 +353,23 @@ local songInfo = {
     return difficulty;
   end,
 
-  drawJacket = function(self, song, difficulty)
+  drawJacket = function(self, difficulty)
+    local jacket = jacketCache:getJacket(difficulty.jacketPath);
+
     gfx.Save();
 
-    if ((not songCache[song.id][self.selectedDifficulty])
-      or (songCache[song.id][self.selectedDifficulty] == jacketFallback)) then
-        songCache[song.id][self.selectedDifficulty] = gfx.LoadImageJob(
-          difficulty.jacketPath,
-          jacketFallback,
-          self.jacketSize,
-          self.jacketSize
-        );
-    end
-
-    if (songCache[song.id][self.selectedDifficulty]) then
-      gfx.BeginPath();
-      gfx.StrokeWidth(2);
-      gfx.StrokeColor(60, 110, 160, 255);
-      gfx.ImageRect(
-        self.padding.x.double,
-        self.padding.y.full,
-        self.jacketSize,
-        self.jacketSize,
-        songCache[song.id][self.selectedDifficulty],
-        1,
-        0
-      );
-      gfx.Stroke();
-    end
+    gfx.BeginPath();
+    gfx.StrokeWidth(2);
+    gfx.StrokeColor(60, 110, 160, 255);
+    gfx.ImageRect(
+      self.padding.x.double,
+      self.padding.y.full,
+      self.jacketSize,
+      self.jacketSize,
+      jacket,
+      1,
+      0
+    );
 
     if (best20[difficulty.id]) then
       self:drawBestIndicator(self.padding.x.double, self.padding.y.full, '20');
@@ -632,7 +641,7 @@ local songInfo = {
 
     gfx.Translate(self.panel.x, self.panel.y);
 
-    self:drawJacket(song, difficulty);
+    self:drawJacket(difficulty);
 
     self:drawSongInfo(deltaTime, song.id, difficulty);
 
@@ -892,8 +901,7 @@ local songGrid = {
     local _, column = help.getPosition(i);
     local x = (self.grid.jacket + self.grid.margin) * column;
     local song = songwheel.songs[i];
-    local isVisible = (i > ((self.currentPage - 1) * self.viewLimit))
-      and (i <= (self.currentPage * self.viewLimit));
+    local isVisible = List.isVisible(i, self.viewLimit, self.currentPage);
 
     verifySongCache(song);
 
@@ -903,18 +911,9 @@ local songGrid = {
       difficulty = song.difficulties[1];
     end
 
-    if ((not songCache[song.id][selectedDifficulty])
-      or (songCache[song.id][selectedDifficulty] == jacketFallback)
-    ) then
-      songCache[song.id][selectedDifficulty] = gfx.LoadImageJob(
-        difficulty.jacketPath,
-        jacketFallback,
-        0,
-        0
-      );
-    end
+    local jacket = jacketCache:getJacket(difficulty.jacketPath);
 
-    if (songCache[song.id][selectedDifficulty] and isVisible) then
+    if (isVisible) then
       gfx.BeginPath();
       Fill.Black();
       gfx.Rect(x, y, self.grid.jacket, self.grid.jacket);
@@ -934,7 +933,7 @@ local songGrid = {
         y, 
         self.grid.jacket, 
         self.grid.jacket, 
-        songCache[song.id][selectedDifficulty], 
+        jacket,
         alpha,
         0
       );
@@ -1256,13 +1255,15 @@ songs_changed = function(withAll)
 
 	for i = 1, 50 do
     if (diffs[i]) then
-      if (i <= 20) then
-        best20[diffs[i].id] = true;
+      if (diffs[i].force > 0) then
+        if (i <= 20) then
+          best20[diffs[i].id] = true;
+        end
+        
+        best50[diffs[i].id] = true;
       end
-      
-      best50[diffs[i].id] = true;
 
-			totalForce = totalForce + diffs[i].force;
+      totalForce = totalForce + diffs[i].force;
 		end
   end
   

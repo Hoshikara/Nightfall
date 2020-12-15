@@ -928,6 +928,7 @@ local graphs = {
 
 local scoreList = {
 	cache = { scaledW = 0, scaledH = 0 },
+	currentPage = 1,
 	cursor = Cursor.New(),
 	labels = nil,
 	list = {
@@ -1121,13 +1122,6 @@ local scoreList = {
 
 		gfx.Save();
 
-		gfx.Scissor(
-			self.list.x,
-			self.list.y.base,
-			self.list.w,
-			self.list.h.base
-		);
-
 		gfx.Translate(self.list.x, self.list.y.base + offset);
 
 		for i = 1, #allScores do
@@ -1136,222 +1130,223 @@ local scoreList = {
 			y = y + self:drawScore(i, y, isSelected);
 		end
 
-		gfx.ResetScissor();
-
 		gfx.Restore();
 	end,
 
 	drawScore = function(self, i, initialY, isSelected)
+		local isVisible = List.isVisible(i, self.viewLimit, self.currentPage);
 		local h = (isSelected and self.list.h.item.expanded)
 			or self.list.h.item.collapsed;
 		local x = self.list.padding.x;
 		local y = initialY + self.list.padding.y;
 
-		self.stats[i].score:setInfo({ value = allScores[i].score });
+		if (isVisible) then
+			self.stats[i].score:setInfo({ value = allScores[i].score });
 
-		gfx.BeginPath();
-		Fill.Dark(120);
-		gfx.Rect(0, initialY, self.list.w, h);
-		gfx.Fill();
+			gfx.BeginPath();
+			Fill.Dark(120);
+			gfx.Rect(0, initialY, self.list.w, h);
+			gfx.Fill();
 
-		gfx.BeginPath();
-		FontAlign.Right();
+			gfx.BeginPath();
+			FontAlign.Right();
 
-		self.stats[i].place:draw({
-			x = self.list.w - self.list.padding.x + 8,
-			y = y - 1,
-			a = 40,
-			color = 'Normal',
-		});
-
-		gfx.BeginPath();
-		FontAlign.Left();
-
-		self.labels.score:draw({
-			x = x + 1,
-			y = y,
-			color = 'Normal',
-		});
-	
-		if (isSelected) then
-			y = y + (self.labels.score.h * 0.75);
-		else
-			x = self.stats[i].score.position[8] + 144;
-
-			if (singleplayer) then
-				self.labels.timestamp:draw({
-					x = x,
-					y = y,
-					color = 'Normal',
-				});
-			else
-				self.labels.name:draw({
-					x = x,
-					y = y,
-					color = 'Normal',
-				});
-			end
-
-			y = y + (self.labels.score.h * 0.75);
-
-			if (singleplayer) then
-				self.stats[i].timestamp:draw({
-					x = x,
-					y = y + 8,
-					color = 'White',
-				});
-			else
-				self.stats[i].name:draw({
-					x = x,
-					y = y + 8,
-					color = 'White',
-				});
-			end
-
-			self.labels.clear:draw({
-				x = x,
-				y = y + (self.labels.score.h * 2.5) + 2,
+			self.stats[i].place:draw({
+				x = self.list.w - self.list.padding.x + 8,
+				y = y - 1,
+				a = 40,
 				color = 'Normal',
 			});
 
-			self.stats[i].clear:draw({
-				x = x,
-				y = y + (self.labels.score.h * 3.75) + 2,
-				color = 'White',
+			gfx.BeginPath();
+			FontAlign.Left();
+
+			self.labels.score:draw({
+				x = x + 1,
+				y = y,
+				color = 'Normal',
 			});
-		end
-
-		x = self.list.padding.x;
-
-		self.stats[i].score:draw({
-			offset = 10,
-			x = x - 3,
-			y1 = y,
-			y2 = y + (self.stats[i].score.labels[1].h * 0.125) + 5,
-		});
-
-		if (isSelected) then
-			y = y + self.stats[i].score.labels[1].h * 1.125;
-
-			if (singleplayer) then
-				local statX = x;
-				local statY = y + (self.labels.timestamp.h * 1.5);
-				local spacing = self:getSpacing(self.orders.sp.row[1], 1);
-
-				for _, name in ipairs(self.orders.sp.row[1]) do
-					self.labels[name]:draw({
-						x = statX,
-						y = y,
-						color = 'Normal',
-					});
-
-					self.stats[i][name]:draw({
-						x = statX,
-						y = statY,
-						color = 'White',
-					});
-
-					statX = statX + self.labels[name].w + spacing;
-				end
-
-				y = y + (self.labels.timestamp.h * 2) + (self.stats[i].timestamp.h * 2);
-
-				statX = x;
-				statY = y + (self.labels.critical.h * 1.5);
-				spacing = self:getSpacing(self.orders.sp.row[2], 1);
-
-				for _, name in ipairs(self.orders.sp.row[2]) do
-					self.labels[name]:draw({
-						x = statX,
-						y = y,
-						color = 'Normal',
-					});
-
-					self.stats[i][name]:draw({
-						x = statX,
-						y = statY,
-						color = 'White',
-					});
-
-					statX = statX + self.labels[name].w + spacing;
-				end
+		
+			if (isSelected) then
+				y = y + (self.labels.score.h * 0.75);
 			else
-				self.labels.name:draw({
-					x = x,
-					y = y,
-					color = 'Normal',
-				});
+				x = self.stats[i].score.position[8] + 144;
 
-				self.stats[i].name:draw({
-					x = x,
-					y = y + (self.labels.name.h * 1.5),
-					color = 'White',
-				});
+				if (singleplayer) then
+					self.labels.timestamp:draw({
+						x = x,
+						y = y,
+						color = 'Normal',
+					});
+				else
+					self.labels.name:draw({
+						x = x,
+						y = y,
+						color = 'Normal',
+					});
+				end
 
-				x = x + (self.labels.name.w * 3.5) + 1;
+				y = y + (self.labels.score.h * 0.75);
 
-				self.labels.grade:draw({
-					x = x,
-					y = y,
-					color = 'Normal',
-				});
-
-				self.stats[i].grade:draw({
-					x = x,
-					y = y + (self.labels.grade.h * 1.5),
-					color = 'White',
-				});
-
-				x = x + (self.labels.grade.w * 1.825) + 2;
-
-				self.labels.gauge:draw({
-					x = x,
-					y = y,
-					color = 'Normal',
-				});
-
-				self.stats[i].gauge:draw({
-					x = x,
-					y = y + (self.labels.gauge.h * 1.5),
-					color = 'White',
-				});
-
-				x = x + (self.labels.gauge.w * 2);
+				if (singleplayer) then
+					self.stats[i].timestamp:draw({
+						x = x,
+						y = y + 8,
+						color = 'White',
+					});
+				else
+					self.stats[i].name:draw({
+						x = x,
+						y = y + 8,
+						color = 'White',
+					});
+				end
 
 				self.labels.clear:draw({
 					x = x,
-					y = y,
+					y = y + (self.labels.score.h * 2.5) + 2,
 					color = 'Normal',
 				});
 
 				self.stats[i].clear:draw({
 					x = x,
-					y = y + (self.labels.clear.h * 1.5),
+					y = y + (self.labels.score.h * 3.75) + 2,
 					color = 'White',
 				});
+			end
 
-				y = y + (self.labels.name.h * 2) + (self.stats[i].name.h * 2);
+			x = self.list.padding.x;
 
-				local statX = self.list.padding.x;
-				local statY = y + (self.labels.critical.h * 1.5);
-				local spacing = self:getSpacing(self.orders.mp.row[1], 1);
+			self.stats[i].score:draw({
+				offset = 10,
+				x = x - 3,
+				y1 = y,
+				y2 = y + (self.stats[i].score.labels[1].h * 0.125) + 5,
+			});
 
-				for _, name in ipairs(self.orders.mp.row[1]) do
-					self.labels[name]:draw({
-						x = statX,
-						y = y,
-						color = 'Normal',
-					});
+			if (isSelected) then
+				y = y + self.stats[i].score.labels[1].h * 1.125;
 
-					if (self.stats[i][name]) then
+				if (singleplayer) then
+					local statX = x;
+					local statY = y + (self.labels.timestamp.h * 1.5);
+					local spacing = self:getSpacing(self.orders.sp.row[1], 1);
+
+					for _, name in ipairs(self.orders.sp.row[1]) do
+						self.labels[name]:draw({
+							x = statX,
+							y = y,
+							color = 'Normal',
+						});
+
 						self.stats[i][name]:draw({
 							x = statX,
 							y = statY,
 							color = 'White',
 						});
+
+						statX = statX + self.labels[name].w + spacing;
 					end
 
-					statX = statX + self.labels[name].w + spacing;
+					y = y + (self.labels.timestamp.h * 2) + (self.stats[i].timestamp.h * 2);
+
+					statX = x;
+					statY = y + (self.labels.critical.h * 1.5);
+					spacing = self:getSpacing(self.orders.sp.row[2], 1);
+
+					for _, name in ipairs(self.orders.sp.row[2]) do
+						self.labels[name]:draw({
+							x = statX,
+							y = y,
+							color = 'Normal',
+						});
+
+						self.stats[i][name]:draw({
+							x = statX,
+							y = statY,
+							color = 'White',
+						});
+
+						statX = statX + self.labels[name].w + spacing;
+					end
+				else
+					self.labels.name:draw({
+						x = x,
+						y = y,
+						color = 'Normal',
+					});
+
+					self.stats[i].name:draw({
+						x = x,
+						y = y + (self.labels.name.h * 1.5),
+						color = 'White',
+					});
+
+					x = x + (self.labels.name.w * 3.5) + 1;
+
+					self.labels.grade:draw({
+						x = x,
+						y = y,
+						color = 'Normal',
+					});
+
+					self.stats[i].grade:draw({
+						x = x,
+						y = y + (self.labels.grade.h * 1.5),
+						color = 'White',
+					});
+
+					x = x + (self.labels.grade.w * 1.825) + 2;
+
+					self.labels.gauge:draw({
+						x = x,
+						y = y,
+						color = 'Normal',
+					});
+
+					self.stats[i].gauge:draw({
+						x = x,
+						y = y + (self.labels.gauge.h * 1.5),
+						color = 'White',
+					});
+
+					x = x + (self.labels.gauge.w * 2);
+
+					self.labels.clear:draw({
+						x = x,
+						y = y,
+						color = 'Normal',
+					});
+
+					self.stats[i].clear:draw({
+						x = x,
+						y = y + (self.labels.clear.h * 1.5),
+						color = 'White',
+					});
+
+					y = y + (self.labels.name.h * 2) + (self.stats[i].name.h * 2);
+
+					local statX = self.list.padding.x;
+					local statY = y + (self.labels.critical.h * 1.5);
+					local spacing = self:getSpacing(self.orders.mp.row[1], 1);
+
+					for _, name in ipairs(self.orders.mp.row[1]) do
+						self.labels[name]:draw({
+							x = statX,
+							y = y,
+							color = 'Normal',
+						});
+
+						if (self.stats[i][name]) then
+							self.stats[i][name]:draw({
+								x = statX,
+								y = statY,
+								color = 'White',
+							});
+						end
+
+						statX = statX + self.labels[name].w + spacing;
+					end
 				end
 			end
 		end
@@ -1384,7 +1379,7 @@ local scoreList = {
 		if (self.selectedScore ~= selectedScore) then
 			self.selectedScore = selectedScore;
 		
-			local currentPage = List.getCurrentPage({
+			self.currentPage = List.getCurrentPage({
 				current = self.selectedScore,
 				limit = self.viewLimit,
 				total = #allScores,
@@ -1393,7 +1388,7 @@ local scoreList = {
 			self.list.y.current = (self.list.h.base
 				- self.list.h.item.difference
 				+ self.list.margin
-			) * (currentPage - 1);
+			) * (self.currentPage - 1);
 			self.list.y.current = -self.list.y.current;
 
 			self.list.timer = 0;

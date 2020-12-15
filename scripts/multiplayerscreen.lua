@@ -121,6 +121,7 @@ local usernameCreation = DialogWindow.New(CONSTANTS_MULTI.dialog.usernameCreatio
 local roomList = {
 	alpha = 0,
 	cache = { scaledW = 0, scaledH = 0 },
+	currentPage = 1,
 	cursor = Cursor.New(),
 	images = {
 		button = Image.New('buttons/normal.png'),
@@ -284,20 +285,11 @@ local roomList = {
 
 		gfx.Save();
 
-		gfx.Scissor(
-			self.list.x,
-			self.list.y.base,
-			self.list.w,
-			self.list.h.base
-		);
-
 		gfx.Translate(self.list.x, self.list.y.base + offset);
 
 		for i = 1, #allRooms do
 			y = y + self:drawRoom(i, y);
 		end
-
-		gfx.ResetScissor();
 
 		gfx.Restore();
 	end,
@@ -305,42 +297,49 @@ local roomList = {
 	drawRoom = function(self, roomIndex, initialY)
 		if (not allRooms[roomIndex]) then return end
 
+		local isVisible = List.isVisible(
+			roomIndex,
+			self.viewLimit,
+			self.currentPage
+		);
 		local x = self.list.padding;
 		local y = initialY + self.list.padding;
 
-		gfx.BeginPath();
-		Fill.Dark(120);
-		gfx.Rect(0, initialY, self.list.w, self.list.h.item);
-		gfx.Fill();
+		if (isVisible) then
+			gfx.BeginPath();
+			Fill.Dark(120);
+			gfx.Rect(0, initialY, self.list.w, self.list.h.item);
+			gfx.Fill();
 
-		gfx.BeginPath();
-		FontAlign.Left();
+			gfx.BeginPath();
+			FontAlign.Left();
 
-		for i, name in ipairs(self.order) do
-			Font.Medium();
-			gfx.FontSize(18);
+			for i, name in ipairs(self.order) do
+				Font.Medium();
+				gfx.FontSize(18);
 
-			Fill.Dark(255 * 0.5);
-			gfx.Text(string.upper(name), x + self.text[i] + 1, y + 1);
+				Fill.Dark(255 * 0.5);
+				gfx.Text(string.upper(name), x + self.text[i] + 1, y + 1);
 
-			Fill.Normal();
-			gfx.Text(string.upper(name), x + self.text[i], y);
+				Fill.Normal();
+				gfx.Text(string.upper(name), x + self.text[i], y);
 
-			local infoY = ((name == 'capacity') and (y + 24)) or (y + 28);
+				local infoY = ((name == 'capacity') and (y + 24)) or (y + 28);
 
-			if (name == 'capacity') then
-				Font.Number();
-				gfx.FontSize(30);
-			else
-				Font.Normal();
-				gfx.FontSize(24);
+				if (name == 'capacity') then
+					Font.Number();
+					gfx.FontSize(30);
+				else
+					Font.Normal();
+					gfx.FontSize(24);
+				end
+
+				Fill.Dark(255 * 0.5);
+				gfx.Text(self.info[roomIndex][name], x + self.text[i] + 1, infoY + 1);
+
+				Fill.White();
+				gfx.Text(self.info[roomIndex][name], x + self.text[i], infoY);
 			end
-
-			Fill.Dark(255 * 0.5);
-			gfx.Text(self.info[roomIndex][name], x + self.text[i] + 1, infoY + 1);
-
-			Fill.White();
-			gfx.Text(self.info[roomIndex][name], x + self.text[i], infoY);
 		end
 
 		return self.list.h.item + self.list.margin;
@@ -356,14 +355,14 @@ local roomList = {
 		if (self.selectedRoomIndex ~= selectedRoomIndex) then
 			self.selectedRoomIndex = selectedRoomIndex;
 
-			local currentPage = List.getCurrentPage({
+			self.currentPage = List.getCurrentPage({
 				current = self.selectedRoomIndex,
 				limit = self.viewLimit,
 				total = #allRooms,
 			});
 	
 			self.list.y.current = (self.list.h.base + self.list.margin)
-				* (currentPage - 1);
+				* (self.currentPage - 1);
 			self.list.y.current = -self.list.y.current;
 	
 			self.list.timer = 0;

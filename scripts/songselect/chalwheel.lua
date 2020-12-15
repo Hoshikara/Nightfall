@@ -55,7 +55,10 @@ cacheChallenge = function(challenge)
     challengeCache[challenge.id].bpms = {};
     challengeCache[challenge.id].titles = {};
     challengeCache[challenge.id].jackets = {};
-    challengeCache[challenge.id].title = Label.New(string.upper(challenge.title), 36);
+    challengeCache[challenge.id].title = {
+      name = Label.New(string.upper(challenge.title), 36),
+      timer = 0,
+    };
 
     for i, chart in ipairs(challenge.charts) do
       challengeCache[challenge.id].artists[i] = Label.New(
@@ -71,10 +74,13 @@ cacheChallenge = function(challenge)
 
     Font.Normal();
 
-    challengeCache[challenge.id].requirement = Label.New(
-      stringReplace(
-        challenge.requirement_text,
-        { '- ' }
+    challengeCache[challenge.id].requirements = Label.New(
+      string.upper(
+        string.gsub(
+          challenge.requirement_text,
+          '\n',
+          '\t\t\t'
+        )
       ),
       24
     );
@@ -161,7 +167,7 @@ local challengeInfo = {
   },
   search = SearchBar.New(),
   selectedChallenge = 0,
-  timer = { title = 0 },
+  timers = { requirements = 0, title = 0 },
   
   setSizes = function(self)
     if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
@@ -377,8 +383,8 @@ local challengeInfo = {
     
     cacheChallenge(challenge);
 
-    local title = challengeCache[challenge.id].title;
-    local requirement = challengeCache[challenge.id].requirement;
+    local title = challengeCache[challenge.id].title.name;
+    local requirements = challengeCache[challenge.id].requirements;
 
     local y = 0;
 
@@ -403,10 +409,10 @@ local challengeInfo = {
     y = y + labels.challenge.h * 1.25;
 
     if (title.w > self.panel.innerWidth) then
-      self.timer.title = self.timer.title + deltaTime;
+      self.timers.title = self.timers.title + deltaTime;
 
       drawScrollingLabel(
-        self.timer.title,
+        self.timers.title,
         title,
         self.panel.innerWidth,
         0,
@@ -425,22 +431,37 @@ local challengeInfo = {
 
     y = y + title.h * 1.75;
 
-    labels.requirement:draw({
+    labels.requirements:draw({
       x = 0,
       y = y,
       color = 'Normal',
     });
 
-    y = y + labels.requirement.h * 1.35;
+    y = y + labels.requirements.h * 1.35;
 
-    requirement:draw({
-      x = 0,
-      y = y,
-      color = 'White',
-    });
+    if (requirements.w > self.panel.innerWidth) then
+      self.timers.requirements = self.timers.requirements + deltaTime;
+
+      drawScrollingLabel(
+        self.timers.requirements,
+        requirements,
+        self.panel.innerWidth,
+        0,
+        y,
+        scalingFactor,
+        'White',
+        255
+      );
+    else
+      requirements:draw({
+        x = 0,
+        y = y,
+        color = 'White',
+      });
+    end
 
     if (challenge.topBadge ~= 0) then
-      y = y + (requirement.h * 1.2);
+      y = y + (requirements.h * 2.5);
   
       self:drawResults(challenge, y);
     end
@@ -449,6 +470,11 @@ local challengeInfo = {
   end,
 
   handleChange = function(self)
+    if (self.selectedChallenge ~= selectedChallenge) then
+      self.timers.requirements = 0;
+      self.timers.title = 0;
+    end
+
     self.selectedChallenge = selectedChallenge;
   end,
 
@@ -472,6 +498,7 @@ local challengeInfo = {
 
 local challengeList = {
   cache = { scaledW = 0, scaledH = 0 },
+  currentPage = 1,
   cursor = Cursor.New(),
   labels = {
     x = {},
@@ -481,7 +508,7 @@ local challengeList = {
   list = {
     margin = 0,
     timer = 1,
-    w = 0,
+    w = { base = 0, max = 0 },
     h = { base = 0, item = 0 },
     x = 0,
     y = {
@@ -501,8 +528,9 @@ local challengeList = {
   
   setSizes = function(self)
     if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
-      self.list.w = scaledW - ((scaledW / 20) * 3) - challengeInfo.panel.w;
-      self.list.h.base = math.floor(self.list.w * 1.125);
+      self.list.w.base = scaledW - ((scaledW / 20) * 3) - challengeInfo.panel.w;
+      self.list.w.max = self.list.w.base - (self.list.w.base / 10);
+      self.list.h.base = math.floor(self.list.w.base * 1.125);
       self.list.h.item = self.list.h.base // 7.5;
       self.list.margin = (self.list.h.base - (self.list.h.item * self.viewLimit))
       / (self.viewLimit - 1);
@@ -510,8 +538,8 @@ local challengeList = {
       self.list.x = (scaledW / 10) + challengeInfo.panel.w;
       self.list.y.base = scaledH - (scaledH / 20) - self.list.h.base;
 
-      local width = self.list.w // 3.3;
-      local gutter = (self.list.w - (width * 3)) // 2;
+      local width = self.list.w.base // 3.3;
+      local gutter = (self.list.w.base - (width * 3)) // 2;
 
       self.labels.x = {};
       self.labels.x[1] = self.list.x - 1;
@@ -522,7 +550,7 @@ local challengeList = {
       self.cursor:setSizes({
         x = self.list.x,
         y = self.list.y.base,
-        w = self.list.w,
+        w = self.list.w.base,
         h = self.list.h.item,
         margin = self.list.margin,
       });
@@ -586,61 +614,73 @@ local challengeList = {
 
     gfx.Save();
 
-    gfx.Scissor(
-      self.list.x,
-      self.list.y.base,
-      self.list.w,
-      self.list.h.base
-    );
-
     gfx.Translate(self.list.x, self.list.y.base + offset);
 
     for i = 1, #chalwheel.challenges do
       local challenge = chalwheel.challenges[i];
       local isSelected = i == self.selectedChallenge;
 
-      y = y + self:drawChallenge(challenge, y, isSelected);
+      y = y + self:drawChallenge(deltaTime, i, challenge, y, isSelected);
     end
-
-    gfx.ResetScissor();
 
     gfx.Restore();
   end,
 
-  drawChallenge = function(self, challenge, initialY, isSelected)
+  drawChallenge = function(self, deltaTime, i, challenge, initialY, isSelected)
     if (not challenge) then return end;
 
     cacheChallenge(challenge);
 
     local alpha = (isSelected and 255) or 80;
-    local title = challengeCache[challenge.id].title;
+    local isVisible = List.isVisible(i, self.viewLimit, self.currentPage);
+    local title = challengeCache[challenge.id].title.name;
     
-    local x = self.list.w / 20;
+    local x = self.list.w.base / 20;
     local y = initialY + (self.list.h.item / 5);
 
-    gfx.BeginPath();
-    Fill.Dark(120);
-    gfx.Rect(0, initialY, self.list.w, self.list.h.item);
-    gfx.Fill();
+    if (isVisible) then
+      gfx.BeginPath();
+      Fill.Dark(120);
+      gfx.Rect(0, initialY, self.list.w.base, self.list.h.item);
+      gfx.Fill();
 
-    gfx.BeginPath();
-    FontAlign.Left();
+      gfx.BeginPath();
+      FontAlign.Left();
 
-    labels.challenge:draw({
-      x = x,
-      y = y,
-      a = alpha,
-      color = 'Normal',
-    });
+      labels.challenge:draw({
+        x = x,
+        y = y,
+        a = alpha,
+        color = 'Normal',
+      });
 
-    y = y + (labels.challenge.h * 1.25);
+      y = y + (labels.challenge.h * 1.25);
 
-    title:draw({
-      x = x,
-      y = y,
-      a = alpha,
-      color = 'White',
-    });
+      if (title.w > self.list.w.max) then
+        challengeCache[challenge.id].title.timer =
+          challengeCache[challenge.id].title.timer + deltaTime;
+
+        drawScrollingLabel(
+          challengeCache[challenge.id].title.timer,
+          title,
+          self.list.w.max,
+          x,
+          y,
+          scalingFactor,
+          'White',
+          255
+        );
+      else
+        title:draw({
+          x = x,
+          y = y,
+          a = alpha,
+          color = 'White',
+        });
+      end
+    else
+      challengeCache[challenge.id].title.timer = 0;
+    end
 
     return self.list.h.item + self.list.margin;
   end,
@@ -658,7 +698,7 @@ local challengeList = {
     gfx.Save();
 
     gfx.Translate(
-      self.list.x + self.list.w + (scaledW / 40) + 5,
+      self.list.x + self.list.w.base + (scaledW / 40) + 5,
       scaledH - (scaledH / 40) - 12
     );
 
@@ -688,7 +728,7 @@ local challengeList = {
     gfx.Save();
 
     gfx.Translate(
-      self.list.x + (self.list.w / 2),
+      self.list.x + (self.list.w.base / 2),
       self.list.y.base + (self.list.h.base / 2)
     );
 
@@ -708,14 +748,14 @@ local challengeList = {
     if (selectedChallenge ~= self.selectedChallenge) then
       self.selectedChallenge = selectedChallenge;
 
-      local currentPage = List.getCurrentPage({
+      self.currentPage = List.getCurrentPage({
         current = self.selectedChallenge,
         limit = self.viewLimit,
         total = #chalwheel.challenges,
       });
   
       self.list.y.current = (self.list.h.base + self.list.margin)
-        * (currentPage - 1);
+        * (self.currentPage - 1);
       self.list.y.current = -self.list.y.current;
   
       self.list.timer = 0;

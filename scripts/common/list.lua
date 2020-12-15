@@ -29,4 +29,11 @@ local getCurrentPage = function(params)
   return 1;
 end
 
-return { getCurrentPage = getCurrentPage };
+local isVisible = function(index, limit, page)
+  return (index > ((page - 1) * limit)) and (index <= (page * limit));
+end
+
+return {
+  getCurrentPage = getCurrentPage,
+  isVisible = isVisible,
+};

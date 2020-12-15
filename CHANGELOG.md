@@ -1,3 +1,10 @@
+###### December 14, 2020
+- Improved jacket loading time in `Song Select`
+- Fixed labels in list-like components getting cut off on resolutions higher than 1080P
+- Fixed challenge names overflowing in `Challenge Wheel`
+- Fixed challenge requirements overflowing in `Challenge Wheel`
+- Fixed Best 20/50 indicators incorrectly appearing when no scores have submitted
+
 ###### December 7, 2020
 - Added highest grade achieved onto the jackets of the song grid in `Song Select`
 - Modified track texture for less distinction between lanes
