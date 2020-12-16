@@ -18,6 +18,7 @@ local best20 = {};
 local best50 = {};
 
 local controlsShortcut = game.GetSkinSetting('controlsShortcut') or false;
+local jacketQuality = game.GetSkinSetting('jacketQuality') or 'NORMAL';
 
 local previousDifficulty = 1;
 local previousSong = 1;
@@ -77,6 +78,12 @@ end
 local jacketCache = {
   cache = {},
   fallback = gfx.CreateSkinImage('common/loading.png', 0),
+  quality = {
+    ['LOW'] = 0.1,
+    ['NORMAL'] = 0.2,
+    ['HIGH'] = 0.5,
+    ['ORIGINAL'] = 0.0,
+  },
 
   getJacket = function(self, jacketPath)
     local jacket = self.cache[jacketPath];
@@ -85,8 +92,8 @@ local jacketCache = {
       jacket = gfx.LoadImageJob(
         jacketPath,
         self.fallback,
-        scaledW / 5,
-        scaledW / 5
+        math.floor(scaledW * self.quality[jacketQuality]),
+        math.floor(scaledW * self.quality[jacketQuality])
       );
 
       self.cache[jacketPath] = jacket;

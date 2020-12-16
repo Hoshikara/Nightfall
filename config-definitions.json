@@ -24,6 +24,23 @@
 	" ": {
 		"type": "label"
 	},
+	"Performance": {
+		"type": "label"
+	},
+	"jacketQuality": {
+		"label": "Jacket Quality",
+		"type": "selection",
+		"default": "NORMAL",
+		"values": [
+			"LOW",
+			"NORMAL",
+			"HIGH",
+			"ORIGINAL"
+		]
+	},
+	"  ": {
+		"type": "label"
+	},
 	"========== GAMEPLAY ==========": {
 		"type": "label"
 	},
@@ -42,7 +59,7 @@
 			"UPPER+"
 		]
 	},
-	"  ": {
+	"   ": {
 		"type": "label"
 	},
 	"Hit Error": {
@@ -66,7 +83,7 @@
 		"max": 2.0,
 		"min": 0.5
 	},
-	"   ": {
+	"    ": {
 		"type": "label"
 	},
 	"User Info": {
@@ -82,7 +99,7 @@
 		"type": "bool",
 		"default": true
 	},
-	"    ": {
+	"     ": {
 		"type": "label"
 	},
 	"========== RESULTS ==========": {
@@ -98,7 +115,7 @@
 			"YEAR-MONTH-DAY"
 		]
 	},
-	"     ": {
+	"      ": {
 		"type": "label"
 	},
 	"screenshotRegion": {
@@ -110,7 +127,7 @@
 			"PANEL"
 		]
 	},
-	"      ": {
+	"       ": {
 		"type": "label"
 	},
 	"========== MULTIPLAYER ==========": {
@@ -129,7 +146,7 @@
 		"type": "bool",
 		"default": true
 	},
-	"       ": {
+	"        ": {
 		"type": "label"
 	},
 	"========== DEVELOPER SETTINGS (DO NOT MODIFY) ==========": {

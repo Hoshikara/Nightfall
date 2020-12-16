@@ -1,3 +1,6 @@
+###### December 15, 2020
+- Added Skin Setting for adjusting `Song Select` jacket quality
+
 ###### December 14, 2020
 - Improved jacket loading time in `Song Select`
 - Fixed labels in list-like components getting cut off on resolutions higher than 1080P
