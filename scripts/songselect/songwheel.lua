@@ -87,13 +87,14 @@ local jacketCache = {
 
   getJacket = function(self, jacketPath)
     local jacket = self.cache[jacketPath];
+    local quality = self.quality[jacketQuality] or self.quality['NORMAL'];
 
     if ((not jacket) or (jacket == self.fallback)) then
       jacket = gfx.LoadImageJob(
         jacketPath,
         self.fallback,
-        math.floor(scaledW * self.quality[jacketQuality]),
-        math.floor(scaledW * self.quality[jacketQuality])
+        math.floor(scaledW * quality),
+        math.floor(scaledW * quality)
       );
 
       self.cache[jacketPath] = jacket;
