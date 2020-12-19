@@ -2,13 +2,13 @@
 
 A custom landscape skin for [Unnamed SDVX Clone (USC)](https://github.com/Drewol/unnamed-sdvx-clone).
 
-Encountered a bug or have a suggestion? Message me on Discord: Hoshikara#5973 or open an issue [here](https://github.com/Hoshikara/Nightfall/issues/new).
+Encountered a bug/error or have a suggestion? Check out the troubleshooting  page [**here**](https://github.com/Hoshikara/Nightfall/wiki/Troubleshooting) or contact me on Discord: Hoshikara#5973.
 
 ## Installation Guide
 ### Prerequisites
 Please make sure your game is up-to-date by either:
-  * Downloading the [latest **build**](https://github.com/Drewol/unnamed-sdvx-clone#download-latest-windows-build) of USC (not the same as latest **release**!)
   * Running `updater.exe` within your USC directory
+  * Downloading and installing the latest **Windows build** of USC [**here**](https://github.com/Drewol/unnamed-sdvx-clone#download-latest-windows-build) (this is not the same as **latest release**!)
 
 ### Installation
 1. Download this repository as a `.zip` file
