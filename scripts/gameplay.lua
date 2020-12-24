@@ -1327,7 +1327,7 @@ local showUserInfo = game.GetSkinSetting('showUserInfo') or false;
 local username = game.GetSkinSetting('displayName') or '';
 
 local userInfo = {
-	difference = 0,
+	isAdditive = true,
 	labels = nil,
 	timer = 0,
 	x = {},
@@ -1364,6 +1364,16 @@ local userInfo = {
 	end,
 
 	drawUserInfo = function(self, deltaTime)
+		-- Kind of a jank solution but needs to be done to account for non-additive
+		-- scoring:
+		-- 	Subtractive: Starting a chart with 10,000,000 score
+		-- 	Average: 5% into a chart with a score greater than 500,000
+		if (((gameplay.progress == 0) and (scoreInfo.current == 10000000))
+			or ((gameplay.progress <= 0.05) and (scoreInfo.current >= 500000))
+		) then
+			self.isAdditive = false;
+		end
+
 		self:setLabels();
 
 		local introShift = math.max(introTimer - 1, 0);
@@ -1400,10 +1410,17 @@ local userInfo = {
 		});
 
 		if (showScoreDifference and gameplay.scoreReplays[1]) then
-			y = y + (self.labels.username.h * 1.75);
+			local difference = 0;
 
-			local difference = scoreInfo.current - gameplay.scoreReplays[1].currentScore;
+			if (self.isAdditive) then
+				difference = scoreInfo.current - gameplay.scoreReplays[1].currentScore;
+			else
+				difference = scoreInfo.current - gameplay.scoreReplays[1].maxScore;
+			end
+
 			local prefix = ((difference < 0) and 'minus') or 'plus';
+
+			y = y + (self.labels.username.h * 1.75);
 
 			self.labels.difference:setInfo({ value = math.abs(difference) });
 
@@ -1419,13 +1436,15 @@ local userInfo = {
 
 			y = y + self.labels.scoreDifference.h;
 
-			self.labels.prefixes[prefix]:draw({
-				x = ((prefix == 'plus') and 0) or 6,
-				y = y + ((prefix == 'plus' and (self.labels.prefixes.plus.h * 0.125))
-				or -4),
-				a = 255 * self.timer,
-				color = 'White',
-			});
+			if (difference ~= 0) then
+				self.labels.prefixes[prefix]:draw({
+					x = ((prefix == 'plus') and 0) or 6,
+					y = y + ((prefix == 'plus' and (self.labels.prefixes.plus.h * 0.125))
+					or -4),
+					a = 255 * self.timer,
+					color = 'White',
+				});
+			end
 
 			self.labels.difference:draw({
 				offset = 6,
