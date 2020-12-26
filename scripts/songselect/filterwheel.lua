@@ -88,9 +88,9 @@ local folders = {
 				if (i <= self.viewLimit) then
 					self.h.total = self.h.total + self.labels[i].h + layout.dropdown.padding;
 				end
-			end
 
-			self.count = self.count + 1;
+				self.count = self.count + 1;
+			end
 		end
 	end,
 
@@ -119,6 +119,7 @@ local folders = {
 				drawScrollingLabel(
 					self.timers[key],
 					self.labels[i],
+					layout.dropdown[1].maxWidth,
 					0,
 					y,
 					scalingFactor,
