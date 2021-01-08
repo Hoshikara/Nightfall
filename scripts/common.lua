@@ -148,7 +148,7 @@ Label = {
   end,
 };
 
-logInfo = function(tbl)
+debug = function(tbl)
   local length = 0;
   local y = 30;
   local inc = 0;
@@ -178,6 +178,14 @@ logInfo = function(tbl)
   end
 
   gfx.Restore();
+end
+
+log = function(content)
+  if (type(content) == 'string') then
+    game.Log(string.format('NIGHTFALL: %s', content), game.LOGGER_INFO);
+  else
+    game.Log('NIGHTFALL: INVALID CONTENT TYPE', game.LOGGER_INFO);
+  end
 end
 
 loadFrames = function(path, count)

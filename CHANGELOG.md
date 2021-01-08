@@ -1,3 +1,10 @@
+###### January 8, 2020
+- Adjusted scoring threshold for determining `Average` score display
+- Carried over the following for `Challenge Wheel`:
+  - Adjustable jacket quality
+  - Jacket loading improvements
+  - Infinite/Gravity/Heavenly/Vivid difficulty names (also fixes incorrect difficulty being displayed)
+
 ###### December 15, 2020
 - Added Skin Setting for adjusting `Song Select` jacket quality
 

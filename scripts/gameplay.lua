@@ -1367,9 +1367,9 @@ local userInfo = {
 		-- Kind of a jank solution but needs to be done to account for non-additive
 		-- scoring:
 		-- 	Subtractive: Starting a chart with 10,000,000 score
-		-- 	Average: 5% into a chart with a score greater than 500,000
+		-- 	Average: 5% into a chart with a score greater than 2,000,000
 		if (((gameplay.progress == 0) and (scoreInfo.current == 10000000))
-			or ((gameplay.progress <= 0.05) and (scoreInfo.current >= 500000))
+			or ((gameplay.progress <= 0.05) and (scoreInfo.current >= 2000000))
 		) then
 			self.isAdditive = false;
 		end

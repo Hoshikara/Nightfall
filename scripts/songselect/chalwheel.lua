@@ -11,9 +11,7 @@ local SearchBar = require('common/searchbar');
 local background = Image.New('bg.png');
 
 local controlsShortcut = game.GetSkinSetting('controlsShortcut') or false;
-
-local jacket = nil;
-local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
+local jacketQuality = game.GetSkinSetting('jacketQuality') or 'NORMAL';
 
 local previousChallenge = 1;
 local selectedChallenge = 1;
@@ -106,6 +104,35 @@ cacheChallenge = function(challenge)
     end
   end
 end
+
+local jacketCache = {
+  cache = {},
+  fallback = gfx.CreateSkinImage('common/loading.png', 0),
+  quality = {
+    ['LOW'] = 0.1,
+    ['NORMAL'] = 0.2,
+    ['HIGH'] = 0.5,
+    ['ORIGINAL'] = 0.0,
+  },
+
+  getJacket = function(self, jacketPath)
+    local jacket = self.cache[jacketPath];
+    local quality = self.quality[jacketQuality] or self.quality['NORMAL'];
+
+    if ((not jacket) or (jacket == self.fallback)) then
+      jacket = gfx.LoadImageJob(
+        jacketPath,
+        self.fallback,
+        math.floor(scaledW * quality),
+        math.floor(scaledW * quality)
+      );
+
+      self.cache[jacketPath] = jacket;
+    end
+
+    return jacket;
+  end,
+};
 
 local clears = {};
 
@@ -200,30 +227,21 @@ local challengeInfo = {
     local x = 2;
     local y = initialY;
 
-    for i, chart in ipairs(challenge.charts) do
-      if ((not challengeCache[challenge.id].jackets[i])
-        or challengeCache[challenge.id].jackets[i] == jacketFallback) then
-          challengeCache[challenge.id].jackets[i] = gfx.LoadImageJob(
-            chart.jacketPath,
-            jacketFallback,
-            jacketSize,
-            jacketSize
-          );
-      end
-    end
-
     gfx.Save();
 
     for i, chart in ipairs(challenge.charts) do
       local info = {
         artist = challengeCache[challenge.id].artists[i],
-        difficulty = difficulties[chart.difficulty],
+        difficulty = difficulties[getDifficultyIndex(
+          chart.jacketPath,
+          chart.difficulty
+        )],
         title = challengeCache[challenge.id].titles[i],
       };
 
       local bpm = challengeCache[challenge.id].bpms[i];
       local level = levels[chart.level];
-      local jacket = challengeCache[challenge.id].jackets[i];
+      local jacket = jacketCache:getJacket(chart.jacketPath);
 
       local maxWidth = self.panel.innerWidth - jacketSize - self.padding.x.full;
       local infoX = x + jacketSize + self.padding.x.full;
