@@ -549,8 +549,8 @@ local songInfo = {
 
 			Font.Number();
 
-			for i, level in ipairs(CONSTANTS_SONGWHEEL.levels) do
-				self.levels[i] = Label.New(level, 18);
+			for i = 1, 4 do
+				self.levels[i] = Label.New('', 18);
 			end
 
 			self.songInfo.bpm = Label.New('000', 24);
@@ -695,7 +695,7 @@ local songInfo = {
     gfx.Restore();
   end,
 
-	drawDifficulty = function(self, y, currentDifficulty, isSelected)
+	drawDifficulty = function(self, currentDifficulty, isSelected, y, i)
 		local x = self.cursor.x;
 		local alpha = math.floor(255 * ((isSelected and 1) or 0.2));
 
@@ -716,6 +716,12 @@ local songInfo = {
 				currentDifficulty.jacketPath,
 				currentDifficulty.difficulty
 			);
+			
+			Font.Number();
+
+      self.levels[i]:update({
+        new = string.format('%02d', currentDifficulty.level)
+      });
 
 			gfx.BeginPath();
 
@@ -728,7 +734,7 @@ local songInfo = {
 			});
 
 			FontAlign.Right();
-			self.levels[currentDifficulty.level]:draw({
+			self.levels[i]:draw({
 				x = x + self.images.button.w - 36,
 				y = y + (self.images.button.h / 2.85),
 				a = alpha,
@@ -851,8 +857,11 @@ local songInfo = {
 			local y = self.padding.y.double + self.labels.difficulty.h - 24;
 
 			for i = 1, 4 do
+				local currentDifficulty = self:getDifficulty(
+					selected_song.all_difficulties,
+					i
+				);
 				local isSelected = (i - 1) == selected_song.difficulty;
-				local current = self:getDifficulty(selected_song.all_difficulties, i);
 
 				if (isSelected) then
 					self.cursor.selected = i;
@@ -862,7 +871,7 @@ local songInfo = {
 					self.cursor.y[i] = y;
 				end
 
-				y = self:drawDifficulty(y, current, isSelected);
+				y = self:drawDifficulty(currentDifficulty, isSelected, y, i);
 			end
 
 			self:drawCursor(deltaTime, self.cursor.y[self.cursor.selected]);

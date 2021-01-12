@@ -1023,7 +1023,7 @@ local songInfo = {
 	updateLabels = function(self)
 		Font.Number();
 
-		difficulties.level:update({ new = gameplay.level });
+		difficulties.level:update({ new = string.format('%02d', gameplay.level) });
 
 		self.labels.bpm.value:update({ new = string.format('%.0f', gameplay.bpm) });
 

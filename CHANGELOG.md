@@ -1,4 +1,8 @@
-###### January 8, 2020
+###### January 11, 2021
+- Added timestamp to main result panel and changed stat display orders accordingly
+- Changed difficulty level display behavior to allow for non-standard values
+
+###### January 8, 2021
 - Adjusted scoring threshold for determining `Average` score display
 - Carried over the following for `Challenge Wheel`:
   - Adjustable jacket quality

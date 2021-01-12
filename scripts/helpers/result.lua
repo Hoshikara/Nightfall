@@ -122,11 +122,6 @@ local formatHighScore = function(current)
       size = 24,
       value = get(current, 'perfects', '-'),
     },
-    criticalWindow = {
-      font = 'Number',
-      size = 24,
-      value = string.format('±%d ms', get(current, 'hitWindow.perfect', 46)),
-    },
     gauge = {
       font = 'Number',
       size = 24,
@@ -136,6 +131,15 @@ local formatHighScore = function(current)
       font = 'Normal',
       size = 24,
       value = getGrade(current),
+    },
+    hitWindows = {
+      font = 'Number',
+      size = 24,
+      value = string.format(
+        '±%d  /  %d ms',
+        get(current, 'hitWindow.perfect', 46),
+        get(current, 'hitWindow.good', 92)
+      ),
     },
     error = {
       font = 'Number',
@@ -151,11 +155,6 @@ local formatHighScore = function(current)
       font = 'Number',
       size = 24,
       value = get(current, 'goods', '-'),
-    },
-    nearWindow = {
-      font = 'Number',
-      size = 24,
-      value = string.format('±%d ms', get(current, 'hitWindow.good', 92)),
     },
     score = get(current, 'score', 0),
     timestamp = {

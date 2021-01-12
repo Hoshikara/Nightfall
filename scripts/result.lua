@@ -87,8 +87,8 @@ local resultPanel = {
 				{
 					'grade',
 					'clear',
-					'criticalWindow',
-					'nearWindow',
+					'hitWindows',
+					'timestamp',
 				},
 				{
 					'critical',
@@ -398,19 +398,25 @@ local resultPanel = {
 		local statY = y + (self.labels.grade.h * 1.5);
 		local spacing = self:getSpacing(self.orders.stat.row[1]);
 
-		for _, name in ipairs(self.orders.stat.row[1]) do
+		for i, name in ipairs(self.orders.stat.row[1]) do
+			local overflow = 0;
+
+			if (name == 'timestamp') then
+				overflow = self.stats[name].w - self.labels[name].w - 3;
+			end
+
 			self.labels[name]:draw({
-				x = statX,
+				x = statX - overflow,
 				y = y,
 				color = 'Normal',
 			});
 
 			self.stats[name]:draw({
-				x = statX,
+				x = statX - overflow,
 				y = statY,
 				color = 'White',
 			});
-	
+
 			statX = statX + self.labels[name].w + spacing;
 		end
 
@@ -956,17 +962,16 @@ local scoreList = {
 		sp = {
 			row = {
 				{
-					'timestamp',
-					'gauge',
-					'criticalWindow',
-					'nearWindow'
-				},
-				{
 					'grade',
 					'clear',
+					'hitWindows',
+					'timestamp',
+				},
+				{
+					'gauge',
 					'critical',
 					'near',
-					'error'
+					'error',
 				},
 			},
 		},
@@ -1172,47 +1177,45 @@ local scoreList = {
 			else
 				x = self.stats[i].score.position[8] + 144;
 
+				self.labels.clear:draw({
+					x = x,
+					y = y,
+					color = 'Normal',
+				});
+
+				y = y + (self.labels.score.h * 0.75);
+
+				self.stats[i].clear:draw({
+					x = x,
+					y = y + 8,
+					color = 'White',
+				});
+
 				if (singleplayer) then
 					self.labels.timestamp:draw({
 						x = x,
-						y = y,
+						y = y + (self.labels.score.h * 2.5) + 2,
 						color = 'Normal',
+					});
+
+					self.stats[i].timestamp:draw({
+						x = x,
+						y = y + (self.labels.score.h * 3.75) + 2,
+						color = 'White',
 					});
 				else
 					self.labels.name:draw({
 						x = x,
-						y = y,
+						y = y + (self.labels.score.h * 2.5) + 2,
 						color = 'Normal',
 					});
-				end
 
-				y = y + (self.labels.score.h * 0.75);
-
-				if (singleplayer) then
-					self.stats[i].timestamp:draw({
-						x = x,
-						y = y + 8,
-						color = 'White',
-					});
-				else
 					self.stats[i].name:draw({
 						x = x,
-						y = y + 8,
+						y = y + (self.labels.score.h * 3.75) + 2,
 						color = 'White',
 					});
 				end
-
-				self.labels.clear:draw({
-					x = x,
-					y = y + (self.labels.score.h * 2.5) + 2,
-					color = 'Normal',
-				});
-
-				self.stats[i].clear:draw({
-					x = x,
-					y = y + (self.labels.score.h * 3.75) + 2,
-					color = 'White',
-				});
 			end
 
 			x = self.list.padding.x;
@@ -1233,14 +1236,20 @@ local scoreList = {
 					local spacing = self:getSpacing(self.orders.sp.row[1], 1);
 
 					for _, name in ipairs(self.orders.sp.row[1]) do
+						local overflow = 0;
+
+						if (name == 'timestamp') then
+							overflow = self.stats[i].timestamp.w - self.labels.timestamp.w;
+						end
+
 						self.labels[name]:draw({
-							x = statX,
+							x = statX - overflow,
 							y = y,
 							color = 'Normal',
 						});
 
 						self.stats[i][name]:draw({
-							x = statX,
+							x = statX - overflow,
 							y = statY,
 							color = 'White',
 						});
@@ -1252,7 +1261,7 @@ local scoreList = {
 
 					statX = x;
 					statY = y + (self.labels.critical.h * 1.5);
-					spacing = self:getSpacing(self.orders.sp.row[2], 1);
+					spacing = self:getSpacing(self.orders.sp.row[2], 0.9375);
 
 					for _, name in ipairs(self.orders.sp.row[2]) do
 						self.labels[name]:draw({

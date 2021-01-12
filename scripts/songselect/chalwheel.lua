@@ -161,8 +161,8 @@ do
 
   Font.Number();
 
-  for i, level in ipairs(CONSTANTS_SONGWHEEL.levels) do
-    levels[i] = Label.New(level, 24);
+  for i = 1, 4 do
+    levels[i] = Label.New('', 24);
   end
 end
 
@@ -240,12 +240,19 @@ local challengeInfo = {
       };
 
       local bpm = challengeCache[challenge.id].bpms[i];
-      local level = levels[chart.level];
       local jacket = jacketCache:getJacket(chart.jacketPath);
 
       local maxWidth = self.panel.innerWidth - jacketSize - self.padding.x.full;
       local infoX = x + jacketSize + self.padding.x.full;
       local infoY = y - 6;
+
+      Font.Number();
+
+      if (not levels[i]) then
+        levels[i] = Label.New('', 24);
+      end
+
+      levels[i]:update({ new = string.format('%02d', chart.level) });
 
       gfx.BeginPath();
       gfx.StrokeWidth(1);
@@ -290,7 +297,7 @@ local challengeInfo = {
               color = 'White',
             });
 
-            level:draw({
+            levels[i]:draw({
               x = infoX + info[name].w + 8,
               y = infoY,
               color = 'White',
