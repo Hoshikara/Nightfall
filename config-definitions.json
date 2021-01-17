@@ -148,29 +148,5 @@
 	},
 	"        ": {
 		"type": "label"
-	},
-	"========== DEVELOPER SETTINGS (DO NOT MODIFY) ==========": {
-		"type": "label"
-	},
-	"cachedFolder": {
-		"type": "int",
-		"label": "Folder",
-		"default": 1,
-		"max": 999,
-		"min": 1
-	},
-	"cachedLevel": {
-		"type": "int",
-		"label": "Level",
-		"default": 1,
-		"max": 999,
-		"min": 1
-	},
-	"cachedVolforce": {
-		"type": "float",
-		"label": "Volforce",
-		"default": 0,
-		"max": 25.0,
-		"min": 0
 	}
 }

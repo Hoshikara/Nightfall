@@ -7,8 +7,8 @@ local initialY = -1000;
 local isSongSelect = true;
 local rendererSet = false;
 
-local currentFolder = game.GetSkinSetting('cachedFolder') or 1;
-local currentLevel = game.GetSkinSetting('cachedLevel') or 1;
+local currentFolder = 1;
+local currentLevel = 1;
 
 local choosingFolder = true;
 
@@ -312,9 +312,7 @@ render = function(deltaTime, displaying)
 	levels:setLabels();
 
 	if (currentFolder > #filters.folder) then
-		currentFolder = currentFolder - (currentFolder - #filters.folder);
-
-		game.SetSkinSetting('cachedFolder', currentFolder);
+		currentFolder = #filters.folder;
 	end
 
 	drawCurrentField(deltaTime, folders.labels[currentFolder], 1, displaying, true);
@@ -377,12 +375,8 @@ end
 set_selection = function(newIndex, selectingFolder)
 	if (selectingFolder) then
 		currentFolder = newIndex;
-
-		game.SetSkinSetting('cachedFolder', newIndex);
 	else
 		currentLevel = newIndex;
-
-		game.SetSkinSetting('cachedLevel', newIndex);
 	end
 end
 

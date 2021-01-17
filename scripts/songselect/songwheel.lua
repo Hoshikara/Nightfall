@@ -25,6 +25,8 @@ local previousSong = 1;
 local selectedDifficulty = 1;
 local selectedSong = 1;
 
+local userData = loadJSON('user_data');
+
 local cache = { resX = 0, resY = 0 };
 
 local resX;
@@ -159,7 +161,8 @@ local clears = {
 local grades = {
   breakpoints = {},
 
-  getGrade = function(self, difficulty, size)
+  getGrade = function(self, difficulty, params)
+    local grade = nil;
     local label = nil;
 
     if (difficulty.scores[1]) then
@@ -167,13 +170,22 @@ local grades = {
 
       for _, breakpoint in ipairs(self.breakpoints) do
         if (highScore.score >= breakpoint.minimum) then
-          label = breakpoint.label[size];
+          if (params.label) then
+            label = breakpoint.label[params.size];
+          else
+            grade = breakpoint.grade;
+          end
+
           break;
         end
       end
     end
 
-    return label;
+    if (params.label) then
+      return label;
+    end
+
+    return grade;
   end
 };
 
@@ -188,6 +200,7 @@ do
 
   for index, current in ipairs(CONSTANTS.grades) do
     grades.breakpoints[index] = {
+      grade = current.grade,
       minimum = current.minimum,
       label = {
         large = Label.New(current.grade, 30),
@@ -452,7 +465,7 @@ local songInfo = {
         difficulty = song.difficulties[1];
       end
 
-      if (grades:getGrade(difficulty, 'small')) then
+      if (grades:getGrade(difficulty, { label = true, size = 'small' })) then
         for _, name in ipairs(self.order.conditional) do
           self.labels[name]:draw({
             x = self.labels.x,
@@ -477,7 +490,10 @@ local songInfo = {
     local baseLabelHeight = self.labels.title.h;
     local y = self.labels.y + baseLabelHeight + self.padding.y.quarter - 8;
     local clearLabel = clears:getClear(difficulty);
-    local gradeLabel = grades:getGrade(difficulty, 'small');
+    local gradeLabel = grades:getGrade(
+      difficulty,
+      { label = true, size = 'small' }
+    );
 
     gfx.Save();
 
@@ -959,9 +975,9 @@ local songGrid = {
         self:drawBestIndicator(x, y, alpha, '50');
       end
 
-      if (grades:getGrade(difficulty, 'large')) then
+      if (grades:getGrade(difficulty, { label = true, size = 'large' })) then
         self:drawGrade(
-          grades:getGrade(difficulty, 'large'),
+          grades:getGrade(difficulty, { label = true, size = 'large' }),
           x,
           y,
           alpha
@@ -1120,7 +1136,7 @@ local miscInfo = {
       self.labels.volforce.value = Label.New('', 20);
     end
 
-    local forceValue = totalForce or game.GetSkinSetting('cachedVolforce') or 0;
+    local forceValue = totalForce or get(userData.contents, 'volforce', 0);
     local y = 0;
 
     Font.Number();
@@ -1280,6 +1296,6 @@ songs_changed = function(withAll)
       totalForce = totalForce + diffs[i].force;
 		end
   end
-  
-  game.SetSkinSetting('cachedVolforce', totalForce);
+
+  userData:set('volforce', totalForce);
 end

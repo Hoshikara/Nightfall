@@ -1,3 +1,14 @@
+###### January 16, 2021
+- `Challenge Wheel` changes:
+  - Changed chart display to only show chart title and difficulty to make more room
+  - Changed requirements display to a vertical list, limited to 6 lines
+  - Fixed incorrect opacity for inactive scrolling challenge names
+  - Fixed fixed long challenge names all scrolling at the same time
+  - Limited the number of charts displayed for a challenge to 3
+- Gameplay-unrelated changes:
+  - Implemented a JSON loader, currently being used for value caching
+  - Removed developer options from skin settings
+
 ###### January 11, 2021
 - Added timestamp to main result panel and changed stat display orders accordingly
 - Changed difficulty level display behavior to allow for non-standard values

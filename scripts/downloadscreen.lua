@@ -1,4 +1,4 @@
-json = require('lib/json');
+JSON = require('lib/JSON');
 
 local header = {}
 header["user-agent"] = "unnamed_sdvx_clone"
@@ -50,7 +50,7 @@ local backgroundImage = gfx.CreateSkinImage("bg.png", 1);
 
 dlcache = io.open(cachepath, "r")
 if dlcache then
-    downloaded = json.decode(dlcache:read("*all"))
+    downloaded = JSON.decode(dlcache:read("*all"))
     dlcache:close()
 end
 function encodeURI(str)
@@ -76,7 +76,7 @@ function gotSongsCallback(response)
         error() 
         return 
     end
-    local jsondata = json.decode(response.text)
+    local jsondata = JSON.decode(response.text)
     for i,song in ipairs(jsondata.data) do
         addsong(song)
     end
@@ -355,7 +355,7 @@ end
 function key_pressed(key)
     if key == 27 then --escape pressed
         dlcache = io.open(cachepath, "w")
-        dlcache:write(json.encode(downloaded))
+        dlcache:write(JSON.encode(downloaded))
         dlcache:close()
         dlScreen.Exit() 
     end

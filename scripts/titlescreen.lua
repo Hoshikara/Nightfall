@@ -33,7 +33,7 @@ local mousePosY = 0;
 local showUpdatePrompt = false;
 local updateChecked = false;
 
-local introTimer = 1;
+local introTimer = 1.2;
 local introSamplePlayed = false;
 local menuLoaded = false;
 

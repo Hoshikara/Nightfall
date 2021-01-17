@@ -16,6 +16,8 @@ local jacketQuality = game.GetSkinSetting('jacketQuality') or 'NORMAL';
 local previousChallenge = 1;
 local selectedChallenge = 1;
 
+local userData = loadJSON('user_data');
+
 local cache = { resX = 0, resY = 0 };
 
 local resX;
@@ -72,16 +74,13 @@ cacheChallenge = function(challenge)
 
     Font.Normal();
 
-    challengeCache[challenge.id].requirements = Label.New(
-      string.upper(
-        string.gsub(
-          challenge.requirement_text,
-          '\n',
-          '\t\t\t'
-        )
-      ),
-      24
-    );
+    challengeCache[challenge.id].requirements = {};
+
+    for requirement in challenge.requirement_text:gmatch('[^\n]+') do
+      local label = Label.New(string.upper(requirement), 24);
+
+      table.insert(challengeCache[challenge.id].requirements, label);
+    end
 
     Font.Number();
 
@@ -169,6 +168,7 @@ end
 local challengeInfo = {
   cache = { scaledW = 0, scaledH = 0 },
   images = { panel = Image.New('common/panel_wide.png') },
+  labels = nil,
   padding = {
     x = { double = 0, full = 0 },
     y = { double = 0, full = 0 },
@@ -176,7 +176,6 @@ local challengeInfo = {
   order = {
     chart = {
       'title',
-      'artist',
       'difficulty',
     },
     result = {
@@ -194,7 +193,7 @@ local challengeInfo = {
   },
   search = SearchBar.New(),
   selectedChallenge = 0,
-  timers = { requirements = 0, title = 0 },
+  timers = { title = 0 },
   
   setSizes = function(self)
     if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
@@ -222,8 +221,18 @@ local challengeInfo = {
     end
   end,
 
+  setLabels = function(self)
+    if (not self.labels) then
+      Font.Normal();
+
+      self.labels = {
+        missingCharts = Label.New('REQUIRED CHARTS MISSING', 36),
+      };
+    end
+  end,
+
   drawCharts = function(self, deltaTime, challenge, initialY)
-    local jacketSize = math.floor(scaledW / 10.75);
+    local jacketSize = math.floor(scaledW / 17.25);
     local x = 2;
     local y = initialY;
 
@@ -338,6 +347,12 @@ local challengeInfo = {
         end
       end
 
+      if (i == 3) then
+        y = y + jacketSize + self.padding.y.full;
+        
+        break;
+      end
+
       if (i ~= #challenge.charts) then
         gfx.BeginPath();
         Fill.Normal(100);
@@ -420,7 +435,19 @@ local challengeInfo = {
       self.panel.y + self.padding.y.full
     );
 
-    y = self:drawCharts(deltaTime, challenge, y);
+    if (challenge.missing_chart) then
+      gfx.BeginPath();
+      FontAlign.Left();
+      self.labels.missingCharts:draw({
+        x = -2,
+        y = y,
+        color = 'White'
+      });
+
+      y = y + (self.labels.missingCharts.h * 0.5) + self.padding.y.full; 
+    else
+      y = self:drawCharts(deltaTime, challenge, y);
+    end
 
     gfx.BeginPath();
     FontAlign.Left();
@@ -464,29 +491,22 @@ local challengeInfo = {
 
     y = y + labels.requirements.h * 1.35;
 
-    if (requirements.w > self.panel.innerWidth) then
-      self.timers.requirements = self.timers.requirements + deltaTime;
-
-      drawScrollingLabel(
-        self.timers.requirements,
-        requirements,
-        self.panel.innerWidth,
-        0,
-        y,
-        scalingFactor,
-        'White',
-        255
-      );
-    else
-      requirements:draw({
+    for i = 1, #requirements do
+      requirements[i]:draw({
         x = 0,
         y = y,
         color = 'White',
       });
+
+      y = y + (requirements[i].h * 1.75);
+
+      if (i == 6) then
+        break;
+      end
     end
 
     if (challenge.topBadge ~= 0) then
-      y = y + (requirements.h * 2.5);
+      y = y + (requirements[1].h * 0.5);
   
       self:drawResults(challenge, y);
     end
@@ -496,7 +516,6 @@ local challengeInfo = {
 
   handleChange = function(self)
     if (self.selectedChallenge ~= selectedChallenge) then
-      self.timers.requirements = 0;
       self.timers.title = 0;
     end
 
@@ -505,6 +524,8 @@ local challengeInfo = {
 
   render = function(self, deltaTime)
     self:setSizes();
+
+    self:setLabels();
 
     gfx.Save();
 
@@ -682,8 +703,12 @@ local challengeList = {
       y = y + (labels.challenge.h * 1.25);
 
       if (title.w > self.list.w.max) then
-        challengeCache[challenge.id].title.timer =
-          challengeCache[challenge.id].title.timer + deltaTime;
+        if (isSelected) then
+          challengeCache[challenge.id].title.timer =
+            challengeCache[challenge.id].title.timer + deltaTime;
+        else
+          challengeCache[challenge.id].title.timer = 0;
+        end
 
         drawScrollingLabel(
           challengeCache[challenge.id].title.timer,
@@ -693,7 +718,7 @@ local challengeList = {
           y,
           scalingFactor,
           'White',
-          255
+          alpha
         );
       else
         title:draw({
@@ -852,7 +877,7 @@ local miscInfo = {
       self.labels.volforce.value = Label.New('', 20);
     end
 
-    local forceValue = totalForce or game.GetSkinSetting('cachedVolforce') or 0;
+    local forceValue = get(userData.contents, 'volforce', 0);
     local y = 0;
 
     Font.Number();

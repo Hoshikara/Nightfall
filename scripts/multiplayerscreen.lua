@@ -7,7 +7,7 @@ local DialogWindow = require('common/dialogwindow');
 local List = require('common/list');local ScoreNumber = require('common/scorenumber');
 local Scrollbar = require('common/scrollbar');
 
-local json = require('lib/json');
+local JSON = require('lib/JSON');
 
 game.LoadSkinSample('click-01');
 game.LoadSkinSample('click-02');
@@ -1492,7 +1492,7 @@ function playSounds(deltaTime)
 end
 
 changeHost = function(user)
-  Tcp.SendLine(json.encode({ topic = 'room.host.set', host = user.id }));
+  Tcp.SendLine(JSON.encode({ topic = 'room.host.set', host = user.id }));
 end
 
 createRoom = function()
@@ -1514,11 +1514,11 @@ joinRoom = function(room)
 end
 
 kickUser = function(user)
-  Tcp.SendLine(json.encode({topic = 'room.kick', id = user.id }));
+  Tcp.SendLine(JSON.encode({topic = 'room.kick', id = user.id }));
 end
 
 readyUp = function()
-  Tcp.SendLine(json.encode({ topic = 'user.ready.toggle' }));
+  Tcp.SendLine(JSON.encode({ topic = 'user.ready.toggle' }));
 end
 
 startGame = function()
@@ -1528,19 +1528,19 @@ startGame = function()
 
 	if (isStartingGame) then return end
 	
-	Tcp.SendLine(json.encode({ topic = 'room.game.start' }));
+	Tcp.SendLine(JSON.encode({ topic = 'room.game.start' }));
 end
 
 toggleHard = function()
-  Tcp.SendLine(json.encode({ topic = 'user.hard.toggle' }));
+  Tcp.SendLine(JSON.encode({ topic = 'user.hard.toggle' }));
 end
 
 toggleMirror = function()
-  Tcp.SendLine(json.encode({ topic = 'user.mirror.toggle' }));
+  Tcp.SendLine(JSON.encode({ topic = 'user.mirror.toggle' }));
 end
 
 toggleRotate = function()
-  Tcp.SendLine(json.encode({ topic = 'room.option.rotation.toggle' }));
+  Tcp.SendLine(JSON.encode({ topic = 'room.option.rotation.toggle' }));
 end
 
 button_pressed = function(button)

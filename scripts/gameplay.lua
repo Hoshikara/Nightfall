@@ -1581,7 +1581,7 @@ end
 -- MULTIPLAYER
 ----------------------------------------
 
-local json = require('lib/json');
+local JSON = require('lib/JSON');
 
 local realRender = render;
 local users = nil;
@@ -1605,7 +1605,7 @@ score_callback = function(res)
 		return;
 	end
 
-	local data = json.decode(res.text);
+	local data = JSON.decode(res.text);
 
 	users = {};
 

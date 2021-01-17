@@ -148,6 +148,12 @@ Label = {
   end,
 };
 
+createError = function(description)
+  return function(cause)
+    error(string.format('%s: %s', description, cause));
+  end
+end
+
 debug = function(tbl)
   local length = 0;
   local y = 30;
@@ -182,9 +188,15 @@ end
 
 log = function(content)
   if (type(content) == 'string') then
-    game.Log(string.format('NIGHTFALL: %s', content), game.LOGGER_INFO);
+    game.Log(string.format('Nightfall Log: %s', content), game.LOGGER_INFO);
   else
-    game.Log('NIGHTFALL: INVALID CONTENT TYPE', game.LOGGER_INFO);
+    game.Log(
+      string.format(
+        'Nightfall Log: Invalid data type (expected a string, got a %s)',
+        type(content)
+      ),
+      game.LOGGER_INFO
+    );
   end
 end
 
@@ -332,6 +344,47 @@ end
 
 getSign = function(val)
   return ((val > 0) and 1) or ((val < 0) and -1) or 0;
+end
+
+loadJSON = function(filename)
+  local JSON = require('lib/JSON');
+  local path = path.Absolute(
+    string.format('skins/%s/JSON/%s.json', game.GetSkin(), filename)
+  );
+  local contents = io.open(path, 'r');
+  local decoded = {};
+
+  if (contents) then
+    local raw = contents:read('*all');
+
+    if (raw == '') then
+      contents:write(JSON.encode(decoded));
+    else
+      decoded = JSON.decode(raw);
+    end
+
+    contents:close();
+  else
+    local throwError = createError('Error loading JSON');
+
+    throwError(string.format('File does not exist: %s', path));
+  end
+
+  return {
+    contents = decoded,
+    JSON = JSON,
+    path = path,
+
+    set = function(self, key, value)
+      local contents = io.open(self.path, 'w');
+
+      self.contents[key] = value;
+
+      contents:write(self.JSON.encode(self.contents));
+
+      contents:close();
+    end,
+  };
 end
 
 roundToZero = function(val)
