@@ -4,13 +4,14 @@ local getClear = function(current)
   local autoplayed = get(current, 'autoplay', false);
   local clear = get(current, 'badge', 0);
   local gauge = get(current, 'gauge', 0) * 100;
+  local type = get(current, 'flags', 0);
 
   if (autoplayed) then
     return 'AUTO';
   elseif (clear == 0) then
     return 'EXIT'
   elseif (clear <= 5) then
-    if (gauge < 70) then
+    if ((type ~= 1) and (gauge < 70)) then
       return 'CRASH';
     end
 
