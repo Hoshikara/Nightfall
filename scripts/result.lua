@@ -601,7 +601,7 @@ local graphs = {
 			gfx.LineTo(initialX + x, y + h - (h * samples[i]));
 		end
 
-		if (gaugeType & 1 ~= 0) then
+		if (gaugeType == 1) then
 			gfx.StrokeColor(255, 155, 55, a);
 			gfx.Stroke();
 		else
@@ -1568,7 +1568,7 @@ result_set = function()
 
 	if (singleplayer or result.isSelf) then
 		gaugeSamples = get(result, 'gaugeSamples', {});
-		gaugeType = get(result, 'flags', 0);
+		gaugeType = get(result, 'gauge_type', get(result, 'flags', 0));
 
 		local duration = get(result, 'duration');
 

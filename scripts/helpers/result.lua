@@ -4,7 +4,7 @@ local getClear = function(current)
   local autoplayed = get(current, 'autoplay', false);
   local clear = get(current, 'badge', 0);
   local gauge = get(current, 'gauge', 0) * 100;
-  local type = get(current, 'flags', 0);
+  local type = get(current, 'gauge_type', get(current, 'flags', 0));
 
   if (autoplayed) then
     return 'AUTO';
@@ -39,7 +39,7 @@ local getDuration = function(current)
 end
 
 local getGauge = function(current)
-  local type = get(current, 'flags', 0);
+  local type = get(current, 'gauge_type', get(current, 'flags', 0));
   local gauge = get(current, 'gauge', 0) * 100;
 
   if (type == 1) then

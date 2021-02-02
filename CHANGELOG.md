@@ -1,3 +1,7 @@
+###### February 2, 2021
+- Changes made to support backup gauge option
+- Fixed red laser end texture being slightly too short
+
 ###### January 16, 2021
 - `Challenge Wheel` changes:
   - Changed chart display to only show chart title and difficulty to make more room

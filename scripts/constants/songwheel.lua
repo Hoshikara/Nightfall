@@ -84,6 +84,10 @@ return {
           'HARD',
         },
       },
+      ['Backup Gauge'] = {
+        invert = false,
+        name = 'BACKUP GAUGE',
+      },
       ['Random'] = {
         invert = false,
         name = 'RANDOM MODE',

@@ -499,8 +499,20 @@ local songSelectDialog = {
 	drawSettings = function(self)
 		local labels = self.labels.settings[current.tab.name];
 
+		local offset = 0;
 		local x = layout.x.middleLeft;
 		local y = layout.y.top + (self.labels.tabs[current.tab.name].h / 1.75);
+
+		if (current.setting.index > 7) then
+			offset = (labels[string.gsub(
+					current.settings[1].name,
+					' %((.*)%)',
+					''
+				)].name.h * 1.75)
+				* (current.setting.index - 7);
+		end
+
+		y = y - offset;
 
 		for i, rawSetting in ipairs(current.settings) do
 			local setting = labels[string.gsub(
@@ -510,6 +522,12 @@ local songSelectDialog = {
 			)];
 			local isSelected = i == current.setting.index;
 			local alpha = (isSelected and (255 * timer)) or (50 * timer);
+
+			if (((current.setting.index > 7) and (i <= (current.setting.index - 7)))
+				or ((not isSelected) and (i > 7))
+			) then
+				alpha = 0;
+			end
 
 			gfx.BeginPath();
 			FontAlign.Left();

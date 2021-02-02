@@ -572,12 +572,20 @@ local gauge = {
 	drawGauge = function(self, deltaTime)
 		self:setLabels();
 
+		local gauge;
+
+		if (gameplay.gaugeType) then
+			gauge = { type = gameplay.gaugeType, value = gameplay.gauge };
+		else
+			gauge = { type = gameplay.gauge.type, value = gameplay.gauge.value };
+		end
+
 		local introShift = math.max(introTimer - 1, 0);
 		local introAlpha = math.floor(255 * (1 - (introShift ^ 1.5)));
 		local height = scaledH / 2;
 		local x = scaledW - (scaledW / 6.5);
 		local y = scaledH / 3.5;
-		local format = ((gameplay.gauge < 0.1) and '%02d%%') or '%d%%';
+		local formattedValue = ((gauge.value < 0.1) and '%02d%%') or '%d%%';
 
 		self.timer = self.timer + deltaTime;
 
@@ -585,7 +593,7 @@ local gauge = {
 
 		Font.Number();
 		self.labels.percentage:update({
-			new = string.format(format, math.floor(gameplay.gauge * 100))
+			new = string.format(formattedValue, math.floor(gauge.value * 100))
 		});
 
 		gfx.Save();
@@ -594,26 +602,26 @@ local gauge = {
 
 		gfx.BeginPath();
 
-		if (gameplay.gaugeType == 0) then
-			if (gameplay.gauge < 0.7) then
+		if (gauge.type == 0) then
+			if (gauge.value < 0.7) then
 				gfx.FillColor(25, 125, 225, 255);
 			else
 				gfx.FillColor(225, 25, 155, 255);
 			end
 		else
-			if (gameplay.gauge < 0.3) then
+			if (gauge.value < 0.3) then
 				gfx.FillColor(225, 25, 25, 255);
 			else
 				gfx.FillColor(225, 105, 25, introAlpha);
 			end
 		end
 
-		gfx.Rect(0, height, 18, -(height * gameplay.gauge));
+		gfx.Rect(0, height, 18, -(height * gauge.value));
 		gfx.Fill();
 
 		gfx.BeginPath();
 		Fill.White((introAlpha / 5) * self.alpha)
-		gfx.Rect(0, height, 18, -(height * gameplay.gauge));
+		gfx.Rect(0, height, 18, -(height * gauge.value));
 		gfx.Fill();
 
 		gfx.BeginPath();
@@ -627,7 +635,7 @@ local gauge = {
 		gfx.BeginPath();
 		Fill.White(introAlpha);
 
-		if (gameplay.gaugeType == 0) then
+		if (gauge.type == 0) then
 			gfx.Rect(0, height * 0.3, 18, 3);
 		else
 			gfx.Rect(0, height * 0.7, 18, 3);
@@ -639,7 +647,7 @@ local gauge = {
 		FontAlign.Right();
 		self.labels.percentage:draw({
 			x = -6,
-			y = height - (height * gameplay.gauge) - 14,
+			y = height - (height * gauge.value) - 14,
 			a = introAlpha,
 			color = 'White',
 
@@ -648,7 +656,7 @@ local gauge = {
 		gfx.BeginPath();
 		gfx.Rotate(90);
 
-		if (gameplay.gaugeType == 0) then
+		if (gauge.type == 0) then
 			FontAlign.Right();
 			self.labels.effective:draw({
 				x = height + 3,
