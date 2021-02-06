@@ -228,7 +228,7 @@ local formatSongInfo = function(current)
     level = {
       font = 'Number',
       size = 24,
-      value = get(current, 'level', '-'),
+      value = string.format('%02d', get(current, 'level', '1')),
     },
     title = {
       font = 'JP',
