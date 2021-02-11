@@ -99,6 +99,17 @@
 		"type": "bool",
 		"default": true
 	},
+	"scoreDifferencePosition": {
+		"type": "selection",
+		"label": "Score Difference Position",
+		"default": "LEFT",
+		"values": [
+			"TOP",
+			"LEFT",
+			"MIDDLE",
+			"BOTTOM"
+		]
+	},
 	"     ": {
 		"type": "label"
 	},

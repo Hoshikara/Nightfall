@@ -18,41 +18,41 @@ _.initializeButton = function(self)
 
   local button = {
     [1] = {
-      label = Label.New('GENERAL', 36),
-      page = 'general'
+      label = New.Label({ text = 'GENERAL', size = 36 }),
+      page = 'general',
     },
     [2] = {
-      label = Label.New('SONG SELECT', 36),
-      page = 'songSelect'
+      label = New.Label({ text = 'SONG SELECT', size = 36 }),
+      page = 'songSelect',
     },
     [3] = {
-      label = Label.New('GAMEPLAY SETTINGS', 36),
-      page = 'gameplaySettings'
+      label = New.Label({ text = 'GAMEPLAY SETTINGS', size = 36 }),
+      page = 'gameplaySettings',
     },
     [4] = {
-      label = Label.New('GAMEPLAY', 36),
-      page = 'gameplay'
+      label = New.Label({ text = 'GAMEPLAY', size = 36 }),
+      page = 'gameplay',
     },
     [5] = {
-      label = Label.New('PRACTICE MODE', 36),
-      page = 'practiceMode'
+      label = New.Label({ text = 'PRACTICE MODE', size = 36 }),
+      page = 'practiceMode',
     },
     [6] = {
-      label = Label.New('RESULTS', 36),
-      page = 'results'
+      label = New.Label({ text = 'RESULTS', size = 36 }),
+      page = 'results',
     },
     [7] = {
-      label = Label.New('MULTIPLAYER', 36),
-      page = 'multiplayer'
+      label = New.Label({ text = 'MULTIPLAYER', size = 36 }),
+      page = 'multiplayer',
     },
     [8] = {
-      label = Label.New('NAUTICA', 36),
-      page = 'nautica'
+      label = New.Label({ text = 'NAUTICA', size = 36 }),
+      page = 'nautica',
     },
     activePage = 1,
-    startEsc = Label.New('[START]  /  [ESC]', 24),
-    close = Label.New('CLOSE', 24),
-    maxWidth = 0
+    startEsc = New.Label({ text = '[START]  /  [ESC]', size = 24 }),
+    close = New.Label({ text = 'CLOSE', size = 24 }),
+    maxWidth = 0,
   };
 
   button.drawButton = function(self, x, y, i, isActive)
@@ -97,11 +97,20 @@ _.initializeControls = function(self)
       list[i] = {};
 
       Font.Normal();
-      list[i].action = Label.New(CONTROL_LIST[category][i].action, 24);
+      list[i].action = New.Label({
+        text = CONTROL_LIST[category][i].action,
+        size = 24,
+      });
 
       Font.Medium();
-      list[i].controller = Label.New(CONTROL_LIST[category][i].controller, 24);
-      list[i].keyboard = Label.New(CONTROL_LIST[category][i].keyboard, 24);
+      list[i].controller = New.Label({
+        text = CONTROL_LIST[category][i].controller,
+        size = 24,
+      });
+      list[i].keyboard = New.Label({
+        text = CONTROL_LIST[category][i].keyboard,
+        size = 24,
+      });
 
       if (CONTROL_LIST[category][i].lineBreak) then
         list[i].lineBreak = true;
@@ -206,9 +215,9 @@ _.initializeAll = function(self, selection)
   end
 
   Font.Medium();
-  self.heading = Label.New('CONTROLS', 60);
-  self.controller = Label.New('CONTROLLER', 30);
-  self.keyboard = Label.New('KEYBOARD', 30);
+  self.heading = New.Label({ text = 'CONTROLS', size = 60 });
+  self.controller = New.Label({ text = 'CONTROLLER', size = 30 });
+  self.keyboard = New.Label({ text = 'KEYBOARD', size = 30 });
 
   self.button = self:initializeButton();
   self.controls = self:initializeControls();

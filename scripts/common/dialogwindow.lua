@@ -5,17 +5,17 @@ local New = function(strings)
 
   Font.Normal();
 
-  labels.heading = Label.New(strings.heading, 48);
+  labels.heading = New.Label({ text = strings.heading, size = 48 });
   
   Font.Medium();
 
-  labels.confirm = Label.New('CONFIRM', 18);
-  labels.enter = Label.New('[ENTER]', 18);
-  labels.inputLabel = Label.New(strings.inputLabel, 18);
+  labels.confirm = New.Label({ text = 'CONFIRM', size = 18 });
+  labels.enter = New.Label({ text = '[ENTER]', size = 18 });
+  labels.inputLabel = New.Label({ text = strings.inputLabel, size = 18 });
   
   Font.JP();
 
-  labels.inputText = Label.New('', 28);
+  labels.inputText = New.Label({ text = '', size = 28 });
 
   return {
     cursor = {

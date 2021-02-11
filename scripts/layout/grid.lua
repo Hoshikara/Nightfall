@@ -2,11 +2,11 @@ local New = function(isSongSelect)
   local width = 0;
 
   if (isSongSelect) then
-    local image = Image.New('common/panel.png');
+    local image = New.Image({ path = 'common/panel.png' });
 
     width = image.w;
   else
-    local image = Image.New('common/panel_wide.png');
+    local image = New.Image({ path = 'common/panel_wide.png' });
 
     width = image.w;
   end
@@ -36,7 +36,7 @@ local New = function(isSongSelect)
       if (not self.field.height) then
         Font.Normal();
 
-        local tempField = Label.New('TEMPFIELD', 24);
+        local tempField = New.Label({ text = 'TEMPFIELD', size = 24 });
 
         self.field.height = tempField.h;
       end
@@ -44,7 +44,7 @@ local New = function(isSongSelect)
       if (not self.label.height) then
         Font.Medium();
 
-        local tempLabel = Label.New('TEMPLABEL', 24);
+        local tempLabel = New.Label({ text = 'TEMPLABEL', size = 24 });
 
         self.label.height = tempLabel.h;
       end

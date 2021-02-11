@@ -48,11 +48,20 @@ local _ = {
           list[i] = {};
     
           Font.Normal();
-          list[i].action = Label.New(CONTROL_LIST[category][i].action, 24);
+          list[i].action = New.Label({
+            text = CONTROL_LIST[category][i].action,
+            size = 24,
+          });
     
           Font.Medium();
-          list[i].controller = Label.New(CONTROL_LIST[category][i].controller, 24);
-          list[i].keyboard = Label.New(CONTROL_LIST[category][i].keyboard, 24);
+          list[i].controller = New.Label({
+            text = CONTROL_LIST[category][i].controller,
+            size = 24,
+          });
+          list[i].keyboard = New.Label({
+            text = CONTROL_LIST[category][i].keyboard,
+            size = 24,
+          });
     
           if (CONTROL_LIST[category][i].lineBreak) then
             list[i].lineBreak = true;
@@ -71,18 +80,18 @@ local _ = {
       Font.Medium();
 
       self.headings = {
-        main = Label.New('CONTROLS', 60),
-        general = Label.New('GENERAL', 36),
-        songSelect = Label.New('SONG SELECT', 36),
-        gameplaySettings = Label.New('GAMEPLAY SETTINGS', 36),
-        gameplay = Label.New('GAMEPLAY', 36),
-        practiceMode = Label.New('PRACTICE MODE', 36),
-        results = Label.New('RESULTS', 36),
-        controller = Label.New('CONTROLLER', 30),
-        keyboard = Label.New('KEYBOARD', 30),
-        btd = Label.New('[BT-D]', 24),
-        next = Label.New('NEXT PAGE', 24),
-        maxWidth = 0
+        main = New.Label({ text = 'CONTROLS', size = 60 }),
+        general = New.Label({ text = 'GENERAL', size = 36 }),
+        songSelect = New.Label({ text = 'SONG SELECT', size = 36 }),
+        gameplaySettings = New.Label({ text = 'GAMEPLAY SETTINGS', size = 36 }),
+        gameplay = New.Label({ text = 'GAMEPLAY', size = 36 }),
+        practiceMode = New.Label({ text = 'PRACTICE MODE', size = 36 }),
+        results = New.Label({ text = 'RESULTS', size = 36 }),
+        controller = New.Label({ text = 'CONTROLLER', size = 30 }),
+        keyboard = New.Label({ text = 'KEYBOARD', size = 30 }),
+        btd = New.Label({ text = '[BT-D]', size = 24 }),
+        next = New.Label({ text = 'NEXT PAGE', size = 24 }),
+        maxWidth = 0,
       };
     end
   end,

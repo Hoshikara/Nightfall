@@ -57,7 +57,7 @@ setLabels = function()
 			end
 
 			labels[i] = {
-				name = Label.New(label.name, 24),
+				name = New.Label({ text = label.name, size = 24 }),
 				direction = label.direction,
 			};
 

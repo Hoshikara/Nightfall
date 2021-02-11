@@ -3,11 +3,11 @@ local New = function()
 
   Font.Medium();
 
-  labels.search = Label.New('SEARCH', 18);
+  labels.search = New.Label({ text = 'SEARCH', size = 18 });
   
   Font.JP();
 
-  labels.input = Label.New('', 24);
+  labels.input = New.Label({ text = '', size = 24 });
 
   return {
     labels = labels,

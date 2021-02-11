@@ -19,7 +19,7 @@ local allReady;
 local allRooms = {};
 local allUsers = {};
 
-local background = Image.New('bg.png');
+local background = New.Image({ path = 'bg.png' });
 
 local allowHardToggle = game.GetSkinSetting('toggleHard') or false;
 local allowMirrorToggle = game.GetSkinSetting('toggleMirror') or false;
@@ -124,8 +124,8 @@ local roomList = {
 	currentPage = 1,
 	cursor = Cursor.New(),
 	images = {
-		button = Image.New('buttons/normal.png'),
-		buttonHover = Image.New('buttons/normal_hover.png'),
+		button = New.Image({ path = 'buttons/normal.png' }),
+		buttonHover = New.Image({ path = 'buttons/normal_hover.png' }),
 	},
 	info = nil,
 	labels = nil,
@@ -206,12 +206,15 @@ local roomList = {
 			Font.Medium();
 
 			self.labels = {
-				createRoom = Label.New('CREATE ROOM', 18),
+				createRoom = New.Label({ text = 'CREATE ROOM', size = 18 }),
 			};
 
 			Font.Normal();
 
-			self.labels.heading = Label.New('MULTIPLAYER ROOMS', 60);
+			self.labels.heading = New.Label({
+				text = 'MULTIPLAYER ROOMS',
+				size = 60,
+			});
 		end
 	end,
 
@@ -454,9 +457,9 @@ local songInfo = {
   },
 	difficulties = nil,
 	images = {
-    button = Image.New('buttons/short.png'),
-    buttonHover = Image.New('buttons/short_hover.png'),
-    panel = Image.New('common/panel.png')
+    button = New.Image({ path = 'buttons/short.png' }),
+    buttonHover = New.Image({ path = 'buttons/short_hover.png' }),
+    panel = New.Image({ path = 'common/panel.png' }),
 	},
 	jacketSize = 0,
 	labels = nil,
@@ -550,40 +553,51 @@ local songInfo = {
 			Font.Number();
 
 			for i = 1, 4 do
-				self.levels[i] = Label.New('', 18);
+				self.levels[i] = New.Label({ text = '', size = 18 });
 			end
 
-			self.songInfo.bpm = Label.New('000', 24);
+			self.songInfo.bpm = New.Label({ text = '000', size = 24 });
 
 			Font.Medium();
 
 			self.labels = {
-				hardGauge = Label.New('HARD GAUGE', 20),
-				mirrorMode = Label.New('MIRROR MODE', 20),
-				rotateHost = Label.New('ROTATE HOST', 20),
+				hardGauge = New.Label({ text = 'HARD GAUGE', size = 20 }),
+				mirrorMode = New.Label({ text = 'MIRROR MODE', size = 20 }),
+				rotateHost = New.Label({ text = 'ROTATE HOST', size = 20 }),
 			};
 
 			for name, label in pairs(CONSTANTS_SONGWHEEL.labels.info) do
-				self.labels[name] = Label.New(label, 18);
+				self.labels[name] = New.Label({ text = label, size = 18 });
 			end
 
 			for i, difficulty in ipairs(CONSTANTS_SONGWHEEL.difficulties) do
-				self.difficulties[i] = Label.New(difficulty, 18);
+				self.difficulties[i] = New.Label({ text = difficulty, size = 18 });
 			end
 
 			Font.Normal();
 
-			self.songInfo.effector = Label.New('EFFECTOR', 24);
-
-			self.labels.disabled = Label.New('DISABLED', 24);
-			self.labels.enabled = Label.New('ENABLED', 24);
-			self.labels.hard = Label.New('HARD', 24);
-			self.labels.normal = Label.New('Normal', 24);
+			self.labels.disabled = New.Label({ text = 'DISABLED', size = 24 });
+			self.labels.enabled = New.Label({ text = 'ENABLED', size = 24 });
+			self.labels.hard = New.Label({ text = 'HARD', size = 24 });
+			self.labels.normal = New.Label({ text = 'NORMAL', size = 24 });
 
 			Font.JP();
 
-			self.songInfo.artist = Label.New('ARTIST', 36);
-			self.songInfo.title = Label.New('TITLE', 36);
+			self.songInfo.artist = New.Label({
+				text = 'ARTIST',
+				scrolling = true,
+				size = 36,
+			});
+			self.songInfo.title = New.Label({
+				text = 'TITLE',
+				scrolling = true,
+				size = 36,
+			});
+			self.songInfo.effector = New.Label({
+				text = 'EFFECTOR',
+				scrolling = true,
+				size = 24,
+			});
 		end
 	end,
 
@@ -805,16 +819,16 @@ local songInfo = {
 			if (doesOverflow and self.scrollTimers[name]) then
 				self.scrollTimers[name] = self.scrollTimers[name] + deltaTime;
 
-				drawScrollingLabel(
-					self.scrollTimers[name],
-					self.songInfo[name],
-					self.panel.innerWidth,
-					self.labels.x,
-					y,
-					scalingFactor,
-					'White',
-					255
-				);
+				self.songInfo[name]:draw({
+					x = self.labels.x,
+					y = y,
+					a = 255,
+					color = 'White',
+					scale = scalingFactor,
+					scrolling = true,
+					timer = self.scrollTimers[name],
+					width = self.panel.innerWidth,
+				});
 			else
 				self.songInfo[name]:draw({
 					x = self.labels.x,
@@ -947,10 +961,10 @@ local songInfo = {
 local lobby = {
 	cache = { scaledW = 0, scaledH = 0 },
 	images = {
-		buttonM = Image.New('buttons/medium.png'),
-		buttonMHover = Image.New('buttons/medium_hover.png'),
-		buttonN = Image.New('buttons/normal.png'),
-		buttonNHover = Image.New('buttons/normal_hover.png'),
+		buttonM = New.Image({ path = 'buttons/medium.png' }),
+		buttonMHover = New.Image({ path = 'buttons/medium_hover.png' }),
+		buttonN = New.Image({ path = 'buttons/normal.png' }),
+		buttonNHover = New.Image({ path = 'buttons/normal_hover.png' }),
 	},
 	button = {
 		spacing = 0,
@@ -1020,11 +1034,11 @@ local lobby = {
 			Font.Medium();
 
 			for name, label in pairs(CONSTANTS_MULTI.buttons) do
-				self.labels[name] = Label.New(label, 18);
+				self.labels[name] = New.Label({ text = label, size = 18 });
 			end
 
 			for name, label in pairs(CONSTANTS_MULTI.user) do
-				self.labels[name] = Label.New(label, 18);
+				self.labels[name] = New.Label({ text = label, size = 18 });
 			end
 		end
 	end,
@@ -1035,14 +1049,14 @@ local lobby = {
 				Font.Normal();
 
 				self.userInfo[i] = {
-					clear = Label.New('', 30),
-					grade = Label.New('', 30),
-					player = Label.New('', 30),
+					clear = New.Label({ text = '', size = 30 }),
+					grade = New.Label({ text = '', size = 30 }),
+					player = New.Label({ text = '', size = 30 }),
 				};
 
 				Font.Number();
 
-				self.userInfo[i].level = Label.New('0', 30);
+				self.userInfo[i].level = New.Label({ text = '0', size = 30 });
 				self.userInfo[i].score = ScoreNumber.New({
 					isScore = true,
 					sizes = { 30, 26 },

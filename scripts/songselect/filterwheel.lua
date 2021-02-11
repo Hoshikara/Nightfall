@@ -68,7 +68,11 @@ local folders = {
 			Font.Normal();
 
 			for i, folder in ipairs(filters.folder) do
-				self.labels[i] = Label.New(stringReplace(folder, prefixes), 24);
+				self.labels[i] = New.Label({
+					text = stringReplace(folder, prefixes),
+					scrolling = true,
+					size = 24,
+				});
 				self.timers[folder] = 0;
 
 				local width = self.labels[i].w;
@@ -116,16 +120,16 @@ local folders = {
 			if (allowScroll and doesOverflow) then
 				self.timers[key] = self.timers[key] + deltaTime;
 
-				drawScrollingLabel(
-					self.timers[key],
-					self.labels[i],
-					layout.dropdown[1].maxWidth,
-					0,
-					y,
-					scalingFactor,
-					color,
-					alpha
-				);
+				self.labels[i]:draw({
+					x = 0,
+					y = y,
+					a = alpha,
+					color = color,
+					scale = scalingFactor,
+					scrolling = true,
+					timer = self.timers[key],
+					width = layout.dropdown[1].maxWidth,
+				});
 			else
 				self.labels[i]:draw({
 					x = 0,
@@ -194,7 +198,7 @@ local levels = {
 					);
 				end
 	
-				self.labels[i] = Label.New(current, 24, 0);
+				self.labels[i] = New.Label({ text = current, size = 24 });
 	
 				local width = self.labels[i].w;
 	
@@ -272,16 +276,16 @@ drawCurrentField = function(deltaTime, label, field, displaying, isFolder)
 	if (doesOverflow) then
 		timers.scroll = timers.scroll + deltaTime;
 
-		drawScrollingLabel(
-			timers.scroll,
-			label,
-			layout.field[1].maxWidth + (layout.dropdown.padding / 2),
-			x,
-			y,
-			scalingFactor,
-			color,
-			255
-		);
+		label:draw({
+			x = x,
+			y = y,
+			a = 255,
+			color = color,
+			scale = scalingFactor,
+			scrolling = true,
+			timer = timers.scroll,
+			width = layout.field[1].maxWidth + (layout.dropdown.padding / 2),
+		});
 	else
 		label:draw({
 			x = x,

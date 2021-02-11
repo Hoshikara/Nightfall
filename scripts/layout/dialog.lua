@@ -34,9 +34,9 @@ return {
 	setSizes = function(self, scaledW, scaledH)
 		if (not self.images) then
 			self.images = {
-				dialogBox = Image.New('common/dialog.png'),
-				button = Image.New('buttons/long.png'),
-				buttonHover = Image.New('buttons/long_hover.png'),
+				dialogBox = New.Image({ path = 'common/dialog.png' }),
+				button = New.Image({ path = 'buttons/long.png' }),
+				buttonHover = New.Image({ path = 'buttons/long_hover.png' }),
 			};
 		end
 	

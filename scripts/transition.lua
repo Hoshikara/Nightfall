@@ -1,5 +1,5 @@
 
-local background = Image.New('bg.png');
+local background = New.Image({ path = 'bg.png' });
 
 local cache = { resX = 0, resY = 0 };
 

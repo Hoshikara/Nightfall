@@ -5,12 +5,12 @@ local New = function(params)
 
   if (params.isScore) then
     for i = 1, 4 do
-      labels[i] = Label.New('0', params.sizes[1]);
-      labels[i + 4] = Label.New('0', params.sizes[2]);
+      labels[i] = New.Label({ text = '0', size = params.sizes[1] });
+      labels[i + 4] = New.Label({ text = '0', size = params.sizes[2] });
     end
   else
     for i = 1, params.digits do
-      labels[i] = Label.New('0', params.sizes[1]);
+      labels[i] = New.Label({ text = '0', size = params.sizes[1] });
     end
   end
 

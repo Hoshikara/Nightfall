@@ -8,7 +8,7 @@ local List = require('common/list');
 local Scrollbar = require('common/scrollbar');
 local SearchBar = require('common/searchbar');
 
-local background = Image.New('bg.png');
+local background = New.Image({ path = 'bg.png' });
 
 local controlsShortcut = game.GetSkinSetting('controlsShortcut') or false;
 local jacketQuality = game.GetSkinSetting('jacketQuality') or 'NORMAL';
@@ -47,29 +47,28 @@ local scrollTimers = {};
 cacheChallenge = function(challenge)
   if (not challengeCache[challenge.id]) then
     challengeCache[challenge.id] = {};
-    scrollTimers[challenge.id] = { artist = 0, title = 0 };
+    scrollTimers[challenge.id] = { title = 0 };
 
     Font.JP();
 
-    challengeCache[challenge.id].artists = {};
     challengeCache[challenge.id].bpms = {};
     challengeCache[challenge.id].titles = {};
     challengeCache[challenge.id].jackets = {};
     challengeCache[challenge.id].title = {
-      name = Label.New(string.upper(challenge.title), 36),
+      name = New.Label({
+        text = string.upper(challenge.title),
+        scrolling = true,
+        size = 36,
+      }),
       timer = 0,
     };
 
     for i, chart in ipairs(challenge.charts) do
-      challengeCache[challenge.id].artists[i] = Label.New(
-        string.upper(chart.artist),
-        26
-      );
-
-      challengeCache[challenge.id].titles[i] = Label.New(
-        string.upper(chart.title),
-        28
-      );
+      challengeCache[challenge.id].titles[i] = New.Label({
+        text = string.upper(chart.title),
+        scrolling = true,
+        size = 28,
+      });
     end
 
     Font.Normal();
@@ -77,7 +76,7 @@ cacheChallenge = function(challenge)
     challengeCache[challenge.id].requirements = {};
 
     for requirement in challenge.requirement_text:gmatch('[^\n]+') do
-      local label = Label.New(string.upper(requirement), 24);
+      local label = New.Label({ text = string.upper(requirement), size = 24 });
 
       table.insert(challengeCache[challenge.id].requirements, label);
     end
@@ -85,21 +84,27 @@ cacheChallenge = function(challenge)
     Font.Number();
 
     for i, chart in ipairs(challenge.charts) do
-      challengeCache[challenge.id].bpms[i] = Label.New(chart.bpm, 24);
+      challengeCache[challenge.id].bpms[i] = New.Label({
+        text = chart.bpm,
+        size = 24,
+      });
     end
 
     if (challenge.topBadge ~= 0) then
-      challengeCache[challenge.id].completion = Label.New(
-        string.format(
+      challengeCache[challenge.id].completion = New.Label({
+        text = string.format(
           '%d%%',
           math.max(0, ((challenge.bestScore - 8000000) // 10000))
         ),
-        24
-      );
+        size = 24,
+      });
 
       Font.Normal();
 
-      challengeCache[challenge.id].grade = Label.New(string.upper(challenge.grade), 24);
+      challengeCache[challenge.id].grade = New.Label({
+        text = string.upper(challenge.grade),
+        size = 24,
+      });
     end
   end
 end
@@ -145,29 +150,29 @@ do
   Font.Normal();
 
   for i, clear in ipairs(CONSTANTS_SONGWHEEL.clears) do
-    clears[i] = Label.New(clear, 24);
+    clears[i] = New.Label({ text = clear, size = 24 });
   end
 
   for i, difficulty in ipairs(CONSTANTS_SONGWHEEL.difficulties) do
-    difficulties[i] = Label.New(difficulty, 24);
+    difficulties[i] = New.Label({ text = difficulty, size = 24 });
   end
 
   Font.Medium();
 
   for name, label in pairs(CONSTANTS_CHALWHEEL.labels) do
-    labels[name] = Label.New(label, 18);
+    labels[name] = New.Label({ text = label, size = 18 });
   end
 
   Font.Number();
 
   for i = 1, 4 do
-    levels[i] = Label.New('', 24);
+    levels[i] = New.Label({ text = '', size = 24 });
   end
 end
 
 local challengeInfo = {
   cache = { scaledW = 0, scaledH = 0 },
-  images = { panel = Image.New('common/panel_wide.png') },
+  images = { panel = New.Image({ path = 'common/panel_wide.png' }) },
   labels = nil,
   padding = {
     x = { double = 0, full = 0 },
@@ -226,7 +231,10 @@ local challengeInfo = {
       Font.Normal();
 
       self.labels = {
-        missingCharts = Label.New('REQUIRED CHARTS MISSING', 36),
+        missingCharts = New.Label({
+          text = 'REQUIRED CHARTS MISSING',
+          size = 36,
+        }),
       };
     end
   end,
@@ -240,7 +248,6 @@ local challengeInfo = {
 
     for i, chart in ipairs(challenge.charts) do
       local info = {
-        artist = challengeCache[challenge.id].artists[i],
         difficulty = difficulties[getDifficultyIndex(
           chart.jacketPath,
           chart.difficulty
@@ -258,7 +265,7 @@ local challengeInfo = {
       Font.Number();
 
       if (not levels[i]) then
-        levels[i] = Label.New('', 24);
+        levels[i] = New.Label({ text = '', size = 24 });
       end
 
       levels[i]:update({ new = string.format('%02d', chart.level) });
@@ -324,16 +331,16 @@ local challengeInfo = {
               scrollTimers[challenge.id][name] =
                 scrollTimers[challenge.id][name] + deltaTime;
 
-              drawScrollingLabel(
-                scrollTimers[challenge.id][name],
-                info[name],
-                maxWidth,
-                infoX,
-                infoY,
-                scalingFactor,
-                'White',
-                255
-              );
+              info[name]:draw({
+                x = infoX,
+                y = infoY,
+                a = 255,
+                color = 'White',
+                scale = scalingFactor,
+                scrolling = true,
+                timer = scrollTimers[challenge.id][name],
+                width = maxWidth,
+              });
             else
               info[name]:draw({
                 x = infoX,
@@ -463,16 +470,16 @@ local challengeInfo = {
     if (title.w > self.panel.innerWidth) then
       self.timers.title = self.timers.title + deltaTime;
 
-      drawScrollingLabel(
-        self.timers.title,
-        title,
-        self.panel.innerWidth,
-        0,
-        y,
-        scalingFactor,
-        'White',
-        255
-      );
+      title:draw({
+        x = 0,
+        y = y,
+        a = 255,
+        color = 'White',
+        scale = scalingFactor,
+        scrolling = true,
+        timer = self.timers.title,
+        width = self.panel.innerWidth,
+      });
     else
       title:draw({
         x = 0,
@@ -619,13 +626,13 @@ local challengeList = {
       Font.Medium();
 
       self.labels.amounts = {
-        of = Label.New('OF', 18),
+        of = New.Label({ text = 'OF', size = 18 }),
       };
 
       Font.Number();
 
-      self.labels.amounts.current = Label.New('', 18);
-      self.labels.amounts.total = Label.New('', 18);
+      self.labels.amounts.current = New.Label({ text = '', size = 18 });
+      self.labels.amounts.total = New.Label({ text = '', size = 18 });
     end
   end,
 
@@ -710,16 +717,16 @@ local challengeList = {
           challengeCache[challenge.id].title.timer = 0;
         end
 
-        drawScrollingLabel(
-          challengeCache[challenge.id].title.timer,
-          title,
-          self.list.w.max,
-          x,
-          y,
-          scalingFactor,
-          'White',
-          alpha
-        );
+        title:draw({
+          x = x,
+          y = y,
+          a = alpha,
+          color = 'White',
+          scale = scalingFactor,
+          scrolling = true,
+          timer = challengeCache[challenge.id].title.timer,
+          width = self.list.w.max,
+        });
       else
         title:draw({
           x = x,
@@ -866,15 +873,15 @@ local miscInfo = {
       Font.Medium();
   
       self.labels = {
-        bta = Label.New('[BT-A]', 20),
-        showControls = Label.New('SHOW CONTROLS', 20),
+        bta = New.Label({ text = '[BT-A]', size = 20 }),
+        showControls = New.Label({ text = 'SHOW CONTROLS', size = 20 }),
         volforce = {
-          label = Label.New('VF', 20),
+          label = New.Label({ text = 'VF', size = 20 }),
         },
       };
 
       Font.Number();
-      self.labels.volforce.value = Label.New('', 20);
+      self.labels.volforce.value = New.Label({ text = '', size = 20 });
     end
 
     local forceValue = get(userData.contents, 'volforce', 0);

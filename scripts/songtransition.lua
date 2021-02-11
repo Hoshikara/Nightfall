@@ -1,5 +1,5 @@
 
-local background = Image.New('bg.png');
+local background = New.Image({ path = 'bg.png' });
 
 local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
 
@@ -49,8 +49,8 @@ setLabels = function()
 		Font.JP();
 
 		labels = {
-			artist = Label.New(string.upper(song.artist), 40),
-			title = Label.New(string.upper(song.title), 48),
+			artist = New.Label({ text = string.upper(song.artist), size = 40 }),
+			title = New.Label({ text = string.upper(song.title), size = 48 }),
 		};
 	end
 end

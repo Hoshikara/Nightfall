@@ -14,7 +14,7 @@ local activePage = 'mainMenu';
 
 local allowClick = false;
 
-local background = Image.New('bg.png');
+local background = New.Image({ path = 'bg.png' });
 
 local buttonCount = {
 	mainMenu = 5,
@@ -120,8 +120,8 @@ local buttons = {
 	cache = { scaledH = 0, scaledW = 0 },
 	cursor = Cursor.New(),
 	images = {
-		button = Image.New('buttons/normal.png'),
-		buttonHover = Image.New('buttons/normal_hover.png'),
+		button = New.Image({ path = 'buttons/normal.png' }),
+		buttonHover = New.Image({ path = 'buttons/normal_hover.png' }),
 	},
 	labels = nil,
 	margin = 0,
@@ -169,40 +169,40 @@ local buttons = {
 							activePage = 'playOptions';
 							self.activePage = activePage;
 						end,
-						label = Label.New('PLAY', 18)
+						label = New.Label({ text = 'PLAY', size = 18 }),
 					},
 					{
 						action = Menu.DLScreen,
-						label = Label.New('NAUTICA', 18)
+						label = New.Label({ text = 'NAUTICA', size = 18 }),
 					},
 					{
 						action = function()
 							activeButton = 1;
 							showControls = true;
 						end,
-						label = Label.New('CONTROLS', 18)
+						label = New.Label({ text = 'CONTROLS', size = 18 }),
 					},
 					{
 						action = Menu.Settings,
-						label = Label.New('SETTINGS', 18)
+						label = New.Label({ text = 'SETTINGS', size = 18 }),
 					},
 					{
 						action = Menu.Exit,
-						label = Label.New('EXIT', 18)
-					}
+						label = New.Label({ text = 'EXIT', size = 18 }),
+					},
 				},
 				playOptions = {
 					{
 						action = Menu.Start,
-						label = Label.New('SINGLEPLAYER', 18)
+						label = New.Label({ text = 'SINGLEPLAYER', size = 18 }),
 					},
 					{
 						action = Menu.Multiplayer,
-						label = Label.New('MULTIPLAYER', 18)
+						label = New.Label({ text = 'MULTIPLAYER', size = 18 }),
 					},
 					{
 						action = Menu.Challenges,
-						label = Label.New('CHALLENGES', 18)
+						label = New.Label({ text = 'CHALLENGES', size = 18 }),
 					},
 					{
 						action = function()
@@ -210,8 +210,8 @@ local buttons = {
 							activePage = 'mainMenu';
 							self.activePage = activePage;
 						end,
-						label = Label.New('MAIN MENU', 18)
-					}
+						label = New.Label({ text = 'MAIN MENU', size = 18 }),
+					},
 				}
 			};
 		end
@@ -304,10 +304,10 @@ local title = {
 			Font.Medium();
 
 			self.labels = {
-				game = Label.New('UNNAMED SDVX CLONE', 31),
+				game = New.Label({ text = 'UNNAMED SDVX CLONE', size = 31 }),
 			};
 
-			self.labels.skin = Label.New('NIGHTFALL', 120);
+			self.labels.skin = New.Label({ text = 'NIGHTFALL', size = 120 });
 		end
 	end,
 
@@ -349,8 +349,8 @@ local title = {
 
 local updatePrompt = {
 	buttons = {
-		normal = Image.New('buttons/short.png'),
-		hover = Image.New('buttons/short_hover.png'),
+		normal = New.Image({ path = 'buttons/short.png' }),
+		hover = New.Image({ path = 'buttons/short_hover.png' }),
 		margin = 0,
 		x = {},
 		y = 0,
@@ -393,11 +393,11 @@ local updatePrompt = {
 			self.labels = {
 				{
 					action = Menu.Update,
-					label = Label.New('UPDATE', 18)
+					label = New.Label({ text = 'UPDATE', size = 18 }),
 				},
 				{
 					action = viewUpdate,
-					label = Label.New('VIEW', 18)
+					label = New.Label({ text = 'VIEW', size = 18 }),
 				},
 				{
 					action = function()
@@ -405,13 +405,16 @@ local updatePrompt = {
 						activePage = 'mainMenu';
 						showUpdatePrompt = false;
 					end,
-					label = Label.New('CLOSE', 18)
-				}
+					label = New.Label({ text = 'CLOSE', size = 18 }),
+				},
 			};
 
 			Font.Normal();
 
-			self.labels.heading = Label.New('A NEW UPDATE IS AVAILABLE!', 36);
+			self.labels.heading = New.Label({
+				text = 'A NEW UPDATE IS AVAILABLE!',
+				size = 36
+			});
 		end
 	end,
 

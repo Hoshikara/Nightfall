@@ -7,7 +7,7 @@ local Scrollbar = require('common/scrollbar');
 
 local help = require('helpers/result');
 
-local background = Image.New('bg.png');
+local background = New.Image({ path = 'bg.png' });
 
 local jacket = nil;
 local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
@@ -106,7 +106,7 @@ local resultPanel = {
 		y = { double = 0, full = 0 },
 	},
 	panel = {
-		image = Image.New('common/panel_wide.png'),
+		image = New.Image({ path = 'common/panel_wide.png' }),
 		maxWidth = 0,
 		w = 0,
 		h = 0,
@@ -162,22 +162,22 @@ local resultPanel = {
 			Font.Medium();
 
 			self.labels = {
-				btbbtc = Label.New('[BT-B]  +  [BT-C]', 20),
-				songCollections = Label.New('SONG COLLECTIONS', 20),
+				btbbtc = New.Label({ text = '[BT-B]  +  [BT-C]', size = 20 }),
+				songCollections = New.Label({ text = 'SONG COLLECTIONS', size = 20 }),
 			};
 
 			for key, name in pairs(CONSTANTS.song) do
-				self.labels[key] = Label.New(name, 18);
+				self.labels[key] = New.Label({ text = name, size = 18 });
 			end
 
 			for key, name in pairs(CONSTANTS.stats) do
-				self.labels[key] = Label.New(name, 18);
+				self.labels[key] = New.Label({ text = name, size = 18 });
 			end
 
 			Font.Number();
 
 			if (upScore) then
-				self.labels.plus = Label.New('+', 30);
+				self.labels.plus = New.Label({ text = '+', size = 30 });
 
 				self.upScore = ScoreNumber.New({
 					isScore = true,
@@ -194,7 +194,11 @@ local resultPanel = {
 			for key, value in pairs(songInfo) do
 				Font[value.font]();
 
-				self.songInfo[key] = Label.New(value.value, value.size);
+				self.songInfo[key] = New.Label({
+					text = value.value,
+					scrolling = true,
+					size = value.size,
+				});
 			end
 		end
 	end,
@@ -207,7 +211,10 @@ local resultPanel = {
 				if (key ~= 'score') then
 					Font[value.font]();
 
-					self.stats[key] = Label.New(value.value, value.size);
+					self.stats[key] = New.Label({
+						text = value.value,
+						size = value.size,
+					});
 				end
 			end
 		end
@@ -286,16 +293,16 @@ local resultPanel = {
 			if (self.songInfo[name].w > maxWidth) then
 				self.timers[name] = self.timers[name] + deltaTime;
 
-				drawScrollingLabel(
-					self.timers[name],
-					self.songInfo[name],
-					maxWidth,
-					x,
-					y,
-					scalingFactor,
-					'White',
-					255
-				);
+				self.songInfo[name]:draw({
+					x = x,
+					y = y,
+					a = 255,
+					color = 'White',
+					scale = scalingFactor,
+					scrolling = true,
+					timer = self.timers[name],
+					width = maxWidth,
+				});
 			else
 				self.songInfo[name]:draw({
 					x = x,
@@ -524,10 +531,10 @@ local graphs = {
 			Font.Medium();
 
 			self.labels = {
-				earliest = Label.New('EARLIEST', 18),
-				latest = Label.New('LATEST', 18),
-				mean = Label.New('MEAN', 18),
-				median = Label.New('MEDIAN', 18),
+				earliest = New.Label({ text = 'EARLIEST', size = 18 }),
+				latest = New.Label({ text = 'LATEST', size = 18 }),
+				mean = New.Label({ text = 'MEAN', size = 18 }),
+				median = New.Label({ text = 'MEDIAN', size = 18 }),
 			};
 		end
 	end,
@@ -537,15 +544,15 @@ local graphs = {
 			Font.Number();
 
 			self.stats = {
-				currentGauge = Label.New('0', 18),
-				earliest = Label.New(
+				currentGauge = New.Label({ text = '0', size = 18 }),
+				earliest = New.Label({ text = 
 					string.format('%.1f ms', self.earliest),
-					18
-				),
-				latest = Label.New(
+					size = 18,
+				}),
+				latest = New.Label({ text = 
 					string.format('%.1f ms', self.latest),
-					18
-				),
+					size = 18,
+				}),
 			};
 
 			for _, name in ipairs(self.statOrder) do
@@ -553,7 +560,7 @@ local graphs = {
 
 				Font[value.font]();
 
-				self.stats[name] = Label.New(value.value, value.size);
+				self.stats[name] = New.Label({ text = value.value, size = value.size });
 			end
 		end
 	end,
@@ -1046,12 +1053,12 @@ local scoreList = {
 			Font.Medium();
 
 			self.labels = {
-				fxlfxr = Label.New('[FX-L]  /  [FX-R]', 20),
-				selectScore = Label.New('SELECT SCORE', 20),
+				fxlfxr = New.Label({ text = '[FX-L]  /  [FX-R]', size = 20 }),
+				selectScore = New.Label({ text = 'SELECT SCORE', size = 20 }),
 			};
 
 			for key, name in pairs(CONSTANTS.stats) do
-				self.labels[key] = Label.New(name, 18);
+				self.labels[key] = New.Label({ text = name, size = 18 });
 			end
 		end
 	end,
@@ -1064,7 +1071,7 @@ local scoreList = {
 				Font.Number();
 
 				self.stats[i] = {
-					place = Label.New(i, 90),
+					place = New.Label({ text = i, size = 90 }),
 				};
 
 				for key, value in pairs(score) do
@@ -1076,7 +1083,10 @@ local scoreList = {
 					else
 						Font[value.font]();
 
-						self.stats[i][key] = Label.New(value.value, value.size);
+						self.stats[i][key] = New.Label({
+							text = value.value,
+							size = value.size,
+						});
 					end
 				end
 			end
@@ -1457,8 +1467,8 @@ local screenshot = {
 			Font.Normal();
 
 			self.labels = {
-				path = Label.New('', 24),
-				saved = Label.New('SCREENSHOT SAVED TO', 24),
+				path = New.Label({ text = '', size = 24 }),
+				saved = New.Label({ text = 'SCREENSHOT SAVED TO', size = 24 }),
 			};
 		end
 	end,

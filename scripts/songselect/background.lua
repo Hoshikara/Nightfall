@@ -1,4 +1,4 @@
-local background = Image.New('bg.png');
+local background = New.Image({ path = 'bg.png' });
 
 render = function(deltaTime)
 	resX, resY = game.GetResolution();

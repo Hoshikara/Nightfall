@@ -12,7 +12,7 @@ local SearchBar = require('common/searchbar');
 local help = require('helpers/songwheel');
 local volforce = require('songselect/volforce');
 
-local background = Image.New('bg.png');
+local background = New.Image({ path = 'bg.png' });
 
 local best20 = {};
 local best50 = {};
@@ -56,15 +56,15 @@ do
   if (not labelHeight) then
     Font.JP();
 
-    local artist = Label.New('ARTIST', 36);
-    local effector = Label.New('EFFECTOR', 24);
-    local title = Label.New('TITLE', 36);
+    local artist = New.Label({ text = 'ARTIST', size = 36 });
+    local effector = New.Label({ text = 'EFFECTOR', size = 24 });
+    local title = New.Label({ text = 'TITLE', size = 36 });
 
     Font.Medium();
 
-    local bpm = Label.New('BPM', 24);
-    local clear = Label.New('CLEAR', 24);
-    local grade = Label.New('GRADE', 24);
+    local bpm = New.Label({ text = 'BPM', size = 24 });
+    local clear = New.Label({ text = 'CLEAR', size = 24 });
+    local grade = New.Label({ text = 'GRADE', size = 24 });
 
     labelHeight = {
       artist = artist.h,
@@ -114,12 +114,23 @@ verifySongCache = function(song)
 
     Font.JP();
 
-    songCache[song.id].artist = Label.New(string.upper(song.artist), 36);
-    songCache[song.id].title = Label.New(string.upper(song.title), 36);
+    songCache[song.id].artist = New.Label({
+      text = string.upper(song.artist),
+      scrolling = true,
+      size = 36,
+    });
+    songCache[song.id].title = New.Label({
+      text = string.upper(song.title),
+      scrolling = true,
+      size = 36,
+    });
     
     Font.Number();
 
-    songCache[song.id].bpm = Label.New(tostring(song.bpm), 24);
+    songCache[song.id].bpm = New.Label({
+      text = tostring(song.bpm),
+      size = 24,
+    });
   end
 end
 
@@ -138,7 +149,11 @@ verifySongCacheEffector = function(song, difficultyIndex)
 
   if (not songCache[song.id].effector[difficultyIndex]) then
     songCache[song.id].effector[difficultyIndex] =
-      Label.New(string.upper(difficulty.effector), 24);
+      New.Label({
+        text = string.upper(difficulty.effector),
+        scrolling = true,
+        size = 24,
+      });
   end
 end
 
@@ -195,7 +210,7 @@ do
   Font.Normal();
 
   for index, clear in ipairs(CONSTANTS.clears) do
-    clears.labels[index] = Label.New(clear, 24);
+    clears.labels[index] = New.Label({ text = clear, size = 24 });
   end
 
   for index, current in ipairs(CONSTANTS.grades) do
@@ -203,25 +218,25 @@ do
       grade = current.grade,
       minimum = current.minimum,
       label = {
-        large = Label.New(current.grade, 30),
-        small = Label.New(current.grade, 24),
+        large = New.Label({ text = current.grade, size = 30 }),
+        small = New.Label({ text = current.grade, size = 24 }),
       },
     };
   end
 
-  bestLabels.large.best = Label.New('BEST', 28);
+  bestLabels.large.best = New.Label({ text = 'BEST', size = 28 });
 
   Font.Medium();
 
-  bestLabels.small.best = Label.New('BEST', 18);
+  bestLabels.small.best = New.Label({ text = 'BEST', size = 18 });
 
   Font.Number();
 
-  bestLabels.large['20'] = Label.New('20', 28);
-  bestLabels.large['50'] = Label.New('50', 28);
+  bestLabels.large['20'] = New.Label({ text = '20', size = 28 });
+  bestLabels.large['50'] = New.Label({ text = '50', size = 28 });
 
-  bestLabels.small['20'] = Label.New('20', 18);
-  bestLabels.small['50'] = Label.New('50', 18);
+  bestLabels.small['20'] = New.Label({ text = '20', size = 18 });
+  bestLabels.small['50'] = New.Label({ text = '50', size = 18 });
 end
 
 local songInfo = {
@@ -231,9 +246,9 @@ local songInfo = {
   difficulties = nil,
   highScore = 0,
   images = {
-    button = Image.New('buttons/short.png'),
-    buttonHover = Image.New('buttons/short_hover.png'),
-    panel = Image.New('common/panel.png')
+    button = New.Image({ path = 'buttons/short.png' }),
+    buttonHover = New.Image({ path = 'buttons/short_hover.png' }),
+    panel = New.Image({ path = 'common/panel.png' }),
   },
   jacketSize = 0,
   labels = nil,
@@ -341,17 +356,17 @@ local songInfo = {
       self.levels = {};
 
       for i = 1, 4 do
-        self.levels[i] = Label.New('', 18);
+        self.levels[i] = New.Label({ text = '', size = 18 });
       end
 
       Font.Medium();
 
       for index, name in pairs(CONSTANTS.difficulties) do
-        self.difficulties[index] = Label.New(name, 18);
+        self.difficulties[index] = New.Label({ text = name, size = 18 });
       end
 
       for name, str in pairs(CONSTANTS.labels.info) do
-        self.labels[name] = Label.New(str, 18);
+        self.labels[name] = New.Label({ text = str, size = 18 });
       end
     end
   end,
@@ -509,19 +524,19 @@ local songInfo = {
 
       local doesOverflow = currentLabel.w > self.panel.innerWidth;
   
-      if (doesOverflow and self.scrollTimers[name] ~= nil) then
+      if (doesOverflow and (self.scrollTimers[name] ~= nil)) then
         self.scrollTimers[name] = self.scrollTimers[name] + deltaTime;
 
-        drawScrollingLabel(
-          self.scrollTimers[name],
-          currentLabel,
-          self.panel.innerWidth,
-          self.labels.x,
-          y,
-          scalingFactor,
-          'White',
-          255
-        );
+        currentLabel:draw({
+          x = self.labels.x,
+          y = y - 1,
+          a = 255,
+          color = 'White',
+          scale = scalingFactor,
+          scrolling = true,
+          timer = self.scrollTimers[name],
+          width = self.panel.innerWidth,
+        });
       else
         currentLabel:draw({
           x = self.labels.x,
@@ -810,17 +825,17 @@ local songGrid = {
       Font.Medium();
 
       self.labels = {
-        of = Label.New('OF', 18),
+        of = New.Label({ text = 'OF', size = 18 }),
       };
 
       for name, str in pairs(CONSTANTS.labels.grid) do
-        self.labels[name] = Label.New(str, 18);
+        self.labels[name] = New.Label({ text = str, size = 18 });
       end
 
       Font.Number();
 
-      self.labels.currentSong = Label.New('', 18);
-      self.labels.totalSongs = Label.New('', 18);
+      self.labels.currentSong = New.Label({ text = '', size = 18 });
+      self.labels.totalSongs = New.Label({ text = '', size = 18 });
     end
   end,
 
@@ -1125,15 +1140,15 @@ local miscInfo = {
       Font.Medium();
   
       self.labels = {
-        bta = Label.New('[BT-A]', 20),
-        showControls = Label.New('SHOW CONTROLS', 20),
+        bta = New.Label({ text = '[BT-A]', size = 20 }),
+        showControls = New.Label({ text = 'SHOW CONTROLS', size = 20 }),
         volforce = {
-          label = Label.New('VF', 20),
+          label = New.Label({ text = 'VF', size = 20 }),
         },
       };
 
       Font.Number();
-      self.labels.volforce.value = Label.New('', 20);
+      self.labels.volforce.value = New.Label({ text = '', size = 20 });
     end
 
     local forceValue = totalForce or get(userData.contents, 'volforce', 0);

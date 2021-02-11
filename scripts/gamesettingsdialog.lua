@@ -34,9 +34,9 @@ generateLabels = function(constants)
 
 	local labels = {
 		controls = {
-			fxl = Label.New('[FX-L]', 20),
-			fxr = Label.New('[FX-R]', 20),
-			start = Label.New('[START]', 24),
+			fxl = New.Label({ text = '[FX-L]', size = 20 }),
+			fxr = New.Label({ text = '[FX-R]', size = 20 }),
+			start = New.Label({ text = '[START]', size = 24 }),
 		},
 		navigation = {},
 		settings = {},
@@ -54,11 +54,11 @@ generateLabels = function(constants)
 
 		Font.Medium();
 
-		labels.navigation[tabName] = Label.New(formattedTab, 20);
+		labels.navigation[tabName] = New.Label({ text = formattedTab, size = 20 });
 
 		Font.Normal();
 
-		labels.tabs[tabName] = Label.New(formattedTab, 48);
+		labels.tabs[tabName] = New.Label({ text = formattedTab, size = 48 });
 
 		labels.settings[tabName] = {};
 
@@ -83,15 +83,15 @@ generateLabels = function(constants)
 
 			local tempTable = {
 				indent = get(settingConstants, 'indent', false),
-				name = Label.New(formattedSetting, 24),
+				name = New.Label({ text = formattedSetting, size = 24 }),
 				special = get(settingConstants, 'special', ''),
 				type = settingType,
 			};
 
 			if (settingType == 'INT') then
-				tempTable.value = Label.New('', 24);
+				tempTable.value = New.Label({ text = '', size = 24 });
 			elseif (settingType == 'FLOAT') then
-				tempTable.value = Label.New('t', 24);
+				tempTable.value = New.Label({ text = 't', size = 24 });
 			elseif (settingType == 'ENUM') then
 				local options = get(currentSetting, 'options', {});
 
@@ -102,25 +102,28 @@ generateLabels = function(constants)
 				tempTable.value = {};
 
 				for optionIndex, currentOption in ipairs(options) do
-					tempTable.value[optionIndex] = Label.New(currentOption, 24);
+					tempTable.value[optionIndex] = New.Label({
+						text = currentOption,
+						size = 24,
+					});
 				end
 			elseif (settingType == 'TOGGLE') then
 				if (settingConstants.name) then
 					if (settingConstants.invert) then
 						tempTable.value = {
-							['true'] = Label.New('DISABLED', 24),
-							['false'] = Label.New('ENABLED', 24),
+							['true'] = New.Label({ text = 'DISABLED', size = 24 }),
+							['false'] = New.Label({ text = 'ENABLED', size = 24 }),
 						};
 					else
 						tempTable.value = {
-							['true'] = Label.New('ENABLED', 24),
-							['false'] = Label.New('DISABLED', 24),
+							['true'] = New.Label({ text = 'ENABLED', size = 24 }),
+							['false'] = New.Label({ text = 'DISABLED', size = 24 }),
 						};
 					end
 				else
 					tempTable.value = {
-						['true'] = Label.New('TRUE', 24),
-						['false'] = Label.New('FALSE', 24),
+						['true'] = New.Label({ text = 'TRUE', size = 24 }),
+						['false'] = New.Label({ text = 'FALSE', size = 24 }),
 					};
 				end
 			end

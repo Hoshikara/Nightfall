@@ -52,16 +52,16 @@ setLabels = function()
 		Font.Medium();
 
 		labels = {
-			artist = Label.New('ARTIST', 18),
-			collectionName = Label.New('COLLECTION NAME', 18),
-			confirm = Label.New('CONFIRM', 18),
-			enter = Label.New('[ENTER]', 18),
-			title = Label.New('TITLE', 18),
+			artist = New.Label({ text = 'ARTIST', size = 18 }),
+			collectionName = New.Label({ text = 'COLLECTION NAME', size = 18 }),
+			confirm = New.Label({ text = 'CONFIRM', size = 18 }),
+			enter = New.Label({ text = '[ENTER]', size = 18 }),
+			title = New.Label({ text = 'TITLE', size = 18 }),
 		};
 
 		Font.JP();
 
-		labels.input = Label.New('', 28);
+		labels.input = New.Label({ text = '', size = 28 });
 	end
 end
 
@@ -119,16 +119,16 @@ drawButton = function(deltaTime, label, isSelected, y)
 	if (label.w > (w - 90)) then
 		buttonScrollTimer = buttonScrollTimer + deltaTime;
 
-		drawScrollingLabel(
-			buttonScrollTimer,
-			label,
-			(w - 90),
-			layout.x.outerRight - w + 55,
-			y + label.h + 8,
-			scalingFactor,
-			'White',
-			alpha
-		);
+		label:draw({
+			x = layout.x.outerRight - w + 55,
+			y = y + label.h + 8,
+			a = alpha,
+			color = 'White',
+			scale = scalingFactor,
+			scrolling = true,
+			timer = buttonScrollTimer,
+			width = w - 90,
+		});
 	else
 		label:draw({
 			x = layout.x.outerRight - w + 55,
@@ -237,16 +237,16 @@ drawSongInfo = function(deltaTime)
 	if (title.w > maxWidth) then
 		timers.title = timers.title + deltaTime;
 
-		drawScrollingLabel(
-			timers.title,
-			title,
-			maxWidth,
-			x + 2,
-			y,
-			scalingFactor,
-			'White',
-			alpha
-		);
+		title:draw({
+			x = x + 2,
+			y = y,
+			a = alpha,
+			color = 'White',
+			scale = scalingFactor,
+			scrolling = true,
+			timer = timers.title,
+			width = maxWidth,
+		});
 	else
 		title:draw({
 			x = x,
@@ -270,16 +270,16 @@ drawSongInfo = function(deltaTime)
 	if (artist.w > maxWidth) then
 		timers.artist = timers.artist + deltaTime;
 
-		drawScrollingLabel(
-			timers.artist,
-			artist,
-			maxWidth,
-			x + 2,
-			y,
-			scalingFactor,
-			'White',
-			alpha
-		);
+		artist:draw({
+			x = x + 2,
+			y = y,
+			a = alpha,
+			color = 'White',
+			scale = scalingFactor,
+			scrolling = true,
+			timer = timers.artist,
+			width = maxWidth,
+		});
 	else
 		artist:draw({
 			x = x,
@@ -302,7 +302,7 @@ open = function()
 	if (#dialog.collections == 0) then
 		menuOptions[initialIndex] = {
 			action = createCollection('FAVOURITES'),
-			label = Label.New('ADD TO FAVOURITES', 18),
+			label = New.Label({ text = 'ADD TO FAVOURITES', size = 18 }),
 		};
 	end
 
@@ -313,23 +313,35 @@ open = function()
 
 		menuOptions[i] = {
 			action = createCollection(collection.name),
-			label = Label.New(currentName, 18),
+			label = New.Label({
+				text = currentName,
+				scrolling = true,
+				size = 18,
+			}),
 		};
 	end
 
 	table.insert(menuOptions, {
 		action = menu.ChangeState,
-		label = Label.New('CREATE COLLECTION', 18),
+		label = New.Label({ text = 'CREATE COLLECTION', size = 18 }),
 	});
 	table.insert(menuOptions, {
 		action = menu.Cancel,
-		label = Label.New('CLOSE', 18),
+		label = New.Label({ text = 'CLOSE', size = 18 }),
 	});
 
 	Font.JP();
 
-	artist = Label.New(string.upper(dialog.artist), 28);
-	title = Label.New(string.upper(dialog.title), 36);
+	artist = New.Label({
+		text = string.upper(dialog.artist),
+		scrolling = true,
+		size = 28
+	});
+	title = New.Label({
+		text = string.upper(dialog.title),
+		scrolling = true,
+		size = 36,
+	});
 end
 
 render = function(deltaTime)

@@ -1,3 +1,10 @@
+###### February 11, 2021
+- `Gameplay` changes:
+  - Added skin setting to change score difference position
+  - Current and total track time is now displayed with the progress bar
+  - Modified BT and FX chip textures for easier distinction again
+- Organized some common functions and provided warnings for missing parameters
+
 ###### February 6, 2021
 - Completed work for `Challenge Result`
 
