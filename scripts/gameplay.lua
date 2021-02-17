@@ -1520,16 +1520,17 @@ local userInfo = {
 						y = y + ((prefix == 'plus' and (self.labels.prefixes.plus.h * 0.125))
 						or -4),
 						a = 255 * self.timer,
-						color = 'White',
+						color = ((prefix == 'plus') and 'White') or 'Red',
 					});
 				end
 
 				self.labels.difference:draw({
-					offset = 6,
 					x = self.labels.prefixes.plus.w + 4,
 					y1 = y,
 					y2 = y + 10,
 					a = 255 * self.timer,
+					color = ((prefix == 'plus') and 'Normal') or 'Red',
+					offset = 6,
 				});
 			else
 				local abs = math.abs(difference);
@@ -1553,7 +1554,7 @@ local userInfo = {
 						x = differenceX - (width * 2.95),
 						y = differenceY + (((prefix == 'plus') and 0) or -5),
 						a = 255 * self.timer,
-						color = 'White',
+						color = ((prefix == 'plus') and 'White') or 'Red',
 					});
 				end
 
@@ -1582,7 +1583,7 @@ local userInfo = {
 					x = differenceX + (width * 1.75),
 					y = differenceY + 4.5,
 					a = (((abs > 1000) and 255) or 50) * self.timer,
-					color = 'Normal',
+					color = ((prefix == 'plus') and 'Normal') or 'Red',
 				});
 			end
 		end

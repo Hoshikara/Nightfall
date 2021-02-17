@@ -39,6 +39,7 @@ local New = function(params)
     draw = function(self, params)
       local x = params.x or 0;
       local alpha = params.a or 255;
+      local color = params.color or 'Normal';
 
       Font.Number();
 
@@ -62,12 +63,11 @@ local New = function(params)
             x = x + offset + self.position[i + 4],
             y = y2,
             a = alpha * self.alpha[i + 4],
-            color = 'Normal',
+            color = color,
           });
         end
       else
         local y = params.y or 0;
-        local color = params.color or 'Normal';
 
         for i = 1, #self.labels do
           self.labels[i]:update({ new = self.digits[i] });

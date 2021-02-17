@@ -25,6 +25,10 @@ Fill = {
     gfx.FillColor(60, 110, 160, (alpha and math.floor(alpha)) or 255);
   end,
 
+  Red = function(alpha)
+    gfx.FillColor(200, 80, 80, (alpha and math.floor(alpha)) or 255);
+  end,
+
   White = function(alpha)
     gfx.FillColor(255, 255, 255, (alpha and math.floor(alpha)) or 255);
   end,
