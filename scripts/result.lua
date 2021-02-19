@@ -531,10 +531,19 @@ local graphs = {
 			Font.Medium();
 
 			self.labels = {
+				decrease = New.Label({
+					text = 'DECREASE CURRENT SONG OFFSET BY',
+					size = 18,
+				}),
 				earliest = New.Label({ text = 'EARLIEST', size = 18 }),
+				increase = New.Label({
+					text = 'INCREASE CURRENT SONG OFFSET BY',
+					size = 18,
+				}),
 				latest = New.Label({ text = 'LATEST', size = 18 }),
 				mean = New.Label({ text = 'MEAN', size = 18 }),
 				median = New.Label({ text = 'MEDIAN', size = 18 }),
+				offset = New.Label({ text = '0', size = 18 }),
 			};
 		end
 	end,
@@ -558,9 +567,16 @@ local graphs = {
 			for _, name in ipairs(self.statOrder) do
 				local value = myScore[name];
 
+				if (value.raw) then
+					self.stats.rawMedian = value.raw;
+				end
+
 				Font[value.font]();
 
-				self.stats[name] = New.Label({ text = value.value, size = value.size });
+				self.stats[name] = New.Label({
+					text = value.value,
+					size = value.size,
+				});
 			end
 		end
 	end,
@@ -739,7 +755,7 @@ local graphs = {
 
 	drawStats = function(self)
 		local x = self.x + (self.w.total / 2);
-		local y = self.y + self.h + 12;
+		local y = self.y + self.h + 4;
 		local spacing = (self.w.total / 2)
 			- self.labels.mean.w
 			- self.labels.median.w;
@@ -774,6 +790,35 @@ local graphs = {
 			y = y,
 			color = 'Normal',
 		});
+
+		if (self.stats.rawMedian) then
+			Font.Number();
+
+			self.labels.offset:update({ new = string.format(
+				'%d ms',
+				math.abs(math.floor(self.stats.rawMedian))
+			)});
+
+			self.labels.offset:draw({
+				x = x - 4,
+				y = y + (self.labels.median.h * 1.35),
+				color = 'White',
+			});
+
+			if (self.stats.rawMedian > 0) then
+				self.labels.increase:draw({
+					x = x - 4 - self.labels.offset.w - 6,
+					y = y + (self.labels.median.h * 1.35),
+					color = 'Red',
+				});
+			elseif (self.stats.rawMedian < 0) then
+				self.labels.decrease:draw({
+					x = x - 4 - self.labels.offset.w - 6,
+					y = y + (self.labels.median.h * 1.35),
+					color = 'Red',
+				});
+			end
+		end
 	end,
 
 	drawLeftGraph = function(self, x, y, w, h)

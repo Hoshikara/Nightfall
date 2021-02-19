@@ -191,6 +191,7 @@ local formatScore = function(current)
   };
   extendedScore.medianDelta = {
     font = 'Number',
+    raw = get(current, 'medianHitDelta', '0'),
     size = 18,
     value = getMedianDelta(current),
   };
