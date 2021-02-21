@@ -34,7 +34,7 @@ local New = function(isSongSelect)
     
     setSizes = function(self, scaledW, scaledH)
       if (not self.field.height) then
-        Font.Normal();
+        loadFont('normal');
 
         local tempField = New.Label({ text = 'TEMPFIELD', size = 24 });
 
@@ -42,7 +42,7 @@ local New = function(isSongSelect)
       end
 
       if (not self.label.height) then
-        Font.Medium();
+        loadFont('medium');
 
         local tempLabel = New.Label({ text = 'TEMPLABEL', size = 24 });
 

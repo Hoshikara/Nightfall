@@ -49,7 +49,7 @@ cacheChallenge = function(challenge)
     challengeCache[challenge.id] = {};
     scrollTimers[challenge.id] = { title = 0 };
 
-    Font.JP();
+    loadFont('jp');
 
     challengeCache[challenge.id].bpms = {};
     challengeCache[challenge.id].titles = {};
@@ -71,7 +71,7 @@ cacheChallenge = function(challenge)
       });
     end
 
-    Font.Normal();
+    loadFont('normal');
 
     challengeCache[challenge.id].requirements = {};
 
@@ -81,7 +81,7 @@ cacheChallenge = function(challenge)
       table.insert(challengeCache[challenge.id].requirements, label);
     end
 
-    Font.Number();
+    loadFont('number');
 
     for i, chart in ipairs(challenge.charts) do
       challengeCache[challenge.id].bpms[i] = New.Label({
@@ -99,7 +99,7 @@ cacheChallenge = function(challenge)
         size = 24,
       });
 
-      Font.Normal();
+      loadFont('normal');
 
       challengeCache[challenge.id].grade = New.Label({
         text = string.upper(challenge.grade),
@@ -147,7 +147,7 @@ local labels = {};
 local levels = {};
 
 do
-  Font.Normal();
+  loadFont('normal');
 
   for i, clear in ipairs(CONSTANTS_SONGWHEEL.clears) do
     clears[i] = New.Label({ text = clear, size = 24 });
@@ -157,13 +157,13 @@ do
     difficulties[i] = New.Label({ text = difficulty, size = 24 });
   end
 
-  Font.Medium();
+  loadFont('medium');
 
   for name, label in pairs(CONSTANTS_CHALWHEEL.labels) do
     labels[name] = New.Label({ text = label, size = 18 });
   end
 
-  Font.Number();
+  loadFont('number');
 
   for i = 1, 4 do
     levels[i] = New.Label({ text = '', size = 24 });
@@ -228,7 +228,7 @@ local challengeInfo = {
 
   setLabels = function(self)
     if (not self.labels) then
-      Font.Normal();
+      loadFont('normal');
 
       self.labels = {
         missingCharts = New.Label({
@@ -262,7 +262,7 @@ local challengeInfo = {
       local infoX = x + jacketSize + self.padding.x.full;
       local infoY = y - 6;
 
-      Font.Number();
+      loadFont('number');
 
       if (not levels[i]) then
         levels[i] = New.Label({ text = '', size = 24 });
@@ -270,28 +270,23 @@ local challengeInfo = {
 
       levels[i]:update({ new = string.format('%02d', chart.level) });
 
-      gfx.BeginPath();
-      gfx.StrokeWidth(1);
-      gfx.StrokeColor(60, 110, 160, 255);
-      gfx.ImageRect(
-        x,
-        y,
-        jacketSize,
-        jacketSize,
-        jacket,
-        1,
-        0
-      );
-      gfx.Stroke();
+      drawRectangle({
+        x = x,
+        y = y,
+        w = jacketSize,
+        h = jacketSize,
+        image = jacket,
+        stroke = { color = 'normal', size = 1 },
+      });
 
       gfx.BeginPath();
-      FontAlign.Left();
+      alignText('left');
 
       for _, name in ipairs(self.order.chart) do
         labels[name]:draw({
           x = infoX,
           y = infoY,
-          color = 'Normal',
+          color = 'normal',
         });
       
         -- TODO: better error handling
@@ -302,7 +297,7 @@ local challengeInfo = {
             labels.bpm:draw({
               x = bpmX,
               y = infoY,
-              color = 'Normal',
+              color = 'normal',
             });
 
             infoY = infoY + labels[name].h * 1.25;
@@ -310,19 +305,19 @@ local challengeInfo = {
             info[name]:draw({
               x = infoX,
               y = infoY,
-              color = 'White',
+              color = 'white',
             });
 
             levels[i]:draw({
               x = infoX + info[name].w + 8,
               y = infoY,
-              color = 'White',
+              color = 'white',
             });
 
             bpm:draw({
               x = bpmX,
               y = infoY,
-              color = 'White',
+              color = 'white',
             });
           else
             infoY = infoY + labels[name].h * 1.25;
@@ -334,8 +329,8 @@ local challengeInfo = {
               info[name]:draw({
                 x = infoX,
                 y = infoY,
-                a = 255,
-                color = 'White',
+                alpha = 255,
+                color = 'white',
                 scale = scalingFactor,
                 scrolling = true,
                 timer = scrollTimers[challenge.id][name],
@@ -345,7 +340,7 @@ local challengeInfo = {
               info[name]:draw({
                 x = infoX,
                 y = infoY,
-                color = 'White',
+                color = 'white',
               });
             end
           end
@@ -361,15 +356,14 @@ local challengeInfo = {
       end
 
       if (i ~= #challenge.charts) then
-        gfx.BeginPath();
-        Fill.Normal(100);
-        gfx.Rect(
-          x - 1,
-          y + jacketSize + (self.padding.y.full / 2) - 1,
-          self.panel.innerWidth,
-          2
-        );
-        gfx.Fill();
+        drawRectangle({
+          x = x - 1,
+          y = y + jacketSize + (self.padding.y.full / 2) - 1,
+          w = self.panel.innerWidth,
+          h = 2,
+          alpha = 100,
+          color = 'normal',
+        });
       end
 
       y = y + jacketSize + self.padding.y.full;
@@ -395,13 +389,13 @@ local challengeInfo = {
         labels[name]:draw({
           x = x,
           y = y,
-          color = 'Normal',
+          color = 'normal',
         });
 
         info[name]:draw({
           x = x,
           y = y + (labels[name].h * 1.35),
-          color = 'White',
+          color = 'white',
         });
 
         x = x + (labels.grade.w * 1.5) + labels[name].w;
@@ -421,7 +415,7 @@ local challengeInfo = {
       y = 0,
       w = self.panel.w,
       h = self.panel.h,
-      a = 0.5,
+      alpha = 0.5,
     });
 
     gfx.Restore();
@@ -444,11 +438,11 @@ local challengeInfo = {
 
     if (challenge.missing_chart) then
       gfx.BeginPath();
-      FontAlign.Left();
+      alignText('left');
       self.labels.missingCharts:draw({
         x = -2,
         y = y,
-        color = 'White'
+        color = 'white'
       });
 
       y = y + (self.labels.missingCharts.h * 0.5) + self.padding.y.full; 
@@ -457,12 +451,12 @@ local challengeInfo = {
     end
 
     gfx.BeginPath();
-    FontAlign.Left();
+    alignText('left');
 
     labels.challenge:draw({
       x = 0,
       y = y,
-      color = 'Normal',
+      color = 'normal',
     });
 
     y = y + labels.challenge.h * 1.25;
@@ -473,8 +467,8 @@ local challengeInfo = {
       title:draw({
         x = 0,
         y = y,
-        a = 255,
-        color = 'White',
+        alpha = 255,
+        color = 'white',
         scale = scalingFactor,
         scrolling = true,
         timer = self.timers.title,
@@ -484,7 +478,7 @@ local challengeInfo = {
       title:draw({
         x = 0,
         y = y,
-        color = 'White',
+        color = 'white',
       });
     end
 
@@ -493,7 +487,7 @@ local challengeInfo = {
     labels.requirements:draw({
       x = 0,
       y = y,
-      color = 'Normal',
+      color = 'normal',
     });
 
     y = y + labels.requirements.h * 1.35;
@@ -502,7 +496,7 @@ local challengeInfo = {
       requirements[i]:draw({
         x = 0,
         y = y,
-        color = 'White',
+        color = 'white',
       });
 
       y = y + (requirements[i].h * 1.75);
@@ -623,13 +617,13 @@ local challengeList = {
 
   setLabels = function(self)
     if (not self.labels.amounts) then
-      Font.Medium();
+      loadFont('medium');
 
       self.labels.amounts = {
         of = New.Label({ text = 'OF', size = 18 }),
       };
 
-      Font.Number();
+      loadFont('number');
 
       self.labels.amounts.current = New.Label({ text = '', size = 18 });
       self.labels.amounts.total = New.Label({ text = '', size = 18 });
@@ -640,13 +634,13 @@ local challengeList = {
     gfx.Save();
 
     gfx.BeginPath();
-    FontAlign.Left();
+    alignText('left');
 
     for i, name in ipairs(self.order) do
       labels[name]:draw({
         x = self.labels.x[i],
         y = self.labels.y,
-        color = 'Normal',
+        color = 'normal',
       });
     end
 
@@ -659,7 +653,7 @@ local challengeList = {
     end
 
     local change = (self.list.y.current - self.list.y.previous)
-      * Ease.OutQuad(self.list.timer);
+      * quadraticEase(self.list.timer);
     local offset = self.list.y.previous + change;
     local y = 0;
 
@@ -692,19 +686,23 @@ local challengeList = {
     local y = initialY + (self.list.h.item / 5);
 
     if (isVisible) then
-      gfx.BeginPath();
-      Fill.Dark(120);
-      gfx.Rect(0, initialY, self.list.w.base, self.list.h.item);
-      gfx.Fill();
+      drawRectangle({
+        x = 0,
+        y = initialY,
+        w = self.list.w.base,
+        h = self.list.h.item,
+        alpha = 120,
+        color = 'dark',
+      });
 
       gfx.BeginPath();
-      FontAlign.Left();
+      alignText('left');
 
       labels.challenge:draw({
         x = x,
         y = y,
-        a = alpha,
-        color = 'Normal',
+        alpha = alpha,
+        color = 'normal',
       });
 
       y = y + (labels.challenge.h * 1.25);
@@ -720,8 +718,8 @@ local challengeList = {
         title:draw({
           x = x,
           y = y,
-          a = alpha,
-          color = 'White',
+          alpha = alpha,
+          color = 'white',
           scale = scalingFactor,
           scrolling = true,
           timer = challengeCache[challenge.id].title.timer,
@@ -731,8 +729,8 @@ local challengeList = {
         title:draw({
           x = x,
           y = y,
-          a = alpha,
-          color = 'White',
+          alpha = alpha,
+          color = 'white',
         });
       end
     else
@@ -743,7 +741,7 @@ local challengeList = {
   end,
 
   drawChallengeAmount = function(self)
-    Font.Number();
+    loadFont('number');
 
     self.labels.amounts.current:update({
       new = string.format('%04d', self.selectedChallenge)
@@ -760,22 +758,22 @@ local challengeList = {
     );
 
     gfx.BeginPath();
-    FontAlign.Right();
+    alignText('right');
 
     self.labels.amounts.current:draw({
       x = -(self.labels.amounts.of.w + self.labels.amounts.total.w + 16),
       y = 0,
-      color = 'Normal',
+      color = 'normal',
     });
     self.labels.amounts.of:draw({
       x = -(self.labels.amounts.total.w + 8),
       y = 0,
-      color = 'Normal',
+      color = 'normal',
     });
     self.labels.amounts.total:draw({
       x = 0,
       y = 0,
-      color = 'Normal',
+      color = 'normal',
     });
 
     gfx.Restore();
@@ -790,12 +788,12 @@ local challengeList = {
     );
 
     gfx.BeginPath();
-    FontAlign.Middle();
-    Font.Normal();
+    alignText('middle');
+    loadFont('normal');
     gfx.FontSize(48);
-    Fill.Dark(255 * 0.5);
+    setFill('dark', 255 * 0.5);
     gfx.Text('NO CHALLENGES FOUND', 1, 1);
-    Fill.White();
+    setFill('white');
     gfx.Text('NO CHALLENGES FOUND', 0, 0);
 
     gfx.Restore();
@@ -870,7 +868,7 @@ local miscInfo = {
 
   render = function(self)
     if (not self.labels) then
-      Font.Medium();
+      loadFont('medium');
   
       self.labels = {
         bta = New.Label({ text = '[BT-A]', size = 20 }),
@@ -880,14 +878,14 @@ local miscInfo = {
         },
       };
 
-      Font.Number();
+      loadFont('number');
       self.labels.volforce.value = New.Label({ text = '', size = 20 });
     end
 
     local forceValue = get(userData.contents, 'volforce', 0);
     local y = 0;
 
-    Font.Number();
+    loadFont('number');
     self.labels.volforce.value:update({ new = string.format('%.2f', forceValue) });
   
     gfx.Save();
@@ -899,51 +897,51 @@ local miscInfo = {
 
     if (controlsShortcut) then
       gfx.BeginPath();
-      FontAlign.Left();
+      alignText('left');
       self.labels.bta:draw({
         x = 0,
         y = y,
-        color = 'Normal',
+        color = 'normal',
       });
 
       self.labels.showControls:draw({
         x = self.labels.bta.w + 8,
         y = y + 1,
-        color = 'White',
+        color = 'white',
       });
 
       gfx.Translate(challengeInfo.panel.w + 2, 0);
 
-      Font.Number();
+      loadFont('number');
       self.labels.volforce.value:update({ new = string.format('%.2f', forceValue) });
 
       gfx.BeginPath();
-      FontAlign.Right();
+      alignText('right');
       self.labels.volforce.label:draw({
         x = 0,
         y = y,
-        color = 'Normal',
+        color = 'normal',
       });
 
       self.labels.volforce.value:draw({
         x = -(self.labels.volforce.label.w + 8),
         y = y,
-        color = 'White',
+        color = 'white',
       });
     else
       gfx.BeginPath();
-      FontAlign.Left();
+      alignText('left');
 
       self.labels.volforce.value:draw({
         x = 0,
         y = y,
-        color = 'White',
+        color = 'white',
       });
 
       self.labels.volforce.label:draw({
         x = self.labels.volforce.value.w + 8,
         y = y,
-        color = 'Normal',
+        color = 'normal',
       });
     end
 

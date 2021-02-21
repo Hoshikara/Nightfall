@@ -1,7 +1,7 @@
 local New = function(params)
   local labels = {};
 
-  Font.Number();
+  loadFont('number');
 
   if (params.isScore) then
     for i = 1, 4 do
@@ -38,10 +38,10 @@ local New = function(params)
 
     draw = function(self, params)
       local x = params.x or 0;
-      local alpha = params.a or 255;
-      local color = params.color or 'Normal';
+      local alpha = params.alpha or 255;
+      local color = params.color or 'normal';
 
-      Font.Number();
+      loadFont('number');
 
       if (self.isScore) then
         local offset = params.offset or 0;
@@ -55,14 +55,14 @@ local New = function(params)
           self.labels[i]:draw({
             x = x + self.position[i],
             y = y1,
-            a = alpha * self.alpha[i],
-            color = 'White',
+            alpha = alpha * self.alpha[i],
+            color = 'white',
           });
 
           self.labels[i + 4]:draw({
             x = x + offset + self.position[i + 4],
             y = y2,
-            a = alpha * self.alpha[i + 4],
+            alpha = alpha * self.alpha[i + 4],
             color = color,
           });
         end
@@ -75,7 +75,7 @@ local New = function(params)
           self.labels[i]:draw({
             x = x + self.position[i],
             y = y,
-            a = alpha * self.alpha[i],
+            alpha = alpha * self.alpha[i],
             color = color,
           });
         end

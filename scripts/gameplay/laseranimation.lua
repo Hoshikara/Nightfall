@@ -93,30 +93,26 @@ _.initializeLaser = function(self)
       cached.timer = 0;
     end
 
-    gfx.BeginPath();
-
     if (cached.timer < self.frameTime) then
-      gfx.GlobalCompositeOperation(inner.blendOp);
-      gfx.ImageRect(
-        pos - ((inner.width * scale) / 2),
-        -((inner.width * scale * 0.925) / 2),
-        inner.width * scale,
-        inner.width * scale * 0.925,
-        inner.frames[cached.counter],
-        inner.alpha,
-        0
-      );
+      drawRectangle({
+        x = pos - ((inner.width * scale) / 2),
+        y = -((inner.width * scale * 0.925) / 2),
+        w = inner.width * scale,
+        h = inner.width * scale * 0.925,
+        alpha = inner.alpha,
+        blendOp = inner.blendOp,
+        image = inner.frames[cached.counter],
+      });
 
-      gfx.GlobalCompositeOperation(outer.blendOp);
-      gfx.ImageRect(
-        pos - ((outer.width * scale) / 2),
-        -((outer.width * scale * 0.925) / 2),
-        outer.width * scale,
-        outer.width * scale * 0.925,
-        outer.frames[cached.counter],
-        outer.alpha,
-        0
-      );
+      drawRectangle({
+        x = pos - ((outer.width * scale) / 2),
+        y = -((outer.width * scale * 0.925) / 2),
+        w = outer.width * scale,
+        h = outer.width * scale * 0.925,
+        alpha = outer.alpha,
+        blendOp = outer.blendOp,
+        image = outer.frames[cached.counter],
+      });
     end
     if (cached.counter == self.frameCount) then
       cached.counter = 1;

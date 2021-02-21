@@ -1,3 +1,26 @@
+###### February 22, 2021
+- `gamesettingsdialog` changes:
+  - Added highlighting to the currently selected setting
+  - Added an arrow indicator for tabs that have more than 7 settings
+  - Changed text color for settings that can be enabled or disabled
+  - Increased the opacity of non-selected settings
+- `Song Select` changes:
+  - Adjusted spacing and arrangement of song info labels
+  - Increased size of grade and clear labels
+- `Gameplay` changes:
+  - Changed track time display format
+  - Refactored script and modified design of hit error bar
+- Added color indicators for hit stats on the results panel
+- Added a skin setting to change early / late display type, options are the following:
+  - DELTA: only displays the hit delta (difference (in ms) between the hit's timing and t he current critical hit window timing)
+  - TEXT: only displays the 'EARLY' or 'LATE' text
+  - TEXT + DELTA: displays both the text and the hit delta
+- Added a skin setting to specify the folder that Nautica charts are saved to
+- Previous changes from other commits:
+  - Added a suggestion to the results screen on how to adjust current song offset
+  - Score difference is now displayed in red if player is behind the top score
+- Rewrote and replaced the usages of common functions
+
 ###### February 11, 2021
 - `Gameplay` changes:
   - Added skin setting to change score difference position

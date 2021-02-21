@@ -69,12 +69,12 @@ local challengeHeading = {
 		local y = self.y + self.padding.y;
 
 		gfx.BeginPath();
-		FontAlign.Left();
+		alignText('left');
 
 			self.labels.challenge:draw({
 			x = x,
 			y = y,
-			color = 'Normal',
+			color = 'normal',
 		});
 
 		y = y + (self.labels.challenge.h * 1.25);
@@ -82,7 +82,7 @@ local challengeHeading = {
 		challengeInfo.title:draw({
 			x = x,
 			y = y,
-			color = 'White',
+			color = 'white',
 		});
 
 		y = y + (challengeInfo.title.h * 0.85) + self.padding.y;
@@ -93,13 +93,13 @@ local challengeHeading = {
 			self.labels[name]:draw({
 				x = tempX,
 				y = y,
-				color = 'Normal',
+				color = 'normal',
 			});
 
 			challengeInfo[name]:draw({
 				x = tempX,
 				y = y + (self.labels[name].h * 1.35),
-				color = 'White',
+				color = 'white',
 			});
 		end
 
@@ -108,7 +108,7 @@ local challengeHeading = {
 		self.labels.requirements:draw({
 			x = x,
 			y = y,
-			color = 'Normal',
+			color = 'normal',
 		});
 
 		y = y + (self.labels.requirements.h * 1.35) + 2;
@@ -117,7 +117,7 @@ local challengeHeading = {
 			requirement:draw({
 				x = x + 1,
 				y = y,
-				color = 'White',
+				color = 'white',
 			});
 
 			y = y + (requirement.h * 1.625);
@@ -133,15 +133,14 @@ local challengeHeading = {
 
 		gfx.Save();
 
-		gfx.BeginPath();
-		Fill.Dark(120);
-		gfx.Rect(
-			self.x,
-			self.y,
-			self.w.base,
-			self.h
-		);
-		gfx.Fill();
+		drawRectangle({
+			x = self.x,
+			y = self.y,
+			w = self.w.base,
+			h = self.h,
+			alpha = 120,
+			color = 'dark',
+		});
 
 		self:drawChallengeHeading();
 
@@ -207,33 +206,28 @@ local chartsPanel = {
 			local innerX = x + self.jacketSize + (self.padding.x / 2);
 			local y = self.y + self.padding.y;
 
-			gfx.BeginPath();
-      gfx.StrokeWidth(1);
-      gfx.StrokeColor(60, 110, 160, 255);
-      gfx.ImageRect(
-        x,
-        y,
-				self.jacketSize,
-				self.jacketSize,
-        chart.jacket,
-        1,
-        0
-      );
-			gfx.Stroke();
+			drawRectangle({
+				x = x,
+				y = y,
+				w = self.jacketSize,
+				h = self.jacketSize,
+				image = chart.jacket,
+				stroke = { color = 'normal', size = 1 },
+			});
 
 			gfx.BeginPath();
-			FontAlign.Left();
+			alignText('left');
 
 			self.labels.result:draw({
 				x = innerX,
 				y = y - 5,
-				color = 'Normal',
+				color = 'normal',
 			});
 
 			self.labels.completion:draw({
 				x = innerX + (self.padding.x * 2.75),
 				y = y - 5,
-				color = 'Normal',
+				color = 'normal',
 			});
 
 			y = y + (self.labels.result.h * 1.35) - 5;
@@ -241,13 +235,13 @@ local chartsPanel = {
 			chart.result:draw({
 				x = innerX,
 				y = y,
-				color = 'White',
+				color = 'white',
 			});
 
 			chart.completion:draw({
 				x = innerX + (self.padding.x * 2.75),
 				y = y,
-				color = 'White',
+				color = 'white',
 			});
 
 			y = y + (chart.completion.h * 2);
@@ -255,7 +249,7 @@ local chartsPanel = {
 			self.labels.score:draw({
 				x = innerX,
 				y = y + 4,
-				color = 'Normal',
+				color = 'normal',
 			});
 
 			y = y + self.labels.score.h;
@@ -274,7 +268,7 @@ local chartsPanel = {
 			self.labels.title:draw({
 				x = x,
 				y = y,
-				color = 'Normal',
+				color = 'normal',
 			});
 
 			y = y + (self.labels.title.h * 1.35);
@@ -285,8 +279,8 @@ local chartsPanel = {
 				chart.title:draw({
 					x = x,
 					y = y,
-					a = 255,
-					color = 'White',
+					alpha = 255,
+					color = 'white',
 					scale = scalingFactor,
 					scrolling = true,
 					timer = chart.timers.title,
@@ -296,7 +290,7 @@ local chartsPanel = {
 				chart.title:draw({
 					x = x,
 					y = y,
-					color = 'White',
+					color = 'white',
 				});
 			end
 
@@ -305,13 +299,13 @@ local chartsPanel = {
 			self.labels.bpm:draw({
 				x = x + (self.labels.difficulty.w * 2),
 				y = y,
-				color = 'Normal',
+				color = 'normal',
 			});
 
 			self.labels.difficulty:draw({
 				x = x,
 				y = y,
-				color = 'Normal',
+				color = 'normal',
 			});
 
 			y = y + (self.labels.difficulty.h * 1.35);
@@ -319,19 +313,19 @@ local chartsPanel = {
 			chart.difficulty:draw({
 				x = x,
 				y = y,
-				color = 'White',
+				color = 'white',
 			});
 
 			chart.level:draw({
 				x = x + chart.difficulty.w + 8,
 				y = y,
-				color = 'White',
+				color = 'white',
 			});
 
 			chart.bpm:draw({
 				x = x + (self.labels.difficulty.w * 2),
 				y = y,
-				color = 'White',
+				color = 'white',
 			});
 
 			y = y + (chart.difficulty.h * 2);
@@ -339,19 +333,19 @@ local chartsPanel = {
 			self.labels.gauge:draw({
 				x = x,
 				y = y,
-				color = 'Normal',
+				color = 'normal',
 			});
 
 			self.labels.grade:draw({
 				x = x + (self.padding.x * 2.5),
 				y = y,
-				color = 'Normal',
+				color = 'normal',
 			});
 
 			self.labels.clear:draw({
 				x = x + (self.padding.x * 5),
 				y = y,
-				color = 'Normal',
+				color = 'normal',
 			});
 
 			y = y + (self.labels.gauge.h * 1.35);
@@ -359,19 +353,19 @@ local chartsPanel = {
 			chart.gauge:draw({
 				x = x,
 				y = y,
-				color = 'White',
+				color = 'white',
 			});
 
 			chart.grade:draw({
 				x = x + (self.padding.x * 2.5),
 				y = y,
-				color = 'White',
+				color = 'white',
 			});
 
 			chart.clear:draw({
 				x = x + (self.padding.x * 5),
 				y = y,
-				color = 'White',
+				color = 'white',
 			});
 
 			y = y + (chart.grade.h * 2);
@@ -383,28 +377,27 @@ local chartsPanel = {
 				self.labels[name]:draw({
 					x = statX,
 					y = y,
-					color = 'Normal',
+					color = 'normal',
 				});
 
 				chart[name]:draw({
 					x = statX,
 					y = y + (self.labels[name].h * 1.35),
-					color = 'White',
+					color = 'white',
 				});
 
 				statX = statX + self.labels[name].w + spacing;
 			end
 	
 			if (i ~= math.min(3, #charts)) then
-				gfx.BeginPath();
-				Fill.Normal(100);
-				gfx.Rect(
-					x + self.w.column.base + self.padding.x,
-					self.y + self.padding.y,
-					2,
-					self.h - (self.padding.y * 2)
-				);
-				gfx.Fill();
+				drawRectangle({
+					x = x + self.w.column.base + self.padding.x,
+					y = self.y + self.padding.y,
+					w = 2,
+					h = self.h - (self.padding.y * 2),
+					alpha = 100,
+					color = 'normal',
+				});
 			end
 
 			x = x + self.w.column.base + (self.padding.x * 2);
@@ -416,15 +409,14 @@ local chartsPanel = {
 
 		gfx.Save();
 
-		gfx.BeginPath();
-		Fill.Dark(120);
-		gfx.Rect(
-			self.x,
-			self.y,
-			self.w.base,
-			self.h
-		);
-		gfx.Fill();
+		drawRectangle({
+			x = self.x,
+			y = self.y,
+			w = self.w.base,
+			h = self.h,
+			alpha = 120,
+			color = 'dark',
+		});
 
 		self:drawCharts(deltaTime);
 
@@ -439,7 +431,7 @@ local screenshot = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			Font.Normal();
+			loadFont('normal');
 
 			self.labels = {
 				path = New.Label({ text = '', size = 24 });
@@ -454,7 +446,7 @@ local screenshot = {
 		if (self.timer > 0) then
 			self.timer = math.max(self.timer - deltaTime, 0);
 
-			Font.Normal();
+			loadFont('normal');
 			self.labels.path:update({ new = self.path });
 
 			gfx.Save();
@@ -462,18 +454,18 @@ local screenshot = {
 			gfx.Translate(8, 4);
 
 			gfx.BeginPath();
-			FontAlign.Left();
+			alignText('left');
 			
 			self.labels.saved:draw({
 				x = 0,
 				y = 0,
-				color = 'Normal'
+				color = 'normal'
 			});
 
 			self.labels.path:draw({
 				x = self.labels.saved.w + 16,
 				y = 0,
-				color = 'White',
+				color = 'white',
 			});
 
 			gfx.Restore();

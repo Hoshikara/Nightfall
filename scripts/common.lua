@@ -1,82 +1,88 @@
 local _ = require('lib/luadash');
+local Constants = require('constants/common');
 
 gfx.LoadSkinFont('DFMGM.ttf');
 
-Ease = {
-  OutQuad = function(progress)
-    return 1 - (1 - progress) * (1 - progress);
-  end,
-};
+quadraticEase = function(progress)
+  return 1 - (1 - progress) * (1 - progress);
+end
 
-Fill = {
-  Black = function(alpha)
-    gfx.FillColor(0, 0, 0, (alpha and math.floor(alpha)) or 255);
-  end,
+alignText = function(alignment)
+  alignment = Constants.Alignments[alignment] or Constants.Alignments.left;
 
-  Dark = function(alpha)
-    gfx.FillColor(4, 8, 12, (alpha and math.floor(alpha)) or 255);
-  end,
+  gfx.TextAlign(alignment);
+end
 
-  Light = function(alpha)
-    gfx.FillColor(80, 130, 180, (alpha and math.floor(alpha)) or 255);
-  end,
+drawRectangle = function(params)
+  local scale = params.scale or 1;
+  local x = params.x or 0;
+  local y = params.y or 0;
+  local w = (params.w or 1000) * scale;
+  local h = (params.h or 1000) * scale;
 
-  Normal = function(alpha)
-    gfx.FillColor(60, 110, 160, (alpha and math.floor(alpha)) or 255);
-  end,
+  if (params.centered) then
+    x = x - (w / 2);
+    y = y - (h / 2);
+  end
 
-  Red = function(alpha)
-    gfx.FillColor(200, 80, 80, (alpha and math.floor(alpha)) or 255);
-  end,
+  gfx.BeginPath();
 
-  White = function(alpha)
-    gfx.FillColor(255, 255, 255, (alpha and math.floor(alpha)) or 255);
-  end,
-};
+  if (params.blendOp) then
+    gfx.GlobalCompositeOperation(params.blendOp);
+  end
 
-Font = {
-  Bold = function()
-    gfx.LoadSkinFont('GothamBold.ttf');
-  end,
+  if (params.image) then
+    if (params.tint) then
+      gfx.SetImageTint(params.tint[1], params.tint[2], params.tint[3]);
 
-  JP = function()
-    gfx.LoadSkinFont('DFMGM.ttf');
-  end,
+      gfx.ImageRect(x, y, w, h, params.image, params.alpha or 1, 0);
 
-  Medium = function()
-    gfx.LoadSkinFont('GothamMedium.ttf');
-  end,
+      gfx.SetImageTint(255, 255, 255);
+    else
+      gfx.ImageRect(x, y, w, h, params.image, params.alpha or 1, 0);
+    end
+  else
+    setFill(params.color, params.alpha);
 
-  Mono = function()
-    gfx.LoadSkinFont('SFMonoMedium.ttf');
-  end,
+    if (params.fast) then
+      gfx.FastRect(x, y, w, h);
+    else
+      gfx.Rect(x, y, w, h);
+    end
 
-  Normal = function()
-    gfx.LoadSkinFont('GothamBook.ttf');
-  end,
+    gfx.Fill();
+  end
 
-  Number = function()
-    gfx.LoadSkinFont('DigitalSerialBold.ttf');
-  end,
-};
+  if (params.stroke) then
+    setStroke(params.stroke);
 
-FontAlign = {
-  Center = function()
-    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_TOP);
-  end,
+    gfx.Stroke();
+  end
+end
 
-  Left = function()
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
-  end,
+loadFont = function(font)
+  font = Constants.Fonts[font] or Constants.Fonts.jp;
 
-  Middle = function()
-    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE);
-  end,
+  gfx.LoadSkinFont(font);
+end
 
-  Right = function()
-    gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP);
-  end,
-};
+setFill = function(color, alpha)
+  alpha = (alpha and math.floor(alpha)) or 255;
+  color = Constants.Colors[color] or color or Constants.Colors.normal;
+
+  gfx.FillColor(color[1], color[2], color[3], alpha);
+end
+
+setStroke = function(params)
+  local alpha = (params.alpha and math.floor(params.alpha)) or 255;
+  local color = Constants.Colors[params.color]
+    or params.color
+    or Constants.Colors.normal;
+  local size = params.size or 1;
+
+  gfx.StrokeColor(color[1], color[2], color[3], alpha);
+  gfx.StrokeWidth(size);
+end
 
 New = {
   Image = require('common/image'),
@@ -101,16 +107,20 @@ debug = function(tbl)
   gfx.Save();
   gfx.Translate(5, 3);
 
-  gfx.BeginPath();
-  gfx.FillColor(0, 0, 0, 200);
-  gfx.Rect(-100, -6, 720, (y * length) + 9);
-  gfx.Fill();
+  drawRectangle({
+    x = -100,
+    y = -6,
+    w = 720,
+    h = (y * length) * 9,
+    alpha = 200,
+    color = 'black',
+  });
 
   gfx.BeginPath();
   gfx.FontSize(30);
-  FontAlign.Left();
-  Fill.White();
-  Font.Mono();
+  alignText('left');
+  setFill('white');
+  loadFont('mono');
 
   for k, v in pairs(tbl) do
     gfx.Text(string.format('%s: %s', k, v), 0, y * inc);
@@ -143,19 +153,6 @@ loadFrames = function(path, count)
   end
 
   return frames;
-end
-
-drawCenteredImage = function(params)
-  local alpha = params['alpha'] or 1;
-  local blendOp = params['blendOp'] or gfx.BLEND_OP_SOURCE_OVER;
-  local w = params['width'];
-  local h = params['height'] or w;
-  local x = -(w / 2);
-  local y = -(h / 2);
-
-  gfx.BeginPath();
-  gfx.GlobalCompositeOperation(blendOp);
-  gfx.ImageRect(x, y, w, h, params['image'], alpha, 0);
 end
 
 drawCursor = function(params);
@@ -198,8 +195,8 @@ drawResolutionWarning = function(x, y)
   gfx.BeginPath();
   gfx.FillColor(255, 55, 55, 255);
   gfx.FontSize(24);
-  FontAlign.Left();
-  Font.Mono();
+  alignText('left');
+  loadFont('mono');
   gfx.Text(
     'NON 16:9 RESOLUTION DETECTED -- SKIN ELEMENTS MAY NOT RENDER AS INTENDED. ENTER FULLSCREEN WITH  [ALT] + [ENTER]  IF THIS IS A MISTAKE',
     x, 

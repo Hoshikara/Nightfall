@@ -49,7 +49,7 @@ local labels = nil;
 
 setLabels = function()
 	if (not labels) then
-		Font.Medium();
+		loadFont('medium');
 
 		labels = {
 			artist = New.Label({ text = 'ARTIST', size = 18 }),
@@ -59,7 +59,7 @@ setLabels = function()
 			title = New.Label({ text = 'TITLE', size = 18 }),
 		};
 
-		Font.JP();
+		loadFont('jp');
 
 		labels.input = New.Label({ text = '', size = 28 });
 	end
@@ -99,13 +99,13 @@ drawButton = function(deltaTime, label, isSelected, y)
 		layout.images.buttonHover:draw({
 			x = layout.x.outerRight - w + 12,
 			y = y,
-			a = timer
+			alpha = timer
 		});
 	else
 		layout.images.button:draw({
 			x = layout.x.outerRight - w + 12,
 			y = y,
-			a = (0.45 * timer)
+			alpha = (0.45 * timer)
 		});
 	end
 
@@ -114,7 +114,7 @@ drawButton = function(deltaTime, label, isSelected, y)
 	gfx.Scale(1 / scalingFactor, 1 / scalingFactor);
 	
 	gfx.BeginPath();
-	FontAlign.Left();
+	alignText('left');
 
 	if (label.w > (w - 90)) then
 		buttonScrollTimer = buttonScrollTimer + deltaTime;
@@ -122,8 +122,8 @@ drawButton = function(deltaTime, label, isSelected, y)
 		label:draw({
 			x = layout.x.outerRight - w + 55,
 			y = y + label.h + 8,
-			a = alpha,
-			color = 'White',
+			alpha = alpha,
+			color = 'white',
 			scale = scalingFactor,
 			scrolling = true,
 			timer = buttonScrollTimer,
@@ -133,8 +133,8 @@ drawButton = function(deltaTime, label, isSelected, y)
 		label:draw({
 			x = layout.x.outerRight - w + 55,
 			y = y + label.h + 8,
-			a = alpha,
-			color = 'White',
+			alpha = alpha,
+			color = 'white',
 		});
 	end
 
@@ -150,34 +150,44 @@ drawInput = function()
 
 	cursor.offset = math.min(labels.input.w + 2, layout.w.middle - 20);
 
-	gfx.BeginPath();
-	gfx.StrokeWidth(1);
-	gfx.StrokeColor(60, 110, 160, math.floor(255 * timer));
-	Fill.Dark(255 * timer);
-	gfx.Rect(x, y, layout.w.middle, layout.h.outer / 6);
-	gfx.Fill();
-	gfx.Stroke();
+	drawRectangle({
+		x = x,
+		y = y,
+		w = layout.w.middle,
+		h = layout.h.outer / 6,
+		alpha = 255 * timer,
+		color = 'dark',
+		stroke = {
+			alpha = 255 * timer,
+			color = 'normal',
+			size = 1,
+		},
+	});
 
-	gfx.BeginPath();
-	Fill.White(255 * cursor.alpha);
-	gfx.Rect(x + 8 + cursor.offset, y + 10, 2, (layout.h.outer / 6) - 20);
-	gfx.Fill();
+	drawRectangle({
+		x = x + 8 + cursor.offset,
+		y = y + 10,
+		w = 2,
+		h = (layout.h.outer / 6) - 20,
+		alpha = 255 * cursor.alpha,
+		color = 'white',
+	});
 
 	gfx.Save();
 
 	gfx.Scale(1 / scalingFactor, 1 / scalingFactor);
 
-	Font.JP();
+	loadFont('jp');
 	labels.input:update({ new = string.upper(dialog.newName) });
 
 	gfx.BeginPath();
-	FontAlign.Left();
+	alignText('left');
 
 	labels.collectionName:draw({
 		x = layout.x.middleLeft,
 		y = labelY,
-		a = 255 * timer,
-		color = 'Normal',
+		alpha = 255 * timer,
+		color = 'normal',
 	});
 
 	labelY = labelY + (labels.collectionName.h * 2);
@@ -185,28 +195,28 @@ drawInput = function()
 	labels.input:draw({
 		x = x + 8,
 		y = labelY + 7,
-		a = 255 * timer,
-		color = 'White',
+		alpha = 255 * timer,
+		color = 'white',
 		maxWidth = layout.w.middle - 22,
 	});
 
 	labelY = labelY + (layout.h.outer / 6);
 
 	gfx.BeginPath();
-	FontAlign.Right();
+	alignText('right');
 
 	labels.confirm:draw({
 		x = layout.x.middleRight + 2,
 		y = labelY + labels.confirm.h,
-		a = 255 * timer,
-		color = 'White',
+		alpha = 255 * timer,
+		color = 'white',
 	});
 
 	labels.enter:draw({
 		x = layout.x.middleRight - labels.enter.w - 16,
 		y = labelY + labels.enter.h,
-		a = 255 * timer,
-		color = 'Normal',
+		alpha = 255 * timer,
+		color = 'normal',
 	});
 
 	gfx.Restore();
@@ -223,13 +233,13 @@ drawSongInfo = function(deltaTime)
 	gfx.Scale(1 / scalingFactor, 1 / scalingFactor);
 
 	gfx.BeginPath();
-	FontAlign.Left();
+	alignText('left');
 
 	labels.title:draw({
 		x = x,
 		y = y,
-		a = alpha,
-		color = 'Normal',
+		alpha = alpha,
+		color = 'normal',
 	});
 
 	y = y + (labels.title.h * 1.25);
@@ -240,8 +250,8 @@ drawSongInfo = function(deltaTime)
 		title:draw({
 			x = x + 2,
 			y = y,
-			a = alpha,
-			color = 'White',
+			alpha = alpha,
+			color = 'white',
 			scale = scalingFactor,
 			scrolling = true,
 			timer = timers.title,
@@ -251,8 +261,8 @@ drawSongInfo = function(deltaTime)
 		title:draw({
 			x = x,
 			y = y,
-			a = alpha,
-			color = 'White',
+			alpha = alpha,
+			color = 'white',
 		});
 	end
 
@@ -261,8 +271,8 @@ drawSongInfo = function(deltaTime)
 	labels.artist:draw({
 		x = x,
 		y = y,
-		a = alpha,
-		color = 'Normal',
+		alpha = alpha,
+		color = 'normal',
 	});
 
 	y = y + (labels.artist.h * 1.5);
@@ -273,8 +283,8 @@ drawSongInfo = function(deltaTime)
 		artist:draw({
 			x = x + 2,
 			y = y,
-			a = alpha,
-			color = 'White',
+			alpha = alpha,
+			color = 'white',
 			scale = scalingFactor,
 			scrolling = true,
 			timer = timers.artist,
@@ -284,8 +294,8 @@ drawSongInfo = function(deltaTime)
 		artist:draw({
 			x = x,
 			y = y,
-			a = alpha,
-			color = 'White',
+			alpha = alpha,
+			color = 'white',
 		});
 	end
 
@@ -297,7 +307,7 @@ open = function()
 	menuOptions = {};
 	selectedIndex = 0;
 
-	Font.Medium();
+	loadFont('medium');
 
 	if (#dialog.collections == 0) then
 		menuOptions[initialIndex] = {
@@ -330,7 +340,7 @@ open = function()
 		label = New.Label({ text = 'CLOSE', size = 18 }),
 	});
 
-	Font.JP();
+	loadFont('jp');
 
 	artist = New.Label({
 		text = string.upper(dialog.artist),
@@ -365,7 +375,7 @@ render = function(deltaTime)
 	layout.images.dialogBox:draw({
 		x = scaledW / 2,
 		y = scaledH / 2,
-		a = timer,
+		alpha = timer,
 		centered = true,
 	});
 

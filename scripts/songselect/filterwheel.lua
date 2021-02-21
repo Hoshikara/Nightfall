@@ -65,7 +65,7 @@ local folders = {
 			self.w.final, self.w.max = 0, 0;
 			self.h.offset, self.h.total = 0, 0;
 
-			Font.Normal();
+			loadFont('normal');
 
 			for i, folder in ipairs(filters.folder) do
 				self.labels[i] = New.Label({
@@ -111,11 +111,11 @@ local folders = {
 
 		if (isVisible) then
 			local alpha = math.floor(255 * math.min(timers.folder ^ 2, 1));
-			local color = (isSelected and 'Normal') or 'White';
+			local color = (isSelected and 'normal') or 'white';
 			local doesOverflow = self.labels[i].w > layout.dropdown[1].maxWidth;
 
 			gfx.BeginPath();
-			FontAlign.Left();
+			alignText('left');
 
 			if (allowScroll and doesOverflow) then
 				self.timers[key] = self.timers[key] + deltaTime;
@@ -123,7 +123,7 @@ local folders = {
 				self.labels[i]:draw({
 					x = 0,
 					y = y,
-					a = alpha,
+					alpha = alpha,
 					color = color,
 					scale = scalingFactor,
 					scrolling = true,
@@ -134,7 +134,7 @@ local folders = {
 				self.labels[i]:draw({
 					x = 0,
 					y = y,
-					a = alpha,
+					alpha = alpha,
 					color = color,
 				});
 			end
@@ -186,11 +186,11 @@ local levels = {
 				local current = stringReplace(level, prefixes);
 		
 				if (current == 'ALL') then
-					Font.Normal();
+					loadFont('normal');
 				elseif (current == '∞') then
-					Font.Number();
+					loadFont('number');
 				else
-					Font.Number();
+					loadFont('number');
 	
 					current = string.format(
 						'%02d',
@@ -213,15 +213,15 @@ local levels = {
 
 	drawLevel = function(self, i, y, isSelected)
 		local alpha = math.floor(255 * math.min(timers.level ^ 2, 1));
-		local color = (isSelected and 'Normal') or 'White';
+		local color = (isSelected and 'normal') or 'white';
 
 		gfx.BeginPath();
-		FontAlign.Left();
+		alignText('left');
 
 		self.labels[i]:draw({
 			x = 0,
 			y = y,
-			a = alpha,
+			alpha = alpha,
 			color = color,
 		});
 
@@ -259,18 +259,18 @@ drawCurrentField = function(deltaTime, label, field, displaying, isFolder)
 	end
 
 	gfx.BeginPath();
-	FontAlign.Left();
+	alignText('left');
 
 	if (displaying) then
 		if (choosingFolder and isFolder) then
-			color = 'Normal';
+			color = 'normal';
 		elseif ((not choosingFolder) and (not isFolder)) then
-			color = 'Normal';
+			color = 'normal';
 		else
-			color = 'White';
+			color = 'white';
 		end
 	else
-		color = 'White';
+		color = 'white';
 	end
 
 	if (doesOverflow) then
@@ -279,7 +279,7 @@ drawCurrentField = function(deltaTime, label, field, displaying, isFolder)
 		label:draw({
 			x = x,
 			y = y,
-			a = 255,
+			alpha = 255,
 			color = color,
 			scale = scalingFactor,
 			scrolling = true,
@@ -353,21 +353,25 @@ render = function(deltaTime, displaying)
 		initialY = layout.dropdown.y;
 	end
 
-	gfx.BeginPath();
-	Fill.Dark(230);
-	gfx.FastRect(
-		layout.dropdown[1].x,
-		initialY,
-		(layout.dropdown.padding * 2) + folders.w.final,
-		(folders.h.total + layout.dropdown.padding) * timers.folder
-	);
-	gfx.FastRect(
-		layout.dropdown[2].x,
-		initialY,
-		(layout.dropdown.padding * 2) + levels.w,
-		(levels.h + (layout.dropdown.padding * 1.5)) * timers.level
-	);
-	gfx.Fill();
+	drawRectangle({
+		x = layout.dropdown[1].x,
+		y = initialY,
+		w = (layout.dropdown.padding * 2) + folders.w.final,
+		h = (folders.h.total + layout.dropdown.padding) * timers.folder,
+		alpha = 230,
+		color = 'dark',
+		fast = true,
+	});
+
+	drawRectangle({
+		x = layout.dropdown[2].x,
+		y = initialY,
+		w = (layout.dropdown.padding * 2) + levels.w,
+		h = (levels.h + (layout.dropdown.padding * 1.5)) * timers.level,
+		alpha = 230,
+		color = 'dark',
+		fast = true,
+	});
 
 	folders:render(deltaTime, initialY);
 

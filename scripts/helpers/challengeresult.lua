@@ -14,7 +14,7 @@ local formatChallengeInfo = function(current)
   local labels = { requirements = {} };
   local player = game.GetSkinSetting('displayName') or 'GUEST';
 
-  Font.Normal();
+  loadFont('normal');
 
   labels.title = New.Label({
     text = string.upper(get(current, 'title', '')),
@@ -26,7 +26,7 @@ local formatChallengeInfo = function(current)
     size = 24,
   });
 
-  Font.Medium();
+  loadFont('medium');
 
   for requirement in get(current, 'requirement_text', ''):gmatch('[^\n]+') do
     local label =  New.Label({
@@ -43,7 +43,7 @@ local formatChallengeInfo = function(current)
     labels.result = New.Label({ text = 'FAIL', size = 24 });
   end
 
-  Font.Number();
+  loadFont('number');
 
   labels.completion = New.Label({
     text = string.format('%d%%', get(current, 'avgPercentage', 0)),
@@ -72,7 +72,7 @@ local formatCharts = function(tbl)
       1000
     );
 
-    Font.JP();
+    loadFont('jp');
 
     current.title = New.Label({
       text = string.upper(get(chart, 'title', '')),
@@ -80,7 +80,7 @@ local formatCharts = function(tbl)
       size = 36,
     });
 
-    Font.Normal();
+    loadFont('normal');
 
     if (get(chart, 'passed', false)) then
       current.result = New.Label({ text = 'PASS', size = 24 });
@@ -104,7 +104,7 @@ local formatCharts = function(tbl)
       size = 24,
     });
 
-    Font.Number();
+    loadFont('number');
 
     current.bpm = New.Label({ text = get(chart, 'bpm', ''), size = 24 });
 

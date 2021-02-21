@@ -34,6 +34,11 @@ local sortingcursor = 0
 local sortingOptions = {"Uploaded", "Oldest"}
 local needsReload = false
 
+local nauticaPath = string.format(
+    '/%s/',
+    game.GetSkinSetting('nauticaPath') or 'nautica'
+);
+
 function addsong(song)
     if song.jacket_url ~= nil then
         song.jacket = gfx.LoadWebImageJob(song.jacket_url, jacketFallback, 250, 250)
@@ -254,24 +259,24 @@ function archive_callback(entries, id)
     game.Log("Listing entries for " .. id, 0)
     local songsfolder = dlScreen.GetSongsPath()
     res = {}
-    folders = { songsfolder .. "/nautica/" }
+    folders = { songsfolder .. nauticaPath }
     local hasFolder = false
     for i, entry in ipairs(entries) do
         for j = 1, #entry do
             if entry:sub(j,j) == '/' then
                hasFolder = true
-               table.insert(folders, songsfolder .. "/nautica/" .. entry:sub(1,j))
+               table.insert(folders, songsfolder .. nauticaPath .. entry:sub(1,j))
             end
         end
         game.Log(entry, 0)
-        res[entry] = songsfolder .. "/nautica/" .. entry
+        res[entry] = songsfolder .. nauticaPath .. entry
     end
     
     if not hasFolder then
         for i, entry in ipairs(entries) do
-            res[entry] = songsfolder .. "/nautica/" .. id .. "/" .. entry
+            res[entry] = songsfolder .. nauticaPath .. id .. "/" .. entry
         end
-        table.insert(folders, songsfolder .. "/nautica/" .. id .. "/")
+        table.insert(folders, songsfolder .. nauticaPath .. id .. "/")
     end
     downloaded[id] = "Downloaded"
     res[".folders"] = table.concat(folders, "|")

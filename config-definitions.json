@@ -1,34 +1,28 @@
 {
-	"========== GENERAL ==========": {
+	"// GENERAL //": {
 		"type": "label"
 	},
 	"displayName": {
 		"type": "text",
-		"label": "Display Name",
+		"label": "Player Name",
 		"default": "Guest"
 	},
-	"": {
-		"type": "label"
+	"nauticaPath": {
+		"type": "text",
+		"label": "Nautica Download Folder i.e. /songs/nautica",
+		"default": "nautica"
 	},
-	"========== SONG SELECT ==========": {
-		"type": "label"
-	},
-	"Controls": {
+	"separator_b": {},
+	"// SONG SELECT //": {
 		"type": "label"
 	},
 	"controlsShortcut": {
-		"label": "[BT-A] for Controls",
+		"label": "Show Controls when [BT-A] is pressed",
 		"type": "bool",
 		"default": true
 	},
-	" ": {
-		"type": "label"
-	},
-	"Performance": {
-		"type": "label"
-	},
 	"jacketQuality": {
-		"label": "Jacket Quality",
+		"label": "Jacket Image Quality (lower = faster loading)",
 		"type": "selection",
 		"default": "NORMAL",
 		"values": [
@@ -38,18 +32,13 @@
 			"ORIGINAL"
 		]
 	},
-	"  ": {
-		"type": "label"
-	},
-	"========== GAMEPLAY ==========": {
-		"type": "label"
-	},
-	"Early / Late": {
+	"separator_c": {},
+	"// GAMEPLAY //": {
 		"type": "label"
 	},
 	"earlatePosition": {
 		"type": "selection",
-		"label": "Position",
+		"label": "Early / Late Position",
 		"default": "BOTTOM",
 		"values": [
 			"OFF",
@@ -59,15 +48,19 @@
 			"UPPER+"
 		]
 	},
-	"   ": {
-		"type": "label"
-	},
-	"Hit Error": {
-		"type": "label"
+	"earlateType": {
+		"type": "selection",
+		"label": "Early / Late Display Type",
+		"default": "TEXT",
+		"values": [
+			"DELTA",
+			"TEXT",
+			"TEXT + DELTA"
+		]
 	},
 	"hitErrorPosition": {
 		"type": "selection",
-		"label": "Position",
+		"label": "Hit Error Bar Position",
 		"default": "OFF",
 		"values": [
 			"OFF",
@@ -78,24 +71,18 @@
 	},
 	"hitErrorScale": {
 		"type": "float",
-		"label": "Scale",
+		"label": "Hit Error Bar Size",
 		"default": 1.0,
 		"max": 2.0,
 		"min": 0.5
 	},
-	"    ": {
-		"type": "label"
-	},
-	"User Info": {
-		"type": "label"
-	},
 	"showUserInfo": {
-		"label": "Display User Info",
+		"label": "Show Player Name and Score Difference",
 		"type": "bool",
 		"default": true
 	},
 	"showScoreDifference": {
-		"label": "Display Score Difference",
+		"label": "Show Score Difference",
 		"type": "bool",
 		"default": true
 	},
@@ -110,10 +97,8 @@
 			"BOTTOM"
 		]
 	},
-	"     ": {
-		"type": "label"
-	},
-	"========== RESULTS ==========": {
+	"separator_d": {},
+	"// RESULTS //": {
 		"type": "label"
 	},
 	"dateFormat": {
@@ -126,38 +111,27 @@
 			"YEAR-MONTH-DAY"
 		]
 	},
-	"      ": {
-		"type": "label"
-	},
 	"screenshotRegion": {
 		"type": "selection",
-		"label": "Screenshot Region",
+		"label": "Screenshot Capture Region",
 		"default": "PANEL",
 		"values": [
 			"FULLSCREEN",
 			"PANEL"
 		]
 	},
-	"       ": {
-		"type": "label"
-	},
-	"========== MULTIPLAYER ==========": {
-		"type": "label"
-	},
-	"Lobby": {
+	"separator_e": {},
+	"// MULTIPLAYER //": {
 		"type": "label"
 	},
 	"toggleHard": {
-		"label": "[FX-L] for Hard Gauge",
+		"label": "Toggle Hard Gauge when [FX-L] is pressed",
 		"type": "bool",
 		"default": true
 	},
 	"toggleMirror": {
-		"label": "[FX-R] for Mirror Mode",
+		"label": "Toggle Mirror Mode when [FX-R] is pressed",
 		"type": "bool",
 		"default": true
-	},
-	"        ": {
-		"type": "label"
 	}
 }

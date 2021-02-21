@@ -39,7 +39,7 @@ local New = function()
       end
 
       local change = (self.y.bar.current - self.y.bar.previous)
-        * Ease.OutQuad(self.timer);
+        * quadraticEase(self.timer);
       local offset = self.y.bar.previous + change;
 
       if (tostring(offset) == '-nan(ind)') then
@@ -50,17 +50,24 @@ local New = function()
 
       gfx.Save();
 
-      gfx.BeginPath();
-      Fill.Dark(120);
-      gfx.Rect(self.x, self.y.track, self.w, self.h.track);
-      gfx.Fill();
+      drawRectangle({
+        x = self.x,
+        y = self.y.track,
+        w = self.w,
+        h = self.h.track,
+        alpha = 120,
+        color = 'dark',
+      });
 
       gfx.Translate(self.x, self.y.track + offset);
 
-      gfx.BeginPath();
-      Fill.Normal();
-      gfx.Rect(0, 0, self.w, self.h.bar);
-      gfx.Fill();
+      drawRectangle({
+        x = 0,
+        y = 0,
+        w = self.w,
+        h = self.h.bar,
+        color = 'normal',
+      });
 
       gfx.Restore();
     end,

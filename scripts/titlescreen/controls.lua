@@ -14,7 +14,7 @@ local _ = {
 };
 
 _.initializeButton = function(self)
-  Font.Medium();
+  loadFont('medium');
 
   local button = {
     [1] = {
@@ -58,12 +58,12 @@ _.initializeButton = function(self)
   button.drawButton = function(self, x, y, i, isActive)
     gfx.BeginPath();
 
-    FontAlign.Left();
+    alignText('left');
     self[i].label:draw({
       x = x,
       y = y,
-      a = (isActive and 255) or 80,
-      color = (isActive and 'Normal') or 'White',
+      alpha = (isActive and 255) or 80,
+      color = (isActive and 'normal') or 'white',
     });
 
     if (_:mouseClipped(x - 20, y - 10, self[i].label.w + 40, self[i].label.h + 30)) then
@@ -96,13 +96,13 @@ _.initializeControls = function(self)
     for i = 1, #CONTROL_LIST[category] do
       list[i] = {};
 
-      Font.Normal();
+      loadFont('normal');
       list[i].action = New.Label({
         text = CONTROL_LIST[category][i].action,
         size = 24,
       });
 
-      Font.Medium();
+      loadFont('medium');
       list[i].controller = New.Label({
         text = CONTROL_LIST[category][i].controller,
         size = 24,
@@ -128,17 +128,17 @@ _.initializeControls = function(self)
     local y = initialY;
 
     gfx.BeginPath();
-    FontAlign.Left();
+    alignText('left');
 
     _.controller:draw({
       x = x,
       y = y,
-      color = 'White',
+      color = 'white',
     });
     _.keyboard:draw({
       x = x + 350,
       y = y,
-      color = 'White',
+      color = 'white',
     });
 
     y = y + 60;
@@ -147,26 +147,31 @@ _.initializeControls = function(self)
       list[i].controller:draw({
         x = x,
         y = y,
-        color = (list[i].note and 'White') or 'Normal',
+        color = (list[i].note and 'white') or 'normal',
       });
 
       list[i].keyboard:draw({
         x = x + 350,
         y = y,
-        color = (list[i].note and 'White') or 'Normal',
+        color = (list[i].note and 'white') or 'normal',
       });
 
       list[i].action:draw({
         x = x + 700,
         y = y,
-        color = 'White',
+        color = 'white',
       });
 
       if ((i ~= #list) and (not list[i].note)) then
-        gfx.BeginPath();
-        Fill.Normal(100);
-        gfx.FastRect(x + 1, y + 38, _.layout.scaledW / 1.65, 2);
-        gfx.Fill();
+        drawRectangle({
+          x = x + 1,
+          y = y + 38,
+          w = _.layout.scaledW / 1.65,
+          h = 2,
+          alpha = 100,
+          color = 'normal',
+          fast = true,
+        });
       end
 
       if (list[i].lineBreak) then
@@ -214,7 +219,7 @@ _.initializeAll = function(self, selection)
       and (self.mousePosY < scaledH);
   end
 
-  Font.Medium();
+  loadFont('medium');
   self.heading = New.Label({ text = 'CONTROLS', size = 60 });
   self.controller = New.Label({ text = 'CONTROLLER', size = 30 });
   self.keyboard = New.Label({ text = 'KEYBOARD', size = 30 });
@@ -233,20 +238,25 @@ _.render = function(self, deltaTime, showControls, selectedPage)
 
   self.mousePosX, self.mousePosY = game.GetMousePos();
 
-  gfx.BeginPath();
-  Fill.Black(170);
-  gfx.FastRect(0, 0, self.layout.scaledW, self.layout.scaledH);
-  gfx.Fill();
+  drawRectangle({
+    x = 0,
+    y = 0,
+    w = self.layout.scaledW,
+    h = self.layout.scaledH,
+    alpha = 170,
+    color = 'black',
+    fast = true,
+  });
 
   local x = self.layout.scaledW / 20;
   local y = self.layout.scaledH / 20;
 
   gfx.BeginPath();
-  FontAlign.Left();
+  alignText('left');
   self.heading:draw({
     x = x - 3,
     y = y,
-    color = 'White',
+    color = 'white',
   });
 
   self.buttonY = y + self.heading.h * 2;
@@ -261,15 +271,13 @@ _.render = function(self, deltaTime, showControls, selectedPage)
     );
   end
 
-  gfx.BeginPath();
-  Fill.White();
-  gfx.FastRect(
-    x + self.button.maxWidth + 75,
-    y + (self.heading.h * 2) + 10,
-    4,
-    self.layout.scaledH * 0.475
-  );
-  gfx.Fill();
+  drawRectangle({
+    x = x + self.button.maxWidth + 75,
+    y = y + (self.heading.h * 2) + 10,
+    w = 4,
+    h = self.layout.scaledH * 0.475,
+    color = 'white',
+  });
 
   self.controls:drawControls(
     self.button[self.selectedPage].page,
@@ -278,17 +286,17 @@ _.render = function(self, deltaTime, showControls, selectedPage)
   );
 
   gfx.BeginPath();
-  FontAlign.Left();
+  alignText('left');
   self.button.startEsc:draw({
     x = x,
     y = y + self.layout.scaledH - (self.layout.scaledH / 7),
-    color = 'Normal',
+    color = 'normal',
   });
 
   self.button.close:draw({
     x = x + self.button.startEsc.w + 8,
     y = y + self.layout.scaledH - (self.layout.scaledH / 7),
-    color = 'White',
+    color = 'white',
   });
 
   return self.hoveredPage;

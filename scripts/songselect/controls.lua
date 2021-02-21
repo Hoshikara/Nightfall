@@ -47,13 +47,13 @@ local _ = {
         for i = 1, #CONTROL_LIST[category] do
           list[i] = {};
     
-          Font.Normal();
+          loadFont('normal');
           list[i].action = New.Label({
             text = CONTROL_LIST[category][i].action,
             size = 24,
           });
     
-          Font.Medium();
+          loadFont('medium');
           list[i].controller = New.Label({
             text = CONTROL_LIST[category][i].controller,
             size = 24,
@@ -77,7 +77,7 @@ local _ = {
 
   setHeadings = function(self)
     if (not self.headings) then
-      Font.Medium();
+      loadFont('medium');
 
       self.headings = {
         main = New.Label({ text = 'CONTROLS', size = 60 }),
@@ -102,19 +102,19 @@ local _ = {
     local y = initialY;
 
     gfx.BeginPath();
-    FontAlign.Left();
+    alignText('left');
 
     self.headings.controller:draw({
       x = x,
       y = y,
-      a = alpha,
-      color = 'White',
+      alpha = alpha,
+      color = 'white',
     });
     self.headings.keyboard:draw({
       x = x + 350,
       y = y,
-      a = alpha,
-      color = 'White',
+      alpha = alpha,
+      color = 'white',
     });
 
     y = y + 60;
@@ -123,29 +123,34 @@ local _ = {
       list[i].controller:draw({
         x = x,
         y = y,
-        a = alpha,
-        color = (list[i].note and 'White') or 'Normal',
+        alpha = alpha,
+        color = (list[i].note and 'white') or 'normal',
       });
 
       list[i].keyboard:draw({
         x = x + 350,
         y = y,
-        a = alpha,
-        color = (list[i].note and 'White') or 'Normal',
+        alpha = alpha,
+        color = (list[i].note and 'white') or 'normal',
       });
 
       list[i].action:draw({
         x = x + 700,
         y = y,
-        a = alpha,
-        color = 'White',
+        alpha = alpha,
+        color = 'white',
       });
 
       if ((i ~= #list) and (not list[i].note)) then
-        gfx.BeginPath();
-        Fill.Normal(100 * self.timer)
-        gfx.FastRect(x + 1, y + 38, self.scaledW / 1.65, 2);
-        gfx.Fill();
+        drawRectangle({
+          x = x + 1,
+          y = y + 38,
+          w = self.scaledW / 1.65,
+          h = 2,
+          alpha = 100 * self.timer,
+          color = 'normal',
+          fast = true,
+        });
       end
 
       if (list[i].lineBreak) then
@@ -161,12 +166,12 @@ local _ = {
 
     gfx.BeginPath();
 
-    FontAlign.Left();
+    alignText('left');
     heading:draw({
       x = x,
       y = y,
-      a = (isActive and (255 * self.timer)) or (80 * self.timer),
-      color = (isActive and 'Normal') or 'White',
+      alpha = (isActive and (255 * self.timer)) or (80 * self.timer),
+      color = (isActive and 'normal') or 'white',
     });
 
     if (heading.w > self.headings.maxWidth) then
@@ -179,22 +184,27 @@ local _ = {
   drawScreen = function(self)
     local alpha = math.floor(255 * self.timer);
 
-    gfx.BeginPath()
-    Fill.Black(235 * self.timer);
-    gfx.FastRect(0, 0, self.scaledW, self.scaledH);
-    gfx.Fill();
+    drawRectangle({
+      x = 0,
+      y = 0,
+      w = self.scaledW,
+      h = self.scaledH,
+      alpha = 235 * self.timer,
+      color = 'black',
+      fast = true,
+    });
 
     gfx.Save();
 
     gfx.Translate(self.x, self.y);
 
     gfx.BeginPath();
-    FontAlign.Left();
+    alignText('left');
     self.headings.main:draw({
       x = -3,
       y = 0,
-      a = alpha,
-      color = 'White',
+      alpha = alpha,
+      color = 'white',
     });
 
     self.headingY = self.headings.main.h * 2;
@@ -208,15 +218,15 @@ local _ = {
       );
     end
 
-    gfx.BeginPath();
-    Fill.White(alpha);
-    gfx.FastRect(
-      self.headings.maxWidth + 75,
-      (self.headings.main.h * 2) + 10,
-      4,
-      self.scaledH / 2.75
-    );
-    gfx.Fill();
+    drawRectangle({
+      x = self.headings.maxWidth + 75,
+      y = (self.headings.main.h * 2) + 10,
+      w = 4,
+      h = self.scaledH / 2.75,
+      alpha = alpha,
+      color = 'white',
+      fast = true,
+    });
 
     self:drawControls(
       self.controls[self.pages[self.selectedPage]],
@@ -225,19 +235,19 @@ local _ = {
     );
 
     gfx.BeginPath();
-    FontAlign.Left();
+    alignText('left');
     self.headings.btd:draw({
       x = 0,
       y = self.scaledH - (self.scaledH / 7),
-      a = alpha,
-      color = 'Normal',
+      alpha = alpha,
+      color = 'normal',
     });
 
     self.headings.next:draw({
       x = self.headings.btd.w + 8,
       y = self.scaledH - (self.scaledH / 7) + 1,
-      a = alpha,
-      color = 'White',
+      alpha = alpha,
+      color = 'white',
     });
 
     gfx.Restore();

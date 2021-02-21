@@ -46,7 +46,7 @@ local labels = nil;
 
 setLabels = function()
 	if (not labels) then
-		Font.JP();
+		loadFont('jp');
 
 		labels = {
 			artist = New.Label({ text = string.upper(song.artist), size = 40 }),
@@ -118,10 +118,14 @@ drawTransition = function(deltaTime, isIntro);
 			centered = true,
 		});
 
-		gfx.BeginPath();
-		Fill.Black(150 * timers.fade);
-		gfx.Rect(0, 0, scaledW, scaledH);
-		gfx.Fill();
+		drawRectangle({
+			x = 0,
+			y = 0,
+			w = scaledW,
+			h = scaledH,
+			alpha = 150 * timers.fade,
+			color = 'black',
+		});
 
 		gfx.ResetScissor();
 	else
@@ -168,28 +172,36 @@ drawTransition = function(deltaTime, isIntro);
 		stroke = 2,
 	});
 
-	gfx.BeginPath();
-	gfx.StrokeWidth(2);
-	gfx.StrokeColor(60, 110, 160, math.floor(255 * flickerAlpha));
-	gfx.ImageRect(-240, -360, 480, 480, jacket, flickerAlpha, 0);
-	gfx.Stroke();
+	drawRectangle({
+		x = -240,
+		y = -360,
+		w = 480,
+		h = 480,
+		alpha = flickerAlpha,
+		image = jacket,
+		stroke = {
+			alpha = 255 * flickerAlpha,
+			color = 'normal',
+			size = 2,
+		},
+	});
 
 	if (isIntro) then
 		gfx.BeginPath();
-		FontAlign.Center();
+		alignText('center');
 
 		labels.title:draw({
 			x = 0,
 			y = 255,
-			a = 255 * flickerAlpha,
-			color = 'White',
+			alpha = 255 * flickerAlpha,
+			color = 'white',
 		});
 
 		labels.artist:draw({
 			x = 0,
 			y = 255 + labels.title.h * 1.75,
-			a = 255 * flickerAlpha,
-			color = 'Normal',
+			alpha = 255 * flickerAlpha,
+			color = 'normal',
 		});
 	end
 

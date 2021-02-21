@@ -8,14 +8,14 @@ return function(params)
   local wrapped = {
     label = label,
     size = params.size or 42,
+    text = params.text or 'NO TEXT PROVIDED FOR LABEL',
     w = w,
     h = h,
 
     draw = function(self, params);
       local x = params.x or 0;
       local y = params.y or 0;
-      local a = params.a or 255;
-      local color = params.color or 'White';
+      local alpha = params.alpha or 255;
       local maxWidth = params.maxWidth or -1;
 
       if (params.override) then
@@ -25,17 +25,17 @@ return function(params)
           self:drawScrolling({
             x = x,
             y = y,
-            a = a,
-            color = color,
+            alpha = alpha,
+            color = params.color or 'normal',
             scale = params.scale or 1,
             timer = params.timer or 0,
             width = params.width or 0,
           });
         else
-          Fill.Dark(a * 0.5);
+          setFill('dark', alpha * 0.5);
           gfx.DrawLabel(self.label, x + 1, y + 1, maxWidth);
       
-          Fill[color](a);
+          setFill(params.color, alpha);
           gfx.DrawLabel(self.label, x, y, maxWidth);
         end
       end
@@ -72,9 +72,9 @@ return function(params)
         self.h * 1.25
       );
 
-      FontAlign.Left();
+      alignText('left');
 
-      Fill.Dark(params.a * 0.5);
+      setFill('dark', params.alpha * 0.5);
       gfx.DrawLabel(
         self.label,
         params.x + 1 - (phase * labelX),
@@ -88,7 +88,7 @@ return function(params)
         -1
       );
 
-      Fill[params.color](params.a);
+      setFill(params.color, params.alpha);
       gfx.DrawLabel(
         self.label,
         params.x - (phase * labelX),

@@ -27,7 +27,7 @@ local CONSTANTS = {
 local generate = function(whichStrings)
   local labels = {};
 
-  Font.Medium();
+  loadFont('medium');
 
   for key, name in pairs(CONSTANTS[whichStrings]) do
     labels[key] = New.Label({ text = name, size = 18 });

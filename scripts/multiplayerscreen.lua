@@ -203,13 +203,13 @@ local roomList = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			Font.Medium();
+			loadFont('medium');
 
 			self.labels = {
 				createRoom = New.Label({ text = 'CREATE ROOM', size = 18 }),
 			};
 
-			Font.Normal();
+			loadFont('normal');
 
 			self.labels.heading = New.Label({
 				text = 'MULTIPLAYER ROOMS',
@@ -257,18 +257,18 @@ local roomList = {
 			self.images.button:draw({
 				x = x,
 				y = y,
-				a = 0.45,
+				alpha = 0.45,
 			});
 		end
 
 		gfx.BeginPath();
-		FontAlign.Left();
+		alignText('left');
 		
 		self.labels.createRoom:draw({
 			x = x + 40,
 			y = y + 25,
-			a = (allowAction and 255) or 50,
-			color = 'White',
+			alpha = (allowAction and 255) or 50,
+			color = 'white',
 		});
 
 		gfx.Restore();
@@ -280,7 +280,7 @@ local roomList = {
 		end
 
 		local change = (self.list.y.current - self.list.y.previous)
-			* Ease.OutQuad(self.list.timer);
+			* quadraticEase(self.list.timer);
 		local offset = self.list.y.previous + change;
 		local y = 0;
 
@@ -309,38 +309,42 @@ local roomList = {
 		local y = initialY + self.list.padding;
 
 		if (isVisible) then
-			gfx.BeginPath();
-			Fill.Dark(120);
-			gfx.Rect(0, initialY, self.list.w, self.list.h.item);
-			gfx.Fill();
+			drawRectangle({
+				x = 0,
+				y = initialY,
+				w = self.list.w,
+				h = self.list.h.item,
+				alpha = 120,
+				color = 'dark',
+			});
 
 			gfx.BeginPath();
-			FontAlign.Left();
+			alignText('left');
 
 			for i, name in ipairs(self.order) do
-				Font.Medium();
+				loadFont('medium');
 				gfx.FontSize(18);
 
-				Fill.Dark(255 * 0.5);
+				setFill('dark', 255 * 0.5);
 				gfx.Text(string.upper(name), x + self.text[i] + 1, y + 1);
 
-				Fill.Normal();
+				setFill('normal');
 				gfx.Text(string.upper(name), x + self.text[i], y);
 
 				local infoY = ((name == 'capacity') and (y + 24)) or (y + 28);
 
 				if (name == 'capacity') then
-					Font.Number();
+					loadFont('number');
 					gfx.FontSize(30);
 				else
-					Font.Normal();
+					loadFont('normal');
 					gfx.FontSize(24);
 				end
 
-				Fill.Dark(255 * 0.5);
+				setFill('dark', 255 * 0.5);
 				gfx.Text(self.info[roomIndex][name], x + self.text[i] + 1, infoY + 1);
 
-				Fill.White();
+				setFill('white');
 				gfx.Text(self.info[roomIndex][name], x + self.text[i], infoY);
 			end
 		end
@@ -405,13 +409,13 @@ local roomList = {
 		gfx.Save();
 
 		gfx.BeginPath();
-		FontAlign.Left();
+		alignText('left');
 
 		self.labels.heading:draw({
 			x = self.x,
 			y = self.y,
-			a = self.alpha,
-			color = 'White',
+			alpha = self.alpha,
+			color = 'white',
 		});
 
 		if (#allRooms > 0) then
@@ -436,10 +440,14 @@ local roomList = {
 
 		self:handleChange();
 
-		gfx.BeginPath();
-		Fill.Black(170 * self.timer);
-		gfx.Rect(0, 0, scaledW, scaledH);
-		gfx.Fill();
+		drawRectangle({
+			x = 0,
+			y = 0,
+			w = scaledW,
+			h = scaledH,
+			alpha = 170 * self.timer,
+			color = 'black',
+		});
 
 		gfx.Restore();
 	end,
@@ -550,7 +558,7 @@ local songInfo = {
 			self.levels = {};
 			self.songInfo = {};
 
-			Font.Number();
+			loadFont('number');
 
 			for i = 1, 4 do
 				self.levels[i] = New.Label({ text = '', size = 18 });
@@ -558,7 +566,7 @@ local songInfo = {
 
 			self.songInfo.bpm = New.Label({ text = '000', size = 24 });
 
-			Font.Medium();
+			loadFont('medium');
 
 			self.labels = {
 				hardGauge = New.Label({ text = 'HARD GAUGE', size = 20 }),
@@ -574,14 +582,14 @@ local songInfo = {
 				self.difficulties[i] = New.Label({ text = difficulty, size = 18 });
 			end
 
-			Font.Normal();
+			loadFont('normal');
 
 			self.labels.disabled = New.Label({ text = 'DISABLED', size = 24 });
 			self.labels.enabled = New.Label({ text = 'ENABLED', size = 24 });
 			self.labels.hard = New.Label({ text = 'HARD', size = 24 });
 			self.labels.normal = New.Label({ text = 'NORMAL', size = 24 });
 
-			Font.JP();
+			loadFont('jp');
 
 			self.songInfo.artist = New.Label({
 				text = 'ARTIST',
@@ -634,19 +642,19 @@ local songInfo = {
 		gfx.Save();
 
 		gfx.BeginPath();
-		FontAlign.Left();
+		alignText('left');
 
 		self.labels.difficulty:draw({
 			x = self.padding.x.double + self.jacketSize + self.padding.x.full + 6,
 			y = self.padding.y.full - 4,
-			color = 'Normal',
+			color = 'normal',
 		});
 
 		for _, name in ipairs(self.order) do
 			self.labels[name]:draw({
 				x = self.labels.x,
 				y = y,
-				color = 'Normal',
+				color = 'normal',
 			});
 
 			y = y
@@ -661,20 +669,19 @@ local songInfo = {
 	end,
 
 	drawButton = function(self, x, y, a, enabled, action, clickAllowed)
-		gfx.BeginPath();
-		gfx.StrokeColor(60, 110, 160, math.floor(255 * a));
-
-		if (enabled) then
-			gfx.StrokeWidth(2);
-			gfx.FillColor(255, 205, 0, math.floor(255 * a));
-		else
-			gfx.StrokeWidth(1);
-			Fill.Dark(150 * a);
-		end
-		
-		gfx.Rect(x, y, 24, 24);
-		gfx.Fill();
-		gfx.Stroke();
+		drawRectangle({
+			x = x,
+			y = y,
+			w = 24,
+			h = 24,
+			alpha = 255 * a,
+			color = (enabled and { 255, 205, 0 }) or 'dark',
+			stroke = {
+				alpha = 255 * a,
+				color = 'normal',
+				size = (enabled and 2) or 1,
+			},
+		});
 
 		if (clickAllowed and mouseClipped(x, y, 24, 24)) then
 			hoveredButton = action;
@@ -721,7 +728,7 @@ local songInfo = {
 			self.images.button:draw({
 				x = x,
 				y = y,
-				a = 0.45,
+				alpha = 0.45,
 			});
 		end
 
@@ -731,7 +738,7 @@ local songInfo = {
 				currentDifficulty.difficulty
 			);
 			
-			Font.Number();
+			loadFont('number');
 
       self.levels[i]:update({
         new = string.format('%02d', currentDifficulty.level)
@@ -739,20 +746,20 @@ local songInfo = {
 
 			gfx.BeginPath();
 
-			FontAlign.Left();
+			alignText('left');
 			self.difficulties[difficultyIndex]:draw({
 				x = x + 36,
 				y = y + (self.images.button.h / 2.85),
-				a = alpha,
-				color = 'White',
+				alpha = alpha,
+				color = 'white',
 			});
 
-			FontAlign.Right();
+			alignText('right');
 			self.levels[i]:draw({
 				x = x + self.images.button.w - 36,
 				y = y + (self.images.button.h / 2.85),
-				a = alpha,
-				color = 'White',
+				alpha = alpha,
+				color = 'white',
 			});
 		end
 
@@ -777,19 +784,14 @@ local songInfo = {
 
 		gfx.Save();
 
-		gfx.BeginPath();
-		gfx.StrokeWidth(2);
-		gfx.StrokeColor(60, 110, 160, 255);
-		gfx.ImageRect(
-			self.padding.x.double,
-			self.padding.y.full,
-			self.jacketSize,
-			self.jacketSize,
-			jacket,
-			1,
-			0
-		);
-		gfx.Stroke();
+		drawRectangle({
+			x = self.padding.x.double,
+			y = self.padding.y.full,
+			w = self.jacketSize,
+			h = self.jacketSize,
+			image = jacket,
+			stroke = { color = 'normal', size = 2 },
+		});
 
 		gfx.Restore();
 	end,
@@ -798,20 +800,20 @@ local songInfo = {
 		local baseHeight = self.labels.title.h;
 		local y = self.labels.y + baseHeight + self.padding.y.quarter - 8;
 
-		Font.JP();
+		loadFont('jp');
 
 		self.songInfo.artist:update({ new = string.upper(selected_song.artist) });
 		self.songInfo.effector:update({ new = string.upper(selected_song.effector)} );
 		self.songInfo.title:update({ new = string.upper(selected_song.title) });
 
-		Font.Number();
+		loadFont('number');
 
 		self.songInfo.bpm:update({ new = selected_song.bpm });
 
 		gfx.Save();
 
 		gfx.BeginPath();
-		FontAlign.Left();
+		alignText('left');
 
 		for _, name in pairs(self.order) do
 			local doesOverflow = self.songInfo[name].w > self.panel.innerWidth;
@@ -822,8 +824,8 @@ local songInfo = {
 				self.songInfo[name]:draw({
 					x = self.labels.x,
 					y = y,
-					a = 255,
-					color = 'White',
+					alpha = 255,
+					color = 'white',
 					scale = scalingFactor,
 					scrolling = true,
 					timer = self.scrollTimers[name],
@@ -833,7 +835,7 @@ local songInfo = {
 				self.songInfo[name]:draw({
 					x = self.labels.x,
 					y = y - 1,
-					color = 'White',
+					color = 'white',
 				});
 			end
 
@@ -856,7 +858,7 @@ local songInfo = {
 		self.images.panel:draw({
 			x = 0,
 			y = 0,
-			a = 0.5,
+			alpha = 0.5,
 		});
 
 		self:drawLabels();
@@ -901,14 +903,14 @@ local songInfo = {
 		gfx.Save();
 
 		gfx.BeginPath();
-		FontAlign.Left();
+		alignText('left');
 
 		self:drawButton(x, y + 1, 1, hardGauge, toggleHard, not isStartingGame);
 
 		self.labels.hardGauge:draw({
 			x = x + 32,
 			y = y,
-			color = 'White',
+			color = 'white',
 		});
 
 		x = x + 32 + self.labels.hardGauge.w + self.toggles.spacing;
@@ -918,7 +920,7 @@ local songInfo = {
 		self.labels.mirrorMode:draw({
 			x = x + 32,
 			y = y,
-			color = 'White',
+			color = 'white',
 		});
 
 
@@ -936,8 +938,8 @@ local songInfo = {
 		self.labels.rotateHost:draw({
 			x = x + 32,
 			y = y,
-			a = ((host == userId) and 255) or 50,
-			color = 'White',
+			alpha = ((host == userId) and 255) or 50,
+			color = 'white',
 		});
 
 		gfx.Restore();
@@ -1031,7 +1033,7 @@ local lobby = {
 		if (not self.labels) then
 			self.labels = {};
 
-			Font.Medium();
+			loadFont('medium');
 
 			for name, label in pairs(CONSTANTS_MULTI.buttons) do
 				self.labels[name] = New.Label({ text = label, size = 18 });
@@ -1046,7 +1048,7 @@ local lobby = {
 	setUserInfo = function(self)
 		if (#allUsers ~= self.userCount) then
 			for i = 1, #allUsers do
-				Font.Normal();
+				loadFont('normal');
 
 				self.userInfo[i] = {
 					clear = New.Label({ text = '', size = 30 }),
@@ -1054,7 +1056,7 @@ local lobby = {
 					player = New.Label({ text = '', size = 30 }),
 				};
 
-				Font.Number();
+				loadFont('number');
 
 				self.userInfo[i].level = New.Label({ text = '0', size = 30 });
 				self.userInfo[i].score = ScoreNumber.New({
@@ -1068,18 +1070,18 @@ local lobby = {
 	end,
 
 	updateLabels = function(self, i, currentUser)
-		Font.Normal();
+		loadFont('normal');
 
 		self.userInfo[i].player:update({ new = string.upper(currentUser.name) });
 		
 		if (currentUser.level ~= 0) then
-			Font.Number();
+			loadFont('number');
 	
 			self.userInfo[i].level:update({ new = currentUser.level });
 		end
 
 		if (currentUser.score) then
-			Font.Normal();
+			loadFont('normal');
 
 			self.userInfo[i].clear:update({
 				new = CONSTANTS_SONGWHEEL.clears[currentUser.clear]
@@ -1170,18 +1172,18 @@ local lobby = {
 			self.images.buttonM:draw({
 				x = self.button.x,
 				y = self.button.y[1],
-				a = 0.75,
+				alpha = 0.75,
 			});
 		end
 
 		gfx.BeginPath();
-		FontAlign.Left();
+		alignText('left');
 
 		self.labels[label]:draw({
 			x = self.button.x + 44,
 			y = self.button.y[1] + 25,
-			a = ((allowAction and isHoveringMain) and 255) or 150,
-			color = 'White',
+			alpha = ((allowAction and isHoveringMain) and 255) or 150,
+			color = 'white',
 		});
 
 		if (isHoveringSettings) then
@@ -1195,15 +1197,15 @@ local lobby = {
 			self.images.buttonM:draw({
 				x = self.button.x,
 				y = self.button.y[2],
-				a = 0.75,
+				alpha = 0.75,
 			});
 		end
 
 		self.labels.settings:draw({
 			x = self.button.x + 44,
 			y = self.button.y[2] + 25,
-			a = (isHoveringSettings and 255) or 150,
-			color = 'White',
+			alpha = (isHoveringSettings and 255) or 150,
+			color = 'white',
 		});
 
 		gfx.Restore();
@@ -1226,10 +1228,14 @@ local lobby = {
 			self.images.buttonN.h
 		);
 
-		gfx.BeginPath();
-		Fill.Dark(120);
-		gfx.Rect(self.x, initialY, self.user.w, self.user.h);
-		gfx.Fill();
+		drawRectangle({
+			x = self.x,
+			y = initialY,
+			w = self.user.w,
+			h = self.user.h,
+			alpha = 120,
+			color = 'dark',
+		});
 
 		if (isHoveringHost) then
 			hoveredButton = function()
@@ -1241,15 +1247,15 @@ local lobby = {
 			self.images.buttonN:draw({
 				x = x1,
 				y = y,
-				a = 0.75,
+				alpha = 0.75,
 			});
 		end
 
 		self.labels.makeHost:draw({
 			x = x1 + 40,
 			y = y + 25,
-			a = (isHoveringHost and 255) or 150,
-			color = 'White',
+			alpha = (isHoveringHost and 255) or 150,
+			color = 'white',
 		});
 
 		if (isHoveringKick) then
@@ -1262,15 +1268,15 @@ local lobby = {
 			self.images.buttonN:draw({
 				x = x2,
 				y = y,
-				a = 0.75,
+				alpha = 0.75,
 			});
 		end
 
 		self.labels.kickUser:draw({
 			x = x2 + 40,
 			y = y + 25,
-			a = (isHoveringKick and 255) or 150,
-			color = 'White',
+			alpha = (isHoveringKick and 255) or 150,
+			color = 'white',
 		});
 	end,
 
@@ -1299,45 +1305,43 @@ local lobby = {
 
 			gfx.Save();
 
-			gfx.BeginPath();
-		
-			if (currentUser.missing_map) then
-				gfx.FillColor(48, 8, 8, 120);
-			elseif (currentUser.ready) then
-				gfx.FillColor(16, 48, 24, 120);
-			else
-				Fill.Dark(120);
-			end
-
-			gfx.Rect(self.x, initialY, self.user.w, self.user.h);
-			gfx.Fill();
+			drawRectangle({
+				x = self.x,
+				y = initialY,
+				w = self.user.w,
+				h = self.user.h,
+				alpha = 120,
+				color = (currentUser.missing_map and { 48, 8, 8 })
+					or (currentUser.ready and { 16, 48, 24 })
+					or 'dark',
+			});
 
 			gfx.BeginPath();
-			FontAlign.Left();
+			alignText('left');
 
 			self.labels[nameLabel]:draw({
 				x = self.user.x[1],
 				y = y,
-				color = 'Normal',
+				color = 'normal',
 			});
 
 			self.userInfo[userIndex].player:draw({
 				x = self.user.x[1],
 				y = infoY,
-				color = 'White'
+				color = 'white'
 			});
 
 			if (get(currentUser, 'level') ~= 0) then
 				self.labels.level:draw({
 					x = self.user.x[2],
 					y = y,
-					color = 'Normal',
+					color = 'normal',
 				});
 
 				self.userInfo[userIndex].level:draw({
 					x = self.user.x[2],
 					y = infoY,
-					color = 'White'
+					color = 'white'
 				});
 			end
 
@@ -1348,7 +1352,7 @@ local lobby = {
 					self.labels[label]:draw({
 						x = self.user.x[i],
 						y = y,
-						color = 'Normal',
+						color = 'normal',
 					});
 
 					if (i == 5) then
@@ -1362,7 +1366,7 @@ local lobby = {
 						self.userInfo[userIndex][label]:draw({
 							x = self.user.x[i],
 							y = infoY,
-							color = 'White',
+							color = 'white',
 						});
 					end
 				end

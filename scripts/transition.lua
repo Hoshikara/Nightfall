@@ -78,10 +78,14 @@ drawTransition = function(deltaTime, isIntro);
 			centered = true,
 		});
 
-		gfx.BeginPath();
-		Fill.Black(150 * timers.fade);
-		gfx.Rect(0, 0, scaledW, scaledH);
-		gfx.Fill();
+		drawRectangle({
+			x = 0,
+			y = 0,
+			w = scaledW,
+			h = scaledH,
+			alpha = 150 * timers.fade,
+			color = 'black',
+		});
 
 		gfx.ResetScissor();
 	else

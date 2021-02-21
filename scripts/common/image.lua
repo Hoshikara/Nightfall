@@ -13,23 +13,16 @@ return function(params)
     h = h,
 
     draw = function(self, params)
-      local a = params.a or 1;
-      local w = params.w or self.w;
-      local h = params.h or self.h;
-
-      w = (params.s and (params.s * w)) or w;
-      h = (params.s and (params.s * h)) or h;
-  
-      local x = (params.centered and (params.x - (w / 2))) or params.x or 0;
-      local y = (params.centered and (params.y - (h / 2))) or params.y or 0;
-
-      gfx.BeginPath();
-
-      if (params.blendOp) then
-        gfx.GlobalCompositeOperation(params.blendOp);
-      end
-
-      gfx.ImageRect(x, y, w, h, self.image, a, 0);
+      drawRectangle({
+        x = params.x,
+        y = params.y,
+        w = params.w or self.w,
+        h = params.h or self.h,
+        alpha = params.alpha,
+        blendOp = params.blendOp,
+        centered = params.centered,
+        image = self.image,
+      });
     end
   };
 end

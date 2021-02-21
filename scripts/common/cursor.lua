@@ -81,7 +81,7 @@ local New = function(params)
         self.alpha = math.abs(0.85 * math.cos(self.timer.phase * 5)) + 0.15;
       end
 
-      local ease = Ease.OutQuad(self.timer.ease);
+      local ease = quadraticEase(self.timer.ease);
 
       if (get(params, 'grid', false)) then
         changeX = (self.x.current - self.x.previous) * ease;

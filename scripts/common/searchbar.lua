@@ -1,11 +1,11 @@
 local New = function()
   local labels = {};
 
-  Font.Medium();
+  loadFont('medium');
 
   labels.search = New.Label({ text = 'SEARCH', size = 18 });
   
-  Font.JP();
+  loadFont('jp');
 
   labels.input = New.Label({ text = '', size = 24 });
 
@@ -45,7 +45,7 @@ local New = function()
         cursorAlpha = math.abs(0.9 * math.cos(self.timer.cursor * 5)) + 0.1;
       end
 
-      Font.JP();
+      loadFont('jp');
 
       self.labels.input:update({ new = string.upper(searchText) });
 
@@ -53,59 +53,59 @@ local New = function()
 
       gfx.Save();
 
-      gfx.BeginPath();
-      Fill.Black(150);
-      gfx.FastRect(
-        self.x + 2,
-        self.y - 6,
-        (self.w - 3) * self.timer.fade,
-        self.h + 12
-      );
-      gfx.Fill();
+      drawRectangle({
+        x = self.x + 2,
+        y = self.y - 6,
+        w = (self.w - 3) * self.timer.fade,
+        h = self.h + 12,
+        alpha = 150,
+        color = 'black',
+        fast = true,
+      });
 
       if (isActive) then
-        gfx.BeginPath();
-        gfx.StrokeWidth(2);
-        gfx.StrokeColor(60, 110, 160, alpha);
-        Fill.Black(0);
-        gfx.Rect(
-          self.x + 2,
-          self.y - 6,
-          (self.w - 3) * self.timer.fade,
-          self.h + 12
-        );
-        gfx.Fill();
-        gfx.Stroke();
+        drawRectangle({
+          x = self.x + 2,
+          y = self.y - 6,
+          w = (self.w - 3) * self.timer.fade,
+          h = self.h + 12,
+          alpha = 0,
+          color = 'black',
+          stroke = {
+            alpha = alpha,
+            color = 'normal',
+            size = 2,
+          },
+        });
       end
 
       gfx.BeginPath();
-      FontAlign.Left();
+      alignText('left');
 
       self.labels.search:draw({
         x = self.x + 7,
         y = self.y - 4,
-        a = alpha,
-        color = 'Normal',
+        alpha = alpha,
+        color = 'normal',
       });
 
       if (shouldShow) then
-        gfx.BeginPath();
-        Fill.White(255 * cursorAlpha);
-        gfx.FastRect(
-          self.x + 8 + cursorOffset,
-          self.y + (self.h / 2) - 4,
-          2,
-          28
-        );
-        gfx.Fill();
+        drawRectangle({
+          x = self.x + 8 + cursorOffset,
+          y = self.y + (self.h / 2) - 4,
+          w = 2,
+          h = 28,
+          alpha = 255 * cursorAlpha,
+          color = 'white',
+        });
 
         gfx.BeginPath();
-        FontAlign.Left();
+        alignText('left');
 
         self.labels.input:draw({
           x = self.x + 8,
           y = self.y + 20,
-          color = 'White',
+          color = 'white',
           maxWidth = self.w - 24,
         });
       end

@@ -44,7 +44,7 @@ setLabels = function()
 			maxHeight = 0,
 		};
 
-		Font.Normal();
+		loadFont('normal');
 
 		for i, sort in ipairs(sorts) do
 			local label = CONSTANTS.sorts[sort];
@@ -77,12 +77,12 @@ drawCurrentSort = function(displaying)
 		currentSort = 1;
 	end
 	
-	local color = (displaying and 'Normal') or 'White';
+	local color = (displaying and 'normal') or 'white';
 	local x = layout.field[3].x;
 	local y = layout.field.y;
 
 	gfx.BeginPath();
-	FontAlign.Left();
+	alignText('left');
 
 	labels[currentSort].name:draw({
 		x = x,
@@ -100,7 +100,7 @@ drawCurrentSort = function(displaying)
 	);
 
 	gfx.BeginPath();
-	Fill.Dark(255 * 0.5);
+	setFill('dark', 255 * 0.5);
 	gfx.MoveTo(1, 1);
 	gfx.LineTo(arrowWidth + 1, 1);
 	gfx.LineTo(
@@ -111,7 +111,7 @@ drawCurrentSort = function(displaying)
 	gfx.Fill();
 
 	gfx.BeginPath();
-	Fill[color]();
+	setFill(color);
 	gfx.MoveTo(0, 0);
 	gfx.LineTo(arrowWidth, 0);
 	gfx.LineTo((arrowWidth / 2), ((labels[currentSort].direction == 'UP') and 10) or -10);
@@ -123,17 +123,17 @@ end
 
 drawSortLabel = function(index, y, isSelected)
 	local alpha = math.floor(255 * math.min(timer ^ 2, 1));
-	local color = (isSelected and 'Normal') or 'White';
+	local color = (isSelected and 'normal') or 'white';
 	local padding = layout.dropdown.padding;
 	local x = layout.dropdown[3].x + padding;
 
 	gfx.BeginPath();
-	FontAlign.Left();
+	alignText('left');
 
 	labels[index].name:draw({
 		x = x,
 		y = y,
-		a = alpha,
+		alpha = alpha,
 		color = color,
 	});
 
@@ -147,7 +147,7 @@ drawSortLabel = function(index, y, isSelected)
 	);
 
 	gfx.BeginPath();
-	Fill.Dark(255 * 0.5);
+	setFill('dark', 255 * 0.5);
 	gfx.MoveTo(1, 1);
 	gfx.LineTo(arrowWidth + 1, 1);
 	gfx.LineTo(
@@ -158,7 +158,7 @@ drawSortLabel = function(index, y, isSelected)
 	gfx.Fill();
 
 	gfx.BeginPath();
-	Fill[color](alpha);
+	setFill(color, alpha);
 	gfx.MoveTo(0, 0);
 	gfx.LineTo(arrowWidth, 0);
 	gfx.LineTo((arrowWidth / 2), ((labels[index].direction == 'UP') and 10) or -10);
@@ -204,15 +204,14 @@ render = function(deltaTime, displaying)
 		initialY = layout.dropdown.y;
 	end
 
-	gfx.BeginPath();
-	Fill.Dark(230);
-	gfx.Rect(
-		layout.dropdown[3].x,
-		initialY,
-		(layout.dropdown.padding * 2) + labels.maxWidth + (arrowWidth * 2),
-		(labels.maxHeight + layout.dropdown.padding) * timer
-	);
-	gfx.Fill();
+	drawRectangle({
+		x = layout.dropdown[3].x,
+		y = initialY,
+		w = (layout.dropdown.padding * 2) + labels.maxWidth + (arrowWidth * 2),
+		h = (labels.maxHeight + layout.dropdown.padding) * timer,
+		alpha = 230,
+		color = 'dark',
+	});
 
 	gfx.Translate(0, initialY + layout.dropdown.start);
 

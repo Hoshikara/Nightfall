@@ -96,10 +96,14 @@ loadMenu = function(deltaTime)
 
 	introTimer = math.max(introTimer - (deltaTime / 1.8), 0);
 
-	gfx.BeginPath();
-	Fill.Black(255 * introTimer);
-	gfx.Rect(0, 0, scaledW, scaledH);
-	gfx.Fill();
+	drawRectangle({
+		x = 0,
+		y = 0,
+		w = scaledW,
+		h = scaledH,
+		alpha = 255 * introTimer,
+		color = 'black',
+	});
 
 	if (introTimer == 0) then
 		menuLoaded = true;
@@ -159,7 +163,7 @@ local buttons = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			Font.Medium();
+			loadFont('medium');
 
 			self.labels = {
 				mainMenu = {
@@ -240,17 +244,17 @@ local buttons = {
 			self.images.button:draw({
 				x = self.x[i],
 				y = self.y,
-				a = 0.45,
+				alpha = 0.45,
 			});
 		end
 
 		gfx.BeginPath();
-		FontAlign.Left();
+		alignText('left');
 		self.labels[page][i].label:draw({
 			x = self.x[i] + (self.images.button.w / 8) + 4,
 			y = self.y + (self.images.button.h / 2) - 12,
-			a = textAlpha,
-			color = 'White',
+			alpha = textAlpha,
+			color = 'white',
 		});
 	end,
 
@@ -301,7 +305,7 @@ local title = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			Font.Medium();
+			loadFont('medium');
 
 			self.labels = {
 				game = New.Label({ text = 'UNNAMED SDVX CLONE', size = 31 }),
@@ -328,21 +332,21 @@ local title = {
 		local alpha = (showControls and 30) or math.floor(255 * self.alpha);
 
 		gfx.BeginPath();
-		FontAlign.Left();
+		alignText('left');
 
 		self.labels.game:draw({
 			x = self.x + 8,
 			y = self.y,
-			a = alpha,
-			color = 'Normal',
+			alpha = alpha,
+			color = 'normal',
 			maxWidth = (self.labels.skin.w * 0.54) - 3,
 		});
 		
 		self.labels.skin:draw({
 			x = self.x,
 			y = self.y + (self.labels.game.h * 0.25),
-			a = alpha,
-			color = 'White',
+			alpha = alpha,
+			color = 'white',
 		});
 	end
 };
@@ -388,7 +392,7 @@ local updatePrompt = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			Font.Medium();
+			loadFont('medium');
 
 			self.labels = {
 				{
@@ -409,7 +413,7 @@ local updatePrompt = {
 				},
 			};
 
-			Font.Normal();
+			loadFont('normal');
 
 			self.labels.heading = New.Label({
 				text = 'A NEW UPDATE IS AVAILABLE!',
@@ -438,17 +442,17 @@ local updatePrompt = {
 			self.buttons.normal:draw({
 				x = self.buttons.x[i],
 				y = self.buttons.y,
-				a = 0.45,
+				alpha = 0.45,
 			});
 		end
 
 		gfx.BeginPath();
-		FontAlign.Left();
+		alignText('left');
 		button.label:draw({
 			x = self.buttons.x[i] + (self.buttons.normal.w / 6) + 2,
 			y = self.buttons.y + (self.buttons.normal.h / 2) - 12,
-			a = alpha,
-			color = 'White',
+			alpha = alpha,
+			color = 'white',
 		});
 	end,
 
@@ -473,25 +477,29 @@ local updatePrompt = {
 
 		self.timer = math.min(self.timer + (deltaTime * 3), 1);
 
-		gfx.BeginPath();
-		Fill.Black(150 * self.timer);
-		gfx.Rect(0, 0, scaledW, scaledH);
-		gfx.Fill();
+		drawRectangle({
+			x = 0,
+			y = 0,
+			w = scaledW,
+			h = scaledH,
+			alpha = 150 * self.timer,
+			color = 'black',
+		});
 
 		dialog.images.dialogBox:draw({
 			x = scaledW / 2,
 			y = scaledH / 2,
-			a = self.timer,
+			alpha = self.timer,
 			centered = true,
 		});
 
 		gfx.BeginPath();
-		FontAlign.Left();
+		alignText('left');
 		self.labels.heading:draw({
 			x = dialog.x.outerLeft,
 			y = dialog.y.top - 8,
-			a = 255 * self.timer,
-			color = 'White',
+			alpha = 255 * self.timer,
+			color = 'white',
 		});
 
 		for i, button in ipairs(self.labels) do

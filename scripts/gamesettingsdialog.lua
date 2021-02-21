@@ -30,7 +30,7 @@ setupLayout = function()
 end
 
 generateLabels = function(constants)
-	Font.Medium();
+	loadFont('medium');
 
 	local labels = {
 		controls = {
@@ -52,11 +52,11 @@ generateLabels = function(constants)
 			formattedTab = tabConstants.name;
 		end
 
-		Font.Medium();
+		loadFont('medium');
 
 		labels.navigation[tabName] = New.Label({ text = formattedTab, size = 20 });
 
-		Font.Normal();
+		loadFont('normal');
 
 		labels.tabs[tabName] = New.Label({ text = formattedTab, size = 48 });
 
@@ -186,9 +186,9 @@ drawArrows = function(initialX, initialY, minBounded, maxBounded);
 	gfx.BeginPath();
 
 	if (minBounded) then
-		Fill.Dark(25 * timer);
+		setFill('dark', 25 * timer);
 	else
-		Fill.Dark(125 * timer);
+		setFill('dark', 125 * timer);
 	end
 
 	gfx.MoveTo(x1 + 1, y + 1);
@@ -201,9 +201,9 @@ drawArrows = function(initialX, initialY, minBounded, maxBounded);
 	gfx.BeginPath();
 
 	if (minBounded) then
-		Fill.White(50 * timer);
+		setFill('white', 50 * timer);
 	else
-		Fill.White(255 * timer);
+		setFill('white', 255 * timer);
 	end
 
 	gfx.MoveTo(x1, y);
@@ -213,13 +213,12 @@ drawArrows = function(initialX, initialY, minBounded, maxBounded);
 	
 	gfx.Fill();
 
-
 	gfx.BeginPath();
 
 	if (maxBounded) then
-		Fill.Dark(25 * timer);
+		setFill('dark', 25 * timer);
 	else
-		Fill.Dark(125 * timer);
+		setFill('dark', 125 * timer);
 	end
 
 	gfx.MoveTo(x2 + 1, y + 1);
@@ -232,15 +231,44 @@ drawArrows = function(initialX, initialY, minBounded, maxBounded);
 	gfx.BeginPath();
 
 	if (maxBounded) then
-		Fill.White(50 * timer);
+		setFill('white', 50 * timer);
 	else
-		Fill.White(255 * timer);
+		setFill('white', 255 * timer);
 	end
 
 	gfx.MoveTo(x2, y);
 	gfx.LineTo(x2, y + 12);
 	gfx.LineTo(x2 + 10, y + 6)
 	gfx.LineTo(x2, y);
+
+	gfx.Fill();
+
+	gfx.Restore();
+end
+
+drawArrow = function(initialX, initialY, direction)
+	local x = initialX - 48;
+	local y = initialY + 26;
+
+	gfx.Save();
+
+	gfx.Scale(scalingFactor, scalingFactor);
+
+	gfx.BeginPath();
+
+	setFill('white', 255 * timer);
+
+	if (direction == 'UP') then
+		gfx.MoveTo(x, y);
+		gfx.LineTo(x + 24, y);
+		gfx.LineTo(x + 12, y - 20);
+		gfx.LineTo(x, y);	
+	elseif (direction == 'DOWN') then
+		gfx.MoveTo(x, y);
+		gfx.LineTo(x + 24, y);
+		gfx.LineTo(x + 12, y + 20);
+		gfx.LineTo(x, y);
+	end
 
 	gfx.Fill();
 
@@ -264,6 +292,8 @@ local practiceModeDialog = {
 		},
 	},
 	labels = nil,
+	previousSetting = 0,
+	timer = 0,
 
 	setSizes = function(self)
 		if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
@@ -293,20 +323,30 @@ local practiceModeDialog = {
 		local label = self.labels.tabs[current.tab.name];
 	
 		gfx.BeginPath();
-		FontAlign.Left();
-		Font.Normal();
+		alignText('left');
+		loadFont('normal');
 		label:draw({
 			x = self.layout.info.x1 - 2,
 			y = self.layout.info.y,
-			a = 255 * timer,
-			color = 'Normal',
+			alpha = 255 * timer,
+			color = 'normal',
 		});
 	end,
 
-	drawSettings = function(self)
+	drawSettings = function(self, deltaTime)
+		if (current.setting.index ~= previousSetting) then
+			self.timer = 0;
+
+			previousSetting = current.setting.index;
+		end
+
+		self.timer = math.min(self.timer + (deltaTime * 4), 1);
+
 		local labels = self.labels.settings[current.tab.name];
 
 		local y = self.layout.info.y + (self.labels.tabs[current.tab.name].h * 1.75);
+		local w = (self.layout.panel.w - (self.layout.info.x1 * 4) - 2)
+			* quadraticEase(self.timer);
 
 		for i, rawSetting in ipairs(current.settings) do
 			local setting = labels[string.gsub(
@@ -317,16 +357,27 @@ local practiceModeDialog = {
 			local isSelected = i == current.setting.index;
 			local x = (setting.indent and (self.layout.info.x1 + 24))
 				or self.layout.info.x1;
-			local alpha = (isSelected and (255 * timer)) or (50 * timer);
+			local alpha = (isSelected and (255 * timer)) or (125 * timer);
+
+			if (isSelected) then
+				drawRectangle({
+					x = self.layout.info.x1 - 8,
+					y = y,
+					w = w,
+					h = 30,
+					alpha = alpha * 0.4,
+					color = 'normal',
+				});
+			end
 
 			gfx.BeginPath();
-			FontAlign.Left();
+			alignText('left');
 
 			setting.name:draw({
 				x = x,
 				y = y,
-				a = alpha,
-				color = 'White',
+				alpha = alpha,
+				color = 'white',
 			});
 
 			self:drawSettingValue(y, setting, rawSetting, isSelected, alpha);
@@ -341,24 +392,24 @@ local practiceModeDialog = {
 		local params = {
 			x = self.layout.info.x2,
 			y = y,
-			a = alpha,
-			color = 'White',
+			alpha = alpha,
+			color = 'white',
 		};
 
 		gfx.BeginPath();
-		FontAlign.Right();
+		alignText('right');
 
 		if ((setting.type == 'BUTTON') and (not rawSetting.value)) then
 			if (isSelected) then
 				self.labels.controls.start:draw({
 					x = self.layout.info.x2,
 					y = y,
-					a = 255 * timer,
-					color = 'Normal',
+					alpha = 255 * timer,
+					color = 'white',
 				});
 			end
 		elseif (setting.type == 'INT') then
-			Font.Number();
+			loadFont('number');
 
 			if ((setting.special == 'TIME') or isOffset) then
 				setting.value:update({
@@ -379,7 +430,7 @@ local practiceModeDialog = {
 		elseif (setting.type == 'FLOAT') then
 			local formatted;
 
-			Font.Number();
+			loadFont('number');
 
 			if (setting.max <= 1) then
 				formatted = string.format('%.f%%', (rawSetting.value * 100));
@@ -394,13 +445,22 @@ local practiceModeDialog = {
 			minBounded, maxBounded = rawSetting.value == rawSetting.min,
 				rawSetting.value == rawSetting.max;
 		elseif (setting.type == 'ENUM') then
-			Font.Normal();
+			loadFont('normal');
 
 			setting.value[rawSetting.value]:draw(params);
 		elseif (setting.type == 'TOGGLE') then
-			Font.Normal();
+			local boolString = tostring(rawSetting.value);
+			local settingText = setting.value[boolString].text or '';
 
-			setting.value[tostring(rawSetting.value)]:draw(params);
+			loadFont('normal');
+
+			if (settingText == 'DISABLED') then
+				params.color = 'red';
+			else
+				params.color = 'normal';
+			end
+
+			setting.value[boolString]:draw(params);
 		end
 
 		if (isSelected and (setting.type ~= 'BUTTON')) then
@@ -415,59 +475,58 @@ local practiceModeDialog = {
 	
 		gfx.BeginPath();
 	
-		FontAlign.Left();
+		alignText('left');
 
 		self.labels.controls.fxl:draw({
 			x = x1,
 			y = y - 1,
-			a = 255 * timer,
-			color = 'Normal',
+			alpha = 255 * timer,
+			color = 'normal',
 		});
 
 		self.labels.navigation[current.tab.previous]:draw({
 			x = x1 + self.labels.controls.fxl.w + 8,
 			y = y,
-			a = 255 * timer,
-			color = 'White',
+			alpha = 255 * timer,
+			color = 'white',
 		});
 
-		FontAlign.Right();
+		alignText('right');
 
 		self.labels.navigation[current.tab.next]:draw({
 			x = x2,
 			y = y,
-			a = 255 * timer,
-			color = 'White',
+			alpha = 255 * timer,
+			color = 'white',
 		});
 
 		self.labels.controls.fxr:draw({
 			x = x2 - self.labels.navigation[current.tab.next].w - 8,
 			y = y - 1,
-			a = 255 * timer,
-			color = 'Normal',
+			alpha = 255 * timer,
+			color = 'normal',
 		});
 	end,
 
-	render = function(self)
+	render = function(self, deltaTime)
 		self:setSizes();
 
 		self:setLabels();
 
 		gfx.Save();
 
-		gfx.BeginPath();
-		Fill.Black(230 * timer);
-		gfx.Rect(
-			self.layout.panel.x,
-			self.layout.panel.y,
-			self.layout.panel.w,
-			self.layout.panel.h
-		);
-		gfx.Fill();
+		drawRectangle({
+			x = self.layout.panel.x,
+			y = self.layout.panel.y,
+			w = self.layout.panel.w,
+			h = self.layout.panel.h,
+			alpha = 230 * timer,
+			color = 'black',
+		});
 
 		self:drawHeading();
 
-		self:drawSettings();
+		self:drawSettings(deltaTime);
 
 		self:drawNavigation();
 
@@ -477,6 +536,8 @@ local practiceModeDialog = {
 
 local songSelectDialog = {
 	labels = nil,
+	previousSetting = 0,
+	timer = 0,
 
 	setLabels = function(self)
 		if (not self.labels) then
@@ -490,21 +551,30 @@ local songSelectDialog = {
 		local y = layout.y.top - (label.h / 1.25);
 	
 		gfx.BeginPath();
-		FontAlign.Left();
+		alignText('left');
 		label:draw({
 			x = x,
 			y = y,
-			a = 255 * timer,
-			color = 'Normal',
+			alpha = 255 * timer,
+			color = 'normal',
 		});
 	end,
 
-	drawSettings = function(self)
+	drawSettings = function(self, deltaTime)
+		if (current.setting.index ~= previousSetting) then
+			self.timer = 0;
+
+			previousSetting = current.setting.index;
+		end
+
+		self.timer = math.min(self.timer + (deltaTime * 3), 1);
+
 		local labels = self.labels.settings[current.tab.name];
 
 		local offset = 0;
 		local x = layout.x.middleLeft;
 		local y = layout.y.top + (self.labels.tabs[current.tab.name].h / 1.75);
+		local w = (layout.w.middle + 16) * quadraticEase(self.timer); 
 
 		if (current.setting.index > 7) then
 			offset = (labels[string.gsub(
@@ -513,6 +583,22 @@ local songSelectDialog = {
 					''
 				)].name.h * 1.75)
 				* (current.setting.index - 7);
+		end
+
+		if (#current.settings > 7) then
+			if (current.setting.index < 8) then
+				drawArrow(
+					layout.x.middleLeft,
+					layout.y.bottom - ((self.labels.tabs[current.tab.name].h / 1.75) * 2.25),
+					'DOWN'
+				);
+			else
+				drawArrow(
+					layout.x.middleLeft,
+					layout.y.top + (self.labels.tabs[current.tab.name].h / 1.75),
+					'UP'
+				);
+			end
 		end
 
 		y = y - offset;
@@ -524,7 +610,7 @@ local songSelectDialog = {
 				''
 			)];
 			local isSelected = i == current.setting.index;
-			local alpha = (isSelected and (255 * timer)) or (50 * timer);
+			local alpha = (isSelected and (255 * timer)) or (125 * timer);
 
 			if (((current.setting.index > 7) and (i <= (current.setting.index - 7)))
 				or ((not isSelected) and (i > 7))
@@ -532,14 +618,31 @@ local songSelectDialog = {
 				alpha = 0;
 			end
 
+			if (isSelected) then
+				gfx.Save();
+
+				gfx.Scale(scalingFactor, scalingFactor);
+
+				drawRectangle({
+					x = (layout.x.middleLeft - 8),
+					y = y,
+					w = w,
+					h = 30,
+					alpha = alpha * 0.4,
+					color = 'normal',
+				});
+
+				gfx.Restore();
+			end
+
 			gfx.BeginPath();
-			FontAlign.Left();
+			alignText('left');
 
 			setting.name:draw({
 				x = x,
 				y = y,
-				a = alpha,
-				color = 'White',
+				alpha = alpha,
+				color = 'white',
 			});
 
 			self:drawSettingValue(y, setting, rawSetting, isSelected, alpha);
@@ -554,24 +657,24 @@ local songSelectDialog = {
 		local params = {
 			x = layout.x.middleRight,
 			y = y,
-			a = alpha,
-			color = 'White',
+			alpha = alpha,
+			color = 'white',
 		};
 
 		gfx.BeginPath();
-		FontAlign.Right();
+		alignText('right');
 
 		if ((setting.type == 'BUTTON') and (not rawSetting.value)) then
 			if (isSelected) then
 				self.labels.controls.start:draw({
 					x = layout.x.middleRight,
 					y = y,
-					a = alpha,
-					color = 'Normal',
+					alpha = alpha,
+					color = 'white',
 				});
 			end
 		elseif (setting.type == 'INT') then
-			Font.Number();
+			loadFont('number');
 
 			if (setting.special == 'TIME WINDOW') then
 				setting.value:update({
@@ -592,7 +695,7 @@ local songSelectDialog = {
 		elseif (setting.type == 'FLOAT') then
 			local formatted;
 
-			Font.Number();
+			loadFont('number');
 
 			if (rawSetting.max <= 1) then
 				formatted = string.format('%.f%%', (rawSetting.value * 100));
@@ -607,13 +710,22 @@ local songSelectDialog = {
 			minBounded, maxBounded = rawSetting.value == rawSetting.min,
 				rawSetting.value == rawSetting.max;
 		elseif (setting.type == 'ENUM') then
-			Font.Normal();
+			loadFont('normal');
 
 			setting.value[rawSetting.value]:draw(params);
 		elseif (setting.type == 'TOGGLE') then
-			Font.Normal();
+			local boolString = tostring(rawSetting.value);
+			local settingText = setting.value[boolString].text or '';
 
-			setting.value[tostring(rawSetting.value)]:draw(params);
+			loadFont('normal');
+
+			if (settingText == 'DISABLED') then
+				params.color = 'red';
+			else
+				params.color = 'normal';
+			end
+
+			setting.value[boolString]:draw(params);
 		end
 
 		if (isSelected and (setting.type ~= 'BUTTON')) then
@@ -629,36 +741,36 @@ local songSelectDialog = {
 
 		gfx.BeginPath();
 
-		FontAlign.Left();
+		alignText('left');
 	
 		self.labels.controls.fxl:draw({
 			x = x1,
 			y = y - 1,
-			a = alpha,
-			color = 'Normal',
+			alpha = alpha,
+			color = 'normal',
 		});
 
 		self.labels.navigation[current.tab.previous]:draw({
 			x = x1 + self.labels.controls.fxr.w + 8,
 			y = y,
-			a = alpha,
-			color = 'White',
+			alpha = alpha,
+			color = 'white',
 		});
 	
-		FontAlign.Right();
+		alignText('right');
 
 		self.labels.navigation[current.tab.next]:draw({
 			x = x2,
 			y = y,
-			a = alpha,
-			color = 'White',
+			alpha = alpha,
+			color = 'white',
 		});
 
 		self.labels.controls.fxr:draw({
 			x = x2 - self.labels.navigation[current.tab.next].w - 8,
 			y = y - 1,
-			a = alpha,
-			color = 'Normal',
+			alpha = alpha,
+			color = 'normal',
 		});
 	end,
 	
@@ -680,15 +792,15 @@ local songSelectDialog = {
 		layout.images.dialogBox:draw({
 			x = scaledW / 2,
 			y = scaledH / 2,
-			a = timer,
-			centered = true
+			alpha = timer,
+			centered = true,
 		});
 		
 		gfx.Restore();
 
 		self:drawHeading();
 
-		self:drawSettings();
+		self:drawSettings(deltaTime);
 
 		self:drawNavigation();
 	end
@@ -714,7 +826,7 @@ render = function(deltaTime, displaying)
 	current:update();
 
 	if (SettingsDiag.tabs[1].name == 'Main') then
-		practiceModeDialog:render();
+		practiceModeDialog:render(deltaTime);
 	elseif (SettingsDiag.tabs[1].name == 'Offsets') then
 		songSelectDialog:render(deltaTime, displaying);
 	end

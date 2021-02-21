@@ -66,11 +66,15 @@ _.initializeHold = function(self)
     end
 
     if (inner[btn].timer < inner.frameTime) then
-      drawCenteredImage({
-        image = inner.frames[inner[btn].counter],
+      drawRectangle({
+        x = 0,
+        y = 0,
+        w = inner.width,
+        h = inner.width,
         alpha = inner.alpha,
         blendOp = inner.blendOp,
-        width = inner.width,
+        centered = true,
+        image = inner.frames[inner[btn].counter],
       });
     end
 
@@ -86,11 +90,15 @@ _.initializeHold = function(self)
     end
 
     if (outer[btn].timer < outer.frameTime) then
-      drawCenteredImage({
-        image = outer.frames[outer[btn].counter],
+      drawRectangle({
+        x = 0,
+        y = 0,
+        w = outer.width,
+        h = outer.width,
         alpha = outer.alpha,
         blendOp = outer.blendOp,
-        width = outer.width,
+        centered = true,
+        image = outer.frames[outer[btn].counter],
       });
     end
 
@@ -114,11 +122,15 @@ _.initializeHold = function(self)
     end
 
     if (holdEnding[btn].timer < holdEnding.frameTime) then
-      drawCenteredImage({
-        image = holdEnding.frames[holdEnding[btn].counter],
+      drawRectangle({
+        x = 0,
+        y = 0,
+        w = holdEnding.width,
+        h = holdEnding.width,
         alpha = holdEnding.alpha,
         blendOp = holdEnding.blendOp,
-        width = holdEnding.width,
+        centered = true,
+        image = holdEnding.frames[holdEnding[btn].counter],
       });
     end
 
@@ -180,11 +192,15 @@ _.initializeHit = function(self)
     end
 
     if (cached.timer < hitType.frameTime) then
-      drawCenteredImage({
-        image = hitType.frames[cached.counter],
+      drawRectangle({
+        x = 0,
+        y = 0,
+        w = hitType.width,
+        h = hitType.width,
         alpha = hitType.alpha,
         blendOp = hitType.blendOp,
-        width = hitType.width,
+        centered = true,
+        image = hitType.frames[cached.counter],
       });
     end
 
