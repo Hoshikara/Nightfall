@@ -16,6 +16,7 @@ local jacketQuality = game.GetSkinSetting('jacketQuality') or 'NORMAL';
 local previousChallenge = 1;
 local selectedChallenge = 1;
 
+local loadJSON = require('common/jsonloader');
 local userData = loadJSON('user_data');
 
 local cache = { resX = 0, resY = 0 };

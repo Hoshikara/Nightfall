@@ -125,6 +125,7 @@ return {
       y = -(self.h / 2),
       w = 2,
       h = self.h,
+      alpha = 200,
       color = 'white',
     });
 
@@ -133,6 +134,7 @@ return {
       y = -(self.h / 2),
       w = 2,
       h = self.h,
+      alpha = 100,
       color = self.colors.early,
     });
 
@@ -141,6 +143,7 @@ return {
       y = -(self.h / 2),
       w = 2,
       h = self.h,
+      alpha = 100,
       color = self.colors.late,
     });
 
@@ -149,7 +152,8 @@ return {
       y = -(self.h / 2),
       w = 2,
       h = self.h,
-      color = self.colors.error,
+      alpha = 100,
+      color = 'white',
     });
 
     drawRectangle({
@@ -157,7 +161,8 @@ return {
       y = -(self.h / 2),
       w = 2,
       h = self.h,
-      color = self.colors.error,
+      alpha = 100,
+      color = 'white',
     });
 
     gfx.Restore();

@@ -32,6 +32,7 @@ local mousePosY = 0;
 local upScore = nil;
 
 local screenshotRegion = game.GetSkinSetting('screenshotRegion') or 'PANEL';
+local showHardScores = game.GetSkinSetting('showHardScores');
 
 local cache = { resX = 0, resY = 0 };
 
@@ -1572,6 +1573,18 @@ local screenshot = {
 	end,
 };
 
+local filterHighScores = function(highScores)
+	local newScores = {};
+
+	for _, highScore in ipairs(highScores) do
+		if (get(highScore, 'hitWindow.perfect', 46) < 46) then
+			newScores[#newScores + 1] = highScore;
+		end
+	end
+
+	return newScores;
+end
+
 result_set = function()
 	singleplayer = result.uid == nil;
 
@@ -1590,6 +1603,10 @@ result_set = function()
 	end
 
 	if (singleplayer) then
+		if (showHardScores) then
+			result.highScores = filterHighScores(result.highScores);
+		end
+
 		if (#result.highScores > 0) then
 			if (result.score > result.highScores[1].score) then
 				upScore = result.score - result.highScores[1].score;

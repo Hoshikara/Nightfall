@@ -1,5 +1,15 @@
 local _ = {};
 
+local loadFrames = function(path, count)
+  local frames = {};
+
+  for i = 1, count do
+    frames[i] = gfx.CreateSkinImage(string.format('%s/%04d.png', path, i), 0);
+  end
+
+  return frames;
+end
+
 _.initializeLaser = function(self)
   local laser = {
     [1] = {

@@ -17,6 +17,7 @@ local prefixes = {
 	'Folder: ',
 	'Level: ',
 };
+
 local scrollTimers = {};
 local timers = {
 	folder = 0,
@@ -47,11 +48,24 @@ setupLayout = function()
 	end
 end
 
+local stringReplace = function(str, patternTable, replacement)
+  local replaceWith = replacement or '';
+	local newStr = str;
+
+	for _, pattern in ipairs(patternTable) do
+		newStr = string.gsub(newStr, pattern, replaceWith);
+	end
+
+	return string.upper(newStr);
+end
+
 local layout = nil;
 
 local folders = {
 	count = 0,
 	labels = {},
+	previousFolder = 0,
+	timer = 0,
 	timers = {},
 	viewLimit = 18,
 	w = { final = 0, max = 0 },
@@ -110,9 +124,22 @@ local folders = {
 		end
 
 		if (isVisible) then
-			local alpha = math.floor(255 * math.min(timers.folder ^ 2, 1));
-			local color = (isSelected and 'normal') or 'white';
+			local baseAlpha = (isSelected and 255) or 150;
+			local alpha = math.floor(baseAlpha * math.min(timers.folder ^ 2, 1));
 			local doesOverflow = self.labels[i].w > layout.dropdown[1].maxWidth;
+			local w = (self.w.final + 16) * quadraticEase(self.timer);
+
+			if (isSelected) then
+				drawRectangle({
+					x = -8,
+					y = y,
+					w = w,
+					h = 30,
+					alpha = alpha * 0.4,
+					color = 'normal',
+					fast = true,
+				});
+			end
 
 			gfx.BeginPath();
 			alignText('left');
@@ -124,7 +151,7 @@ local folders = {
 					x = 0,
 					y = y,
 					alpha = alpha,
-					color = color,
+					color = 'white',
 					scale = scalingFactor,
 					scrolling = true,
 					timer = self.timers[key],
@@ -135,7 +162,7 @@ local folders = {
 					x = 0,
 					y = y,
 					alpha = alpha,
-					color = color,
+					color = 'white',
 				});
 			end
 		end
@@ -154,6 +181,14 @@ local folders = {
 	end,
 
 	render = function(self, deltaTime, initialY)
+		if (self.previousFolder ~= currentFolder) then
+			self.timer = 0;
+
+			self.previousFolder = currentFolder;
+		end
+
+		self.timer = math.min(self.timer + (deltaTime * 4), 1);
+
 		local y = 0;
 
 		self:handleChange();
@@ -175,6 +210,8 @@ local folders = {
 
 local levels = {
 	labels = nil,
+	previousLevel = 0,
+	timer = 0,
 	w = 0,
 	h = 0,
 
@@ -212,8 +249,21 @@ local levels = {
 	end,
 
 	drawLevel = function(self, i, y, isSelected)
-		local alpha = math.floor(255 * math.min(timers.level ^ 2, 1));
-		local color = (isSelected and 'normal') or 'white';
+		local baseAlpha = (isSelected and 255) or 155;
+		local alpha = math.floor(baseAlpha * math.min(timers.level ^ 2, 1));
+		local w = (self.w + 16) * quadraticEase(self.timer);
+
+		if (isSelected) then
+			drawRectangle({
+				x = -8,
+				y = y,
+				w = w,
+				h = 30,
+				alpha = alpha * 0.4,
+				color = 'normal',
+				fast = true,
+			});
+		end
 
 		gfx.BeginPath();
 		alignText('left');
@@ -222,13 +272,21 @@ local levels = {
 			x = 0,
 			y = y,
 			alpha = alpha,
-			color = color,
+			color = 'white',
 		});
 
 		return self.labels[i].h + (layout.dropdown.padding / 2);
 	end,
 
-	render = function(self, initialY)
+	render = function(self, deltaTime, initialY)
+		if (self.previousLevel ~= currentLevel) then
+			self.timer = 0;
+
+			self.previousLevel = currentLevel;
+		end
+
+		self.timer = math.min(self.timer + (deltaTime * 6), 1);
+
 		local y = 0;
 
 		gfx.Save();
@@ -375,7 +433,7 @@ render = function(deltaTime, displaying)
 
 	folders:render(deltaTime, initialY);
 
-	levels:render(initialY);
+	levels:render(deltaTime, initialY);
 
 	gfx.Restore();
 end

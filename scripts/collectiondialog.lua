@@ -73,7 +73,7 @@ drawArrows = function()
 	local y2 = layout.y.center + 45;
 
 	gfx.BeginPath();
-	Fill.White(timer * ((noHigher and 50) or 255));
+	setFill('white', timer * ((noHigher and 50) or 255));
 	gfx.MoveTo(x, y1);
 	gfx.LineTo(x - 12, y1);
 	gfx.LineTo(x - 6, y1 - 10);
@@ -81,7 +81,7 @@ drawArrows = function()
 	gfx.Fill();
 
 	gfx.BeginPath();
-	Fill.White(timer * ((noLower and 50) or 255));
+	setFill('white', timer * ((noLower and 50) or 255));
 	gfx.MoveTo(x, y2);
 	gfx.LineTo(x - 12, y2);
 	gfx.LineTo(x - 6, y2 + 10);

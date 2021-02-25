@@ -1,3 +1,10 @@
+###### February 24, 2021
+- Added line highlighting for filter and sort wheels
+- Added a skin option to only show high scores with harder hit windows for the results screen
+- Fixed a crash that occurred when opening the collection dialog
+- Moved some single use functions out of `common.lua`
+- Reduced the opacity of hit error bar dividers
+
 ###### February 22, 2021
 - `gamesettingsdialog` changes:
   - Added highlighting to the currently selected setting

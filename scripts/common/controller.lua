@@ -6,6 +6,20 @@ local getDelta = function(delta)
   return delta;
 end
 
+local getSign = function(val)
+  return ((val > 0) and 1) or ((val < 0) and -1) or 0;
+end
+
+local roundToZero = function(val)
+	if (val < 0) then
+		return math.ceil(val);
+	elseif (val > 0) then 
+		return math.floor(val);
+	else 
+		return 0;
+	end
+end
+
 return {
   knobProgress = 0,
   previousKnobs = nil,

@@ -145,16 +145,6 @@ log = function(content)
   end
 end
 
-loadFrames = function(path, count)
-  local frames = {};
-
-  for i = 1, count do
-    frames[i] = gfx.CreateSkinImage(string.format('%s/%04d.png', path, i), 0);
-  end
-
-  return frames;
-end
-
 drawCursor = function(params);
 	local x = params.x or 0;
 	local y = params.y or 0;
@@ -189,39 +179,8 @@ drawCursor = function(params);
 	gfx.Stroke();
 end
 
-drawResolutionWarning = function(x, y)
-  gfx.Save();
-
-  gfx.BeginPath();
-  gfx.FillColor(255, 55, 55, 255);
-  gfx.FontSize(24);
-  alignText('left');
-  loadFont('mono');
-  gfx.Text(
-    'NON 16:9 RESOLUTION DETECTED -- SKIN ELEMENTS MAY NOT RENDER AS INTENDED. ENTER FULLSCREEN WITH  [ALT] + [ENTER]  IF THIS IS A MISTAKE',
-    x, 
-    y
-  );
-
-  gfx.Restore();
-end
-
 get = function(tbl, path, default)
   return _.get(tbl, path, default);
-end
-
-getDateFormat = function()
-  local dateFormat = game.GetSkinSetting('dateFormat') or 'DAY-MONTH-YEAR';
-
-  if (dateFormat == 'DAY-MONTH-YEAR') then
-    return '%d-%m-%y';
-  elseif (dateFormat == 'MONTH-DAY-YEAR') then
-    return '%m-%d-%y';
-  elseif (dateFormat == 'YEAR-MONTH-DAY') then
-    return '%y-%m-%d';
-  else
-    return '%d-%m-%y';
-  end
 end
 
 getDifficultyIndex = function(jacketPath, difficultyIndex)
@@ -242,70 +201,4 @@ getDifficultyIndex = function(jacketPath, difficultyIndex)
   end
 
   return difficultyIndex + 1;
-end
-
-getSign = function(val)
-  return ((val > 0) and 1) or ((val < 0) and -1) or 0;
-end
-
-loadJSON = function(filename)
-  local JSON = require('lib/JSON');
-  local path = path.Absolute(
-    string.format('skins/%s/JSON/%s.json', game.GetSkin(), filename)
-  );
-  local contents = io.open(path, 'r');
-  local decoded = {};
-
-  if (contents) then
-    local raw = contents:read('*all');
-
-    if (raw == '') then
-      contents:write(JSON.encode(decoded));
-    else
-      decoded = JSON.decode(raw);
-    end
-
-    contents:close();
-  else
-    local throwError = createError('Error loading JSON');
-
-    throwError(string.format('File does not exist: %s', path));
-  end
-
-  return {
-    contents = decoded,
-    JSON = JSON,
-    path = path,
-
-    set = function(self, key, value)
-      local contents = io.open(self.path, 'w');
-
-      self.contents[key] = value;
-
-      contents:write(self.JSON.encode(self.contents));
-
-      contents:close();
-    end,
-  };
-end
-
-roundToZero = function(val)
-	if (val < 0) then
-		return math.ceil(val);
-	elseif (val > 0) then 
-		return math.floor(val);
-	else 
-		return 0;
-	end
-end
-
-stringReplace = function(str, patternTable, replacement)
-  local replaceWith = replacement or '';
-	local newStr = str;
-
-	for _, pattern in ipairs(patternTable) do
-		newStr = string.gsub(newStr, pattern, replaceWith);
-	end
-
-	return string.upper(newStr);
 end

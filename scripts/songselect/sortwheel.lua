@@ -8,7 +8,10 @@ local currentSort = 1;
 
 local initialY = -1000;
 
+local previousSort = 0;
+
 local timer = 0;
+local highlightTimer = 0;
 
 local cache = { resX = 0, resY = 0 };
 
@@ -122,10 +125,24 @@ drawCurrentSort = function(displaying)
 end
 
 drawSortLabel = function(index, y, isSelected)
-	local alpha = math.floor(255 * math.min(timer ^ 2, 1));
-	local color = (isSelected and 'normal') or 'white';
+	local baseAlpha = (isSelected and 255) or 150;
+	local alpha = math.floor(baseAlpha * math.min(timer ^ 2, 1));
 	local padding = layout.dropdown.padding;
 	local x = layout.dropdown[3].x + padding;
+	local w = (labels.maxWidth + (arrowWidth * 2) + 16)
+		* quadraticEase(highlightTimer);
+	
+	if (isSelected) then
+		drawRectangle({
+			x = x - 8,
+			y = y,
+			w = w,
+			h = 30,
+			alpha = alpha * 0.4,
+			color = 'normal',
+			fast = true,
+		});
+	end
 
 	gfx.BeginPath();
 	alignText('left');
@@ -134,7 +151,7 @@ drawSortLabel = function(index, y, isSelected)
 		x = x,
 		y = y,
 		alpha = alpha,
-		color = color,
+		color = 'white',
 	});
 
 	gfx.Save();
@@ -158,7 +175,7 @@ drawSortLabel = function(index, y, isSelected)
 	gfx.Fill();
 
 	gfx.BeginPath();
-	setFill(color, alpha);
+	setFill('white', alpha);
 	gfx.MoveTo(0, 0);
 	gfx.LineTo(arrowWidth, 0);
 	gfx.LineTo((arrowWidth / 2), ((labels[index].direction == 'UP') and 10) or -10);
@@ -200,6 +217,14 @@ render = function(deltaTime, displaying)
 		end
 	else
 		timer = math.min(timer + (deltaTime * 8), 1);
+
+		if (previousSort ~= currentSort) then
+			highlightTimer = 0;
+
+			previousSort = currentSort;
+		end
+
+		highlightTimer = math.min(highlightTimer + (deltaTime * 6), 1);
 
 		initialY = layout.dropdown.y;
 	end

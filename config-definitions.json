@@ -120,6 +120,11 @@
 			"PANEL"
 		]
 	},
+	"showHardScores": {
+		"label": "Only show High Scores with harder hit windows",
+		"type": "bool",
+		"default": false
+	},
 	"separator_e": {},
 	"// MULTIPLAYER //": {
 		"type": "label"

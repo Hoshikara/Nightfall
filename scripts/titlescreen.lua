@@ -548,7 +548,16 @@ render = function(deltaTime)
 	hoveredPage = controls:render(deltaTime, showControls, activeButton);
 
 	if (aspectRatio ~= 1.7778) then
-		drawResolutionWarning(6, scaledH - 24);
+		gfx.BeginPath();
+		gfx.FillColor(255, 55, 55, 255);
+		gfx.FontSize(24);
+		alignText('left');
+		loadFont('mono');
+		gfx.Text(
+			'NON 16:9 RESOLUTION DETECTED -- SKIN ELEMENTS MAY NOT RENDER AS INTENDED. ENTER FULLSCREEN WITH  [ALT] + [ENTER]  IF THIS IS A MISTAKE',
+			6, 
+			scaledH - 24
+		);
 	end
 
 	if (previousButton ~= activeButton) then

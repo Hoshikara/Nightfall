@@ -25,6 +25,7 @@ local previousSong = 1;
 local selectedDifficulty = 1;
 local selectedSong = 1;
 
+local loadJSON = require('common/jsonloader');
 local userData = loadJSON('user_data');
 
 local cache = { resX = 0, resY = 0 };
