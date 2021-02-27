@@ -1,13 +1,13 @@
+local getSign = function(val)
+  return ((val > 0) and 1) or ((val < 0) and -1) or 0;
+end
+
 local getDelta = function(delta)
   if (math.abs(delta) > (1.5 * math.pi)) then
     return delta + 2 * (math.pi * getSign(delta) * -1);
   end
 
   return delta;
-end
-
-local getSign = function(val)
-  return ((val > 0) and 1) or ((val < 0) and -1) or 0;
 end
 
 local roundToZero = function(val)
