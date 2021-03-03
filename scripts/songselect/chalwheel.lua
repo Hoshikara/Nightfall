@@ -5,13 +5,14 @@ local CONSTANTS_SONGWHEEL = require('constants/songwheel');
 
 local Cursor = require('common/cursor');
 local List = require('common/list');
+local ScoreNumber = require('common/scorenumber');
 local Scrollbar = require('common/scrollbar');
 local SearchBar = require('common/searchbar');
 
 local background = New.Image({ path = 'bg.png' });
 
-local controlsShortcut = game.GetSkinSetting('controlsShortcut') or false;
-local jacketQuality = game.GetSkinSetting('jacketQuality') or 'NORMAL';
+local controlsShortcut = getSetting('controlsShortcut', false);
+local jacketQuality = getSetting('jacketQuality', 'NORMAL');
 
 local previousChallenge = 1;
 local selectedChallenge = 1;
@@ -50,15 +51,13 @@ cacheChallenge = function(challenge)
     challengeCache[challenge.id] = {};
     scrollTimers[challenge.id] = { title = 0 };
 
-    loadFont('jp');
-
     challengeCache[challenge.id].bpms = {};
     challengeCache[challenge.id].titles = {};
     challengeCache[challenge.id].jackets = {};
     challengeCache[challenge.id].title = {
       name = New.Label({
+        font = 'jp',
         text = string.upper(challenge.title),
-        scrolling = true,
         size = 36,
       }),
       timer = 0,
@@ -66,26 +65,27 @@ cacheChallenge = function(challenge)
 
     for i, chart in ipairs(challenge.charts) do
       challengeCache[challenge.id].titles[i] = New.Label({
+        font = 'jp',
         text = string.upper(chart.title),
-        scrolling = true,
         size = 28,
       });
     end
 
-    loadFont('normal');
-
     challengeCache[challenge.id].requirements = {};
 
     for requirement in challenge.requirement_text:gmatch('[^\n]+') do
-      local label = New.Label({ text = string.upper(requirement), size = 24 });
+      local label = New.Label({
+        font = 'normal',
+        text = string.upper(requirement),
+        size = 24,
+      });
 
       table.insert(challengeCache[challenge.id].requirements, label);
     end
 
-    loadFont('number');
-
     for i, chart in ipairs(challenge.charts) do
       challengeCache[challenge.id].bpms[i] = New.Label({
+        font = 'number',
         text = chart.bpm,
         size = 24,
       });
@@ -93,6 +93,7 @@ cacheChallenge = function(challenge)
 
     if (challenge.topBadge ~= 0) then
       challengeCache[challenge.id].completion = New.Label({
+        font = 'number',
         text = string.format(
           '%d%%',
           math.max(0, ((challenge.bestScore - 8000000) // 10000))
@@ -100,9 +101,8 @@ cacheChallenge = function(challenge)
         size = 24,
       });
 
-      loadFont('normal');
-
       challengeCache[challenge.id].grade = New.Label({
+        font = 'number',
         text = string.upper(challenge.grade),
         size = 24,
       });
@@ -121,21 +121,20 @@ local jacketCache = {
   },
 
   getJacket = function(self, jacketPath)
-    local jacket = self.cache[jacketPath];
     local quality = self.quality[jacketQuality] or self.quality['NORMAL'];
 
-    if ((not jacket) or (jacket == self.fallback)) then
-      jacket = gfx.LoadImageJob(
+    if ((not self.cache[jacketPath])
+      or (self.cache[jacketPath] == self.fallback)
+    ) then
+      self.cache[jacketPath] = gfx.LoadImageJob(
         jacketPath,
         self.fallback,
         math.floor(scaledW * quality),
         math.floor(scaledW * quality)
       );
-
-      self.cache[jacketPath] = jacket;
     end
 
-    return jacket;
+    return self.cache[jacketPath];
   end,
 };
 
@@ -148,26 +147,36 @@ local labels = {};
 local levels = {};
 
 do
-  loadFont('normal');
-
   for i, clear in ipairs(CONSTANTS_SONGWHEEL.clears) do
-    clears[i] = New.Label({ text = clear, size = 24 });
+    clears[i] = New.Label({
+      font = 'normal',
+      text = clear,
+      size = 24,
+    });
   end
 
   for i, difficulty in ipairs(CONSTANTS_SONGWHEEL.difficulties) do
-    difficulties[i] = New.Label({ text = difficulty, size = 24 });
+    difficulties[i] = New.Label({
+      font = 'normal',
+      text = difficulty,
+      size = 24,
+    });
   end
-
-  loadFont('medium');
 
   for name, label in pairs(CONSTANTS_CHALWHEEL.labels) do
-    labels[name] = New.Label({ text = label, size = 18 });
+    labels[name] = New.Label({
+      font = 'medium',
+      text = label,
+      size = 18,
+    });
   end
 
-  loadFont('number');
-
   for i = 1, 4 do
-    levels[i] = New.Label({ text = '', size = 24 });
+    levels[i] = New.Label({
+      font = 'number',
+      text = '',
+      size = 24,
+    });
   end
 end
 
@@ -229,10 +238,9 @@ local challengeInfo = {
 
   setLabels = function(self)
     if (not self.labels) then
-      loadFont('normal');
-
       self.labels = {
         missingCharts = New.Label({
+          font = 'normal',
           text = 'REQUIRED CHARTS MISSING',
           size = 36,
         }),
@@ -263,10 +271,12 @@ local challengeInfo = {
       local infoX = x + jacketSize + self.padding.x.full;
       local infoY = y - 6;
 
-      loadFont('number');
-
       if (not levels[i]) then
-        levels[i] = New.Label({ text = '', size = 24 });
+        levels[i] = New.Label({
+          font = 'number',
+          text = '',
+          size = 24,
+        });
       end
 
       levels[i]:update({ new = string.format('%02d', chart.level) });
@@ -280,45 +290,46 @@ local challengeInfo = {
         stroke = { color = 'normal', size = 1 },
       });
 
-      gfx.BeginPath();
-      alignText('left');
-
       for _, name in ipairs(self.order.chart) do
-        labels[name]:draw({
+        drawLabel({
           x = infoX,
           y = infoY,
           color = 'normal',
+          label = labels[name],
         });
       
-        -- TODO: better error handling
         if (info[name]) then
           if (name == 'difficulty') then
             local bpmX = infoX + labels[name].w * 2.25;
           
-            labels.bpm:draw({
+            drawLabel({
               x = bpmX,
               y = infoY,
               color = 'normal',
+              label = labels.bpm,
             });
 
             infoY = infoY + labels[name].h * 1.25;
 
-            info[name]:draw({
+            drawLabel({
               x = infoX,
               y = infoY,
               color = 'white',
+              label = info[name],
             });
 
-            levels[i]:draw({
+            drawLabel({
               x = infoX + info[name].w + 8,
               y = infoY,
               color = 'white',
+              label = levels[i],
             });
 
-            bpm:draw({
+            drawLabel({
               x = bpmX,
               y = infoY,
               color = 'white',
+              label = bpm,
             });
           else
             infoY = infoY + labels[name].h * 1.25;
@@ -327,21 +338,22 @@ local challengeInfo = {
               scrollTimers[challenge.id][name] =
                 scrollTimers[challenge.id][name] + deltaTime;
 
-              info[name]:draw({
+              drawScrollingLabel({
                 x = infoX,
                 y = infoY,
                 alpha = 255,
                 color = 'white',
+                label = info[name],
                 scale = scalingFactor,
-                scrolling = true,
                 timer = scrollTimers[challenge.id][name],
                 width = maxWidth,
               });
             else
-              info[name]:draw({
+              drawLabel({
                 x = infoX,
                 y = infoY,
                 color = 'white',
+                label = info[name],
               });
             end
           end
@@ -387,16 +399,18 @@ local challengeInfo = {
 
     for _, name in ipairs(self.order.result) do
       if (info[name]) then
-        labels[name]:draw({
+        drawLabel({
           x = x,
           y = y,
           color = 'normal',
+          label = labels[name],
         });
 
-        info[name]:draw({
+        drawLabel({
           x = x,
           y = y + (labels[name].h * 1.35),
           color = 'white',
+          label = info[name],
         });
 
         x = x + (labels.grade.w * 1.5) + labels[name].w;
@@ -407,16 +421,19 @@ local challengeInfo = {
   drawChallengeInfo = function(self, deltaTime)
     local challenge = chalwheel.challenges[self.selectedChallenge];
 
+    if (not challenge) then return end
+
     gfx.Save();
 
     gfx.Translate(self.panel.x, self.panel.y);
 
-    self.images.panel:draw({
+    drawImage({
       x = 0,
       y = 0,
       w = self.panel.w,
       h = self.panel.h,
       alpha = 0.5,
+      image = self.images.panel,
     });
 
     gfx.Restore();
@@ -438,12 +455,11 @@ local challengeInfo = {
     );
 
     if (challenge.missing_chart) then
-      gfx.BeginPath();
-      alignText('left');
-      self.labels.missingCharts:draw({
+      drawLabel({
         x = -2,
         y = y,
-        color = 'white'
+        color = 'white',
+        label = self.labels.missingCharts,
       });
 
       y = y + (self.labels.missingCharts.h * 0.5) + self.padding.y.full; 
@@ -451,13 +467,11 @@ local challengeInfo = {
       y = self:drawCharts(deltaTime, challenge, y);
     end
 
-    gfx.BeginPath();
-    alignText('left');
-
-    labels.challenge:draw({
+    drawLabel({
       x = 0,
       y = y,
       color = 'normal',
+      label = labels.challenge,
     });
 
     y = y + labels.challenge.h * 1.25;
@@ -465,39 +479,42 @@ local challengeInfo = {
     if (title.w > self.panel.innerWidth) then
       self.timers.title = self.timers.title + deltaTime;
 
-      title:draw({
+      drawScrollingLabel({
         x = 0,
         y = y,
         alpha = 255,
         color = 'white',
+        label = title,
         scale = scalingFactor,
-        scrolling = true,
         timer = self.timers.title,
         width = self.panel.innerWidth,
       });
     else
-      title:draw({
+      drawLabel({
         x = 0,
         y = y,
         color = 'white',
+        label = title,
       });
     end
 
     y = y + title.h * 1.75;
 
-    labels.requirements:draw({
+    drawLabel({
       x = 0,
       y = y,
       color = 'normal',
+      label = labels.requirements,
     });
 
     y = y + labels.requirements.h * 1.35;
 
     for i = 1, #requirements do
-      requirements[i]:draw({
+      drawLabel({
         x = 0,
         y = y,
         color = 'white',
+        label = requirements[i],
       });
 
       y = y + (requirements[i].h * 1.75);
@@ -518,10 +535,16 @@ local challengeInfo = {
 
   handleChange = function(self)
     if (self.selectedChallenge ~= selectedChallenge) then
-      self.timers.title = 0;
-    end
+      local challenge = chalwheel.challenges[selectedChallenge];
 
-    self.selectedChallenge = selectedChallenge;
+      if (challenge and challenge.id and scrollTimers[challenge.id]) then
+        scrollTimers[challenge.id].title = 0;
+      end
+
+      self.timers.title = 0;
+
+      self.selectedChallenge = selectedChallenge;
+    end
   end,
 
   render = function(self, deltaTime)
@@ -618,30 +641,36 @@ local challengeList = {
 
   setLabels = function(self)
     if (not self.labels.amounts) then
-      loadFont('medium');
-
       self.labels.amounts = {
-        of = New.Label({ text = 'OF', size = 18 }),
+        of = New.Label({
+          font = 'medium',
+          text = 'OF',
+          size = 18,
+        }),
       };
 
-      loadFont('number');
-
-      self.labels.amounts.current = New.Label({ text = '', size = 18 });
-      self.labels.amounts.total = New.Label({ text = '', size = 18 });
+      self.labels.amounts.current = ScoreNumber.New({
+        digits = 4,
+        isScore = false,
+        sizes = { 18 },
+      });
+      self.labels.amounts.total = ScoreNumber.New({
+        digits = 4,
+        isScore = false,
+        sizes = { 18 },
+      });
     end
   end,
 
   drawLabels = function(self)
     gfx.Save();
 
-    gfx.BeginPath();
-    alignText('left');
-
     for i, name in ipairs(self.order) do
-      labels[name]:draw({
+      drawLabel({
         x = self.labels.x[i],
         y = self.labels.y,
         color = 'normal',
+        label = labels[name],
       });
     end
 
@@ -650,11 +679,11 @@ local challengeList = {
 
   drawChallengeList = function(self, deltaTime)
     if (self.list.timer < 1) then
-      self.list.timer = math.min(self.list.timer + (deltaTime * 8), 1);
+      self.list.timer = math.min(self.list.timer + (deltaTime * 4), 1);
     end
 
     local change = (self.list.y.current - self.list.y.previous)
-      * quadraticEase(self.list.timer);
+      * smoothstep(self.list.timer);
     local offset = self.list.y.previous + change;
     local y = 0;
 
@@ -696,14 +725,12 @@ local challengeList = {
         color = 'dark',
       });
 
-      gfx.BeginPath();
-      alignText('left');
-
-      labels.challenge:draw({
+      drawLabel({
         x = x,
         y = y,
         alpha = alpha,
         color = 'normal',
+        label = labels.challenge,
       });
 
       y = y + (labels.challenge.h * 1.25);
@@ -716,22 +743,23 @@ local challengeList = {
           challengeCache[challenge.id].title.timer = 0;
         end
 
-        title:draw({
+        drawScrollingLabel({
           x = x,
           y = y,
           alpha = alpha,
           color = 'white',
+          label = title,
           scale = scalingFactor,
-          scrolling = true,
           timer = challengeCache[challenge.id].title.timer,
           width = self.list.w.max,
         });
       else
-        title:draw({
+        drawLabel({
           x = x,
           y = y,
           alpha = alpha,
           color = 'white',
+          label = title,
         });
       end
     else
@@ -742,14 +770,8 @@ local challengeList = {
   end,
 
   drawChallengeAmount = function(self)
-    loadFont('number');
-
-    self.labels.amounts.current:update({
-      new = string.format('%04d', self.selectedChallenge)
-    });
-    self.labels.amounts.total:update({
-      new = string.format('%04d', #chalwheel.challenges);
-    });
+    self.labels.amounts.current:setInfo({ value = self.selectedChallenge });
+    self.labels.amounts.total:setInfo({ value = #chalwheel.challenges });
 
     gfx.Save();
 
@@ -758,22 +780,25 @@ local challengeList = {
       scaledH - (scaledH / 40) - 12
     );
 
-    gfx.BeginPath();
-    alignText('right');
-
     self.labels.amounts.current:draw({
-      x = -(self.labels.amounts.of.w + self.labels.amounts.total.w + 16),
+      x = -(self.labels.amounts.of.w + (self.labels.amounts.total.w * 2) + 30),
       y = 0,
+      align = 'right',
       color = 'normal',
     });
-    self.labels.amounts.of:draw({
-      x = -(self.labels.amounts.total.w + 8),
+
+    drawLabel({
+      x = -((self.labels.amounts.total.w * 1.25) + 12),
       y = 0,
+      align = 'right',
       color = 'normal',
+      label = self.labels.amounts.of,
     });
+
     self.labels.amounts.total:draw({
-      x = 0,
+      x = -(self.labels.amounts.total.w),
       y = 0,
+      align = 'right',
       color = 'normal',
     });
 
@@ -869,24 +894,36 @@ local miscInfo = {
 
   render = function(self)
     if (not self.labels) then
-      loadFont('medium');
-  
       self.labels = {
-        bta = New.Label({ text = '[BT-A]', size = 20 }),
-        showControls = New.Label({ text = 'SHOW CONTROLS', size = 20 }),
+        bta = New.Label({
+          font = 'medium',
+          text = '[BT-A]',
+          size = 20,
+        }),
+        showControls = New.Label({
+          font = 'medium',
+          text = 'SHOW CONTROLS',
+          size = 20,
+        }),
         volforce = {
-          label = New.Label({ text = 'VF', size = 20 }),
+          label = New.Label({
+            font = 'medium',
+            text = 'VF',
+            size = 20,
+          }),
         },
       };
 
-      loadFont('number');
-      self.labels.volforce.value = New.Label({ text = '', size = 20 });
+      self.labels.volforce.value = New.Label({ 
+        font = 'number',
+        text = '',
+        size = 20,
+      });
     end
 
     local forceValue = get(userData.contents, 'volforce', 0);
     local y = 0;
 
-    loadFont('number');
     self.labels.volforce.value:update({ new = string.format('%.2f', forceValue) });
   
     gfx.Save();
@@ -897,52 +934,54 @@ local miscInfo = {
     );
 
     if (controlsShortcut) then
-      gfx.BeginPath();
-      alignText('left');
-      self.labels.bta:draw({
+      drawLabel({
         x = 0,
         y = y,
         color = 'normal',
+        label = self.labels.bta,
       });
 
-      self.labels.showControls:draw({
+      drawLabel({
         x = self.labels.bta.w + 8,
         y = y + 1,
         color = 'white',
+        label = self.labels.showControls,
       });
 
       gfx.Translate(challengeInfo.panel.w + 2, 0);
 
-      loadFont('number');
-      self.labels.volforce.value:update({ new = string.format('%.2f', forceValue) });
-
-      gfx.BeginPath();
-      alignText('right');
-      self.labels.volforce.label:draw({
-        x = 0,
-        y = y,
-        color = 'normal',
+      self.labels.volforce.value:update({
+        new = string.format('%.2f', forceValue)
       });
 
-      self.labels.volforce.value:draw({
+      drawLabel({
+        x = 0,
+        y = y,
+        align = 'right',
+        color = 'normal',
+        label = self.labels.volforce.label,
+      });
+
+      drawLabel({
         x = -(self.labels.volforce.label.w + 8),
         y = y,
+        align = 'right',
         color = 'white',
+        label = self.labels.volforce.value,
       });
     else
-      gfx.BeginPath();
-      alignText('left');
-
-      self.labels.volforce.value:draw({
+      drawLabel({
         x = 0,
         y = y,
         color = 'white',
+        label = self.labels.volforce.value,
       });
 
-      self.labels.volforce.label:draw({
+      drawLabel({
         x = self.labels.volforce.value.w + 8,
         y = y,
         color = 'normal',
+        label = self.labels.volforce.label,
       });
     end
 
@@ -955,11 +994,12 @@ render = function(deltaTime)
 
   gfx.Save();
 
-  background:draw({
+  drawImage({
     x = 0,
     y = 0,
     w = scaledW,
     h = scaledH,
+    image = background,
   });
 
   challengeInfo:render(deltaTime);

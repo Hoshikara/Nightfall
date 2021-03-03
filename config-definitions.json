@@ -77,7 +77,12 @@
 		"min": 0.5
 	},
 	"showUserInfo": {
-		"label": "Show Player Name and Score Difference",
+		"label": "Show Player Name, Hit Windows, and Score Difference",
+		"type": "bool",
+		"default": true
+	},
+	"showHitWindows": {
+		"label": "Show Hit Windows",
 		"type": "bool",
 		"default": true
 	},

@@ -14,7 +14,7 @@ local loadFrames = function(path, count)
   local frames = {};
 
   for i = 1, count do
-    frames[i] = gfx.CreateSkinImage(string.format('%s/%04d.png', path, i), 0);
+    frames[i] = New.Image({ path = string.format('%s/%04d.png', path, i) });
   end
 
   return frames;
@@ -38,13 +38,12 @@ _.initializeHold = function(self)
       string.format('gameplay/hit_animation/hold/%s', part),
       hold[part].frameCount
     );
-    local width = gfx.ImageSize(frames[1]);
 
     hold[part].alpha = ((part == 'inner') and 1.35) or 1.5;
     hold[part].blendOp = gfx.BLEND_OP_LIGHTER;
     hold[part].frames = frames;
     hold[part].frameTime = (1.0 / 38.0);
-    hold[part].width = width * 0.625;
+    hold[part].width = frames[1].w * 0.625;
 
     for btn = 1, 6 do
       hold[part][btn] = {
@@ -76,7 +75,7 @@ _.initializeHold = function(self)
     end
 
     if (inner[btn].timer < inner.frameTime) then
-      drawRectangle({
+      drawImage({
         x = 0,
         y = 0,
         w = inner.width,
@@ -100,7 +99,7 @@ _.initializeHold = function(self)
     end
 
     if (outer[btn].timer < outer.frameTime) then
-      drawRectangle({
+      drawImage({
         x = 0,
         y = 0,
         w = outer.width,
@@ -132,7 +131,7 @@ _.initializeHold = function(self)
     end
 
     if (holdEnding[btn].timer < holdEnding.frameTime) then
-      drawRectangle({
+      drawImage({
         x = 0,
         y = 0,
         w = holdEnding.width,
@@ -166,14 +165,13 @@ _.initializeHit = function(self)
       string.format('gameplay/hit_animation/%s', type),
       hit.frameCount
     );
-    local width = gfx.ImageSize(frames[1]);
   
     hit[rating] = {
       alpha = ((type == 'near') and 1) or 1.2,
       blendOp = gfx.BLEND_OP_SOURCE_OVER,
       frames = frames,
       frameTime = ((type == 'near') and (1.0 / 74.0)) or (1.0 / 58.0),
-      width = width * (((type == 'near') and 0.975) or 0.65),
+      width = frames[1].w * (((type == 'near') and 0.975) or 0.65),
     };
   
     for btn = 1, 6 do
@@ -202,7 +200,7 @@ _.initializeHit = function(self)
     end
 
     if (cached.timer < hitType.frameTime) then
-      drawRectangle({
+      drawImage({
         x = 0,
         y = 0,
         w = hitType.width,

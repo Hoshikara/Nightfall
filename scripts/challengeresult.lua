@@ -68,21 +68,21 @@ local challengeHeading = {
 		local x = self.x + self.padding.x;
 		local y = self.y + self.padding.y;
 
-		gfx.BeginPath();
-		alignText('left');
 
-			self.labels.challenge:draw({
+		drawLabel({
 			x = x,
 			y = y,
 			color = 'normal',
+			label = self.labels.challenge,
 		});
 
 		y = y + (self.labels.challenge.h * 1.25);
 
-		challengeInfo.title:draw({
+		drawLabel({
 			x = x,
 			y = y,
 			color = 'white',
+			label = challengeInfo.title,
 		});
 
 		y = y + (challengeInfo.title.h * 0.85) + self.padding.y;
@@ -90,34 +90,38 @@ local challengeHeading = {
 		for i, name in ipairs(self.order) do
 			local tempX = x + (self.padding.x * ((i - 1) * 5));
 
-			self.labels[name]:draw({
+			drawLabel({
 				x = tempX,
 				y = y,
 				color = 'normal',
+				label = self.labels[name],
 			});
 
-			challengeInfo[name]:draw({
+			drawLabel({
 				x = tempX,
 				y = y + (self.labels[name].h * 1.35),
 				color = 'white',
+				label = challengeInfo[name],
 			});
 		end
 
 		y = y + (self.labels.result.h * 1.35) + (challengeInfo.result.h * 2.25);
 
-		self.labels.requirements:draw({
+		drawLabel({
 			x = x,
 			y = y,
 			color = 'normal',
+			label = self.labels.requirements,
 		});
 
 		y = y + (self.labels.requirements.h * 1.35) + 2;
 
 		for i, requirement in ipairs(challengeInfo.requirements) do
-			requirement:draw({
+			drawLabel({
 				x = x + 1,
 				y = y,
 				color = 'white',
+				label = requirement,
 			});
 
 			y = y + (requirement.h * 1.625);
@@ -215,41 +219,43 @@ local chartsPanel = {
 				stroke = { color = 'normal', size = 1 },
 			});
 
-			gfx.BeginPath();
-			alignText('left');
-
-			self.labels.result:draw({
+			drawLabel({
 				x = innerX,
 				y = y - 5,
 				color = 'normal',
+				label = self.labels.result,
 			});
 
-			self.labels.completion:draw({
+			drawLabel({
 				x = innerX + (self.padding.x * 2.75),
 				y = y - 5,
 				color = 'normal',
+				label = self.labels.completion,
 			});
 
 			y = y + (self.labels.result.h * 1.35) - 5;
 
-			chart.result:draw({
+			drawLabel({
 				x = innerX,
 				y = y,
 				color = 'white',
+				label = chart.result,
 			});
 
-			chart.completion:draw({
+			drawLabel({
 				x = innerX + (self.padding.x * 2.75),
 				y = y,
 				color = 'white',
+				label = chart.completion,
 			});
 
 			y = y + (chart.completion.h * 2);
 
-			self.labels.score:draw({
+			drawLabel({
 				x = innerX,
 				y = y + 4,
 				color = 'normal',
+				label = self.labels.score,
 			});
 
 			y = y + self.labels.score.h;
@@ -257,18 +263,19 @@ local chartsPanel = {
 			chart.score.label:setInfo({ value = chart.score.value });
 
 			chart.score.label:draw({
-				offset = 10,
 				x = innerX - 3,
 				y1 = y,
 				y2 = y + (chart.score.label.labels[5].h / 4) - 3,
+				offset = 10,
 			});
 
 			y = self.y + self.padding.y + self.jacketSize + (self.padding.y / 2);
 
-			self.labels.title:draw({
+			drawLabel({
 				x = x,
 				y = y,
 				color = 'normal',
+				label = self.labels.title,
 			});
 
 			y = y + (self.labels.title.h * 1.35);
@@ -276,96 +283,108 @@ local chartsPanel = {
 			if (chart.title.w > self.w.column.max) then
 				chart.timers.title = chart.timers.title + deltaTime;
 
-				chart.title:draw({
+				drawScrollingLabel({
 					x = x,
 					y = y,
 					alpha = 255,
 					color = 'white',
+					label = chart.title,
 					scale = scalingFactor,
-					scrolling = true,
 					timer = chart.timers.title,
 					width = self.w.column.max,
 				});
 			else
-				chart.title:draw({
+				drawLabel({
 					x = x,
 					y = y,
 					color = 'white',
+					label = chart.title,
 				});
 			end
 
 			y = y + (chart.title.h * 1.75);
 
-			self.labels.bpm:draw({
+			drawLabel({
 				x = x + (self.labels.difficulty.w * 2),
 				y = y,
 				color = 'normal',
+				label = self.labels.bpm,
 			});
 
-			self.labels.difficulty:draw({
+			drawLabel({
 				x = x,
 				y = y,
 				color = 'normal',
+				label = self.labels.difficulty,
 			});
 
 			y = y + (self.labels.difficulty.h * 1.35);
 
-			chart.difficulty:draw({
+			drawLabel({
 				x = x,
 				y = y,
 				color = 'white',
+				label = chart.difficulty,
 			});
 
-			chart.level:draw({
+			drawLabel({
 				x = x + chart.difficulty.w + 8,
 				y = y,
 				color = 'white',
+				label = chart.level,
 			});
 
-			chart.bpm:draw({
+			drawLabel({
 				x = x + (self.labels.difficulty.w * 2),
 				y = y,
 				color = 'white',
+				label = chart.bpm,
 			});
 
 			y = y + (chart.difficulty.h * 2);
 
-			self.labels.gauge:draw({
+			drawLabel({
 				x = x,
 				y = y,
 				color = 'normal',
+				label = self.labels.gauge,
 			});
 
-			self.labels.grade:draw({
+			drawLabel({
 				x = x + (self.padding.x * 2.5),
 				y = y,
 				color = 'normal',
+				label = self.labels.grade,
 			});
 
-			self.labels.clear:draw({
+			drawLabel({
 				x = x + (self.padding.x * 5),
 				y = y,
 				color = 'normal',
+				label = self.labels.clear,
 			});
 
 			y = y + (self.labels.gauge.h * 1.35);
 
-			chart.gauge:draw({
+			drawLabel({
 				x = x,
 				y = y,
 				color = 'white',
+				label = chart.gauge,
 			});
 
-			chart.grade:draw({
+			drawLabel({
 				x = x + (self.padding.x * 2.5),
 				y = y,
 				color = 'white',
+				label = chart.grade,
 			});
 
-			chart.clear:draw({
+			drawLabel({
 				x = x + (self.padding.x * 5),
 				y = y,
 				color = 'white',
+				label = chart.clear,
 			});
 
 			y = y + (chart.grade.h * 2);
@@ -374,16 +393,18 @@ local chartsPanel = {
 			local statX = x;
 
 			for i, name in ipairs(self.order) do
-				self.labels[name]:draw({
+				drawLabel({
 					x = statX,
 					y = y,
 					color = 'normal',
+					label = self.labels[name],
 				});
 
-				chart[name]:draw({
+				drawLabel({
 					x = statX,
 					y = y + (self.labels[name].h * 1.35),
 					color = 'white',
+					label = chart[name],
 				});
 
 				statX = statX + self.labels[name].w + spacing;
@@ -431,11 +452,17 @@ local screenshot = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			loadFont('normal');
-
 			self.labels = {
-				path = New.Label({ text = '', size = 24 });
-				saved = New.Label({ text = 'SCREENSHOT SAVED TO', size = 24 });
+				path = New.Label({
+					font = 'normal',
+					text = '',
+					size = 24,
+				});
+				saved = New.Label({
+					font = 'normal',
+					text = 'SCREENSHOT SAVED TO',
+					size = 24,
+				});
 			};
 		end
 	end,
@@ -446,26 +473,24 @@ local screenshot = {
 		if (self.timer > 0) then
 			self.timer = math.max(self.timer - deltaTime, 0);
 
-			loadFont('normal');
 			self.labels.path:update({ new = self.path });
 
 			gfx.Save();
 
 			gfx.Translate(8, 4);
 
-			gfx.BeginPath();
-			alignText('left');
-			
-			self.labels.saved:draw({
+			drawLabel({
 				x = 0,
 				y = 0,
-				color = 'normal'
+				color = 'normal',
+				label = self.labels.saved,
 			});
 
-			self.labels.path:draw({
+			drawLabel({
 				x = self.labels.saved.w + 16,
 				y = 0,
 				color = 'white',
+				label = self.labels.path,
 			});
 
 			gfx.Restore();
@@ -482,11 +507,12 @@ end
 render = function(deltaTime, newScroll)
 	setupLayout();
 
-	background:draw({
+	drawImage({
 		x = 0,
 		y = 0,
 		w = scaledW,
 		h = scaledH,
+		image = background,
 	});
 
 	challengeHeading:render(deltaTime);

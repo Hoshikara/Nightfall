@@ -45,23 +45,31 @@ setupLayout = function()
   gfx.Scale(scalingFactor, scalingFactor);
 end
 
+local setLabelText = function(text)
+	return {
+		font = 'medium',
+		text = text,
+		size = 18,
+	};
+end 
+
 local labels = nil;
 
 setLabels = function()
 	if (not labels) then
-		loadFont('medium');
-
 		labels = {
-			artist = New.Label({ text = 'ARTIST', size = 18 }),
-			collectionName = New.Label({ text = 'COLLECTION NAME', size = 18 }),
-			confirm = New.Label({ text = 'CONFIRM', size = 18 }),
-			enter = New.Label({ text = '[ENTER]', size = 18 }),
-			title = New.Label({ text = 'TITLE', size = 18 }),
+			artist = New.Label(setLabelText('ARTIST')),
+			collectionName = New.Label(setLabelText('COLLECTION NAME')),
+			confirm = New.Label(setLabelText('CONFIRM')),
+			enter = New.Label(setLabelText('ENTER')),
+			title = New.Label(setLabelText('TITLE')),
 		};
 
-		loadFont('jp');
-
-		labels.input = New.Label({ text = '', size = 28 });
+		labels.input = New.Label({
+			font = 'jp',
+			text = '',
+			size = 28,
+		});
 	end
 end
 
@@ -96,45 +104,45 @@ drawButton = function(deltaTime, label, isSelected, y)
 	local w = layout.images.button.w;
 
 	if (isSelected) then
-		layout.images.buttonHover:draw({
+		drawImage({
 			x = layout.x.outerRight - w + 12,
 			y = y,
-			alpha = timer
+			alpha = timer,
+			image = layout.images.buttonHover,
 		});
 	else
-		layout.images.button:draw({
+		drawImage({
 			x = layout.x.outerRight - w + 12,
 			y = y,
-			alpha = (0.45 * timer)
+			alpha = (0.45 * timer),
+			image = layout.images.button,
 		});
 	end
 
 	gfx.Save();
 
 	gfx.Scale(1 / scalingFactor, 1 / scalingFactor);
-	
-	gfx.BeginPath();
-	alignText('left');
 
 	if (label.w > (w - 90)) then
 		buttonScrollTimer = buttonScrollTimer + deltaTime;
 
-		label:draw({
+		drawScrollingLabel({
 			x = layout.x.outerRight - w + 55,
 			y = y + label.h + 8,
 			alpha = alpha,
 			color = 'white',
+			label = label,
 			scale = scalingFactor,
-			scrolling = true,
 			timer = buttonScrollTimer,
 			width = w - 90,
 		});
 	else
-		label:draw({
+		drawLabel({
 			x = layout.x.outerRight - w + 55,
 			y = y + label.h + 8,
 			alpha = alpha,
 			color = 'white',
+			label = label,
 		});
 	end
 
@@ -177,46 +185,45 @@ drawInput = function()
 
 	gfx.Scale(1 / scalingFactor, 1 / scalingFactor);
 
-	loadFont('jp');
 	labels.input:update({ new = string.upper(dialog.newName) });
 
-	gfx.BeginPath();
-	alignText('left');
-
-	labels.collectionName:draw({
+	drawLabel({
 		x = layout.x.middleLeft,
 		y = labelY,
 		alpha = 255 * timer,
 		color = 'normal',
+		label = labels.collectionName,
 	});
 
 	labelY = labelY + (labels.collectionName.h * 2);
 
-	labels.input:draw({
+	drawLabel({
 		x = x + 8,
 		y = labelY + 7,
 		alpha = 255 * timer,
 		color = 'white',
+		label = labels.input,
 		maxWidth = layout.w.middle - 22,
 	});
 
 	labelY = labelY + (layout.h.outer / 6);
 
-	gfx.BeginPath();
-	alignText('right');
-
-	labels.confirm:draw({
+	drawLabel({
 		x = layout.x.middleRight + 2,
 		y = labelY + labels.confirm.h,
+		align = 'right',
 		alpha = 255 * timer,
 		color = 'white',
+		label = labels.confirm,
 	});
 
-	labels.enter:draw({
+	drawLabel({
 		x = layout.x.middleRight - labels.enter.w - 16,
 		y = labelY + labels.enter.h,
+		align = 'right',
 		alpha = 255 * timer,
 		color = 'normal',
+		label = labels.enter,
 	});
 
 	gfx.Restore();
@@ -232,14 +239,12 @@ drawSongInfo = function(deltaTime)
 
 	gfx.Scale(1 / scalingFactor, 1 / scalingFactor);
 
-	gfx.BeginPath();
-	alignText('left');
-
-	labels.title:draw({
+	drawLabel({
 		x = x,
 		y = y,
 		alpha = alpha,
 		color = 'normal',
+		label = labels.title,
 	});
 
 	y = y + (labels.title.h * 1.25);
@@ -247,32 +252,34 @@ drawSongInfo = function(deltaTime)
 	if (title.w > maxWidth) then
 		timers.title = timers.title + deltaTime;
 
-		title:draw({
+		drawScrollingLabel({
 			x = x + 2,
 			y = y,
 			alpha = alpha,
 			color = 'white',
+			label = title,
 			scale = scalingFactor,
-			scrolling = true,
 			timer = timers.title,
 			width = maxWidth,
 		});
 	else
-		title:draw({
+		drawLabel({
 			x = x,
 			y = y,
 			alpha = alpha,
 			color = 'white',
+			label = title,
 		});
 	end
 
 	y = y + (title.h * 1.5);
 
-	labels.artist:draw({
+	drawLabel({
 		x = x,
 		y = y,
 		alpha = alpha,
 		color = 'normal',
+		label = labels.artist,
 	});
 
 	y = y + (labels.artist.h * 1.5);
@@ -280,22 +287,23 @@ drawSongInfo = function(deltaTime)
 	if (artist.w > maxWidth) then
 		timers.artist = timers.artist + deltaTime;
 
-		artist:draw({
+		drawScrollingLabel({
 			x = x + 2,
 			y = y,
 			alpha = alpha,
 			color = 'white',
+			label = artist,
 			scale = scalingFactor,
-			scrolling = true,
 			timer = timers.artist,
 			width = maxWidth,
 		});
 	else
-		artist:draw({
+		drawLabel({
 			x = x,
 			y = y,
 			alpha = alpha,
 			color = 'white',
+			label = artist,
 		});
 	end
 
@@ -307,12 +315,10 @@ open = function()
 	menuOptions = {};
 	selectedIndex = 0;
 
-	loadFont('medium');
-
 	if (#dialog.collections == 0) then
 		menuOptions[initialIndex] = {
 			action = createCollection('FAVOURITES'),
-			label = New.Label({ text = 'ADD TO FAVOURITES', size = 18 }),
+			label = New.Label(setLabelText('ADD TO FAVOURITES')),
 		};
 	end
 
@@ -323,33 +329,27 @@ open = function()
 
 		menuOptions[i] = {
 			action = createCollection(collection.name),
-			label = New.Label({
-				text = currentName,
-				scrolling = true,
-				size = 18,
-			}),
+			label = New.Label(setLabelText(currentName)),
 		};
 	end
 
 	table.insert(menuOptions, {
 		action = menu.ChangeState,
-		label = New.Label({ text = 'CREATE COLLECTION', size = 18 }),
+		label = New.Label(setLabelText('CREATE COLLECTION')),
 	});
 	table.insert(menuOptions, {
 		action = menu.Cancel,
-		label = New.Label({ text = 'CLOSE', size = 18 }),
+		label = New.Label(setLabelText('CLOSE')),
 	});
-
-	loadFont('jp');
 
 	artist = New.Label({
+		font = 'jp',
 		text = string.upper(dialog.artist),
-		scrolling = true,
-		size = 28
+		size = 28,
 	});
 	title = New.Label({
+		font = 'jp',
 		text = string.upper(dialog.title),
-		scrolling = true,
 		size = 36,
 	});
 end
@@ -372,11 +372,12 @@ render = function(deltaTime)
 	cursor.timer = cursor.timer + deltaTime;
 	cursor.alpha = timer * (math.abs(0.8 * math.cos(cursor.timer * 5)) + 0.2);
 
-	layout.images.dialogBox:draw({
+	drawImage({
 		x = scaledW / 2,
 		y = scaledH / 2,
 		alpha = timer,
 		centered = true,
+		image = layout.images.dialogBox,
 	});
 
 	drawSongInfo(deltaTime);

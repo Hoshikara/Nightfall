@@ -99,11 +99,11 @@ return {
       },
       ['Set maximum amount of rewinding on fail'] = {
         invert = false,
-        name = 'AUTO-RESTART FROM MEASURE',
+        name = 'AUTO-REWIND BY MEASURES ON FAIL',
       },
       ['- amount in # of measures'] = {
         indent = true,
-        name = 'MEASURE',
+        name = 'MEASURES',
       },
     },
     ['Mission'] = {

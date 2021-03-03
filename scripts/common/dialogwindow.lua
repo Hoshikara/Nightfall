@@ -3,19 +3,33 @@ local layout = require('layout/dialog');
 local New = function(strings)
   local labels = {};
 
-  loadFont('normal');
-
-  labels.heading = New.Label({ text = strings.heading, size = 48 });
+  labels.heading = New.Label({
+    font = 'normal',
+    text = strings.heading,
+    size = 48,
+  });
   
-  loadFont('medium');
-
-  labels.confirm = New.Label({ text = 'CONFIRM', size = 18 });
-  labels.enter = New.Label({ text = '[ENTER]', size = 18 });
-  labels.inputLabel = New.Label({ text = strings.inputLabel, size = 18 });
+  labels.confirm = New.Label({
+    font = 'medium',
+    text = 'CONFIRM',
+    size = 18,
+  });
+  labels.enter = New.Label({
+    font = 'medium',
+    text = '[ENTER]',
+    size = 18,
+  });
+  labels.inputLabel = New.Label({
+    font = 'medium',
+    text = strings.inputLabel,
+    size = 18,
+  });
   
-  loadFont('jp');
-
-  labels.inputText = New.Label({ text = '', size = 28 });
+  labels.inputText = New.Label({
+    font = 'jp',
+    text = '',
+    size = 28,
+  });
 
   return {
     cursor = {
@@ -31,7 +45,6 @@ local New = function(strings)
       self.cursor.alpha = self.timer
         * (math.abs(0.8 * math.cos(self.cursor.timer * 5)) + 0.2);
   
-      loadFont('jp');
       self.labels.inputText:update({ new = string.upper(textInput.text) });
   
       self.cursor.offset = math.min(
@@ -70,43 +83,43 @@ local New = function(strings)
   
       gfx.Save();
   
-      gfx.BeginPath();
-      alignText('left');
-  
-      self.labels.inputLabel:draw({
+      drawLabel({
         x = layout.x.middleLeft - 2,
         y = labelY,
         alpha = 255 * self.timer,
         color = 'normal',
+        label = self.labels.inputLabel,
       });
   
       labelY = labelY + (self.labels.inputLabel.h * 2);
   
-      self.labels.inputText:draw({
+      drawLabel({
         x = x + 8,
         y = labelY + 7,
         alpha = 255 * self.timer,
         color = 'white',
+        label = self.labels.inputText,
         maxWidth = layout.w.middle - 22,
       });
   
       labelY = labelY + (layout.h.outer / 6);
   
-      gfx.BeginPath();
-      alignText('right');
-  
-      self.labels.confirm:draw({
+      drawLabel({
         x = layout.x.middleRight + 2,
         y = labelY + self.labels.confirm.h + 1,
+        align = 'right',
         alpha = 255 * self.timer,
         color = 'white',
+        label = self.labels.confirm,
       });
   
-      self.labels.enter:draw({
+      drawLabel({
         x = layout.x.middleRight - self.labels.confirm.w - 8,
         y = labelY + self.labels.confirm.h,
+        align = 'right',
         alpha = 255 * self.timer,
         color = 'normal',
+        label = self.labels.enter,
       });
   
       gfx.Restore();
@@ -119,20 +132,20 @@ local New = function(strings)
   
       gfx.Save();
   
-      layout.images.dialogBox:draw({
+      drawImage({
         x = scaledW / 2,
         y = scaledH / 2,
         alpha = self.timer,
         centered = true,
+        image = layout.images.dialogBox,
       });
   
-      gfx.BeginPath();
-      alignText('left');
-      self.labels.heading:draw({
+      drawLabel({
         x = layout.x.outerLeft,
         y = layout.y.top - (self.labels.heading.h * 0.25),
         alpha = 255 * self.timer,
         color = 'white',
+        label = self.labels.heading,
       });
   
       self:drawInput(deltaTime);

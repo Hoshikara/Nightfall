@@ -11,18 +11,5 @@ return function(params)
     image = image,
     w = w,
     h = h,
-
-    draw = function(self, params)
-      drawRectangle({
-        x = params.x,
-        y = params.y,
-        w = params.w or self.w,
-        h = params.h or self.h,
-        alpha = params.alpha,
-        blendOp = params.blendOp,
-        centered = params.centered,
-        image = self.image,
-      });
-    end
   };
 end

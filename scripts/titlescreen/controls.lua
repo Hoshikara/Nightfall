@@ -13,60 +13,77 @@ local _ = {
   selectedPage = nil
 };
 
-_.initializeButton = function(self)
-  loadFont('medium');
+local setButtonText = function(text)
+  return {
+    font = 'medium',
+    text = text,
+    size = 36,
+  };
+end
 
+_.initializeButton = function(self)
   local button = {
     [1] = {
-      label = New.Label({ text = 'GENERAL', size = 36 }),
+      label = New.Label(setButtonText('GENERAL')),
       page = 'general',
     },
     [2] = {
-      label = New.Label({ text = 'SONG SELECT', size = 36 }),
+      label = New.Label(setButtonText('SONG SELECT')),
       page = 'songSelect',
     },
     [3] = {
-      label = New.Label({ text = 'GAMEPLAY SETTINGS', size = 36 }),
+      label = New.Label(setButtonText('GAMEPLAY SETTINGS')),
       page = 'gameplaySettings',
     },
     [4] = {
-      label = New.Label({ text = 'GAMEPLAY', size = 36 }),
+      label = New.Label(setButtonText('GAMEPLAY')),
       page = 'gameplay',
     },
     [5] = {
-      label = New.Label({ text = 'PRACTICE MODE', size = 36 }),
+      label = New.Label(setButtonText('PRACTICE MODE')),
       page = 'practiceMode',
     },
     [6] = {
-      label = New.Label({ text = 'RESULTS', size = 36 }),
+      label = New.Label(setButtonText('RESULTS')),
       page = 'results',
     },
     [7] = {
-      label = New.Label({ text = 'MULTIPLAYER', size = 36 }),
+      label = New.Label(setButtonText('MULTIPLAYER')),
       page = 'multiplayer',
     },
     [8] = {
-      label = New.Label({ text = 'NAUTICA', size = 36 }),
+      label = New.Label(setButtonText('NAUTICA')),
       page = 'nautica',
     },
     activePage = 1,
-    startEsc = New.Label({ text = '[START]  /  [ESC]', size = 24 }),
-    close = New.Label({ text = 'CLOSE', size = 24 }),
+    startEsc = New.Label({
+      font = 'medium',
+      text = '[START]  /  [ESC]',
+      size = 24
+    }),
+    close = New.Label({
+      font = 'medium',
+      text = 'CLOSE',
+      size = 24,
+    }),
     maxWidth = 0,
   };
 
   button.drawButton = function(self, x, y, i, isActive)
-    gfx.BeginPath();
-
-    alignText('left');
-    self[i].label:draw({
+    drawLabel({
       x = x,
       y = y,
       alpha = (isActive and 255) or 80,
       color = (isActive and 'normal') or 'white',
+      label = self[i].label,
     });
 
-    if (_:mouseClipped(x - 20, y - 10, self[i].label.w + 40, self[i].label.h + 30)) then
+    if (_:mouseClipped(
+      x - 20,
+      y - 10,
+      self[i].label.w + 40,
+      self[i].label.h + 30
+    )) then
       _.hoveredPage = i;
     end
 
@@ -96,18 +113,18 @@ _.initializeControls = function(self)
     for i = 1, #CONTROL_LIST[category] do
       list[i] = {};
 
-      loadFont('normal');
       list[i].action = New.Label({
+        font = 'normal',
         text = CONTROL_LIST[category][i].action,
         size = 24,
       });
-
-      loadFont('medium');
       list[i].controller = New.Label({
+        font = 'medium',
         text = CONTROL_LIST[category][i].controller,
         size = 24,
       });
       list[i].keyboard = New.Label({
+        font = 'medium',
         text = CONTROL_LIST[category][i].keyboard,
         size = 24,
       });
@@ -127,39 +144,42 @@ _.initializeControls = function(self)
     local x = initialX;
     local y = initialY;
 
-    gfx.BeginPath();
-    alignText('left');
-
-    _.controller:draw({
+    drawLabel({
       x = x,
       y = y,
       color = 'white',
+      label = _.controller,
     });
-    _.keyboard:draw({
+
+    drawLabel({
       x = x + 350,
       y = y,
       color = 'white',
+      label = _.keyboard,
     });
 
     y = y + 60;
 
     for i = 1, #list do
-      list[i].controller:draw({
+      drawLabel({
         x = x,
         y = y,
         color = (list[i].note and 'white') or 'normal',
+        label = list[i].controller,
       });
 
-      list[i].keyboard:draw({
+      drawLabel({
         x = x + 350,
         y = y,
         color = (list[i].note and 'white') or 'normal',
+        label = list[i].keyboard,
       });
 
-      list[i].action:draw({
+      drawLabel({
         x = x + 700,
         y = y,
         color = 'white',
+        label = list[i].action,
       });
 
       if ((i ~= #list) and (not list[i].note)) then
@@ -219,10 +239,21 @@ _.initializeAll = function(self, selection)
       and (self.mousePosY < scaledH);
   end
 
-  loadFont('medium');
-  self.heading = New.Label({ text = 'CONTROLS', size = 60 });
-  self.controller = New.Label({ text = 'CONTROLLER', size = 30 });
-  self.keyboard = New.Label({ text = 'KEYBOARD', size = 30 });
+  self.heading = New.Label({
+    font = 'medium',
+    text = 'CONTROLS',
+    size = 60,
+  });
+  self.controller = New.Label({
+    font = 'medium',
+    text = 'CONTROLLER',
+    size = 30,
+  });
+  self.keyboard = New.Label({
+    font = 'medium',
+    text = 'KEYBOARD',
+    size = 30,
+  });
 
   self.button = self:initializeButton();
   self.controls = self:initializeControls();
@@ -251,12 +282,11 @@ _.render = function(self, deltaTime, showControls, selectedPage)
   local x = self.layout.scaledW / 20;
   local y = self.layout.scaledH / 20;
 
-  gfx.BeginPath();
-  alignText('left');
-  self.heading:draw({
+  drawLabel({
     x = x - 3,
     y = y,
     color = 'white',
+    label = self.heading,
   });
 
   self.buttonY = y + self.heading.h * 2;
@@ -285,18 +315,18 @@ _.render = function(self, deltaTime, showControls, selectedPage)
     y + (self.heading.h * 2)
   );
 
-  gfx.BeginPath();
-  alignText('left');
-  self.button.startEsc:draw({
+  drawLabel({
     x = x,
     y = y + self.layout.scaledH - (self.layout.scaledH / 7),
     color = 'normal',
+    label = self.button.startEsc,
   });
 
-  self.button.close:draw({
+  drawLabel({
     x = x + self.button.startEsc.w + 8,
     y = y + self.layout.scaledH - (self.layout.scaledH / 7),
     color = 'white',
+    label = self.button.close,
   });
 
   return self.hoveredPage;

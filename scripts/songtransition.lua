@@ -46,15 +46,20 @@ local labels = nil;
 
 setLabels = function()
 	if (not labels) then
-		loadFont('jp');
-
 		labels = {
-			artist = New.Label({ text = string.upper(song.artist), size = 40 }),
-			title = New.Label({ text = string.upper(song.title), size = 48 }),
+			artist = New.Label({
+				font = 'jp',
+				text = string.upper(song.artist),
+				size = 40,
+			}),
+			title = New.Label({
+				font = 'jp',
+				text = string.upper(song.title),
+				size = 48,
+			}),
 		};
 	end
 end
-
 
 drawTransition = function(deltaTime, isIntro);
 	local jacket = ((song.jacket == 0) and jacketFallback) or song.jacket;
@@ -112,10 +117,11 @@ drawTransition = function(deltaTime, isIntro);
 
 		gfx.Translate(-(scaledW / 2), 0);
 
-		background:draw({
+		drawImage({
 			x = scaledW / 2,
 			y = scaledH / 2,
 			centered = true,
+			image = background,
 		});
 
 		drawRectangle({
@@ -136,10 +142,11 @@ drawTransition = function(deltaTime, isIntro);
 			scaledH
 		);
 
-		background:draw({
+		drawImage({
 			x = scaledW / 2,
 			y = scaledH / 2,
 			centered = true,
+			image = background,
 		});
 
 		gfx.ResetScissor();
@@ -151,10 +158,11 @@ drawTransition = function(deltaTime, isIntro);
 			scaledH
 		);
 
-		background:draw({
+		drawImage({
 			x = scaledW / 2,
 			y = scaledH / 2,
 			centered = true,
+			image = background,
 		});
 
 		gfx.ResetScissor();
@@ -187,21 +195,22 @@ drawTransition = function(deltaTime, isIntro);
 	});
 
 	if (isIntro) then
-		gfx.BeginPath();
-		alignText('center');
-
-		labels.title:draw({
+		drawLabel({
 			x = 0,
 			y = 255,
+			align = 'center',
 			alpha = 255 * flickerAlpha,
 			color = 'white',
+			label = labels.title,
 		});
 
-		labels.artist:draw({
+		drawLabel({
 			x = 0,
 			y = 255 + labels.title.h * 1.75,
+			align = 'center',
 			alpha = 255 * flickerAlpha,
 			color = 'normal',
+			label = labels.artist,
 		});
 	end
 

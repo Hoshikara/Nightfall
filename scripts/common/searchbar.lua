@@ -1,13 +1,17 @@
 local New = function()
   local labels = {};
 
-  loadFont('medium');
-
-  labels.search = New.Label({ text = 'SEARCH', size = 18 });
+  labels.search = New.Label({
+    font = 'medium',
+    text = 'SEARCH',
+    size = 18,
+  });
   
-  loadFont('jp');
-
-  labels.input = New.Label({ text = '', size = 24 });
+  labels.input = New.Label({
+    font = 'jp',
+    text = '',
+    size = 24,
+  });
 
   return {
     labels = labels,
@@ -45,8 +49,6 @@ local New = function()
         cursorAlpha = math.abs(0.9 * math.cos(self.timer.cursor * 5)) + 0.1;
       end
 
-      loadFont('jp');
-
       self.labels.input:update({ new = string.upper(searchText) });
 
       local cursorOffset = math.min(self.labels.input.w + 2, self.w - 24);
@@ -79,14 +81,12 @@ local New = function()
         });
       end
 
-      gfx.BeginPath();
-      alignText('left');
-
-      self.labels.search:draw({
+      drawLabel({
         x = self.x + 7,
         y = self.y - 4,
         alpha = alpha,
         color = 'normal',
+        label = self.labels.search,
       });
 
       if (shouldShow) then
@@ -99,13 +99,11 @@ local New = function()
           color = 'white',
         });
 
-        gfx.BeginPath();
-        alignText('left');
-
-        self.labels.input:draw({
+        drawLabel({
           x = self.x + 8,
           y = self.y + 20,
           color = 'white',
+          label = self.labels.input,
           maxWidth = self.w - 24,
         });
       end

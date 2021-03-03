@@ -21,8 +21,8 @@ local allUsers = {};
 
 local background = New.Image({ path = 'bg.png' });
 
-local allowHardToggle = game.GetSkinSetting('toggleHard') or false;
-local allowMirrorToggle = game.GetSkinSetting('toggleMirror') or false;
+local allowHardToggle = getSetting('toggleHard', false);
+local allowMirrorToggle = getSetting('toggleMirror', false);
 
 local didExit = false;
 
@@ -57,13 +57,13 @@ local userName = nil;
 local userReady;
 
 do
-	local usernameKey = game.GetSkinSetting('multi.user_name_key');
+	local usernameKey = getSetting('multi.user_name_key');
 
 	if (not userNameKey) then
 		userNameKey = 'displayName';
 	end
 
-	local userName = game.GetSkinSetting(userNameKey) or '';
+	local userName = getSetting(userNameKey, '');
 
 	if ((not userName) or (userName == '')) then
 		userName = 'GUEST';
@@ -203,15 +203,16 @@ local roomList = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			loadFont('medium');
-
 			self.labels = {
-				createRoom = New.Label({ text = 'CREATE ROOM', size = 18 }),
+				createRoom = New.Label({
+					font = 'medium',
+					text = 'CREATE ROOM',
+					size = 18,
+				}),
 			};
 
-			loadFont('normal');
-
 			self.labels.heading = New.Label({
+				font = 'normal',
 				text = 'MULTIPLAYER ROOMS',
 				size = 60,
 			});
@@ -252,23 +253,26 @@ local roomList = {
 		if (allowAction) then
 			hoveredButton = createRoom;
 
-			self.images.buttonHover:draw({ x = x, y = y });
+			drawImage({
+				x = x,
+				y = y,
+				image = self.images.buttonHover,
+			});
 		else
-			self.images.button:draw({
+			drawImage({
 				x = x,
 				y = y,
 				alpha = 0.45,
+				image = self.images.button,
 			});
 		end
 
-		gfx.BeginPath();
-		alignText('left');
-		
-		self.labels.createRoom:draw({
+		drawLabel({
 			x = x + 40,
 			y = y + 25,
 			alpha = (allowAction and 255) or 50,
 			color = 'white',
+			label = self.labels.createRoom,
 		});
 
 		gfx.Restore();
@@ -276,11 +280,11 @@ local roomList = {
 
 	drawRoomList = function(self, deltaTime)
 		if (self.list.timer < 1) then
-			self.list.timer = math.min(self.list.timer + (deltaTime * 8), 1);
+			self.list.timer = math.min(self.list.timer + (deltaTime * 4), 1);
 		end
 
 		local change = (self.list.y.current - self.list.y.previous)
-			* quadraticEase(self.list.timer);
+			* smoothstep(self.list.timer);
 		local offset = self.list.y.previous + change;
 		local y = 0;
 
@@ -408,14 +412,12 @@ local roomList = {
 
 		gfx.Save();
 
-		gfx.BeginPath();
-		alignText('left');
-
-		self.labels.heading:draw({
+		drawLabel({
 			x = self.x,
 			y = self.y,
 			alpha = self.alpha,
 			color = 'white',
+			label = self.labels.heading,
 		});
 
 		if (#allRooms > 0) then
@@ -558,52 +560,88 @@ local songInfo = {
 			self.levels = {};
 			self.songInfo = {};
 
-			loadFont('number');
-
 			for i = 1, 4 do
-				self.levels[i] = New.Label({ text = '', size = 18 });
+				self.levels[i] = New.Label({
+					font = 'number',
+					text = '0',
+					size = 18,
+				});
 			end
 
-			self.songInfo.bpm = New.Label({ text = '000', size = 24 });
-
-			loadFont('medium');
+			self.songInfo.bpm = New.Label({
+				font = 'number',
+				text = '000',
+				size = 24,
+			});
 
 			self.labels = {
-				hardGauge = New.Label({ text = 'HARD GAUGE', size = 20 }),
-				mirrorMode = New.Label({ text = 'MIRROR MODE', size = 20 }),
-				rotateHost = New.Label({ text = 'ROTATE HOST', size = 20 }),
+				hardGauge = New.Label({
+					font = 'medium',
+					text = 'HARD GAUGE',
+					size = 20,
+				}),
+				mirrorMode = New.Label({
+					font = 'medium',
+					text = 'MIRROR MODE',
+					size = 20,
+				}),
+				rotateHost = New.Label({
+					font = 'medium',
+					text = 'ROTATE HOST',
+					size = 20,
+				}),
 			};
 
 			for name, label in pairs(CONSTANTS_SONGWHEEL.labels.info) do
-				self.labels[name] = New.Label({ text = label, size = 18 });
+				self.labels[name] = New.Label({
+					font = 'medium',
+					text = label,
+					size = 18,
+				});
 			end
 
 			for i, difficulty in ipairs(CONSTANTS_SONGWHEEL.difficulties) do
-				self.difficulties[i] = New.Label({ text = difficulty, size = 18 });
+				self.difficulties[i] = New.Label({
+					font = 'medium',
+					text = difficulty,
+					size = 18,
+				});
 			end
 
-			loadFont('normal');
-
-			self.labels.disabled = New.Label({ text = 'DISABLED', size = 24 });
-			self.labels.enabled = New.Label({ text = 'ENABLED', size = 24 });
-			self.labels.hard = New.Label({ text = 'HARD', size = 24 });
-			self.labels.normal = New.Label({ text = 'NORMAL', size = 24 });
-
-			loadFont('jp');
+			self.labels.disabled = New.Label({
+				font = 'normal',
+				text = 'DISABLED',
+				size = 24,
+			});
+			self.labels.enabled = New.Label({
+				font = 'normal',
+				text = 'ENABLED',
+				size = 24,
+			});
+			self.labels.hard = New.Label({
+				font = 'normal',
+				text = 'HARD',
+				size = 24,
+			});
+			self.labels.normal = New.Label({
+				font = 'normal',
+				text = 'NORMAL',
+				size = 24,
+			});
 
 			self.songInfo.artist = New.Label({
+				font = 'jp',
 				text = 'ARTIST',
-				scrolling = true,
 				size = 36,
 			});
 			self.songInfo.title = New.Label({
+				font = 'jp',
 				text = 'TITLE',
-				scrolling = true,
 				size = 36,
 			});
 			self.songInfo.effector = New.Label({
+				font = 'jp',
 				text = 'EFFECTOR',
-				scrolling = true,
 				size = 24,
 			});
 		end
@@ -641,20 +679,19 @@ local songInfo = {
 
 		gfx.Save();
 
-		gfx.BeginPath();
-		alignText('left');
-
-		self.labels.difficulty:draw({
+		drawLabel({
 			x = self.padding.x.double + self.jacketSize + self.padding.x.full + 6,
 			y = self.padding.y.full - 4,
 			color = 'normal',
+			label = self.labels.difficulty,
 		});
 
 		for _, name in ipairs(self.order) do
-			self.labels[name]:draw({
+			drawLabel({
 				x = self.labels.x,
 				y = y,
 				color = 'normal',
+				label = self.labels[name],
 			});
 
 			y = y
@@ -723,12 +760,17 @@ local songInfo = {
 		gfx.Save();
 
 		if (isSelected) then
-			self.images.buttonHover:draw({ x = x, y = y });
+			drawImage({
+				x = x,
+				y = y,
+				image = self.images.buttonHover,
+			});
 		else
-			self.images.button:draw({
+			drawImage({
 				x = x,
 				y = y,
 				alpha = 0.45,
+				image = self.images.button,
 			});
 		end
 
@@ -738,28 +780,25 @@ local songInfo = {
 				currentDifficulty.difficulty
 			);
 			
-			loadFont('number');
-
       self.levels[i]:update({
         new = string.format('%02d', currentDifficulty.level)
       });
 
-			gfx.BeginPath();
-
-			alignText('left');
-			self.difficulties[difficultyIndex]:draw({
+			drawLabel({
 				x = x + 36,
 				y = y + (self.images.button.h / 2.85),
 				alpha = alpha,
 				color = 'white',
+				label = self.difficulties[difficultyIndex],
 			});
 
-			alignText('right');
-			self.levels[i]:draw({
+			drawLabel({
 				x = x + self.images.button.w - 36,
 				y = y + (self.images.button.h / 2.85),
+				align = 'right',
 				alpha = alpha,
 				color = 'white',
+				label = self.levels[i],
 			});
 		end
 
@@ -800,20 +839,13 @@ local songInfo = {
 		local baseHeight = self.labels.title.h;
 		local y = self.labels.y + baseHeight + self.padding.y.quarter - 8;
 
-		loadFont('jp');
-
 		self.songInfo.artist:update({ new = string.upper(selected_song.artist) });
 		self.songInfo.effector:update({ new = string.upper(selected_song.effector)} );
 		self.songInfo.title:update({ new = string.upper(selected_song.title) });
 
-		loadFont('number');
-
 		self.songInfo.bpm:update({ new = selected_song.bpm });
 
 		gfx.Save();
-
-		gfx.BeginPath();
-		alignText('left');
 
 		for _, name in pairs(self.order) do
 			local doesOverflow = self.songInfo[name].w > self.panel.innerWidth;
@@ -821,21 +853,22 @@ local songInfo = {
 			if (doesOverflow and self.scrollTimers[name]) then
 				self.scrollTimers[name] = self.scrollTimers[name] + deltaTime;
 
-				self.songInfo[name]:draw({
+				drawScrollingLabel({
 					x = self.labels.x,
 					y = y,
 					alpha = 255,
 					color = 'white',
+					label = self.songInfo[name],
 					scale = scalingFactor,
-					scrolling = true,
 					timer = self.scrollTimers[name],
 					width = self.panel.innerWidth,
 				});
 			else
-				self.songInfo[name]:draw({
+				drawLabel({
 					x = self.labels.x,
 					y = y - 1,
 					color = 'white',
+					label = self.songInfo[name],
 				});
 			end
 
@@ -855,10 +888,11 @@ local songInfo = {
 
 		gfx.Translate(self.panel.x, self.panel.y);
 
-		self.images.panel:draw({
+		drawImage({
 			x = 0,
 			y = 0,
 			alpha = 0.5,
+			image = self.images.panel,
 		});
 
 		self:drawLabels();
@@ -902,27 +936,25 @@ local songInfo = {
 
 		gfx.Save();
 
-		gfx.BeginPath();
-		alignText('left');
-
 		self:drawButton(x, y + 1, 1, hardGauge, toggleHard, not isStartingGame);
 
-		self.labels.hardGauge:draw({
+		drawLabel({
 			x = x + 32,
 			y = y,
 			color = 'white',
+			label = self.labels.hardGauge,
 		});
 
 		x = x + 32 + self.labels.hardGauge.w + self.toggles.spacing;
 
 		self:drawButton(x, y + 1, 1, mirrorMode, toggleMirror, not isStartingGame);
 
-		self.labels.mirrorMode:draw({
+		drawLabel({
 			x = x + 32,
 			y = y,
 			color = 'white',
+			label = self.labels.mirrorMode,
 		});
-
 
 		x = x + 32 + self.labels.rotateHost.w + self.toggles.spacing;
 
@@ -935,11 +967,12 @@ local songInfo = {
 			(host == userId) and (not isStartingGame)
 		);
 
-		self.labels.rotateHost:draw({
+		drawLabel({
 			x = x + 32,
 			y = y,
 			alpha = ((host == userId) and 255) or 50,
 			color = 'white',
+			label = self.labels.rotateHost,
 		});
 
 		gfx.Restore();
@@ -1033,14 +1066,20 @@ local lobby = {
 		if (not self.labels) then
 			self.labels = {};
 
-			loadFont('medium');
-
 			for name, label in pairs(CONSTANTS_MULTI.buttons) do
-				self.labels[name] = New.Label({ text = label, size = 18 });
+				self.labels[name] = New.Label({
+					font = 'medium',
+					text = label,
+					size = 18,
+				});
 			end
 
 			for name, label in pairs(CONSTANTS_MULTI.user) do
-				self.labels[name] = New.Label({ text = label, size = 18 });
+				self.labels[name] = New.Label({
+					font = 'medium',
+					text = label,
+					size = 18,
+				});
 			end
 		end
 	end,
@@ -1048,17 +1087,29 @@ local lobby = {
 	setUserInfo = function(self)
 		if (#allUsers ~= self.userCount) then
 			for i = 1, #allUsers do
-				loadFont('normal');
-
 				self.userInfo[i] = {
-					clear = New.Label({ text = '', size = 30 }),
-					grade = New.Label({ text = '', size = 30 }),
-					player = New.Label({ text = '', size = 30 }),
+					clear = New.Label({
+						font = 'normal',
+						text = '',
+						size = 30,
+					}),
+					grade = New.Label({
+						font = 'normal',
+						text = '',
+						size = 30,
+					}),
+					player = New.Label({
+						font = 'normal',
+						text = '',
+						size = 30,
+					}),
 				};
 
-				loadFont('number');
-
-				self.userInfo[i].level = New.Label({ text = '0', size = 30 });
+				self.userInfo[i].level = New.Label({
+					font = 'number',
+					text = '0',
+					size = 30,
+				});
 				self.userInfo[i].score = ScoreNumber.New({
 					isScore = true,
 					sizes = { 30, 26 },
@@ -1070,19 +1121,13 @@ local lobby = {
 	end,
 
 	updateLabels = function(self, i, currentUser)
-		loadFont('normal');
-
 		self.userInfo[i].player:update({ new = string.upper(currentUser.name) });
 		
 		if (currentUser.level ~= 0) then
-			loadFont('number');
-	
 			self.userInfo[i].level:update({ new = currentUser.level });
 		end
 
 		if (currentUser.score) then
-			loadFont('normal');
-
 			self.userInfo[i].clear:update({
 				new = CONSTANTS_SONGWHEEL.clears[currentUser.clear]
 			});
@@ -1167,45 +1212,51 @@ local lobby = {
 		if (allowAction and isHoveringMain) then
 			hoveredButton = action;
 
-			self.images.buttonMHover:draw({ x = self.button.x, y = self.button.y[1] });
+			drawImage({
+				x = self.button.x,
+				y = self.button.y[1],
+				image = self.images.buttonMHover,
+			});
 		else
-			self.images.buttonM:draw({
+			drawImage({
 				x = self.button.x,
 				y = self.button.y[1],
 				alpha = 0.75,
+				image = self.images.buttonM,
 			});
 		end
 
-		gfx.BeginPath();
-		alignText('left');
-
-		self.labels[label]:draw({
+		drawLabel({
 			x = self.button.x + 44,
 			y = self.button.y[1] + 25,
 			alpha = ((allowAction and isHoveringMain) and 255) or 150,
 			color = 'white',
+			label = self.labels[label],
 		});
 
 		if (isHoveringSettings) then
 			hoveredButton = mpScreen.OpenSettings;
 
-			self.images.buttonMHover:draw({
+			drawImage({
 				x = self.button.x,
 				y = self.button.y[2],
+				image = self.images.buttonMHover,
 			});
 		else
-			self.images.buttonM:draw({
+			drawImage({
 				x = self.button.x,
 				y = self.button.y[2],
 				alpha = 0.75,
+				image = self.images.buttonM,
 			});
 		end
 
-		self.labels.settings:draw({
+		drawLabel({
 			x = self.button.x + 44,
 			y = self.button.y[2] + 25,
 			alpha = (isHoveringSettings and 255) or 150,
 			color = 'white',
+			label = self.labels.settings,
 		});
 
 		gfx.Restore();
@@ -1242,20 +1293,26 @@ local lobby = {
 				changeHost(currentUser);
 			end
 		
-			self.images.buttonNHover:draw({ x = x1, y = y });
+			drawImage({
+				x = x1,
+				y = y,
+				image = self.images.buttonNHover,
+			});
 		else
-			self.images.buttonN:draw({
+			drawImage({
 				x = x1,
 				y = y,
 				alpha = 0.75,
+				image = self.images.buttonN,
 			});
 		end
 
-		self.labels.makeHost:draw({
+		drawLabel({
 			x = x1 + 40,
 			y = y + 25,
 			alpha = (isHoveringHost and 255) or 150,
 			color = 'white',
+			label = self.labels.makeHost,
 		});
 
 		if (isHoveringKick) then
@@ -1263,20 +1320,26 @@ local lobby = {
 				kickUser(currentUser);
 			end
 		
-			self.images.buttonNHover:draw({ x = x2, y = y });
+			drawImage({
+				x = x2,
+				y = y,
+				image = self.images.buttonNHover,
+			});
 		else
-			self.images.buttonN:draw({
+			drawImage({
 				x = x2,
 				y = y,
 				alpha = 0.75,
+				image = self.images.buttonN,
 			});
 		end
 
-		self.labels.kickUser:draw({
+		drawLabel({
 			x = x2 + 40,
 			y = y + 25,
 			alpha = (isHoveringKick and 255) or 150,
 			color = 'white',
+			label = self.labels.kickUser,
 		});
 	end,
 
@@ -1316,32 +1379,33 @@ local lobby = {
 					or 'dark',
 			});
 
-			gfx.BeginPath();
-			alignText('left');
-
-			self.labels[nameLabel]:draw({
+			drawLabel({
 				x = self.user.x[1],
 				y = y,
 				color = 'normal',
+				label = self.labels[nameLabel],
 			});
 
-			self.userInfo[userIndex].player:draw({
+			drawLabel({
 				x = self.user.x[1],
 				y = infoY,
-				color = 'white'
+				color = 'white',
+				label = self.userInfo[userIndex].player,
 			});
 
 			if (get(currentUser, 'level') ~= 0) then
-				self.labels.level:draw({
+				drawLabel({
 					x = self.user.x[2],
 					y = y,
 					color = 'normal',
+					label = self.labels.level,
 				});
 
-				self.userInfo[userIndex].level:draw({
+				drawLabel({
 					x = self.user.x[2],
 					y = infoY,
-					color = 'white'
+					color = 'white',
+					label = self.userInfo[userIndex].level,
 				});
 			end
 
@@ -1349,24 +1413,26 @@ local lobby = {
 				for i = 3, 5 do
 					local label = self.order[i];
 
-					self.labels[label]:draw({
+					drawLabel({
 						x = self.user.x[i],
 						y = y,
 						color = 'normal',
+						label = self.labels[label],
 					});
 
 					if (i == 5) then
 						self.userInfo[userIndex].score:draw({
-							offset = 2,
 							x = self.user.x[i],
 							y1 = infoY,
 							y2 = infoY + 4,
+							offset = 2,
 						});
 					else
-						self.userInfo[userIndex][label]:draw({
+						drawLabel({
 							x = self.user.x[i],
 							y = infoY,
 							color = 'white',
+							label = self.userInfo[userIndex][label],
 						});
 					end
 				end
@@ -1444,11 +1510,12 @@ render = function(deltaTime)
 
 	playSounds(deltaTime);
 
-	background:draw({
+	drawImage({
 		x = 0,
 		y = 0,
 		w = scaledW,
 		h = scaledH,
+		image = background,
 	});
 
 	if (screenState == 'setUsername') then

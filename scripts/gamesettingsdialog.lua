@@ -4,7 +4,7 @@ local SONG_SELECT_CONSTANTS = require('constants/songwheel');
 local controls = require('songselect/controls');
 local layout = require('layout/dialog');
 
-local controlsShortcut = game.GetSkinSetting('controlsShortcut') or false;
+local controlsShortcut = getSetting('controlsShortcut', false);
 
 local timer = 0;
 
@@ -30,13 +30,23 @@ setupLayout = function()
 end
 
 generateLabels = function(constants)
-	loadFont('medium');
-
 	local labels = {
 		controls = {
-			fxl = New.Label({ text = '[FX-L]', size = 20 }),
-			fxr = New.Label({ text = '[FX-R]', size = 20 }),
-			start = New.Label({ text = '[START]', size = 24 }),
+			fxl = New.Label({
+				font = 'medium',
+				text = '[FX-L]',
+				size = 20,
+			}),
+			fxr = New.Label({
+				font = 'medium',
+				text = '[FX-R]',
+				size = 20,
+			}),
+			start = New.Label({
+				font = 'medium',
+				text = '[START]',
+				size = 24,
+			}),
 		},
 		navigation = {},
 		settings = {},
@@ -52,13 +62,17 @@ generateLabels = function(constants)
 			formattedTab = tabConstants.name;
 		end
 
-		loadFont('medium');
+		labels.navigation[tabName] = New.Label({
+			font = 'medium',
+			text = formattedTab,
+			size = 20,
+		});
 
-		labels.navigation[tabName] = New.Label({ text = formattedTab, size = 20 });
-
-		loadFont('normal');
-
-		labels.tabs[tabName] = New.Label({ text = formattedTab, size = 48 });
+		labels.tabs[tabName] = New.Label({
+			font = 'normal',
+			text = formattedTab,
+			size = 48,
+		});
 
 		labels.settings[tabName] = {};
 
@@ -83,15 +97,27 @@ generateLabels = function(constants)
 
 			local tempTable = {
 				indent = get(settingConstants, 'indent', false),
-				name = New.Label({ text = formattedSetting, size = 24 }),
+				name = New.Label({
+					font = 'normal',
+					text = formattedSetting,
+					size = 24,
+				}),
 				special = get(settingConstants, 'special', ''),
 				type = settingType,
 			};
 
 			if (settingType == 'INT') then
-				tempTable.value = New.Label({ text = '', size = 24 });
+				tempTable.value = New.Label({
+					font = 'number',
+					text = '',
+					size = 24,
+				});
 			elseif (settingType == 'FLOAT') then
-				tempTable.value = New.Label({ text = 't', size = 24 });
+				tempTable.value = New.Label({
+					font = 'number',
+					text = '',
+					size = 24,
+				});
 			elseif (settingType == 'ENUM') then
 				local options = get(currentSetting, 'options', {});
 
@@ -103,6 +129,7 @@ generateLabels = function(constants)
 
 				for optionIndex, currentOption in ipairs(options) do
 					tempTable.value[optionIndex] = New.Label({
+						font = 'normal',
 						text = currentOption,
 						size = 24,
 					});
@@ -111,19 +138,43 @@ generateLabels = function(constants)
 				if (settingConstants.name) then
 					if (settingConstants.invert) then
 						tempTable.value = {
-							['true'] = New.Label({ text = 'DISABLED', size = 24 }),
-							['false'] = New.Label({ text = 'ENABLED', size = 24 }),
+							['true'] = New.Label({
+								font = 'normal',
+								text = 'DISABLED',
+								size = 24,
+							}),
+							['false'] = New.Label({
+								font = 'normal',
+								text = 'ENABLED',
+								size = 24,
+							}),
 						};
 					else
 						tempTable.value = {
-							['true'] = New.Label({ text = 'ENABLED', size = 24 }),
-							['false'] = New.Label({ text = 'DISABLED', size = 24 }),
+							['true'] = New.Label({
+								font = 'normal',
+								text = 'ENABLED',
+								size = 24,
+							}),
+							['false'] = New.Label({
+								font = 'normal',
+								text = 'DISABLED',
+								size = 24,
+							}),
 						};
 					end
 				else
 					tempTable.value = {
-						['true'] = New.Label({ text = 'TRUE', size = 24 }),
-						['false'] = New.Label({ text = 'FALSE', size = 24 }),
+						['true'] = New.Label({
+							font = 'normal',
+							text = 'TRUE',
+							size = 24,
+						}),
+						['false'] = New.Label({
+							font = 'normal',
+							text = 'FALSE',
+							size = 24,
+						}),
 					};
 				end
 			end
@@ -320,16 +371,12 @@ local practiceModeDialog = {
 	end,
 
 	drawHeading = function(self)
-		local label = self.labels.tabs[current.tab.name];
-	
-		gfx.BeginPath();
-		alignText('left');
-		loadFont('normal');
-		label:draw({
+		drawLabel({
 			x = self.layout.info.x1 - 2,
 			y = self.layout.info.y,
 			alpha = 255 * timer,
 			color = 'normal',
+			label = self.labels.tabs[current.tab.name],
 		});
 	end,
 
@@ -346,7 +393,7 @@ local practiceModeDialog = {
 
 		local y = self.layout.info.y + (self.labels.tabs[current.tab.name].h * 1.75);
 		local w = (self.layout.panel.w - (self.layout.info.x1 * 4) - 2)
-			* quadraticEase(self.timer);
+			* smoothstep(self.timer);
 
 		for i, rawSetting in ipairs(current.settings) do
 			local setting = labels[string.gsub(
@@ -370,14 +417,12 @@ local practiceModeDialog = {
 				});
 			end
 
-			gfx.BeginPath();
-			alignText('left');
-
-			setting.name:draw({
+			drawLabel({
 				x = x,
 				y = y,
 				alpha = alpha,
 				color = 'white',
+				label = setting.name,p
 			});
 
 			self:drawSettingValue(y, setting, rawSetting, isSelected, alpha);
@@ -392,75 +437,71 @@ local practiceModeDialog = {
 		local params = {
 			x = self.layout.info.x2,
 			y = y,
+			align = 'right',
 			alpha = alpha,
 			color = 'white',
 		};
 
-		gfx.BeginPath();
-		alignText('right');
-
 		if ((setting.type == 'BUTTON') and (not rawSetting.value)) then
 			if (isSelected) then
-				self.labels.controls.start:draw({
+				drawLabel({
 					x = self.layout.info.x2,
 					y = y,
+					align = 'right',
 					alpha = 255 * timer,
 					color = 'white',
+					label = self.labels.controls.start,
 				});
 			end
-		elseif (setting.type == 'INT') then
-			loadFont('number');
+		else
+			if (setting.type == 'INT') then
+				if ((setting.special == 'TIME') or isOffset) then
+					setting.value:update({
+						new = string.format('%s ms', tostring(rawSetting.value)),
+					});
+				elseif (setting.special == 'PERCENTAGE') then
+					setting.value:update({
+						new = string.format('%s%%', tostring(rawSetting.value)),
+					});
+				else
+					setting.value:update({ new = tostring(rawSetting.value) });
+				end
 
-			if ((setting.special == 'TIME') or isOffset) then
-				setting.value:update({
-					new = string.format('%s ms', tostring(rawSetting.value)),
-				});
-			elseif (setting.special == 'PERCENTAGE') then
-				setting.value:update({
-					new = string.format('%s%%', tostring(rawSetting.value)),
-				});
-			else
-				setting.value:update({ new = tostring(rawSetting.value) });
+				params.label = setting.value;
+
+				minBounded, maxBounded = rawSetting.value == rawSetting.min,
+					rawSetting.value == rawSetting.max;
+			elseif (setting.type == 'FLOAT') then
+				local formatted;
+
+				if (setting.max <= 1) then
+					formatted = string.format('%.f%%', (rawSetting.value * 100));
+				else
+					formatted = string.format('%.2f', rawSetting.value);
+				end
+
+				setting.value:update({ new = formatted });
+
+				params.label = setting.value;
+
+				minBounded, maxBounded = rawSetting.value == rawSetting.min,
+					rawSetting.value == rawSetting.max;
+			elseif (setting.type == 'ENUM') then
+				params.label = setting.value[rawSetting.value];
+			elseif (setting.type == 'TOGGLE') then
+				local boolString = tostring(rawSetting.value);
+				local settingText = setting.value[boolString].text or '';
+
+				if (settingText == 'DISABLED') then
+					params.color = 'red';
+				else
+					params.color = 'normal';
+				end
+
+				params.label = setting.value[boolString];
 			end
 
-			setting.value:draw(params);
-
-			minBounded, maxBounded = rawSetting.value == rawSetting.min,
-				rawSetting.value == rawSetting.max;
-		elseif (setting.type == 'FLOAT') then
-			local formatted;
-
-			loadFont('number');
-
-			if (setting.max <= 1) then
-				formatted = string.format('%.f%%', (rawSetting.value * 100));
-			else
-				formatted = string.format('%.2f', rawSetting.value);
-			end
-
-			setting.value:update({ new = formatted });
-
-			setting.value:draw(params);
-
-			minBounded, maxBounded = rawSetting.value == rawSetting.min,
-				rawSetting.value == rawSetting.max;
-		elseif (setting.type == 'ENUM') then
-			loadFont('normal');
-
-			setting.value[rawSetting.value]:draw(params);
-		elseif (setting.type == 'TOGGLE') then
-			local boolString = tostring(rawSetting.value);
-			local settingText = setting.value[boolString].text or '';
-
-			loadFont('normal');
-
-			if (settingText == 'DISABLED') then
-				params.color = 'red';
-			else
-				params.color = 'normal';
-			end
-
-			setting.value[boolString]:draw(params);
+			drawLabel(params);
 		end
 
 		if (isSelected and (setting.type ~= 'BUTTON')) then
@@ -473,38 +514,38 @@ local practiceModeDialog = {
 		local x2 = self.layout.info.x2 + 56;
 		local y = self.layout.navigation.y;
 	
-		gfx.BeginPath();
-	
-		alignText('left');
-
-		self.labels.controls.fxl:draw({
+		drawLabel({
 			x = x1,
 			y = y - 1,
 			alpha = 255 * timer,
 			color = 'normal',
+			label = self.labels.controls.fxl,
 		});
 
-		self.labels.navigation[current.tab.previous]:draw({
+		drawLabel({
 			x = x1 + self.labels.controls.fxl.w + 8,
 			y = y,
 			alpha = 255 * timer,
 			color = 'white',
+			label = self.labels.navigation[current.tab.previous],
 		});
 
-		alignText('right');
-
-		self.labels.navigation[current.tab.next]:draw({
+		drawLabel({
 			x = x2,
 			y = y,
+			align = 'right',
 			alpha = 255 * timer,
 			color = 'white',
+			label = self.labels.navigation[current.tab.next],
 		});
 
-		self.labels.controls.fxr:draw({
+		drawLabel({
 			x = x2 - self.labels.navigation[current.tab.next].w - 8,
 			y = y - 1,
+			align = 'right',
 			alpha = 255 * timer,
 			color = 'normal',
+			label = self.labels.controls.fxr,
 		});
 	end,
 
@@ -550,13 +591,12 @@ local songSelectDialog = {
 		local x = layout.x.outerLeft - 2;
 		local y = layout.y.top - (label.h / 1.25);
 	
-		gfx.BeginPath();
-		alignText('left');
-		label:draw({
+		drawLabel({
 			x = x,
 			y = y,
 			alpha = 255 * timer,
 			color = 'normal',
+			label = label,
 		});
 	end,
 
@@ -567,14 +607,14 @@ local songSelectDialog = {
 			previousSetting = current.setting.index;
 		end
 
-		self.timer = math.min(self.timer + (deltaTime * 3), 1);
+		self.timer = math.min(self.timer + (deltaTime * 4), 1);
 
 		local labels = self.labels.settings[current.tab.name];
 
 		local offset = 0;
 		local x = layout.x.middleLeft;
 		local y = layout.y.top + (self.labels.tabs[current.tab.name].h / 1.75);
-		local w = (layout.w.middle + 16) * quadraticEase(self.timer); 
+		local w = (layout.w.middle + 16) * smoothstep(self.timer); 
 
 		if (current.setting.index > 7) then
 			offset = (labels[string.gsub(
@@ -635,14 +675,12 @@ local songSelectDialog = {
 				gfx.Restore();
 			end
 
-			gfx.BeginPath();
-			alignText('left');
-
-			setting.name:draw({
+			drawLabel({
 				x = x,
 				y = y,
 				alpha = alpha,
 				color = 'white',
+				label = setting.name,
 			});
 
 			self:drawSettingValue(y, setting, rawSetting, isSelected, alpha);
@@ -657,75 +695,71 @@ local songSelectDialog = {
 		local params = {
 			x = layout.x.middleRight,
 			y = y,
+			align = 'right',
 			alpha = alpha,
 			color = 'white',
 		};
 
-		gfx.BeginPath();
-		alignText('right');
-
 		if ((setting.type == 'BUTTON') and (not rawSetting.value)) then
 			if (isSelected) then
-				self.labels.controls.start:draw({
+				drawLabel({
 					x = layout.x.middleRight,
 					y = y,
+					align = 'right',
 					alpha = alpha,
 					color = 'white',
+					label = self.labels.controls.start,
 				});
 			end
-		elseif (setting.type == 'INT') then
-			loadFont('number');
+		else
+			if (setting.type == 'INT') then
+				if (setting.special == 'TIME WINDOW') then
+					setting.value:update({
+						new = string.format('±%s ms', tostring(rawSetting.value)),
+					});
+				elseif ((setting.special == 'TIME') or isOffset) then
+					setting.value:update({
+						new = string.format('%s ms', tostring(rawSetting.value)),
+					});
+				else
+					setting.value:update({ new = tostring(rawSetting.value) });
+				end
 
-			if (setting.special == 'TIME WINDOW') then
-				setting.value:update({
-					new = string.format('±%s ms', tostring(rawSetting.value)),
-				});
-			elseif ((setting.special == 'TIME') or isOffset) then
-				setting.value:update({
-					new = string.format('%s ms', tostring(rawSetting.value)),
-				});
-			else
-				setting.value:update({ new = tostring(rawSetting.value) });
+				params.label = setting.value;
+
+				minBounded, maxBounded = rawSetting.value == rawSetting.min,
+					rawSetting.value == rawSetting.max;
+			elseif (setting.type == 'FLOAT') then
+				local formatted;
+
+				if (rawSetting.max <= 1) then
+					formatted = string.format('%.f%%', (rawSetting.value * 100));
+				else
+					formatted = string.format('%.2f', rawSetting.value);
+				end
+
+				setting.value:update({ new = formatted });
+
+				params.label = setting.value;
+
+				minBounded, maxBounded = rawSetting.value == rawSetting.min,
+					rawSetting.value == rawSetting.max;
+			elseif (setting.type == 'ENUM') then
+				params.label = setting.value[rawSetting.value];
+			elseif (setting.type == 'TOGGLE') then
+				local boolString = tostring(rawSetting.value);
+				local settingText = setting.value[boolString].text or '';
+
+				if (settingText == 'DISABLED') then
+					params.color = 'red';
+				else
+					params.color = 'normal';
+				end
+
+				params.label = setting.value[boolString];
 			end
 
-			setting.value:draw(params);
-
-			minBounded, maxBounded = rawSetting.value == rawSetting.min,
-				rawSetting.value == rawSetting.max;
-		elseif (setting.type == 'FLOAT') then
-			local formatted;
-
-			loadFont('number');
-
-			if (rawSetting.max <= 1) then
-				formatted = string.format('%.f%%', (rawSetting.value * 100));
-			else
-				formatted = string.format('%.2f', rawSetting.value);
-			end
-
-			setting.value:update({ new = formatted });
-
-			setting.value:draw(params);
-
-			minBounded, maxBounded = rawSetting.value == rawSetting.min,
-				rawSetting.value == rawSetting.max;
-		elseif (setting.type == 'ENUM') then
-			loadFont('normal');
-
-			setting.value[rawSetting.value]:draw(params);
-		elseif (setting.type == 'TOGGLE') then
-			local boolString = tostring(rawSetting.value);
-			local settingText = setting.value[boolString].text or '';
-
-			loadFont('normal');
-
-			if (settingText == 'DISABLED') then
-				params.color = 'red';
-			else
-				params.color = 'normal';
-			end
-
-			setting.value[boolString]:draw(params);
+			drawLabel(params);
 		end
 
 		if (isSelected and (setting.type ~= 'BUTTON')) then
@@ -739,38 +773,38 @@ local songSelectDialog = {
 		local x2 = layout.x.outerRight;
 		local y = layout.y.bottom + 12;
 
-		gfx.BeginPath();
-
-		alignText('left');
-	
-		self.labels.controls.fxl:draw({
+		drawLabel({
 			x = x1,
 			y = y - 1,
 			alpha = alpha,
 			color = 'normal',
+			label = self.labels.controls.fxl,
 		});
 
-		self.labels.navigation[current.tab.previous]:draw({
+		drawLabel({
 			x = x1 + self.labels.controls.fxr.w + 8,
 			y = y,
 			alpha = alpha,
 			color = 'white',
+			label = self.labels.navigation[current.tab.previous],
 		});
 	
-		alignText('right');
-
-		self.labels.navigation[current.tab.next]:draw({
+		drawLabel({
 			x = x2,
 			y = y,
+			align = 'right',
 			alpha = alpha,
 			color = 'white',
+			label = self.labels.navigation[current.tab.next],
 		});
 
-		self.labels.controls.fxr:draw({
+		drawLabel({
 			x = x2 - self.labels.navigation[current.tab.next].w - 8,
 			y = y - 1,
+			align = 'right',
 			alpha = alpha,
 			color = 'normal',
+			label = self.labels.controls.fxr,
 		});
 	end,
 	
@@ -789,11 +823,12 @@ local songSelectDialog = {
 
 		gfx.Scale(scalingFactor, scalingFactor);
 
-		layout.images.dialogBox:draw({
+		drawImage({
 			x = scaledW / 2,
 			y = scaledH / 2,
 			alpha = timer,
 			centered = true,
+			image = layout.images.dialogBox,
 		});
 		
 		gfx.Restore();

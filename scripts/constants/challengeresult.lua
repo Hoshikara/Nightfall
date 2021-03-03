@@ -27,10 +27,12 @@ local CONSTANTS = {
 local generate = function(whichStrings)
   local labels = {};
 
-  loadFont('medium');
-
   for key, name in pairs(CONSTANTS[whichStrings]) do
-    labels[key] = New.Label({ text = name, size = 18 });
+    labels[key] = New.Label({
+      font = 'medium',
+      text = name,
+      size = 18,
+    });
   end
 
   return labels;

@@ -1,16 +1,29 @@
 local New = function(params)
   local labels = {};
-
-  loadFont('number');
+  local w = 0;
 
   if (params.isScore) then
     for i = 1, 4 do
-      labels[i] = New.Label({ text = '0', size = params.sizes[1] });
-      labels[i + 4] = New.Label({ text = '0', size = params.sizes[2] });
+      labels[i] = New.Label({
+        font = 'number',
+        text = '0',
+        size = params.sizes[1],
+      });
+      labels[i + 4] = New.Label({
+        font = 'number',
+        text = '0',
+        size = params.sizes[2],
+      });
     end
   else
     for i = 1, params.digits do
-      labels[i] = New.Label({ text = '0', size = params.sizes[1] });
+      labels[i] = New.Label({
+        font = 'number',
+        text = '0',
+        size = params.sizes[1],
+      });
+
+      w = w + labels[i].w;
     end
   end
 
@@ -20,6 +33,7 @@ local New = function(params)
     isScore = params.isScore,
     labels = labels,
     position = {},
+    w = w * 0.75,
 
     setInfo = function(self, params)
       for i = 1, #self.labels do
@@ -38,11 +52,10 @@ local New = function(params)
 
     draw = function(self, params)
       local x = params.x or 0;
+      local align = params.align or 'left';
       local alpha = params.alpha or 255;
       local color = params.color or 'normal';
-
-      loadFont('number');
-
+      
       if (self.isScore) then
         local offset = params.offset or 0;
         local y1 = params.y1 or 0;
@@ -52,18 +65,22 @@ local New = function(params)
           self.labels[i]:update({ new = self.digits[i] });
           self.labels[i + 4]:update({ new = self.digits[i + 4] });
 
-          self.labels[i]:draw({
+          drawLabel({
             x = x + self.position[i],
             y = y1,
+            align = align,
             alpha = alpha * self.alpha[i],
             color = 'white',
+            label = self.labels[i],
           });
 
-          self.labels[i + 4]:draw({
+          drawLabel({
             x = x + offset + self.position[i + 4],
             y = y2,
+            align = align,
             alpha = alpha * self.alpha[i + 4],
             color = color,
+            label = self.labels[i + 4],
           });
         end
       else
@@ -72,11 +89,13 @@ local New = function(params)
         for i = 1, #self.labels do
           self.labels[i]:update({ new = self.digits[i] });
 
-          self.labels[i]:draw({
+          drawLabel({
             x = x + self.position[i],
             y = y,
+            align = align,
             alpha = alpha * self.alpha[i],
             color = color,
+            label = self.labels[i],
           });
         end
       end

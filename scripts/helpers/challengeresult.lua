@@ -3,7 +3,7 @@ local CONSTANTS = require('constants/result');
 local ScoreNumber = require('common/scorenumber');
 
 local getDateFormat = function()
-  local dateFormat = game.GetSkinSetting('dateFormat') or 'DAY-MONTH-YEAR';
+  local dateFormat = getSetting('dateFormat', 'DAY-MONTH-YEAR');
 
   if (dateFormat == 'DAY-MONTH-YEAR') then
     return '%d-%m-%y';
@@ -26,24 +26,37 @@ end
 
 local formatChallengeInfo = function(current)
   local labels = { requirements = {} };
-  local player = game.GetSkinSetting('displayName') or 'GUEST';
-
-  loadFont('normal');
+  local player = getSetting('displayName', 'GUEST');
 
   labels.title = New.Label({
+    font = 'normal',
     text = string.upper(get(current, 'title', '')),
     size = 36,
   });
 
   labels.player = New.Label({
+    font = 'normal',
     text = string.upper(player),
     size = 24,
   });
 
-  loadFont('medium');
+  if (get(current, 'passed', false)) then
+    labels.result = New.Label({
+      font = 'normal',
+      text = 'PASS',
+      size = 24,
+    });
+  else
+    labels.result = New.Label({
+      font = 'normal',
+      text = 'FAIL',
+      size = 24,
+    });
+  end
 
   for requirement in get(current, 'requirement_text', ''):gmatch('[^\n]+') do
     local label =  New.Label({
+      font = 'medium',
       text = string.upper(requirement),
       size = 20,
     });
@@ -51,20 +64,14 @@ local formatChallengeInfo = function(current)
     table.insert(labels.requirements, label);
   end
 
-  if (get(current, 'passed', false)) then
-    labels.result = New.Label({ text = 'PASS', size = 24 });
-  else
-    labels.result = New.Label({ text = 'FAIL', size = 24 });
-  end
-
-  loadFont('number');
-
   labels.completion = New.Label({
+    font = 'number',
     text = string.format('%d%%', get(current, 'avgPercentage', 0)),
     size = 24,
   });
 
   labels.date = New.Label({
+    font = 'number',
     text = os.date(getDateFormat(), os.time()),
     size = 24,
   });
@@ -86,49 +93,67 @@ local formatCharts = function(tbl)
       1000
     );
 
-    loadFont('jp');
-
     current.title = New.Label({
+      font = 'jp',
       text = string.upper(get(chart, 'title', '')),
-      scrolling = true,
       size = 36,
     });
 
-    loadFont('normal');
-
     if (get(chart, 'passed', false)) then
-      current.result = New.Label({ text = 'PASS', size = 24 });
+      current.result = New.Label({
+        font = 'normal',
+        text = 'PASS',
+        size = 24,
+      });
     else
-      current.result = New.Label({ text = 'FAIL', size = 24 });
+      current.result = New.Label({
+        font = 'normal',
+        text = 'FAIL',
+        size = 24,
+      });
     end
 
     if (get(chart, 'badge', 0) == 0) then
-      current.clear = New.Label({ text = 'EXIT', size = 24 });
+      current.clear = New.Label({
+        font = 'normal',
+        text = 'EXIT',
+        size = 24,
+      });
     else
       current.clear = New.Label({
+        font = 'normal',
         text = CONSTANTS.clears[get(chart, 'badge', 1)],
         size = 24,
       });
     end
 
-    current.difficulty = New.Label({ text = getDifficulty(chart), size = 24 });
+    current.difficulty = New.Label({
+      font = 'normal',
+      text = getDifficulty(chart),
+      size = 24,
+    });
 
     current.grade = New.Label({
+      font = 'normal',
       text = string.upper(get(chart, 'grade', '')),
       size = 24,
     });
 
-    loadFont('number');
-
-    current.bpm = New.Label({ text = get(chart, 'bpm', ''), size = 24 });
+    current.bpm = New.Label({
+      font = 'number',
+      text = get(chart, 'bpm', ''),
+      size = 24,
+    });
 
     current.completion = New.Label({
+      font = 'number',
       text = string.format('%d%%', get(chart, 'percent', 0)),
       size = 24,
     });
 
     if (get(chart, 'gauge_type', get(chart, 'flags', 0)) == 1) then
       current.gauge = New.Label({
+        font = 'number',
         text = string.format(
           '%d%% (H)',
           math.ceil(get(chart, 'gauge', 0) * 100)
@@ -137,6 +162,7 @@ local formatCharts = function(tbl)
       });
     else
       current.gauge = New.Label({
+        font = 'number',
         text = string.format(
           '%d%%',
           math.ceil(get(chart, 'gauge', 0) * 100)
@@ -146,23 +172,28 @@ local formatCharts = function(tbl)
     end
 
     current.level = New.Label({
+      font = 'number',
       text = string.format('%02d', get(chart, 'level', 1)),
       size = 24,
     });
 
     current.critical = New.Label({
+      font = 'number',
       text = get(chart, 'perfects', '-'),
       size = 24,
     });
     current.error = New.Label({
+      font = 'number',
       text = get(chart, 'misses', '-'),
       size = 24,
     });
     current.maxChain = New.Label({
+      font = 'number',
       text = get(chart, 'maxCombo', '-'),
       size = 24,
     });
     current.near = New.Label({
+      font = 'number',
       text = get(chart, 'goods', '-'),
       size = 24,
     });

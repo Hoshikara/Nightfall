@@ -17,8 +17,8 @@ local background = New.Image({ path = 'bg.png' });
 local best20 = {};
 local best50 = {};
 
-local controlsShortcut = game.GetSkinSetting('controlsShortcut') or false;
-local jacketQuality = game.GetSkinSetting('jacketQuality') or 'NORMAL';
+local controlsShortcut = getSetting('controlsShortcut', false);
+local jacketQuality = getSetting('jacketQuality', 'NORMAL');
 
 local previousDifficulty = 1;
 local previousSong = 1;
@@ -62,21 +62,20 @@ local jacketCache = {
   },
 
   getJacket = function(self, jacketPath)
-    local jacket = self.cache[jacketPath];
     local quality = self.quality[jacketQuality] or self.quality['NORMAL'];
 
-    if ((not jacket) or (jacket == self.fallback)) then
-      jacket = gfx.LoadImageJob(
+    if ((not self.cache[jacketPath])
+      or (self.cache[jacketPath] == self.fallback)
+    ) then
+      self.cache[jacketPath] = gfx.LoadImageJob(
         jacketPath,
         self.fallback,
         math.floor(scaledW * quality),
         math.floor(scaledW * quality)
       );
-
-      self.cache[jacketPath] = jacket;
     end
 
-    return jacket;
+    return self.cache[jacketPath];
   end,
 };
 
@@ -84,24 +83,22 @@ local songCache = {};
 
 verifySongCache = function(song)
   if (not songCache[song.id]) then
-    songCache[song.id] = {};
-
-    loadFont('jp');
+    songCache[song.id] = { jackets = {} };
 
     songCache[song.id].artist = New.Label({
+      font = 'jp',
       text = string.upper(song.artist),
-      scrolling = true,
       size = 30,
     });
+
     songCache[song.id].title = New.Label({
+      font = 'jp',
       text = string.upper(song.title),
-      scrolling = true,
       size = 36,
     });
     
-    loadFont('number');
-
     songCache[song.id].bpm = New.Label({
+      font = 'number',
       text = tostring(song.bpm),
       size = 24,
     });
@@ -119,13 +116,11 @@ verifySongCacheEffector = function(song, difficultyIndex)
     songCache[song.id].effector = {};
   end
 
-  loadFont('jp');
-
   if (not songCache[song.id].effector[difficultyIndex]) then
     songCache[song.id].effector[difficultyIndex] =
       New.Label({
+        font = 'jp',
         text = string.upper(difficulty.effector),
-        scrolling = true,
         size = 24,
       });
   end
@@ -172,33 +167,59 @@ local grades = {
 local bestLabels = { large = {}, small = {} };
 
 do
-  loadFont('normal');
-
   for index, clear in ipairs(CONSTANTS.clears) do
-    clears.labels[index] = New.Label({ text = clear, size = 36 });
+    clears.labels[index] = New.Label({
+      font = 'normal',
+      text = clear,
+      size = 36,
+    });
   end
 
   for index, current in ipairs(CONSTANTS.grades) do
     grades.breakpoints[index] = {
       grade = current.grade,
       minimum = current.minimum,
-      label = New.Label({ text = current.grade, size = 36 }),
+      label = New.Label({
+        font = 'normal',
+        text = current.grade,
+        size = 36,
+      }),
     };
   end
 
-  bestLabels.large.best = New.Label({ text = 'BEST', size = 28 });
+  bestLabels.large.best = New.Label({
+    font = 'normal',
+    text = 'BEST',
+    size = 28,
+  });
 
-  loadFont('medium');
+  bestLabels.small.best = New.Label({
+    font = 'medium',
+    text = 'BEST',
+    size = 18,
+  });
 
-  bestLabels.small.best = New.Label({ text = 'BEST', size = 18 });
+  bestLabels.large['20'] = New.Label({
+    font = 'number',
+    text = '20',
+    size = 28,
+  });
+  bestLabels.large['50'] = New.Label({
+    font = 'number',
+    text = '50',
+    size = 28,
+  });
 
-  loadFont('number');
-
-  bestLabels.large['20'] = New.Label({ text = '20', size = 28 });
-  bestLabels.large['50'] = New.Label({ text = '50', size = 28 });
-
-  bestLabels.small['20'] = New.Label({ text = '20', size = 18 });
-  bestLabels.small['50'] = New.Label({ text = '50', size = 18 });
+  bestLabels.small['20'] = New.Label({
+    font = 'number',
+    text = '20',
+    size = 18,
+  });
+  bestLabels.small['50'] = New.Label({
+    font = 'number',
+    text = '50',
+    size = 18,
+  });
 end
 
 local songInfo = {
@@ -307,8 +328,6 @@ local songInfo = {
 
   setLabels = function(self)
     if (not self.labels) then
-      loadFont('number');
-
       self.difficulties = {};
       self.highScore = ScoreNumber.New({
         isScore = true,
@@ -318,17 +337,27 @@ local songInfo = {
       self.levels = {};
 
       for i = 1, 4 do
-        self.levels[i] = New.Label({ text = '', size = 18 });
+        self.levels[i] = New.Label({
+          font = 'number',
+          text = '',
+          size = 18,
+        });
       end
 
-      loadFont('medium');
-
       for index, name in pairs(CONSTANTS.difficulties) do
-        self.difficulties[index] = New.Label({ text = name, size = 18 });
+        self.difficulties[index] = New.Label({
+          font = 'medium',
+          text = name,
+          size = 18,
+        });
       end
 
       for name, str in pairs(CONSTANTS.labels.info) do
-        self.labels[name] = New.Label({ text = str, size = 18 });
+        self.labels[name] = New.Label({
+          font = 'medium',
+          text = str,
+          size = 18,
+        });
       end
     end
   end,
@@ -351,7 +380,7 @@ local songInfo = {
     return difficulty;
   end,
 
-  drawJacket = function(self, difficulty)
+  drawJacket = function(self, songId, difficulty)
     local jacket = jacketCache:getJacket(difficulty.jacketPath);
 
     gfx.Save();
@@ -383,19 +412,18 @@ local songInfo = {
       color = 'dark',
     });
 
-    gfx.BeginPath();
-    alignText('left');
-
-    bestLabels.large.best:draw({
+    drawLabel({
       x = x + 20,
       y = y + 15,
       color = 'white',
+      label = bestLabels.large.best,
     });
 
-    bestLabels.large[range]:draw({
+    drawLabel({
       x = x + 20 + bestLabels.large.best.w + 12,
       y = y + 15,
       color = 'normal',
+      label = bestLabels.large[range],
     });
   end,
 
@@ -406,9 +434,6 @@ local songInfo = {
 
     gfx.Save();
 
-    gfx.BeginPath();
-    alignText('left');
-
     for _, name in ipairs(self.order.main) do
       local currentLabel = songCache[song.id][name];
 
@@ -418,30 +443,32 @@ local songInfo = {
 
       local doesOverflow = currentLabel.w > self.panel.innerWidth;
 
-      self.labels[name]:draw({
+      drawLabel({
         x = self.labels.x,
         y = y,
         color = 'normal',
+        label = self.labels[name],
       });
   
       if (doesOverflow and (self.scrollTimers[name] ~= nil)) then
         self.scrollTimers[name] = self.scrollTimers[name] + deltaTime;
 
-        currentLabel:draw({
+        drawScrollingLabel({
           x = self.labels.x,
           y = y + (self.labels[name].h * 1.35),
           alpha = 255,
           color = 'white',
+          label = currentLabel,
           scale = scalingFactor,
-          scrolling = true,
           timer = self.scrollTimers[name],
           width = self.panel.innerWidth,
         });
       else
-        currentLabel:draw({
+        drawLabel({
           x = self.labels.x,
           y = y + (self.labels[name].h * 1.35),
           color = 'white',
+          label = currentLabel,
         });
       end
 
@@ -453,28 +480,32 @@ local songInfo = {
 
     if (clearLabel and gradeLabel) then
       for _, name in ipairs(self.order.conditional) do
-        self.labels.grade:draw({
+        drawLabel({
           x = self.labels.x,
           y = y,
           color = 'normal',
+          label = self.labels.grade,
         });
 
-        gradeLabel:draw({
+        drawLabel({
           x = self.labels.x,
           y = y + (self.labels.grade.h * 1.25),
           color = 'white',
+          label = gradeLabel,
         });
 
-        self.labels.clear:draw({
+        drawLabel({
           x = self.labels.x + (self.padding.x.full * 4.5),
           y = y,
           color = 'normal',
+          label = self.labels.clear,
         });
 
-        clearLabel:draw({
+        drawLabel({
           x = self.labels.x + (self.padding.x.full * 4.5),
           y = y + (self.labels.clear.h * 1.25),
           color = 'white',
+          label = clearLabel,
         });
       end
 
@@ -483,19 +514,20 @@ local songInfo = {
         + (clearLabel.h)
         + (self.padding.y.quarter * 1.35);
 
-      self.highScore:setInfo({ value = difficulty.scores[1].score });
-
-      self.labels.highScore:draw({
+      drawLabel({
         x = self.labels.x,
         y = y,
         color = 'normal',
+        label = self.labels.highScore,
       });
 
+      self.highScore:setInfo({ value = difficulty.scores[1].score });
+
       self.highScore:draw({
-        offset = 10,
         x = self.labels.x - 4,
         y1 = y + (self.labels.highScore.h * 0.5),
         y2 = y + (self.labels.highScore.h * 0.5) + self.padding.y.half - 5,
+        offset = 10,
       });
     end
 
@@ -507,17 +539,21 @@ local songInfo = {
       + self.jacketSize
       + self.padding.x.full
       + 4;
-    local alpha = math.floor(255 * ((isSelected and 1) or 0.2));
 
     gfx.Save();
 
     if (isSelected) then
-      self.images.buttonHover:draw({ x = x, y = y });
+      drawImage({
+        x = x,
+        y = y,
+        image = self.images.buttonHover,
+      })
     else
-      self.images.button:draw({
+      drawImage({
         x = x,
         y = y,
         alpha = 0.45,
+        image = self.images.button,
       });
     end
 
@@ -527,27 +563,25 @@ local songInfo = {
         currentDifficulty.difficulty
       );
 
-      loadFont('number');
-
       self.levels[i]:update({
         new = string.format('%02d', currentDifficulty.level)
       });
 
-      gfx.BeginPath();
-      alignText('left');
-      self.difficulties[difficultyIndex]:draw({
+      drawLabel({
         x = x + 36,
         y = y + (self.images.button.h / 2.85),
-        alpha = alpha,
+        alpha = 255 * ((isSelected and 1) or 0.2),
         color = 'white',
+        label = self.difficulties[difficultyIndex],
       });
 
-      alignText('right');
-      self.levels[i]:draw({
+      drawLabel({
         x = x + self.images.button.w - 36,
         y = y + (self.images.button.h / 2.85),
-        alpha = alpha,
+        align = 'right',
+        alpha = 255 * ((isSelected and 1) or 0.2),
         color = 'white',
+        label = self.levels[i],
       });
     end
 
@@ -563,12 +597,13 @@ local songInfo = {
 
     gfx.Translate(self.panel.x, self.panel.y);
 
-    self.images.panel:draw({
+    drawImage({
       x = 0,
       y = 0,
       w = self.panel.w,
       h = self.panel.h,
       alpha = 0.5,
+      image = self.images.panel,
     });
 
     gfx.Restore();
@@ -588,17 +623,15 @@ local songInfo = {
 
     gfx.Translate(self.panel.x, self.panel.y);
 
-    self:drawJacket(difficulty);
+    self:drawJacket(song.id, difficulty);
 
     self:drawSongInfo(deltaTime, song, difficulty);
 
-    gfx.BeginPath();
-    alignText('left');
-
-    self.labels.difficulty:draw({
+    drawLabel({
       x = self.padding.x.double + self.jacketSize + self.padding.x.full + 4,
       y = self.padding.y.full - 4,
       color = 'normal',
+      label = self.labels.difficulty,
     });
 
     local y = self.padding.y.double + self.labels.difficulty.h - 24;
@@ -618,11 +651,21 @@ local songInfo = {
   end,
 
   handleChange = function(self)
+    local resetTimers = function(self)
+      self.scrollTimers.artist = 0;
+      self.scrollTimers.effector = 0;
+      self.scrollTimers.title = 0;
+    end
+
     if (self.selectedDifficulty ~= selectedDifficulty) then
+      resetTimers(self);
+
       self.selectedDifficulty = selectedDifficulty;
     end
 
     if (self.cursorIndex.previous ~= self.cursorIndex.current) then
+      resetTimers(self);
+
       self.cursorIndex.previous = self.cursorIndex.current;
 
       self.cursor:setPosition({
@@ -735,34 +778,44 @@ local songGrid = {
 
   setLabels = function(self)
     if (not self.labels) then
-      loadFont('medium');
-
       self.labels = {
-        of = New.Label({ text = 'OF', size = 18 }),
+        of = New.Label({
+          font = 'medium',
+          text = 'OF',
+          size = 18,
+        }),
       };
 
       for name, str in pairs(CONSTANTS.labels.grid) do
-        self.labels[name] = New.Label({ text = str, size = 18 });
+        self.labels[name] = New.Label({
+          font = 'medium',
+          text = str,
+          size = 18,
+        });
       end
 
-      loadFont('number');
-
-      self.labels.currentSong = New.Label({ text = '', size = 18 });
-      self.labels.totalSongs = New.Label({ text = '', size = 18 });
+      self.labels.currentSong = ScoreNumber.New({
+        digits = 4,
+        isScore = false,
+        sizes = { 18 },
+      });
+      self.labels.totalSongs = ScoreNumber.New({
+        digits = 4,
+        isScore = false,
+        sizes = { 18 },
+      });
     end
   end,
 
   drawLabels = function(self)
     gfx.Save();
   
-    gfx.BeginPath();
-    alignText('left');
-
     for i, name in ipairs(self.order) do
-      self.labels[name]:draw({
+      drawLabel({
         x = self.labels.x[i],
         y = self.labels.y,
         color = 'normal',
+        label = self.labels[name],
       });
     end
 
@@ -790,14 +843,8 @@ local songGrid = {
   end,
 
   drawSongAmount = function(self)
-    loadFont('number');
-
-    self.labels.currentSong:update({
-      new = string.format('%04d', self.selectedSong)
-    });
-    self.labels.totalSongs:update({
-      new = string.format('%04d', #songwheel.songs)
-    });
+    self.labels.currentSong:setInfo({ value = self.selectedSong });
+    self.labels.totalSongs:setInfo({ value = #songwheel.songs });
 
     gfx.Save();
 
@@ -806,21 +853,25 @@ local songGrid = {
       scaledH - (scaledH / 40) - 12
     );
 
-    gfx.BeginPath();
-    alignText('right');
     self.labels.currentSong:draw({
-      x = -(self.labels.of.w + self.labels.totalSongs.w + 16),
+      x = -(self.labels.of.w + (self.labels.totalSongs.w * 2) + 30),
       y = 0,
+      align = 'right',
       color = 'normal',
     });
-    self.labels.of:draw({
-      x = -(self.labels.totalSongs.w + 8),
+
+    drawLabel({
+      x = -((self.labels.totalSongs.w * 1.25) + 12),
       y = 0,
+      align = 'right',
       color = 'normal',
+      label = self.labels.of,
     });
+
     self.labels.totalSongs:draw({
-      x = 0,
+      x = -(self.labels.totalSongs.w),
       y = 0,
+      align = 'right',
       color = 'normal',
     });
 
@@ -829,11 +880,11 @@ local songGrid = {
 
   drawSongGrid = function(self, deltaTime)
     if (self.grid.timer < 1) then
-      self.grid.timer = math.min(self.grid.timer + (deltaTime * 8), 1);
+      self.grid.timer = math.min(self.grid.timer + (deltaTime * 4), 1);
     end
 
     local change = (self.grid.y.current - self.grid.y.previous)
-      * quadraticEase(self.grid.timer);
+      * smoothstep(self.grid.timer);
     local offset = self.grid.y.previous + change;
     local y = 0;
 
@@ -869,9 +920,9 @@ local songGrid = {
       difficulty = song.difficulties[1];
     end
 
-    local jacket = jacketCache:getJacket(difficulty.jacketPath);
-
     if (isVisible) then
+      local jacket = jacketCache:getJacket(difficulty.jacketPath);
+
       drawRectangle({
         x = x,
         y = y,
@@ -926,21 +977,20 @@ local songGrid = {
       color = 'dark',
     });
 
-    gfx.BeginPath();
-    alignText('left');
-
-    bestLabels.small.best:draw({
+    drawLabel({
       x = x + 16,
       y = y + 12,
       alpha = 255 * alpha,
       color = 'white',
+      label = bestLabels.small.best,
     });
 
-    bestLabels.small[range]:draw({
+    drawLabel({
       x = x + 16 + bestLabels.small.best.w + 8,
       y = y + 12,
       alpha = 255 * math.min(alpha * 1.5, 1),
       color = 'normal',
+      label = bestLabels.small[range],
     });
   end,
 
@@ -957,21 +1007,20 @@ local songGrid = {
       color = 'dark',
     });
 
-    gfx.BeginPath();
-    alignText('left');
-
-    self.labels.grade:draw({
+    drawLabel({
       x = x + 8,
       y = y + 4,
       alpha = 255 * math.min(alpha * 1.5, 1),
       color = 'normal',
+      label = self.labels.grade,
     });
 
-    grade:draw({
+    drawLabel({
       x = x + 8,
       y = y + 4 + (self.labels.grade.h),
       alpha = 255 * alpha,
       color = 'white',
+      label = grade,
     });
   end,
 
@@ -1044,24 +1093,36 @@ local miscInfo = {
 
   render = function(self)
     if (not self.labels) then
-      loadFont('medium');
-  
       self.labels = {
-        bta = New.Label({ text = '[BT-A]', size = 20 }),
-        showControls = New.Label({ text = 'SHOW CONTROLS', size = 20 }),
+        bta = New.Label({
+          font = 'medium',
+          text = '[BT-A]',
+          size = 20,
+        }),
+        showControls = New.Label({
+          font = 'medium',
+          text = 'SHOW CONTROLS', 
+          size = 20,
+        }),
         volforce = {
-          label = New.Label({ text = 'VF', size = 20 }),
+          label = New.Label({
+            font = 'medium',
+            text = 'VF',
+            size = 20,
+          }),
         },
       };
 
-      loadFont('number');
-      self.labels.volforce.value = New.Label({ text = '', size = 20 });
+      self.labels.volforce.value = New.Label({
+        font = 'number',
+        text = '',
+        size = 20,
+      });
     end
 
     local forceValue = totalForce or get(userData.contents, 'volforce', 0);
     local y = 0;
 
-    loadFont('number');
     self.labels.volforce.value:update({ new = string.format('%.2f', forceValue) });
   
     gfx.Save();
@@ -1072,52 +1133,54 @@ local miscInfo = {
     );
 
     if (controlsShortcut) then
-      gfx.BeginPath();
-      alignText('left');
-      self.labels.bta:draw({
+      drawLabel({
         x = 0,
         y = y,
         color = 'normal',
+        label = self.labels.bta,
       });
 
-      self.labels.showControls:draw({
+      drawLabel({
         x = self.labels.bta.w + 8,
         y = y + 1,
         color = 'white',
+        label = self.labels.showControls,
       });
 
       gfx.Translate(songInfo.panel.w + 2, 0);
 
-      loadFont('number');
-      self.labels.volforce.value:update({ new = string.format('%.2f', forceValue) });
-
-      gfx.BeginPath();
-      alignText('right');
-      self.labels.volforce.label:draw({
-        x = 0,
-        y = y,
-        color = 'normal',
+      self.labels.volforce.value:update({
+        new = string.format('%.2f', forceValue)
       });
 
-      self.labels.volforce.value:draw({
+      drawLabel({
+        x = 0,
+        y = y,
+        align = 'right',
+        color = 'normal',
+        label = self.labels.volforce.label,
+      });
+
+      drawLabel({
         x = -(self.labels.volforce.label.w + 8),
         y = y,
+        align = 'right',
         color = 'white',
+        label = self.labels.volforce.value,
       });
     else
-      gfx.BeginPath();
-      alignText('left');
-
-      self.labels.volforce.value:draw({
+      drawLabel({
         x = 0,
         y = y,
         color = 'white',
+        label = self.labels.volforce.value,
       });
 
-      self.labels.volforce.label:draw({
+      drawLabel({
         x = self.labels.volforce.value.w + 8,
         y = y,
         color = 'normal',
+        label = self.labels.volforce.label,
       });
     end
 
@@ -1130,11 +1193,12 @@ render = function(deltaTime)
 
   gfx.Save();
 
-  background:draw({
+  drawImage({
     x = 0,
     y = 0,
     w = scaledW,
     h = scaledH,
+    image = background,
   });
 
   songInfo:render(deltaTime);

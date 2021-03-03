@@ -1,3 +1,10 @@
+###### March 3, 2021
+- Added current hit window display during gameplay; this can be disabled in skin settings
+- Adjusted some scrolling animations
+- Changed various scrolling labels to reset when not visisble
+- Fixed a bug where some skin settings were not being consumed properly
+- Fixed a memory leak caused by excessive jacket loading
+
 ###### February 24, 2021
 - Added line highlighting for filter and sort wheels
 - Added a skin option to only show high scores with harder hit windows for the results screen

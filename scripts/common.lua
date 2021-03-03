@@ -3,14 +3,104 @@ local Constants = require('constants/common');
 
 gfx.LoadSkinFont('DFMGM.ttf');
 
-quadraticEase = function(progress)
-  return 1 - (1 - progress) * (1 - progress);
+smoothstep = function(t)
+  return t * t * (3 - 2 * t);
 end
 
 alignText = function(alignment)
   alignment = Constants.Alignments[alignment] or Constants.Alignments.left;
 
   gfx.TextAlign(alignment);
+end
+
+drawLabel = function(params)
+  local x = params.x or 0;
+  local y = params.y or 0;
+  local alpha = params.alpha or 255;
+  local maxWidth = params.maxWidth or -1;
+
+  gfx.BeginPath();
+
+  alignText(params.align);
+
+  setFill('dark', alpha * 0.5);
+  gfx.DrawLabel(params.label.label, x + 1, y + 1, maxWidth);
+
+  setFill(params.color, alpha);
+  gfx.DrawLabel(params.label.label, x, y, maxWidth);
+end
+
+drawScrollingLabel = function(params)
+  local x = params.x or 0;
+  local y = params.y or 0;
+  local alpha = params.alpha or 255;
+  local scale = params.scale or 1;
+  local timer = params.timer or 0;
+  local width = params.width or 0;
+
+  local labelX = params.label.w * 1.2;
+  local duration = (labelX / 80) * 0.75;
+  local phase = math.max((timer % (duration + 1.5)) - 1.5, 0) / duration;
+
+  gfx.Save();
+
+  gfx.BeginPath();
+
+  gfx.Scissor((x + 2) * scale, y * scale, width, params.label.h * 1.25);
+
+  alignText(params.align);
+
+  setFill('dark', alpha * 0.5);
+  gfx.DrawLabel(params.label.label, x + 1 - (phase * labelX), y + 1, -1);
+  gfx.DrawLabel(
+    params.label.label,
+    x + 1 - (phase * labelX) + labelX,
+    y + 1,
+    -1
+  );
+
+  setFill(params.color, alpha);
+  gfx.DrawLabel(params.label.label, x - (phase * labelX), y, -1);
+  gfx.DrawLabel(params.label.label, x - (phase * labelX) + labelX, y, -1);
+
+  gfx.ResetScissor();
+
+  gfx.Restore();
+end
+
+drawImage = function(params)
+  local scale = params.scale or 1;
+  local x = params.x or 0;
+  local y = params.y or 0;
+  local w = (params.w or params.image.w) * scale;
+  local h = (params.h or params.image.h) * scale;
+
+  if (params.centered) then
+    x = x - (w / 2);
+    y = y - (h / 2);
+  end
+
+  gfx.BeginPath();
+
+  if (params.blendOp) then
+    gfx.GlobalCompositeOperation(params.blendOp);
+  end
+
+  if (params.tint) then
+    gfx.SetImageTint(params.tint[1], params.tint[2], params.tint[3]);
+
+    gfx.ImageRect(x, y, w, h, params.image.image, params.alpha or 1, 0);
+
+    gfx.SetImageTint(255, 255, 255);
+  else
+    gfx.ImageRect(x, y, w, h, params.image.image, params.alpha or 1, 0);
+  end
+
+  if (params.stroke) then
+    setStroke(params.stroke);
+
+    gfx.Stroke();
+  end
 end
 
 drawRectangle = function(params)
@@ -201,4 +291,19 @@ getDifficultyIndex = function(jacketPath, difficultyIndex)
   end
 
   return difficultyIndex + 1;
+end
+
+getSetting = function(key, default)
+  local setting = game.GetSkinSetting(key);
+
+  if (setting == nil) then
+    return default;
+  end
+
+  -- remove random double quote carriage return that get inserted in skin.cfg
+  if (type(setting) == 'string') then
+    setting = setting:gsub('[%"%\r]', '');
+  end
+
+  return setting;
 end

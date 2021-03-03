@@ -47,8 +47,6 @@ setLabels = function()
 			maxHeight = 0,
 		};
 
-		loadFont('normal');
-
 		for i, sort in ipairs(sorts) do
 			local label = CONSTANTS.sorts[sort];
 
@@ -60,7 +58,11 @@ setLabels = function()
 			end
 
 			labels[i] = {
-				name = New.Label({ text = label.name, size = 24 }),
+				name = New.Label({
+					font = 'normal',
+					text = label.name,
+					size = 24,
+				}),
 				direction = label.direction,
 			};
 
@@ -84,13 +86,11 @@ drawCurrentSort = function(displaying)
 	local x = layout.field[3].x;
 	local y = layout.field.y;
 
-	gfx.BeginPath();
-	alignText('left');
-
-	labels[currentSort].name:draw({
+	drawLabel({
 		x = x,
 		y = y,
 		color = color,
+		label = labels[currentSort].name,
 	});
 
 	gfx.Save();
@@ -130,7 +130,7 @@ drawSortLabel = function(index, y, isSelected)
 	local padding = layout.dropdown.padding;
 	local x = layout.dropdown[3].x + padding;
 	local w = (labels.maxWidth + (arrowWidth * 2) + 16)
-		* quadraticEase(highlightTimer);
+		* smoothstep(highlightTimer);
 	
 	if (isSelected) then
 		drawRectangle({
@@ -144,14 +144,12 @@ drawSortLabel = function(index, y, isSelected)
 		});
 	end
 
-	gfx.BeginPath();
-	alignText('left');
-
-	labels[index].name:draw({
+	drawLabel({
 		x = x,
 		y = y,
 		alpha = alpha,
 		color = 'white',
+		label = labels[index].name,
 	});
 
 	gfx.Save();
@@ -224,7 +222,7 @@ render = function(deltaTime, displaying)
 			previousSort = currentSort;
 		end
 
-		highlightTimer = math.min(highlightTimer + (deltaTime * 6), 1);
+		highlightTimer = math.min(highlightTimer + (deltaTime * 4), 1);
 
 		initialY = layout.dropdown.y;
 	end

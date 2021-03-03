@@ -9,6 +9,7 @@ local rendererSet = false;
 
 local currentFolder = 1;
 local currentLevel = 1;
+local previousFolder = 1;
 
 local choosingFolder = true;
 
@@ -79,12 +80,10 @@ local folders = {
 			self.w.final, self.w.max = 0, 0;
 			self.h.offset, self.h.total = 0, 0;
 
-			loadFont('normal');
-
 			for i, folder in ipairs(filters.folder) do
 				self.labels[i] = New.Label({
+					font = 'normal',
 					text = stringReplace(folder, prefixes),
-					scrolling = true,
 					size = 24,
 				});
 				self.timers[folder] = 0;
@@ -127,7 +126,7 @@ local folders = {
 			local baseAlpha = (isSelected and 255) or 150;
 			local alpha = math.floor(baseAlpha * math.min(timers.folder ^ 2, 1));
 			local doesOverflow = self.labels[i].w > layout.dropdown[1].maxWidth;
-			local w = (self.w.final + 16) * quadraticEase(self.timer);
+			local w = (self.w.final + 16) * smoothstep(self.timer);
 
 			if (isSelected) then
 				drawRectangle({
@@ -141,28 +140,30 @@ local folders = {
 				});
 			end
 
-			gfx.BeginPath();
-			alignText('left');
-
 			if (allowScroll and doesOverflow) then
-				self.timers[key] = self.timers[key] + deltaTime;
+				if (isSelected) then
+					self.timers[key] = self.timers[key] + deltaTime;
+				else
+					self.timers[key] = 0;
+				end
 
-				self.labels[i]:draw({
+				drawScrollingLabel({
 					x = 0,
 					y = y,
 					alpha = alpha,
 					color = 'white',
+					label = self.labels[i],
 					scale = scalingFactor,
-					scrolling = true,
 					timer = self.timers[key],
 					width = layout.dropdown[1].maxWidth,
 				});
 			else
-				self.labels[i]:draw({
+				drawLabel({
 					x = 0,
 					y = y,
 					alpha = alpha,
 					color = 'white',
+					label = self.labels[i],
 				});
 			end
 		end
@@ -221,21 +222,22 @@ local levels = {
 
 			for i, level in ipairs(filters.level) do
 				local current = stringReplace(level, prefixes);
+				local font = 'number';
 		
 				if (current == 'ALL') then
-					loadFont('normal');
-				elseif (current == '∞') then
-					loadFont('number');
-				else
-					loadFont('number');
-	
+					font = 'normal';
+				elseif (current ~= '∞') then
 					current = string.format(
 						'%02d',
 						tonumber(stringReplace(level, prefixes))
 					);
 				end
 	
-				self.labels[i] = New.Label({ text = current, size = 24 });
+				self.labels[i] = New.Label({
+					font = font,
+					text = current,
+					size = 24,
+				});
 	
 				local width = self.labels[i].w;
 	
@@ -251,7 +253,7 @@ local levels = {
 	drawLevel = function(self, i, y, isSelected)
 		local baseAlpha = (isSelected and 255) or 155;
 		local alpha = math.floor(baseAlpha * math.min(timers.level ^ 2, 1));
-		local w = (self.w + 16) * quadraticEase(self.timer);
+		local w = (self.w + 16) * smoothstep(self.timer);
 
 		if (isSelected) then
 			drawRectangle({
@@ -265,14 +267,12 @@ local levels = {
 			});
 		end
 
-		gfx.BeginPath();
-		alignText('left');
-
-		self.labels[i]:draw({
+		drawLabel({
 			x = 0,
 			y = y,
 			alpha = alpha,
 			color = 'white',
+			label = self.labels[i],
 		});
 
 		return self.labels[i].h + (layout.dropdown.padding / 2);
@@ -285,7 +285,7 @@ local levels = {
 			self.previousLevel = currentLevel;
 		end
 
-		self.timer = math.min(self.timer + (deltaTime * 6), 1);
+		self.timer = math.min(self.timer + (deltaTime * 8), 1);
 
 		local y = 0;
 
@@ -316,9 +316,6 @@ drawCurrentField = function(deltaTime, label, field, displaying, isFolder)
 		doesOverflow = label.w > layout.field[1].maxWidth;
 	end
 
-	gfx.BeginPath();
-	alignText('left');
-
 	if (displaying) then
 		if (choosingFolder and isFolder) then
 			color = 'normal';
@@ -334,21 +331,22 @@ drawCurrentField = function(deltaTime, label, field, displaying, isFolder)
 	if (doesOverflow) then
 		timers.scroll = timers.scroll + deltaTime;
 
-		label:draw({
+		drawScrollingLabel({
 			x = x,
 			y = y,
 			alpha = 255,
 			color = color,
+			label = label,
 			scale = scalingFactor,
-			scrolling = true,
 			timer = timers.scroll,
 			width = layout.field[1].maxWidth + (layout.dropdown.padding / 2),
 		});
 	else
-		label:draw({
+		drawLabel({
 			x = x,
 			y = y,
 			color = color,
+			label = label,
 		});
 	end
 end
@@ -375,6 +373,12 @@ render = function(deltaTime, displaying)
 
 	if (currentFolder > #filters.folder) then
 		currentFolder = #filters.folder;
+	end
+
+	if (previousFolder ~= currentFolder) then
+		timers.scroll = 0;
+
+		previousFolder = currentFolder;
 	end
 
 	drawCurrentField(deltaTime, folders.labels[currentFolder], 1, displaying, true);

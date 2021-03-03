@@ -4,6 +4,7 @@ local New = function(params)
   return {
     alpha = 0,
     margin = 0,
+    speed = 8,
     timer = {
       ease = 0,
       flicker = 0,
@@ -53,6 +54,8 @@ local New = function(params)
 
           self.y.current = (height + self.margin) * (index - 1);
         else
+          self.speed = 32;
+
           self.x.current = (self.w + self.margin) * (index - 1);
         end
       end
@@ -69,7 +72,10 @@ local New = function(params)
       local offsetY = 0;
 
       if (self.timer.ease < 1) then
-        self.timer.ease = math.min(self.timer.ease + (deltaTime * 8), 1);
+        self.timer.ease = math.min(
+          self.timer.ease + (deltaTime * self.speed),
+          1
+        );
       end
 
       self.timer.phase = self.timer.phase + deltaTime;
@@ -81,7 +87,7 @@ local New = function(params)
         self.alpha = math.abs(0.85 * math.cos(self.timer.phase * 5)) + 0.15;
       end
 
-      local ease = quadraticEase(self.timer.ease);
+      local ease = smoothstep(self.timer.ease);
 
       if (get(params, 'grid', false)) then
         changeX = (self.x.current - self.x.previous) * ease;

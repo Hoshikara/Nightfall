@@ -35,11 +35,11 @@ local New = function()
 
     render = function(self, deltaTime)
       if (self.timer < 1) then
-        self.timer = math.min(self.timer + (deltaTime * 8), 1);
+        self.timer = math.min(self.timer + (deltaTime * 4), 1);
       end
 
       local change = (self.y.bar.current - self.y.bar.previous)
-        * quadraticEase(self.timer);
+        * smoothstep(self.timer);
       local offset = self.y.bar.previous + change;
 
       if (tostring(offset) == '-nan(ind)') then

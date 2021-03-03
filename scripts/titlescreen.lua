@@ -119,6 +119,14 @@ viewUpdate = function()
 	end
 end
 
+local setButtonText = function(text)
+	return {
+		font = 'medium',
+		text = text,
+		size = 18,
+	};
+end
+
 local buttons = {
 	activePage = 'mainMenu',
 	cache = { scaledH = 0, scaledW = 0 },
@@ -163,8 +171,6 @@ local buttons = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			loadFont('medium');
-
 			self.labels = {
 				mainMenu = {
 					{
@@ -173,40 +179,40 @@ local buttons = {
 							activePage = 'playOptions';
 							self.activePage = activePage;
 						end,
-						label = New.Label({ text = 'PLAY', size = 18 }),
+						label = New.Label(setButtonText('PLAY')),
 					},
 					{
 						action = Menu.DLScreen,
-						label = New.Label({ text = 'NAUTICA', size = 18 }),
+						label = New.Label(setButtonText('NAUTICA')),
 					},
 					{
 						action = function()
 							activeButton = 1;
 							showControls = true;
 						end,
-						label = New.Label({ text = 'CONTROLS', size = 18 }),
+						label = New.Label(setButtonText('CONTROLS')),
 					},
 					{
 						action = Menu.Settings,
-						label = New.Label({ text = 'SETTINGS', size = 18 }),
+						label = New.Label(setButtonText('SETTINGS')),
 					},
 					{
 						action = Menu.Exit,
-						label = New.Label({ text = 'EXIT', size = 18 }),
+						label = New.Label(setButtonText('EXIT')),
 					},
 				},
 				playOptions = {
 					{
 						action = Menu.Start,
-						label = New.Label({ text = 'SINGLEPLAYER', size = 18 }),
+						label = New.Label(setButtonText('SINGLEPLAYER')),
 					},
 					{
 						action = Menu.Multiplayer,
-						label = New.Label({ text = 'MULTIPLAYER', size = 18 }),
+						label = New.Label(setButtonText('MULTIPLAYER')),
 					},
 					{
 						action = Menu.Challenges,
-						label = New.Label({ text = 'CHALLENGES', size = 18 }),
+						label = New.Label(setButtonText('CHALLENGES')),
 					},
 					{
 						action = function()
@@ -214,7 +220,7 @@ local buttons = {
 							activePage = 'mainMenu';
 							self.activePage = activePage;
 						end,
-						label = New.Label({ text = 'MAIN MENU', size = 18 }),
+						label = New.Label(setButtonText('MAIN MENU')),
 					},
 				}
 			};
@@ -232,29 +238,32 @@ local buttons = {
 			self.images.button.w,
 			self.images.button.h + 20
 		);
-		local textAlpha = math.floor(255 * ((allowAction and isActive and 1) or 0.2));
+		local alpha = 255 * ((allowAction and isActive and 1) or 0.2);
 
 		if (allowAction and (isHovering or isActive)) then
 			activeButton = i;
 			allowClick = isHovering;
 			clickAction = currentAction;
 
-			self.images.buttonHover:draw({ x = self.x[i], y = self.y });
-		else
-			self.images.button:draw({
+			drawImage({
 				x = self.x[i],
 				y = self.y,
-				alpha = 0.45,
+				image = self.images.buttonHover,
+			});
+		else
+			drawImage({
+				x = self.x[i],
+				y = self.y,
+				image = self.images.button,
 			});
 		end
 
-		gfx.BeginPath();
-		alignText('left');
-		self.labels[page][i].label:draw({
+		drawLabel({
 			x = self.x[i] + (self.images.button.w / 8) + 4,
 			y = self.y + (self.images.button.h / 2) - 12,
-			alpha = textAlpha,
+			alpha = alpha,
 			color = 'white',
+			label = self.labels[page][i].label,
 		});
 	end,
 
@@ -305,13 +314,19 @@ local title = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			loadFont('medium');
-
 			self.labels = {
-				game = New.Label({ text = 'UNNAMED SDVX CLONE', size = 31 }),
+				game = New.Label({
+					font = 'medium',
+					text = 'UNNAMED SDVX CLONE',
+					size = 31
+				}),
 			};
 
-			self.labels.skin = New.Label({ text = 'NIGHTFALL', size = 120 });
+			self.labels.skin = New.Label({
+				font = 'medium',
+				text = 'NIGHTFALL',
+				size = 120
+			});
 		end
 	end,
 
@@ -331,22 +346,21 @@ local title = {
 	
 		local alpha = (showControls and 30) or math.floor(255 * self.alpha);
 
-		gfx.BeginPath();
-		alignText('left');
-
-		self.labels.game:draw({
+		drawLabel({
 			x = self.x + 8,
 			y = self.y,
 			alpha = alpha,
 			color = 'normal',
+			label = self.labels.game,
 			maxWidth = (self.labels.skin.w * 0.54) - 3,
 		});
 		
-		self.labels.skin:draw({
+		drawLabel({
 			x = self.x,
 			y = self.y + (self.labels.game.h * 0.25),
 			alpha = alpha,
 			color = 'white',
+			label = self.labels.skin,
 		});
 	end
 };
@@ -392,16 +406,14 @@ local updatePrompt = {
 
 	setLabels = function(self)
 		if (not self.labels) then
-			loadFont('medium');
-
 			self.labels = {
 				{
 					action = Menu.Update,
-					label = New.Label({ text = 'UPDATE', size = 18 }),
+					label = New.Label(setButtonText('UPDATE')),
 				},
 				{
 					action = viewUpdate,
-					label = New.Label({ text = 'VIEW', size = 18 }),
+					label = New.Label(setButtonText('VIEW')),
 				},
 				{
 					action = function()
@@ -409,13 +421,12 @@ local updatePrompt = {
 						activePage = 'mainMenu';
 						showUpdatePrompt = false;
 					end,
-					label = New.Label({ text = 'CLOSE', size = 18 }),
+					label = New.Label(setButtonText('CLOSE')),
 				},
 			};
 
-			loadFont('normal');
-
 			self.labels.heading = New.Label({
+				font = 'normal',
 				text = 'A NEW UPDATE IS AVAILABLE!',
 				size = 36
 			});
@@ -437,22 +448,26 @@ local updatePrompt = {
 			allowClick = isHovering;
 			clickAction = button.action;
 
-			self.buttons.hover:draw({ x = self.buttons.x[i], y = self.buttons.y });
+			drawImage({
+				x = self.buttons.x[i],
+				y = self.buttons.y,
+				image = self.buttons.hover,
+			});
 		else
-			self.buttons.normal:draw({
+			drawImage({
 				x = self.buttons.x[i],
 				y = self.buttons.y,
 				alpha = 0.45,
+				image = self.buttons.normal,
 			});
 		end
 
-		gfx.BeginPath();
-		alignText('left');
-		button.label:draw({
+		drawLabel({
 			x = self.buttons.x[i] + (self.buttons.normal.w / 6) + 2,
 			y = self.buttons.y + (self.buttons.normal.h / 2) - 12,
 			alpha = alpha,
 			color = 'white',
+			label = button.label,
 		});
 	end,
 
@@ -486,20 +501,20 @@ local updatePrompt = {
 			color = 'black',
 		});
 
-		dialog.images.dialogBox:draw({
+		drawImage({
 			x = scaledW / 2,
 			y = scaledH / 2,
 			alpha = self.timer,
 			centered = true,
+			image = dialog.images.dialogBox,
 		});
 
-		gfx.BeginPath();
-		alignText('left');
-		self.labels.heading:draw({
+		drawLabel({
 			x = dialog.x.outerLeft,
 			y = dialog.y.top - 8,
 			alpha = 255 * self.timer,
 			color = 'white',
+			label = self.labels.heading,
 		});
 
 		for i, button in ipairs(self.labels) do
@@ -515,11 +530,12 @@ render = function(deltaTime)
 
 	mousePosX, mousePosY = game.GetMousePos();
 
-	background:draw({
+	drawImage({
 		x = 0,
 		y = 0,
 		w = scaledW,
 		h = scaledH,
+		image = background,
 	});
 
 	if (not menuLoaded) then

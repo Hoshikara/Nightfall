@@ -20,7 +20,7 @@ local getClear = function(current)
 end
 
 local getDateFormat = function()
-  local dateFormat = game.GetSkinSetting('dateFormat') or 'DAY-MONTH-YEAR';
+  local dateFormat = getSetting('dateFormat', 'DAY-MONTH-YEAR');
 
   if (dateFormat == 'DAY-MONTH-YEAR') then
     return '%d-%m-%y';
@@ -92,7 +92,7 @@ local getMedianDelta = function(current)
 end
 
 local getName = function(current)
-  local displayName = game.GetSkinSetting('displayName') or 'GUEST';
+  local displayName = getSetting('displayName', 'GUEST');
   local playerName = get(current, 'playerName');
   local scoreName = get(current, 'name');
 
@@ -216,7 +216,7 @@ end
 local formatSongInfo = function(current)
   return {
     artist = {
-      font = 'JP',
+      font = 'jp',
       size = 30,
       value = string.upper(get(current, 'artist', '-')),
     },
@@ -236,7 +236,7 @@ local formatSongInfo = function(current)
       value = getDuration(current),
     },
     effector = {
-      font = 'JP',
+      font = 'jp',
       size = 24,
       value = string.upper(get(current, 'effector', '-')),
     },
@@ -246,7 +246,7 @@ local formatSongInfo = function(current)
       value = string.format('%02d', get(current, 'level', '1')),
     },
     title = {
-      font = 'JP',
+      font = 'jp',
       size = 36,
       value = getTitle(current),
     },

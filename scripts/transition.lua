@@ -72,10 +72,11 @@ drawTransition = function(deltaTime, isIntro);
 
 		gfx.Translate(-(scaledW / 2), 0);
 
-		background:draw({
+		drawImage({
 			x = scaledW / 2,
 			y = scaledH / 2,
 			centered = true,
+			image = background,
 		});
 
 		drawRectangle({
@@ -96,10 +97,11 @@ drawTransition = function(deltaTime, isIntro);
 			scaledH
 		);
 
-		background:draw({
+		drawImage({
 			x = scaledW / 2,
 			y = scaledH / 2,
 			centered = true,
+			image = background,
 		});
 
 		gfx.ResetScissor();
@@ -111,10 +113,11 @@ drawTransition = function(deltaTime, isIntro);
 			scaledH
 		);
 
-		background:draw({
+		drawImage({
 			x = scaledW / 2,
 			y = scaledH / 2,
 			centered = true,
+			image = background,
 		});
 
 		gfx.ResetScissor();

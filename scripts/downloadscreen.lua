@@ -34,10 +34,7 @@ local sortingcursor = 0
 local sortingOptions = {"Uploaded", "Oldest"}
 local needsReload = false
 
-local nauticaPath = string.format(
-    '/%s/',
-    game.GetSkinSetting('nauticaPath') or 'nautica'
-);
+local nauticaPath = string.format('/%s/', getSetting('nauticaPath', 'nautica'));
 
 function addsong(song)
     if song.jacket_url ~= nil then

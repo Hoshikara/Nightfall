@@ -47,18 +47,19 @@ local _ = {
         for i = 1, #CONTROL_LIST[category] do
           list[i] = {};
     
-          loadFont('normal');
           list[i].action = New.Label({
+            font = 'normal',
             text = CONTROL_LIST[category][i].action,
             size = 24,
           });
     
-          loadFont('medium');
           list[i].controller = New.Label({
+            font = 'medium',
             text = CONTROL_LIST[category][i].controller,
             size = 24,
           });
           list[i].keyboard = New.Label({
+            font = 'medium',
             text = CONTROL_LIST[category][i].keyboard,
             size = 24,
           });
@@ -77,20 +78,62 @@ local _ = {
 
   setHeadings = function(self)
     if (not self.headings) then
-      loadFont('medium');
-
       self.headings = {
-        main = New.Label({ text = 'CONTROLS', size = 60 }),
-        general = New.Label({ text = 'GENERAL', size = 36 }),
-        songSelect = New.Label({ text = 'SONG SELECT', size = 36 }),
-        gameplaySettings = New.Label({ text = 'GAMEPLAY SETTINGS', size = 36 }),
-        gameplay = New.Label({ text = 'GAMEPLAY', size = 36 }),
-        practiceMode = New.Label({ text = 'PRACTICE MODE', size = 36 }),
-        results = New.Label({ text = 'RESULTS', size = 36 }),
-        controller = New.Label({ text = 'CONTROLLER', size = 30 }),
-        keyboard = New.Label({ text = 'KEYBOARD', size = 30 }),
-        btd = New.Label({ text = '[BT-D]', size = 24 }),
-        next = New.Label({ text = 'NEXT PAGE', size = 24 }),
+        main = New.Label({
+          font = 'medium',
+          text = 'CONTROLS',
+          size = 60,
+        }),
+        general = New.Label({
+          font = 'medium',
+          text = 'GENERAL',
+          size = 36,
+        }),
+        songSelect = New.Label({
+          font = 'medium',
+          text = 'SONG SELECT',
+          size = 36,
+        }),
+        gameplaySettings = New.Label({
+          font = 'medium',
+          text = 'GAMEPLAY SETTINGS',
+          size = 36,
+        }),
+        gameplay = New.Label({
+          font = 'medium',
+          text = 'GAMEPLAY',
+          size = 36,
+        }),
+        practiceMode = New.Label({
+          font = 'medium',
+          text = 'PRACTICE MODE',
+          size = 36,
+        }),
+        results = New.Label({
+          font = 'medium',
+          text = 'RESULTS',
+          size = 36,
+        }),
+        controller = New.Label({
+          font = 'medium',
+          text = 'CONTROLLER',
+          size = 30,
+        }),
+        keyboard = New.Label({
+          font = 'medium',
+          text = 'KEYBOARD',
+          size = 30,
+        }),
+        btd = New.Label({
+          font = 'medium',
+          text = '[BT-D]',
+          size = 24,
+        }),
+        next = New.Label({
+          font = 'medium',
+          text = 'NEXT PAGE',
+          size = 24,
+        }),
         maxWidth = 0,
       };
     end
@@ -101,44 +144,47 @@ local _ = {
     local x = initialX;
     local y = initialY;
 
-    gfx.BeginPath();
-    alignText('left');
-
-    self.headings.controller:draw({
+    drawLabel({
       x = x,
       y = y,
       alpha = alpha,
       color = 'white',
+      label = self.headings.controller,
     });
-    self.headings.keyboard:draw({
+
+    drawLabel({
       x = x + 350,
       y = y,
       alpha = alpha,
       color = 'white',
+      label = self.headings.keyboard,
     });
 
     y = y + 60;
 
     for i = 1, #list do
-      list[i].controller:draw({
+      drawLabel({
         x = x,
         y = y,
         alpha = alpha,
         color = (list[i].note and 'white') or 'normal',
+        label = list[i].controller,
       });
 
-      list[i].keyboard:draw({
+      drawLabel({
         x = x + 350,
         y = y,
         alpha = alpha,
         color = (list[i].note and 'white') or 'normal',
+        label = list[i].keyboard,
       });
 
-      list[i].action:draw({
+      drawLabel({
         x = x + 700,
         y = y,
         alpha = alpha,
         color = 'white',
+        label = list[i].action, 
       });
 
       if ((i ~= #list) and (not list[i].note)) then
@@ -164,14 +210,12 @@ local _ = {
   drawHeading = function(self, x, y, page, isActive)
     local heading = self.headings[page];
 
-    gfx.BeginPath();
-
-    alignText('left');
-    heading:draw({
+    drawLabel({
       x = x,
       y = y,
       alpha = (isActive and (255 * self.timer)) or (80 * self.timer),
       color = (isActive and 'normal') or 'white',
+      label = heading,
     });
 
     if (heading.w > self.headings.maxWidth) then
@@ -198,13 +242,12 @@ local _ = {
 
     gfx.Translate(self.x, self.y);
 
-    gfx.BeginPath();
-    alignText('left');
-    self.headings.main:draw({
+    drawLabel({
       x = -3,
       y = 0,
       alpha = alpha,
       color = 'white',
+      label = self.headings.main,
     });
 
     self.headingY = self.headings.main.h * 2;
@@ -234,20 +277,20 @@ local _ = {
       self.headings.main.h * 2
     );
 
-    gfx.BeginPath();
-    alignText('left');
-    self.headings.btd:draw({
+    drawLabel({
       x = 0,
       y = self.scaledH - (self.scaledH / 7),
       alpha = alpha,
       color = 'normal',
+      label = self.headings.btd,
     });
 
-    self.headings.next:draw({
+    drawLabel({
       x = self.headings.btd.w + 8,
       y = self.scaledH - (self.scaledH / 7) + 1,
       alpha = alpha,
       color = 'white',
+      label = self.headings.next,
     });
 
     gfx.Restore();

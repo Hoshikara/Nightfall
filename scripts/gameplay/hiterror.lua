@@ -7,8 +7,8 @@ return {
     late = { 105, 205, 255 },
   },
   lengthScale = 1,
-  position = string.upper(game.GetSkinSetting('hitErrorPosition') or 'OFF'),
-  scale = game.GetSkinSetting('hitErrorScale'),
+  position = getSetting('hitErrorPosition', 'OFF'),
+  scale = getSetting('hitErrorScale', 1.5),
   windows = {
     crit = get(gameplay, 'hitWindow.perfect', 46),
     near = get(gameplay, 'hitWindow.good', 92),
