@@ -725,11 +725,6 @@ local songGrid = {
     },
   },
   labels = nil,
-  order = {
-    'collection',
-    'difficulty',
-    'sort',
-  },
   scrollbar = Scrollbar.New(),
   selectedSong = 1,
   viewLimit = 9,
@@ -748,12 +743,6 @@ local songGrid = {
 
       self.grid.stats.w = (self.grid.jacket // 2.2);
       self.grid.stats.h = (self.grid.jacket // 4);
-
-      self.labels.x = {};
-      self.labels.x[1] = self.grid.x - 1;
-      self.labels.x[2] = self.labels.x[1] + (self.grid.jacket * 1.5) + self.grid.margin;
-      self.labels.x[3] = self.labels.x[2] + (self.grid.jacket * 0.9); 
-      self.labels.y = (scaledH / 20) - 2;
 
       self.cursor:setSizes({
         x = self.grid.x,
@@ -778,21 +767,20 @@ local songGrid = {
 
   setLabels = function(self)
     if (not self.labels) then
-      self.labels = {
-        of = New.Label({
+      local newLabel = function(text, size)
+        return New.Label({
           font = 'medium',
-          text = 'OF',
-          size = 18,
-        }),
-      };
-
-      for name, str in pairs(CONSTANTS.labels.grid) do
-        self.labels[name] = New.Label({
-          font = 'medium',
-          text = str,
-          size = 18,
+          text = text,
+          size = size,
         });
       end
+
+      self.labels = {
+        gameplaySettings = newLabel('GAMEPLAY SETTINGS', 20),
+        grade = newLabel('GRADE', 18),
+        of = newLabel('OF', 18),
+        fxlfxr = newLabel('[FX-L]  +  [FX-R]', 20),
+      };
 
       self.labels.currentSong = ScoreNumber.New({
         digits = 4,
@@ -805,21 +793,6 @@ local songGrid = {
         sizes = { 18 },
       });
     end
-  end,
-
-  drawLabels = function(self)
-    gfx.Save();
-  
-    for i, name in ipairs(self.order) do
-      drawLabel({
-        x = self.labels.x[i],
-        y = self.labels.y,
-        color = 'normal',
-        label = self.labels[name],
-      });
-    end
-
-    gfx.Restore();
   end,
 
   drawNoSongMessage = function(self)
@@ -1062,8 +1035,6 @@ local songGrid = {
 
     gfx.Save();
 
-    self:drawLabels();
-
     if (#songwheel.songs > 0) then
       self:drawSongGrid(deltaTime);
 
@@ -1082,6 +1053,20 @@ local songGrid = {
       self:drawNoSongMessage();
     end
 
+    drawLabel({
+      x = self.grid.x - 1,
+      y = scaledH - (scaledH / 40) - 14,
+      color = 'normal',
+      label = self.labels.fxlfxr,
+    });
+
+    drawLabel({
+      x = self.grid.x - 1 + self.labels.fxlfxr.w + 8,
+      y = scaledH - (scaledH / 40) - 14,
+      color = 'white',
+      label = self.labels.gameplaySettings,
+    });
+
     self:handleChange();
 
     gfx.Restore();
@@ -1093,31 +1078,26 @@ local miscInfo = {
 
   render = function(self)
     if (not self.labels) then
+      local newLabel = function(text)
+        return New.Label({
+          font = 'medium',
+          text = text,
+          size = 20,
+        });
+      end
+
       self.labels = {
-        bta = New.Label({
-          font = 'medium',
-          text = '[BT-A]',
-          size = 20,
-        }),
-        showControls = New.Label({
-          font = 'medium',
-          text = 'SHOW CONTROLS', 
-          size = 20,
-        }),
+        bta = newLabel('[BT-A]');
+        showControls = newLabel('SHOW CONTROLS');
         volforce = {
-          label = New.Label({
-            font = 'medium',
-            text = 'VF',
+          label = newLabel('VF'),
+          value = New.Label({
+            font = 'number',
+            text = '',
             size = 20,
           }),
         },
       };
-
-      self.labels.volforce.value = New.Label({
-        font = 'number',
-        text = '',
-        size = 20,
-      });
     end
 
     local forceValue = totalForce or get(userData.contents, 'volforce', 0);

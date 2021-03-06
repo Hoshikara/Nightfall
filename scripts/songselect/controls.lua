@@ -11,7 +11,6 @@ local _ = {
     'songSelect',
     'gameplaySettings',
     'gameplay',
-    'practiceMode',
     'results',
   },
   pressedBTD = false,
@@ -39,7 +38,6 @@ local _ = {
         songSelect = {},
         gameplaySettings = {},
         gameplay = {},
-        practiceMode = {},
         results = {}
       };
     
@@ -102,11 +100,6 @@ local _ = {
         gameplay = New.Label({
           font = 'medium',
           text = 'GAMEPLAY',
-          size = 36,
-        }),
-        practiceMode = New.Label({
-          font = 'medium',
-          text = 'PRACTICE MODE',
           size = 36,
         }),
         results = New.Label({

@@ -6,6 +6,9 @@ local layout = require('layout/dialog');
 
 local controlsShortcut = getSetting('controlsShortcut', false);
 
+local showPracticeControls = getSetting('showPracticeControls', true);
+local showPracticeSetup = getSetting('showPracticeSetup', true);
+
 local timer = 0;
 
 local cache = { resX = 0, resY = 0 };
@@ -29,7 +32,7 @@ setupLayout = function()
   end
 end
 
-generateLabels = function(constants)
+local generateLabels = function(constants)
 	local labels = {
 		controls = {
 			fxl = New.Label({
@@ -223,7 +226,7 @@ local current = {
 	end
 };
 
-drawArrows = function(initialX, initialY, minBounded, maxBounded);
+local drawArrows = function(initialX, initialY, minBounded, maxBounded);
 	local x1 = initialX + 28;
 	local x2 = initialX + 44;
 	local y = initialY + 10;
@@ -297,7 +300,7 @@ drawArrows = function(initialX, initialY, minBounded, maxBounded);
 	gfx.Restore();
 end
 
-drawArrow = function(initialX, initialY, direction)
+local drawArrow = function(initialX, initialY, direction)
 	local x = initialX - 48;
 	local y = initialY + 26;
 
@@ -330,7 +333,7 @@ local practiceModeDialog = {
 	cache = { scaledW = 0, scaledH = 0 },	
 	layout = {
 		info = {
-			x1 = 0,
+			x1 = { 0, 0 },
 			x2 = 0,
 			y = 0,
 		},
@@ -338,7 +341,7 @@ local practiceModeDialog = {
 		panel = {
 			w = 0,
 			h = 0,
-			x = 0,
+			x = { 0, 0 },
 			y = 0,
 		},
 	},
@@ -349,12 +352,14 @@ local practiceModeDialog = {
 	setSizes = function(self)
 		if ((self.cache.scaledW ~= scaledW) or (self.cache.scaledH ~= scaledH)) then
 			self.layout.panel.w = scaledW / 2.4;
-			self.layout.panel.h = scaledH / 1.925;
-			self.layout.panel.x = 0;
+			self.layout.panel.h = scaledH / 1.8;
+			self.layout.panel.x[1] = 0;
+			self.layout.panel.x[2] = scaledW - self.layout.panel.w; 
 			self.layout.panel.y = scaledH / 4.25;
 
-			self.layout.info.x1 = scaledW / 100;
-			self.layout.info.x2 = self.layout.panel.w - (self.layout.info.x1 * 4);
+			self.layout.info.x1[1] = scaledW / 100;
+			self.layout.info.x1[2] = self.layout.panel.x[2] + (scaledW / 100);
+			self.layout.info.x2 = self.layout.panel.w - (self.layout.info.x1[1] * 4);
 			self.layout.info.y = scaledH / 4.1;
 
 			self.layout.navigation.y = self.layout.panel.y + self.layout.panel.h - 48;
@@ -366,13 +371,55 @@ local practiceModeDialog = {
 
 	setLabels = function(self)
 		if (not self.labels) then
+			local newLabel = function(text)
+				return New.Label({
+					font = 'medium',
+					text = text,
+					size = 20,
+				});
+			end
+
 			self.labels = generateLabels(GAMEPLAY_CONSTANTS.settings);
+
+			self.labels.controls.backesc = newLabel('[BACK]  /  [ESC]');
+			self.labels.controls.fxlfxr = newLabel('[FX-L]  +  [FX-R]');
+			self.labels.controls.fxlorfxr = newLabel('[FX-L]  /  [FX-R]');
+			self.labels.controls.knobl = newLabel('[KNOB-L]');
+			self.labels.controls.knobr = newLabel('[KNOB-R]');
+
+			self.labels.close = newLabel('CLOSE SETTINGS WINDOW');
+			self.labels.open = newLabel('OPEN SETTINGS WINDOW')
+			self.labels.playpause = newLabel('PLAY  /  PAUSE SONG');
+			self.labels.scrubfast = newLabel('SCRUB THROUGH SONG (FAST)');
+			self.labels.scrubslow = newLabel('SCRUB THROUGH SONG (SLOW)');
+
+			self.labels.setup = {
+				disable = New.Label({
+					font = 'medium',
+					text = 'THIS WINDOW CAN BE DISABLED IN SKIN SETTINGS',
+					size = 20,
+				}),
+				heading = New.Label({
+					font = 'normal',
+					text = 'SETUP INSTRUCTIONS',
+					size = 48,
+				}),
+				steps = {},
+			};
+
+			for i, step in ipairs(GAMEPLAY_CONSTANTS.steps) do
+				self.labels.setup.steps[i] = New.Label({
+					font = 'normal',
+					text = step,
+					size = 24,
+				});
+			end
 		end
 	end,
 
 	drawHeading = function(self)
 		drawLabel({
-			x = self.layout.info.x1 - 2,
+			x = self.layout.info.x1[1] - 2,
 			y = self.layout.info.y,
 			alpha = 255 * timer,
 			color = 'normal',
@@ -392,7 +439,7 @@ local practiceModeDialog = {
 		local labels = self.labels.settings[current.tab.name];
 
 		local y = self.layout.info.y + (self.labels.tabs[current.tab.name].h * 1.75);
-		local w = (self.layout.panel.w - (self.layout.info.x1 * 4) - 2)
+		local w = (self.layout.panel.w - (self.layout.info.x1[1] * 4) - 2)
 			* smoothstep(self.timer);
 
 		for i, rawSetting in ipairs(current.settings) do
@@ -402,13 +449,13 @@ local practiceModeDialog = {
 				''
 			)];
 			local isSelected = i == current.setting.index;
-			local x = (setting.indent and (self.layout.info.x1 + 24))
-				or self.layout.info.x1;
+			local x = (setting.indent and (self.layout.info.x1[1] + 24))
+				or self.layout.info.x1[1];
 			local alpha = (isSelected and (255 * timer)) or (125 * timer);
 
 			if (isSelected) then
 				drawRectangle({
-					x = self.layout.info.x1 - 8,
+					x = self.layout.info.x1[1] - 8,
 					y = y,
 					w = w,
 					h = 30,
@@ -422,7 +469,7 @@ local practiceModeDialog = {
 				y = y,
 				alpha = alpha,
 				color = 'white',
-				label = setting.name,p
+				label = setting.name,
 			});
 
 			self:drawSettingValue(y, setting, rawSetting, isSelected, alpha);
@@ -510,9 +557,11 @@ local practiceModeDialog = {
 	end,
 
 	drawNavigation = function(self)
-		local x1 = self.layout.info.x1;
+		local navigationLabel = (SettingsDiag.tabs[1].settings[5].value
+			and 'fxlfxr') or 'backesc';
+		local x1 = self.layout.info.x1[1];
 		local x2 = self.layout.info.x2 + 56;
-		local y = self.layout.navigation.y;
+		local y = self.layout.navigation.y - (self.labels.controls.fxl.h * 1.875);
 	
 		drawLabel({
 			x = x1,
@@ -547,6 +596,135 @@ local practiceModeDialog = {
 			color = 'normal',
 			label = self.labels.controls.fxr,
 		});
+
+		drawLabel({
+			x = x1,
+			y = self.layout.navigation.y - 1,
+			alpha = 255 * timer,
+			color = 'normal',
+			label = self.labels.controls[navigationLabel],
+		});
+
+		drawLabel({
+			x = x1 + self.labels.controls[navigationLabel].w + 8,
+			y = self.layout.navigation.y,
+			alpha = 255 * timer,
+			color = 'white',
+			label = self.labels.close,
+		});
+	end,
+
+	drawControls = function(self)
+		if (not self.labels) then return end
+
+		local navigationLabel = (SettingsDiag.tabs[1].settings[5].value
+		and 'fxlfxr') or 'backesc';
+		local x = self.layout.info.x1[1];
+		local y = self.layout.info.y - 24;
+
+		drawLabel({
+			x = x,
+			y = y - 1,
+			color = 'normal',
+			label = self.labels.controls.knobl,
+		});
+
+		drawLabel({
+			x = x + self.labels.controls.knobl.w + 8,
+			y = y,
+			color = 'white',
+			label = self.labels.scrubslow,
+		});
+
+		y = y + (self.labels.controls.knobl.h * 1.5);
+
+		drawLabel({
+			x = x,
+			y = y - 1,
+			color = 'normal',
+			label = self.labels.controls.knobr,
+		});
+
+		drawLabel({
+			x = x + self.labels.controls.knobr.w + 8,
+			y = y,
+			color = 'white',
+			label = self.labels.scrubfast,
+		});
+
+		y = y + (self.labels.controls.knobr.h * 1.5);
+
+		drawLabel({
+			x = x,
+			y = y - 1,
+			color = 'normal',
+			label = self.labels.controls.fxlorfxr,
+		});
+
+		drawLabel({
+			x = x + self.labels.controls.fxlorfxr.w + 8,
+			y = y,
+			color = 'white',
+			label = self.labels.playpause,
+		});
+
+		y = y + (self.labels.controls.fxlorfxr.h * 1.5);
+
+		drawLabel({
+			x = x,
+			y = y - 1,
+			color = 'normal',
+			label = self.labels.controls.backesc,
+		});
+
+		drawLabel({
+			x = x + self.labels.controls.backesc.w + 8,
+			y = y,
+			color = 'white',
+			label = self.labels.open,
+		});
+	end,
+
+	drawPracticeSetup = function(self)
+		local y = self.layout.info.y + (self.labels.setup.heading.h * 1.75);
+
+		drawRectangle({
+			x = self.layout.panel.x[2],
+			y = self.layout.panel.y,
+			w = self.layout.panel.w,
+			h = self.layout.panel.h,
+			alpha = 230 * timer,
+			color = 'black',
+			fast = true,
+		});
+
+		drawLabel({
+			x = self.layout.info.x1[2] - 2,
+			y = self.layout.info.y,
+			alpha = 255 * timer,
+			color = 'normal',
+			label = self.labels.setup.heading,
+		});
+
+		for _, step in ipairs(self.labels.setup.steps) do
+			drawLabel({
+				x = self.layout.info.x1[2],
+				y = y,
+				alpha = 255 * timer,
+				color = 'white',
+				label = step,
+			});
+
+			y = y + (step.h * 2);
+		end
+
+		drawLabel({
+			x = self.layout.info.x1[2],
+			y = self.layout.navigation.y,
+			alpha = 255 * timer,
+			color = 'normal',
+			label = self.labels.setup.disable,
+		});
 	end,
 
 	render = function(self, deltaTime)
@@ -557,13 +735,17 @@ local practiceModeDialog = {
 		gfx.Save();
 
 		drawRectangle({
-			x = self.layout.panel.x,
+			x = self.layout.panel.x[1],
 			y = self.layout.panel.y,
 			w = self.layout.panel.w,
 			h = self.layout.panel.h,
 			alpha = 230 * timer,
 			color = 'black',
 		});
+
+		if (showPracticeSetup) then
+			self:drawPracticeSetup();
+		end
 
 		self:drawHeading();
 
@@ -845,6 +1027,13 @@ render = function(deltaTime, displaying)
 	gfx.Save();
 
 	setupLayout();
+
+	if ((not displaying)
+		and (SettingsDiag.tabs[1].name == 'Main')
+		and showPracticeControls
+	) then
+		practiceModeDialog:drawControls();
+	end
 
 	if ((timer > 0) and (not displaying)) then
 		timer = math.max(timer - (deltaTime * 6), 0);

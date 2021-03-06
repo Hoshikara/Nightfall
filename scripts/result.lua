@@ -174,6 +174,16 @@ local resultPanel = {
 					text = '[BT-B]  +  [BT-C]',
 					size = 20,
 				}),
+				f12 = New.Label({
+					font = 'medium',
+					text = '[F12]',
+					size = 20,
+				}),
+				screenshot = New.Label({
+					font = 'medium',
+					text = 'SCREENSHOT',
+					size = 20,
+				}),
 				songCollections = New.Label({
 					font = 'medium',
 					text = 'SONG COLLECTIONS',
@@ -265,6 +275,22 @@ local resultPanel = {
 			y = scaledH - (scaledH / 20) + (self.labels.btbbtc.h - 6) + 1,
 			color = 'white',
 			label = self.labels.songCollections,
+		});
+
+		drawLabel({
+			x = self.panel.x + self.panel.w,
+			y = scaledH - (scaledH / 20) + (self.labels.f12.h - 6) + 1,
+			align = 'right',
+			color = 'white',
+			label = self.labels.screenshot,
+		});
+
+		drawLabel({
+			x = self.panel.x + self.panel.w - self.labels.screenshot.w - 8,
+			y = scaledH - (scaledH / 20) + (self.labels.f12.h - 6),
+			align = 'right',
+			color = 'normal',
+			label = self.labels.f12,
 		});
 	end,
 

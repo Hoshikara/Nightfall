@@ -7,7 +7,7 @@ local _ = {
   },
   buttonY = 0,
   hoveredPage = nil,
-  maxPages = 8,
+  maxPages = 7,
   mousePosX = 0,
   mousePosY = 0,
   selectedPage = nil
@@ -40,18 +40,14 @@ _.initializeButton = function(self)
       page = 'gameplay',
     },
     [5] = {
-      label = New.Label(setButtonText('PRACTICE MODE')),
-      page = 'practiceMode',
-    },
-    [6] = {
       label = New.Label(setButtonText('RESULTS')),
       page = 'results',
     },
-    [7] = {
+    [6] = {
       label = New.Label(setButtonText('MULTIPLAYER')),
       page = 'multiplayer',
     },
-    [8] = {
+    [7] = {
       label = New.Label(setButtonText('NAUTICA')),
       page = 'nautica',
     },
@@ -103,7 +99,6 @@ _.initializeControls = function(self)
     songSelect = {},
     gameplaySettings = {},
     gameplay = {},
-    practiceMode = {},
     results = {},
     multiplayer = {},
     nautica = {},

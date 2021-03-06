@@ -4,12 +4,10 @@ local _ = {
     bpm = 'BPM',
     challenge = 'CHALLENGE',
     clear = 'CLEAR',
-    collection = 'COLLECTION',
     completion = 'COMPLETION',
     difficulty = 'DIFFICULTY',
     grade = 'GRADE',
     requirements = 'REQUIREMENTS',
-    sort = 'SORT',
     title = 'TITLE',
   },
   sorts = {

@@ -1,17 +1,21 @@
 local New = function()
-  local labels = {};
-
-  labels.search = New.Label({
-    font = 'medium',
-    text = 'SEARCH',
-    size = 18,
-  });
-  
-  labels.input = New.Label({
-    font = 'jp',
-    text = '',
-    size = 24,
-  });
+  local labels = {
+    input = New.Label({
+      font = 'jp',
+      text = '',
+      size = 24,
+    }),
+    search = New.Label({
+      font = 'medium',
+      text = 'SEARCH',
+      size = 18,
+    }),
+    tab = New.Label({
+      font = 'medium',
+      text = '[TAB]',
+      size = 18,
+    }),
+  };
 
   return {
     labels = labels,
@@ -83,9 +87,15 @@ local New = function()
 
       drawLabel({
         x = self.x + 7,
-        y = self.y - 4,
-        alpha = alpha,
+        y = self.y - 5,
         color = 'normal',
+        label = self.labels.tab,
+      });
+
+      drawLabel({
+        x = self.x + 7 + self.labels.tab.w + 8,
+        y = self.y - 4,
+        color = 'white',
         label = self.labels.search,
       });
 

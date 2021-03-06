@@ -1,3 +1,14 @@
+###### March 6, 2021
+- Added labels to indicate controls for the following:
+  - `Song Select` and `Challenge Wheel`
+    - Activating search input
+    - Changing current song collection/difficulty filter
+    - Changing current song sort
+    - Opening gameplay settings
+  - `Results`
+    - Capturing a screenshot
+- Moved practice mode controls and instructions to `Practice Mode`, both can be disabled by newly added skin settings
+
 ###### March 3, 2021
 - Added current hit window display during gameplay; this can be disabled in skin settings
 - Adjusted some scrolling animations

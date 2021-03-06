@@ -29,12 +29,6 @@ return {
     { minimum = 0, grade = 'D' },
   },
   labels = {
-    grid = {
-      collection = 'COLLECTION',
-      difficulty = 'DIFFICULTY',
-      grade = 'GRADE',
-      sort = 'SORT',
-    },
     info = {
       artist = 'ARTIST',
       bpm = 'BPM',

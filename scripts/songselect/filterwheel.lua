@@ -60,7 +60,28 @@ local stringReplace = function(str, patternTable, replacement)
 	return string.upper(newStr);
 end
 
+local labels = nil;
+
 local layout = nil;
+
+local setLabels = function()
+	if (not labels) then
+		local newLabel = function(text)
+			return New.Label({
+				font = 'medium',
+				text = text,
+				size = 18,
+			});
+		end
+
+		labels = {
+			collection = newLabel('COLLECTION'),
+			difficulty = newLabel('DIFFICULTY'),
+			fxl = newLabel('[FX-L]'),
+			start = newLabel('[START]'),
+		};
+	end
+end
 
 local folders = {
 	count = 0,
@@ -304,7 +325,7 @@ local levels = {
 	end,
 };
 
-drawCurrentField = function(deltaTime, label, field, displaying, isFolder)
+local drawCurrentField = function(deltaTime, label, field, displaying, isFolder)
 	local x = layout.field[field].x;
 	local y = layout.field.y;
 	local color;
@@ -351,6 +372,48 @@ drawCurrentField = function(deltaTime, label, field, displaying, isFolder)
 	end
 end
 
+local drawLabels = function(displaying)
+	local collectionPrefix = labels.fxl;
+	local difficultyPrefix = labels.fxl;
+	local y = (scaledH / 20) - 2;
+
+	if (displaying) then
+		if (choosingFolder) then
+			difficultyPrefix = labels.start;
+		else
+			collectionPrefix = labels.start;
+		end
+	end
+
+	drawLabel({
+		x = layout.field[1].x,
+		y = y - 1,
+		color = 'normal',
+		label = collectionPrefix,
+	});
+
+	drawLabel({
+		x = layout.field[1].x + collectionPrefix.w + 8,
+		y = y,
+		color = 'white',
+		label = labels.collection,
+	});
+
+	drawLabel({
+		x = layout.field[2].x,
+		y = y - 1,
+		color = 'normal',
+		label = difficultyPrefix,
+	});
+
+	drawLabel({
+		x = layout.field[2].x + difficultyPrefix.w + 8,
+		y = y,
+		color = 'white',
+		label = labels.difficulty,
+	});
+end
+
 render = function(deltaTime, displaying)
 	if (not rendererSet) then
 		isSongSelect = #filters.level == 21;
@@ -361,6 +424,8 @@ render = function(deltaTime, displaying)
 	if ((not layout) and rendererSet) then
 		layout = GridLayout.New(isSongSelect);
 	end
+
+	setLabels();
 
 	gfx.Save();
 
@@ -380,6 +445,8 @@ render = function(deltaTime, displaying)
 
 		previousFolder = currentFolder;
 	end
+
+	drawLabels(displaying);
 
 	drawCurrentField(deltaTime, folders.labels[currentFolder], 1, displaying, true);
 	drawCurrentField(deltaTime, levels.labels[currentLevel], 2, displaying, false);

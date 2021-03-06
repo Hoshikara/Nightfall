@@ -40,11 +40,21 @@ local layout = nil;
 
 local labels = nil;
 
-setLabels = function()
+local setLabels = function()
 	if (not labels) then
 		labels = {
 			maxWidth = 0,
 			maxHeight = 0,
+			fxr = New.Label({
+				font = 'medium',
+				text = '[FX-R]',
+				size = 18,
+			}),
+			sort = New.Label({
+				font = 'medium',
+				text = 'SORT',
+				size = 18,
+			}),
 		};
 
 		for i, sort in ipairs(sorts) do
@@ -77,7 +87,7 @@ setLabels = function()
 	end
 end
 
-drawCurrentSort = function(displaying)
+local drawCurrentSort = function(displaying)
 	if (currentSort > #labels) then
 		currentSort = 1;
 	end
@@ -85,6 +95,20 @@ drawCurrentSort = function(displaying)
 	local color = (displaying and 'normal') or 'white';
 	local x = layout.field[3].x;
 	local y = layout.field.y;
+
+	drawLabel({
+		x = x,
+		y = (scaledH / 20) - 3,
+		color = 'normal',
+		label = labels.fxr,
+	});
+
+	drawLabel({
+		x = x + labels.fxr.w + 8,
+		y = (scaledH / 20) - 3,
+		color = 'white',
+		label = labels.sort,
+	});
 
 	drawLabel({
 		x = x,
@@ -124,7 +148,7 @@ drawCurrentSort = function(displaying)
 	gfx.Restore();
 end
 
-drawSortLabel = function(index, y, isSelected)
+local drawSortLabel = function(index, y, isSelected)
 	local baseAlpha = (isSelected and 255) or 150;
 	local alpha = math.floor(baseAlpha * math.min(timer ^ 2, 1));
 	local padding = layout.dropdown.padding;

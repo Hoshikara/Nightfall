@@ -544,7 +544,7 @@ render = function(deltaTime)
 
 	activeButton = Controller:handleInput({
 		current = activeButton,
-		total = ((showControls and 8) or buttonCount[activePage]),
+		total = ((showControls and 7) or buttonCount[activePage]),
 	});
 
 	clickAction = nil;

@@ -588,11 +588,6 @@ local challengeList = {
       previous = 0,
     },
   },
-  order = {
-    'collection',
-    'difficulty',
-    'sort',
-  },
   scrollbar = Scrollbar.New(),
   selectedChallenge = 0,
   viewLimit = 6,
@@ -659,22 +654,19 @@ local challengeList = {
         isScore = false,
         sizes = { 18 },
       });
-    end
-  end,
 
-  drawLabels = function(self)
-    gfx.Save();
+      self.labels.fxlfxr = New.Label({
+        font = 'medium',
+        text = '[FX-L]  +  [FX-R]',
+        size = 20,
+      });
 
-    for i, name in ipairs(self.order) do
-      drawLabel({
-        x = self.labels.x[i],
-        y = self.labels.y,
-        color = 'normal',
-        label = labels[name],
+      self.labels.gameplaySettings = New.Label({
+        font = 'medium',
+        text = 'GAMEPLAY SETTINGS',
+        size = 20,
       });
     end
-
-    gfx.Restore();
   end,
 
   drawChallengeList = function(self, deltaTime)
@@ -863,8 +855,6 @@ local challengeList = {
 
     gfx.Save();
 
-    self:drawLabels();
-
     if (#chalwheel.challenges > 0) then
       self:drawChallengeList(deltaTime);
 
@@ -882,6 +872,20 @@ local challengeList = {
     if (#chalwheel.challenges > self.viewLimit) then
       self.scrollbar:render(deltaTime);
     end
+
+    drawLabel({
+      x = self.list.x - 1,
+      y = scaledH - (scaledH / 40) - 14,
+      color = 'normal',
+      label = self.labels.fxlfxr,
+    });
+
+    drawLabel({
+      x = self.list.x - 1 + self.labels.fxlfxr.w + 8,
+      y = scaledH - (scaledH / 40) - 13,
+      color = 'white',
+      label = self.labels.gameplaySettings,
+    });
 
     self:handleChange();
 

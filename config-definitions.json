@@ -102,6 +102,16 @@
 			"BOTTOM"
 		]
 	},
+	"showPracticeControls": {
+		"label": "Show Controls for Practice Mode",
+		"type": "bool",
+		"default": true
+	},
+	"showPracticeSetup": {
+		"label": "Show Setup Instructions for Practice Mode",
+		"type": "bool",
+		"default": true
+	},
 	"separator_d": {},
 	"// RESULTS //": {
 		"type": "label"
