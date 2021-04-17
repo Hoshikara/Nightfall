@@ -33,6 +33,7 @@ local upScore = nil;
 
 local screenshotRegion = getSetting('screenshotRegion', 'PANEL');
 local showHardScores = getSetting('showHardScores', false);
+local suggestOffset = getSetting('suggestOffset', true);
 
 local cache = { resX = 0, resY = 0 };
 
@@ -834,9 +835,6 @@ local graphs = {
 	drawStats = function(self)
 		local x = self.x + (self.w.total / 2);
 		local y = self.y + self.h + 4;
-		local spacing = (self.w.total / 2)
-			- self.labels.mean.w
-			- self.labels.median.w;
 
 		drawLabel({
 			x = x,
@@ -870,39 +868,41 @@ local graphs = {
 			label = self.labels.median,
 		});
 
-		if (self.stats.rawMedian
-			and (math.abs(math.floor(self.stats.rawMedian)) > 1)
-		) then
-				self.labels.offset:update({ new = string.format(
-					'%d ms',
-					math.abs(math.floor(self.stats.rawMedian))
-				)});
+		if (suggestOffset) then
+			if (self.stats.rawMedian
+				and (math.abs(math.floor(self.stats.rawMedian)) > 1)
+			) then
+					self.labels.offset:update({ new = string.format(
+						'%d ms',
+						math.abs(math.floor(self.stats.rawMedian))
+					)});
 
-				drawLabel({
-					x = x - 4,
-					y = y + (self.labels.median.h * 1.35),
-					align = 'right',
-					color = 'white',
-					label = self.labels.offset,
-				});
-
-				if (self.stats.rawMedian > 0) then
 					drawLabel({
-						x = x - 4 - self.labels.offset.w - 6,
+						x = x - 4,
 						y = y + (self.labels.median.h * 1.35),
 						align = 'right',
-						color = 'red',
-						label = self.labels.increase,
+						color = 'white',
+						label = self.labels.offset,
 					});
-				elseif (self.stats.rawMedian < 0) then
-					drawLabel({
-						x = x - 4 - self.labels.offset.w - 6,
-						y = y + (self.labels.median.h * 1.35),
-						align = 'right',
-						color = 'red',
-						label = self.labels.decrease,
-					});
-				end
+
+					if (self.stats.rawMedian > 0) then
+						drawLabel({
+							x = x - 4 - self.labels.offset.w - 6,
+							y = y + (self.labels.median.h * 1.35),
+							align = 'right',
+							color = 'red',
+							label = self.labels.increase,
+						});
+					elseif (self.stats.rawMedian < 0) then
+						drawLabel({
+							x = x - 4 - self.labels.offset.w - 6,
+							y = y + (self.labels.median.h * 1.35),
+							align = 'right',
+							color = 'red',
+							label = self.labels.decrease,
+						});
+					end
+			end
 		end
 	end,
 

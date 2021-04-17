@@ -2,7 +2,7 @@ local badgeRates = {
 	0.5,  -- Played
 	1.0,  -- Cleared
 	1.02, -- Hard clear
-	1.04, -- UC
+	1.05, -- UC
 	1.1   -- PUC
 };
 

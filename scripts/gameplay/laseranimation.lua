@@ -29,13 +29,13 @@ _.initializeLaser = function(self)
   };
 
   for side = 1, 2 do
-    local whichSide = ((side == 1) and 'left') or 'right';
+    local whichSide = ((side == 1) and 'l') or 'r';
 
     local dome = gfx.LoadSkinAnimation(
       string.format('gameplay/hit_animation/laser_%s/dome', whichSide),
       (1.0 / 30.0)
     );
-    local frame = gfx.CreateSkinImage('gameplay/hit_animation/laser_left/dome/0001.png', 0);
+    local frame = gfx.CreateSkinImage('gameplay/hit_animation/laser_l/dome/0001.png', 0);
     local tail = gfx.CreateSkinImage(
       string.format('gameplay/laser_cursor/tail_%s.png', whichSide),
       0

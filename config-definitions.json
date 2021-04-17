@@ -116,6 +116,11 @@
 	"// RESULTS //": {
 		"type": "label"
 	},
+	"suggestOffset": {
+		"label": "Show song offset suggestion",
+		"type": "bool",
+		"default": true
+	},
 	"dateFormat": {
 		"type": "selection",
 		"label": "Date Format",
