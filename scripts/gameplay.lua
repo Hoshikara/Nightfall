@@ -1657,8 +1657,8 @@ local userInfo = {
 						font = 'number',
 						text = string.format(
 							'±%d / %d ms',
-							get(current, 'hitWindow.perfect', 46),
-							get(current, 'hitWindow.good', 92)
+							get(gameplay, 'hitWindow.perfect', 46),
+							get(gameplay, 'hitWindow.good', 92)
 						),
 						size = 24,
 					}),
