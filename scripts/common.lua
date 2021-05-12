@@ -1,309 +1,239 @@
-local _ = require('lib/luadash');
-local Constants = require('constants/common');
+-- This script is loaded for every screen of the game
+-- All of the functions below are available to all of the scripts of the skin
 
 gfx.LoadSkinFont('DFMGM.ttf');
 
-smoothstep = function(t)
-  return t * t * (3 - 2 * t);
-end
+Image = require('common/image');
+Label = require('common/label');
 
-alignText = function(alignment)
-  alignment = Constants.Alignments[alignment] or Constants.Alignments.left;
+local Constants = require('constants/common');
+local Alignments = Constants.Alignments;
+local Colors = Constants.Colors;
 
-  gfx.TextAlign(alignment);
-end
+local abs = math.abs;
+local cos = math.cos;
+local floor = math.floor;
+local min = math.min;
+local max = math.max;
 
-drawLabel = function(params)
-  local x = params.x or 0;
-  local y = params.y or 0;
-  local alpha = params.alpha or 255;
-  local maxWidth = params.maxWidth or -1;
-
-  gfx.BeginPath();
-
-  alignText(params.align);
-
-  setFill('dark', alpha * 0.5);
-  gfx.DrawLabel(params.label.label, x + 1, y + 1, maxWidth);
-
-  setFill(params.color, alpha);
-  gfx.DrawLabel(params.label.label, x, y, maxWidth);
-end
-
-drawScrollingLabel = function(params)
-  local x = params.x or 0;
-  local y = params.y or 0;
-  local alpha = params.alpha or 255;
-  local scale = params.scale or 1;
-  local timer = params.timer or 0;
-  local width = params.width or 0;
-
-  local labelX = params.label.w * 1.2;
-  local duration = (labelX / 80) * 0.75;
-  local phase = math.max((timer % (duration + 1.5)) - 1.5, 0) / duration;
-
-  gfx.Save();
-
-  gfx.BeginPath();
-
-  gfx.Scissor((x + 2) * scale, y * scale, width, params.label.h * 1.25);
-
-  alignText(params.align);
-
-  setFill('dark', alpha * 0.5);
-  gfx.DrawLabel(params.label.label, x + 1 - (phase * labelX), y + 1, -1);
-  gfx.DrawLabel(
-    params.label.label,
-    x + 1 - (phase * labelX) + labelX,
-    y + 1,
-    -1
-  );
-
-  setFill(params.color, alpha);
-  gfx.DrawLabel(params.label.label, x - (phase * labelX), y, -1);
-  gfx.DrawLabel(params.label.label, x - (phase * labelX) + labelX, y, -1);
-
-  gfx.ResetScissor();
-
-  gfx.Restore();
-end
-
-drawImage = function(params)
-  local scale = params.scale or 1;
-  local x = params.x or 0;
-  local y = params.y or 0;
-  local w = (params.w or params.image.w) * scale;
-  local h = (params.h or params.image.h) * scale;
-
-  if (params.centered) then
-    x = x - (w / 2);
-    y = y - (h / 2);
-  end
-
-  gfx.BeginPath();
-
-  if (params.blendOp) then
-    gfx.GlobalCompositeOperation(params.blendOp);
-  end
-
-  if (params.tint) then
-    gfx.SetImageTint(params.tint[1], params.tint[2], params.tint[3]);
-
-    gfx.ImageRect(x, y, w, h, params.image.image, params.alpha or 1, 0);
-
-    gfx.SetImageTint(255, 255, 255);
-  else
-    gfx.ImageRect(x, y, w, h, params.image.image, params.alpha or 1, 0);
-  end
-
-  if (params.stroke) then
-    setStroke(params.stroke);
-
-    gfx.Stroke();
-  end
-end
-
-drawRectangle = function(params)
-  local scale = params.scale or 1;
-  local x = params.x or 0;
-  local y = params.y or 0;
-  local w = (params.w or 1000) * scale;
-  local h = (params.h or 1000) * scale;
-
-  if (params.centered) then
-    x = x - (w / 2);
-    y = y - (h / 2);
-  end
-
-  gfx.BeginPath();
-
-  if (params.blendOp) then
-    gfx.GlobalCompositeOperation(params.blendOp);
-  end
-
-  if (params.image) then
-    if (params.tint) then
-      gfx.SetImageTint(params.tint[1], params.tint[2], params.tint[3]);
-
-      gfx.ImageRect(x, y, w, h, params.image, params.alpha or 1, 0);
-
-      gfx.SetImageTint(255, 255, 255);
-    else
-      gfx.ImageRect(x, y, w, h, params.image, params.alpha or 1, 0);
-    end
-  else
-    setFill(params.color, params.alpha);
-
-    if (params.fast) then
-      gfx.FastRect(x, y, w, h);
-    else
-      gfx.Rect(x, y, w, h);
-    end
-
-    gfx.Fill();
-  end
-
-  if (params.stroke) then
-    setStroke(params.stroke);
-
-    gfx.Stroke();
-  end
-end
-
-loadFont = function(font)
-  font = Constants.Fonts[font] or Constants.Fonts.jp;
-
-  gfx.LoadSkinFont(font);
-end
-
-setFill = function(color, alpha)
-  alpha = (alpha and math.floor(alpha)) or 255;
-  color = Constants.Colors[color] or color or Constants.Colors.normal;
-
-  gfx.FillColor(color[1], color[2], color[3], alpha);
-end
-
-setStroke = function(params)
-  local alpha = (params.alpha and math.floor(params.alpha)) or 255;
-  local color = Constants.Colors[params.color]
-    or params.color
-    or Constants.Colors.normal;
-  local size = params.size or 1;
-
-  gfx.StrokeColor(color[1], color[2], color[3], alpha);
-  gfx.StrokeWidth(size);
-end
-
-New = {
-  Image = require('common/image'),
-  Label = require('common/label'),
+local btnMap = {
+	BTA = 0,
+	BTB = 1,
+	BTC = 2,
+	BTD = 3,
+	FXL = 4,
+	FXR = 5,
+	STA = 6,
+	BCK = 11,
 };
 
-createError = function(description)
-  return function(cause)
-    error(string.format('%s: %s', description, cause));
-  end
-end
+local fontMap = {
+	jp = 24,
+	med = 18,
+	norm = 24,
+	num = 18,
+};
 
-debug = function(tbl)
-  local length = 0;
-  local y = 30;
-  local inc = 0;
+-- Text alignment wrapper function
+---@param a? string # `'center'`, `'left'`, `'middle'`, `'right'`
+alignText = function(a) gfx.TextAlign(Alignments[a] or Alignments.left); end
 
-  for k, v in pairs(tbl) do
-    length = length + 1;
-  end
-
-  gfx.Save();
-  gfx.Translate(5, 3);
-
-  drawRectangle({
-    x = -100,
-    y = -6,
-    w = 720,
-    h = (y * length) * 9,
-    alpha = 200,
-    color = 'black',
-  });
-
-  gfx.BeginPath();
-  gfx.FontSize(30);
-  alignText('left');
-  setFill('white');
-  loadFont('mono');
-
-  for k, v in pairs(tbl) do
-    gfx.Text(string.format('%s: %s', k, v), 0, y * inc);
-
-    inc = inc + 1;
-  end
-
-  gfx.Restore();
-end
-
-log = function(content)
-  if (type(content) == 'string') then
-    game.Log(string.format('Nightfall Log: %s', content), game.LOGGER_INFO);
-  else
-    game.Log(
-      string.format(
-        'Nightfall Log: Invalid data type (expected a string, got a %s)',
-        type(content)
-      ),
-      game.LOGGER_INFO
-    );
-  end
-end
-
-drawCursor = function(params);
+-- Rectangle drawing wrapper function  
+-- Draws `image` if provided
+---@param params table #
+-- ```
+-- {
+-- 	x: number = 0,
+-- 	y: number = 0,
+-- 	w: number = 1000,
+-- 	h: number = 1000,
+-- 	alpha?: number
+-- 	blendOp?: integer,
+-- 	centered?: boolean,
+-- 	color?: string|table,
+-- 	fast?: boolean,
+-- 	image?: any,
+-- 	scale: number = 1,
+-- 	stroke?: table,
+-- 	tint?: table
+-- }
+-- ```
+drawRect = function(params)
+	local scale = params.scale or 1;
 	local x = params.x or 0;
 	local y = params.y or 0;
-	local w = params.w or 0;
-	local h = params.h or 0;
-	local alpha = (params.alpha and math.floor(255 * params.alpha)) or 255;
-	local stroke = params.stroke or 1;
-  local size = params.size or 6;
-  local sizeY = size * 0.95;
-  local gap = size / (size * 1.05);
+	local w = (params.w or 1000) * scale;
+	local h = (params.h or 1000) * scale;
+
+	if (params.centered) then
+		x = x - (w / 2);
+		y = y - (h / 2);
+	end
 
 	gfx.BeginPath();
-	gfx.StrokeWidth(stroke);
-	gfx.StrokeColor(255, 255, 255, alpha);
 
-	gfx.MoveTo(x - size - gap, y);
-	gfx.LineTo(x - size - gap, y - sizeY);
-	gfx.LineTo(x - gap, y - sizeY);
+	if (params.blendOp) then
+		gfx.GlobalCompositeOperation(params.blendOp);
+	end
 
-	gfx.MoveTo(x + w + size + gap, y);
-	gfx.LineTo(x + w + size + gap, y - sizeY);
-	gfx.LineTo(x + w + gap, y - sizeY);
+	if (params.image) then
+		if (params.tint) then
+			gfx.SetImageTint(params.tint[1], params.tint[2], params.tint[3]);
 
-	gfx.MoveTo(x - size - gap, y + h);
-	gfx.LineTo(x - size - gap, y + h + sizeY);
-	gfx.LineTo(x - gap, y + h + sizeY);
+			gfx.ImageRect(x, y, w, h, params.image, params.alpha or 1, 0);
 
-	gfx.MoveTo(x + w + size + gap, y + h);
-	gfx.LineTo(x + w + size + gap, y + h + sizeY);
-	gfx.LineTo(x + w + gap, y + h + sizeY);
+			gfx.SetImageTint(255, 255, 255);
+		else
+			gfx.ImageRect(x, y, w, h, params.image, params.alpha or 1, 0);
+		end
+	else
+		setFill(params.color, params.alpha);
 
-	gfx.Stroke();
+		if (params.fast) then
+			gfx.FastRect(x, y, w, h);
+		else
+			gfx.Rect(x, y, w, h);
+		end
+
+		gfx.Fill();
+	end
+
+	if (params.stroke) then
+		setStroke(params.stroke);
+
+		gfx.Stroke();
+	end
 end
 
-get = function(tbl, path, default)
-  return _.get(tbl, path, default);
+-- Flickers alpha channel  
+-- Pulses after flickering if `pt` provided
+---@param ft number # flicker timer
+---@param pt number # pulse timer
+---@param p number # percentage, `0.0` to `1.0`
+---@param d number # duration, in seconds
+flicker = function(ft, pt, p, d)
+	if (ft < 0.26) then return floor(ft * 30) % 2; end
+
+	if (not pt) then return 1; end
+
+	return pulse(pt, p, d);
 end
 
-getDifficultyIndex = function(jacketPath, difficultyIndex)
-  if (jacketPath and difficultyIndex) then
-    local path = string.match(string.lower(jacketPath), '[/\\][^\\/]+$');
+-- Gets the index that corresponds to a `Difficulty` name
+---@param jacketPath string
+---@param diffIndex integer
+---@return integer
+getDiffIndex = function(jacketPath, diffIndex)
+	if (jacketPath and diffIndex) then
+		local path = ((jacketPath):lower()):match('[/\\][^\\/]+$');
 
-    if ((difficultyIndex == 3) and path) then
-      if (string.find(path, 'inf')) then
-        return 5;
-      elseif (string.find(path, 'grv')) then
-        return 6;
-      elseif (string.find(path, 'hvn')) then
-        return 7;
-      elseif (string.find(path, 'vvd')) then
-        return 8
-      end
-    end
-  end
+		if ((diffIndex == 3) and path) then
+			if (path:find('inf')) then
+				return 5;
+			elseif (path:find('grv')) then
+				return 6;
+			elseif (path:find('hvn')) then
+				return 7;
+			elseif (path:find('vvd')) then
+				return 8;
+			end
+		end
+	end
 
-  return difficultyIndex + 1;
+	return diffIndex + 1;
 end
 
+---Gets the value of the skin setting by the specified key
+---@param key string
+---@param default any
+---@return any
 getSetting = function(key, default)
-  local setting = game.GetSkinSetting(key);
+	local setting = game.GetSkinSetting(key);
 
-  if (setting == nil) then
-    return default;
-  end
+	if (setting == nil) then return default; end
 
-  -- remove random double quote carriage return that get inserted in skin.cfg
-  if (type(setting) == 'string') then
-    setting = setting:gsub('[%"%\r]', '');
-  end
+	-- remove random double quote carriage return that gets inserted in skin.cfg
+	if (type(setting) == 'string') then setting = setting:gsub('[%"%\r]', ''); end
 
-  return setting;
+	return setting;
 end
+
+-- Font loading wrapper function
+---@param f string # `'bold'`, `'jp'`, `'med'`, `'mono'`, `'norm'`, `'num'`
+loadFont = function(f)
+	gfx.LoadSkinFont(Constants.Fonts[f] or Constants.Fonts.jp);
+end
+
+-- Label wrapper function
+---@param font string # `'jp'`, `'med'`, `'norm'`, `'num'`
+---@param text string | table # string |
+-- ```
+-- { color: string, text: string }
+-- ```
+---@param size? integer
+---@param color? string | table # `'black'`, `'dark'`, `'med'`, `'light'`, `'norm'`, `'red'`, `'white'` or `{ r: integer, g: integer, b: integer }`
+---@return Label
+makeLabel = function(font, text, size, color)
+	return Label:new({
+		color = color or 'norm',
+		font = font,
+		size = size or fontMap[font],
+		text = text,
+	});
+end
+
+-- Check whether a button is being pressed
+---@param btn string # `'BTA' - 'BTD'`, `'FXL' / 'FXR'`, `'STA'`, `'BCK'` 
+pressed = function(btn) return game.GetButton(btnMap[btn]); end
+
+-- Pulses alpha channel
+---@param t number # timer
+---@param p number # percentage, `0.0` to `1.0`
+---@param d number # duration, in seconds 
+pulse = function(t, p, d) return abs(p * cos(t * (1 / d))) + (1 - p); end
+
+-- Fill color wrapper function
+---@param c? string | table # `'black'`, `'dark'`, `'med'`, `'light'`, `'norm'`, `'red'`, `'white'` or `{ r: intger, g: integer, b: integer }`
+---@param a? number # = 255
+setFill = function(c, a)
+	a = (a and floor(a)) or 255;
+	c = Colors[c] or c or Colors.norm;
+
+	gfx.FillColor(c[1], c[2], c[3], a);
+end
+
+-- Stroke style wrapper function
+---@param params table #
+-- ```
+-- {
+-- 	alpha: integer = 255,
+-- 	color: string|table = 'norm' = { 60, 110, 160 },
+-- 	size: integer = 1,
+-- }
+-- ```
+setStroke = function(params)
+	local a = (params.alpha and floor(params.alpha)) or 255;
+	local c = Colors[params.color] or params.color or Colors.norm;
+	local size = params.size or 1;
+
+	gfx.StrokeColor(c[1], c[2], c[3], a);
+	gfx.StrokeWidth(size);
+end
+
+-- Smoother interpolation
+---@param t number # timer
+smoothstep = function(t) return t * t * (3 - 2 * t); end
+
+-- Decreases a timer to 0
+---@param t number # timer
+---@param dt deltaTime
+---@param d number # duration, in seconds
+---@return number
+to0 = function(t, dt, d) return max(t - (dt * (1 / d)), 0); end
+
+-- Increases a timer to 1
+---@param t number # timer
+---@param dt deltaTime
+---@param d number # duration, in seconds
+---@return number
+to1 = function(t, dt, d) return min(t + (dt * (1 / d)), 1); end

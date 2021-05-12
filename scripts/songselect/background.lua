@@ -1,13 +1,10 @@
-local background = New.Image({ path = 'bg.png' });
+local bg = Image:new('bg.png');
 
-render = function(deltaTime)
+local resX = 0;
+local resY = 0;
+
+render = function(dt)
 	resX, resY = game.GetResolution();
 
-	drawImage({
-		x = 0,
-		y = 0,
-		w = resX,
-		h = resY,
-		image = background,
-	});
+	bg:draw({ w = resX, h = resY });
 end

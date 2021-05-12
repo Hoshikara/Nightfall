@@ -1,33 +1,4 @@
-local _ = {
-  clears = {
-    'PLAYED',
-    'NORMAL',
-    'HARD',
-    'UC',
-    'PUC',
-  },
-  difficulties = {
-    'NOVICE',
-    'ADVANCED',
-    'EXHAUST',
-    'MAXIMUM',
-    'INFINITE',
-    'GRAVITY',
-    'HEAVENLY',
-    'VIVID',
-  },
-  grades = {
-    { minimum = 9900000, grade = 'S' },
-    { minimum = 9800000, grade = 'AAA+' },
-    { minimum = 9700000, grade = 'AAA' },
-    { minimum = 9500000, grade = 'AA+' },
-    { minimum = 9300000, grade = 'AA' },
-    { minimum = 9000000, grade = 'A+' },
-    { minimum = 8700000, grade = 'A' },
-    { minimum = 7500000, grade = 'B' },
-    { minimum = 6500000, grade = 'C' },
-    { minimum = 0, grade = 'D' },
-  },
+return {
   song = {
     artist = 'ARTIST',
     bpm = 'BPM',
@@ -42,14 +13,14 @@ local _ = {
     error = 'ERROR',
     gauge = 'GAUGE',
     grade = 'GRADE',
+    critWindow = 'CRIT WINDOW',
+    nearWindow = 'NEAR WINDOW',
     hitWindows = 'HIT WINDOWS',
     late = 'LATE',
     maxChain = 'MAX CHAIN',
     name = 'PLAYER',
     near = 'NEAR',
     score = 'SCORE',
-    timestamp = 'PLAYED',
+    timestamp = 'DATE',
   },
 };
-
-return _;

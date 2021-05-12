@@ -1,7 +1,52 @@
-##### April 16, 2021
-- Added a skin setting to disable the song offset suggestion on the results screen
-- Added laser animation textures to correspond with the colors inside `laser_colors` (renamed from `optional`)
-- Fixed UC badge rate being lower than official calculation (1.04 -> 1.05)
+##### 1.0.0 - May 12, 2021
+- Added `Player Info` screen to the main menu
+  - To load player info, enter `Song Select` and press `BT-A`, doing this also ensures your player info is fully updated
+  - Stats are organized by the folder they belong to, along with an additional folder for official Sound Voltex charts (converts)
+    - Press `FX-L` to open up folder dropdown, navigate with knobs or click on folder names to select
+  - For `Clears` and `Grades` tabs:
+    - Totals for a level and clear/grade are hoverable to show overall completion percentage
+    - Those same totals are also clickable to view the titles and artists of the charts that make up that total
+    - Press `FX-L` or `FX-R` while viewing the charts to navigate chart pages (if applicable)
+- `Song Select` changes:
+  - Added a note per second graph display but requires the chart to be played at least once; this can be disabled in skin settings
+  - Added a scrollbar to the game settings and song collection windows
+  - Fixed jacket labels rendering on top of the sorting dropdown
+  - Optimized jacket loading for lower memory consumption
+  - Removed `BT-A` shortcut to view controls
+- `Gameplay` changes:
+  - Added upcoming BPM and Hi-Speed change indicators but requires the chart to be played at least once
+  - Added a display for Hi-Speed in the middle of the screen when `START` is held; the position can be changed in skin settings
+  - Added a flashing indicator for excessive gauge below 30%
+  - Added a skin setting to change hit bar decay time for the hit delta bar
+  - Added a skin setting to display hit delta from 0 instead of from the current critical window (only relevant when using `TEXT + DELTA` or `DELTA` for `Early / Late Display Type`)
+  - Added a skin setting to ignore incoming Hi-Speed changes for the middle Hi-Speed display
+  - Added a small animation to the outro text display
+  - Added current hit window indicators to the hit delta bar; these fade out after gameplay starts
+  - Inverted colors of BPM and Hi-Speed labels and values
+  - Fixed hit delta bar not scaling properly for harder hit timing windows
+  - Fixed slam animations playing at incorrect positions
+  - Modified button, fx, and track tick textures
+  - Modified laser textures for more distinct active state
+  - Removed laser ending animations (consequence of the change above)
+  - Removed `Hit Windows` field for User Info
+  - Removed skin setting to change hit delta bar position, now is only displayed at the top of the screen
+- `Results` changes:
+  - Added a hit bar graph to represent `critical`, `early`, `late`, `early error`, and `late error` counts; hold and laser errors fall into the `late error` category
+  - Added a display for current and total score (play) amounts
+  - Added a number indicator for comparing best overall critical/near/error count to corresponding stats; this can be disabled in skin settings
+  - Added a skin setting to disable recommended offset text
+  - Added a skin setting to choose the minimum offset required to show recommended text
+  - Changed gauge graph to show both effective and excessive gauge progress when using ARS
+  - Changed suggested offset change (increase/decrease by) text to instead recommend the value that the song offset should be set to
+  - Fixed gauge graph size
+  - Removed the hit window field, instead added as indicators to the hit stat graph
+  - Restored button letter indicators for hit stat graph from the default skin; rating colors changed for consistency
+- `Challenge Wheel` changes:
+  - Fixed challenge wheel results not being displayed immediately after completion
+  - More than 3 charts can now be displayed by scrolling with `BT-A`
+- Volforce changes
+  - Added a check to only allow gain from converts (chart must exist in a folder that contains `SOUND VOLTEX` or `SDVX`, case insensitive)
+  - Modified display and calculation to align with Exceed Gear
 
 ##### March 6, 2021
 - Added labels to indicate controls for the following:

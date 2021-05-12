@@ -1,5 +1,5 @@
 return {
-  general = {
+  ['GENERAL'] = {
     {
       action = 'TOGGLE FULLSCREEN',
       controller = '',
@@ -11,7 +11,7 @@ return {
       keyboard = '[F9]',
     },
   },
-  songSelect = {
+  ['SONG SELECT'] = {
     {
       action = 'START SONG',
       controller = '[START]',
@@ -103,7 +103,7 @@ return {
       keyboard = '[F12]',
     },
   },
-  gameplaySettings = {
+  ['GAMEPLAY SETTINGS'] = {
     {
       action = 'CHANGE TABS',
       controller = '[FX-L]  /  [FX-R]',
@@ -135,7 +135,7 @@ return {
       keyboard = '',
     },
   },
-  gameplay = {
+  ['GAMEPLAY'] = {
     {
       action = 'ADJUST HISPEED',
       controller = '[START] *',
@@ -157,6 +157,11 @@ return {
       keyboard = '',
     },
     {
+      action = 'SKIP FORWARD',
+      controller = '',
+      keyboard = '[PAGE UP]',
+    },
+    {
       action = 'RESTART SONG',
       controller = '',
       keyboard = '[F5]',
@@ -169,12 +174,7 @@ return {
       note = true,
     },
   },
-  results = {
-    {
-      action = 'INCREASE HIT GRAPH SCALE',
-      controller = '[BT-A]',
-      keyboard = '',
-    },
+  ['RESULTS'] = {
     {
       action = 'PREVIOUS SCORE',
       controller = '[FX-L]',
@@ -191,7 +191,7 @@ return {
       keyboard = '[F12]',
     },
   },
-  multiplayer = {
+  ['MULTIPLAYER'] = {
     {
       action = 'SELECT ROOM',
       controller = '[KNOB-L]  /  [KNOB-R]',
@@ -225,7 +225,7 @@ return {
       note = true,
     },
   },
-  nautica = {
+  ['NAUTICA'] = {
     {
       action = 'DOWNLOAD SONG',
       controller = '[START]',

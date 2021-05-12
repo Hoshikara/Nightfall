@@ -1,134 +1,100 @@
+local Window = require('common/window');
 
-local background = New.Image({ path = 'bg.png' });
+local Cursor = require('components/common/cursor');
+
+local window = Window:new();
+
+local cursor = Cursor:new({ size = 26, stroke = 2 }, true);
+
+local floor = math.floor;
+
+local alpha = 0;
+
+local bg = Image:new('bg.png');
+
+local introDone = false;
+local outroDone = false;
 
 local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
 
-local cache = { resX = 0, resY = 0 };
-
-local resX;
-local resY;
-local scaledW;
-local scaledH;
-local scalingFactor;
-
-setupLayout = function()
-  resX, resY = game.GetResolution();
-
-  if ((cache.resX ~= resX) or (cache.resY ~= resY)) then
-    scaledW = 1920;
-    scaledH = scaledW * (resY / resX);
-    scalingFactor = resX / scaledW;
-
-    cache.resX = resX;
-    cache.resY = resY;
-  end
-
-  gfx.Scale(scalingFactor, scalingFactor);
-end
-
-local introComplete = false;
-local outroComplete = false;
-
-local flickerAlpha = 0;
+local labels = nil;
 
 local timers = {
-	intro = 0,
-	outro = 0,
 	fade = 1,
-	flicker = { intro = 0, outro = 0 },
+	flicker = { i = 0, o = 0 },
+	i = 0,
+	o = 0,
 	scissor = {
-		intro = 0,
-		outro = { left = 1, right = 0 },
+		i = 0,
+		o = { l = 1, r = 0 },
 	},
 };
 
-local labels = nil;
-
-setLabels = function()
+local setLabels = function()
 	if (not labels) then
 		labels = {
-			artist = New.Label({
-				font = 'jp',
-				text = string.upper(song.artist),
-				size = 40,
-			}),
-			title = New.Label({
-				font = 'jp',
-				text = string.upper(song.title),
-				size = 48,
-			}),
+			artist = makeLabel('jp', song.artist, 40),
+			title = makeLabel('jp', song.title, 48),
 		};
 	end
 end
 
-drawTransition = function(deltaTime, isIntro);
+local drawTransition = function(dt, isIntro);
 	local jacket = ((song.jacket == 0) and jacketFallback) or song.jacket;
+
+	setLabels();
 
 	gfx.Save();
 
-	setupLayout();
-	
-	setLabels();
+	window:set(true);
 
 	if (isIntro) then
-		timers.fade = math.max(timers.fade - (deltaTime * 1.5), 0);
-	
-		timers.flicker.intro = timers.flicker.intro + deltaTime;
-	
-		timers.scissor.intro = math.min(timers.scissor.intro + (deltaTime * 4), 1)
+		timers.fade = to0(timers.fade, dt, 0.67);
+		timers.flicker.i = timers.flicker.i + dt;
+		timers.i = timers.i + dt;
+		timers.scissor.i = to1(timers.scissor.i, dt, 0.25);
 
-		flickerAlpha = math.floor(timers.flicker.intro * 30) % 2;
-		flickerAlpha = ((flickerAlpha * 80) + 175) / 255;
+		alpha = floor(timers.flicker.i * 30) % 2;
+		alpha = ((alpha * 80) + 175) / 255;
 
-		if (timers.flicker.intro >= 0.3) then
-			flickerAlpha = 1;
-		end
+		if (timers.flicker.i >= 0.3) then alpha = 1; end
 
-		timers.intro = timers.intro + deltaTime;
-
-		introComplete = timers.intro >= 1;
+		introDone = timers.i >= 1;
 	else
-		timers.scissor.outro.left = math.max(timers.scissor.outro.left - (deltaTime * 3), 0);
-		timers.scissor.outro.right = math.min(timers.scissor.outro.right + (deltaTime *  3), 1);
+		timers.flicker.o = timers.flicker.o + dt;
+		timers.o = timers.o + (dt * 2);
+		timers.scissor.o.l = to0(timers.scissor.o.l, dt, 0.33);
+		timers.scissor.o.r = to1(timers.scissor.o.r, dt, 0.33);
 
-		timers.flicker.outro = timers.flicker.outro + deltaTime;
+		alpha = floor(timers.flicker.o * 36) % 2;
+		alpha = ((alpha * 80) + 175) / 255;
 
-		flickerAlpha = math.floor(timers.flicker.outro * 36) % 2;
-		flickerAlpha = ((flickerAlpha * 80) + 175) / 255;
-
-		if (timers.flicker.outro >= 0.3) then
-			flickerAlpha = timers.scissor.outro.left * 0.5;
-		end
-
-		timers.outro = timers.outro + (deltaTime * 2);
+		if (timers.flicker.o >= 0.3) then alpha = timers.scissor.o.l * 0.5; end
 		
-		outroComplete = timers.outro >= 1;
+		outroDone = timers.o >= 1;
 	end
 
 	if (isIntro) then
-		gfx.Translate(scaledW / 2, 0);
+		gfx.Translate(window.w / 2, 0);
 
 		gfx.Scissor(
-			-((scaledW / 2) * timers.scissor.intro),
+			-((window.w / 2) * timers.scissor.i),
 			0,
-			scaledW * timers.scissor.intro,
-			scaledH
+			window.w * timers.scissor.i,
+			window.h
 		);
 
-		gfx.Translate(-(scaledW / 2), 0);
+		gfx.Translate(-(window.w / 2), 0);
 
-		drawImage({
-			x = scaledW / 2,
-			y = scaledH / 2,
+		bg:draw({
+			x = window.w / 2,
+			y = window.h / 2,
 			centered = true,
-			image = background,
 		});
 
-		drawRectangle({
-			x = 0,
-			y = 0,
-			w = scaledW,
-			h = scaledH,
+		drawRect({
+			w = window.w,
+			h = window.h,
 			alpha = 150 * timers.fade,
 			color = 'black',
 		});
@@ -138,131 +104,98 @@ drawTransition = function(deltaTime, isIntro);
 		gfx.Scissor(
 			0,
 			0,
-			(scaledW / 2) * timers.scissor.outro.left,
-			scaledH
+			(window.w / 2) * timers.scissor.o.l,
+			window.h
 		);
 
-		drawImage({
-			x = scaledW / 2,
-			y = scaledH / 2,
+		bg:draw({
+			x = window.w / 2,
+			y = window.h / 2,
 			centered = true,
-			image = background,
 		});
 
 		gfx.ResetScissor();
 
 		gfx.Scissor(
-			(scaledW / 2) + ((scaledW / 2) * timers.scissor.outro.right),
+			(window.w / 2) + ((window.w / 2) * timers.scissor.o.r),
 			0,
-			scaledW / 2,
-			scaledH
+			window.w / 2,
+			window.h
 		);
 
-		drawImage({
-			x = scaledW / 2,
-			y = scaledH / 2,
+		bg:draw({
+			x = window.w / 2,
+			y = window.h / 2,
 			centered = true,
-			image = background,
 		});
 
 		gfx.ResetScissor();
 	end
 
-	gfx.Translate(scaledW / 2, scaledH / 2);
+	gfx.Translate(window.w / 2, window.h / 2);
 
-	drawCursor({
+	cursor:draw({
 		x = -240,
 		y = -360,
 		w = 480,
 		h = 480,
-		alpha = flickerAlpha,
-		size = 26,
-		stroke = 2,
+		alpha = 255 * alpha,
 	});
 
-	drawRectangle({
+	drawRect({
 		x = -240,
 		y = -360,
 		w = 480,
 		h = 480,
-		alpha = flickerAlpha,
+		alpha = alpha,
 		image = jacket,
 		stroke = {
-			alpha = 255 * flickerAlpha,
-			color = 'normal',
+			alpha = 255 * alpha,
+			color = 'norm',
 			size = 2,
 		},
 	});
 
 	if (isIntro) then
-		drawLabel({
+		labels.title:draw({
 			x = 0,
 			y = 255,
 			align = 'center',
-			alpha = 255 * flickerAlpha,
+			alpha = 255 * alpha,
 			color = 'white',
-			label = labels.title,
 		});
 
-		drawLabel({
+		labels.artist:draw({
 			x = 0,
 			y = 255 + labels.title.h * 1.75,
 			align = 'center',
-			alpha = 255 * flickerAlpha,
-			color = 'normal',
-			label = labels.artist,
+			alpha = 255 * alpha,
 		});
 	end
 
 	gfx.Restore();
 end
 
-drawDetails = function(x, y, w, h, s, a)
-	gfx.BeginPath();
-	gfx.StrokeWidth(2);
-	gfx.StrokeColor(255, 255, 255, math.floor(255 * a));
-
-	gfx.MoveTo(x - s, y);
-	gfx.LineTo(x - s, y - (s * 0.875));
-	gfx.LineTo(x - (s * 0.075), y - (s * 0.875));
-
-	gfx.MoveTo(x + w + s, y);
-	gfx.LineTo(x + w + s, y - (s * 0.875));
-	gfx.LineTo(x + w + (s * 0.075), y - (s * 0.875));
-
-	gfx.MoveTo(x - s, y + h);
-	gfx.LineTo(x - s, y + h + (s * 0.875));
-	gfx.LineTo(x - (s * 0.075), y + h + (s * 0.875));
-
-	gfx.MoveTo(x + w + s, y + h);
-	gfx.LineTo(x + w + s, y + h + (s * 0.875));
-	gfx.LineTo(x + w + (s * 0.075), y + h + (s * 0.875));
-
-	gfx.Stroke();
-end
-
-render = function(deltaTime)
-	drawTransition(deltaTime, true);
+render = function(dt)
+	drawTransition(dt, true);
 	
-  return introComplete;
+  return introDone;
 end
 
-render_out = function(deltaTime)
-	drawTransition(deltaTime, false);
+render_out = function(dt)
+	drawTransition(dt, false);
 
-	return outroComplete;
+	return outroDone;
 end
 
 reset = function()
 	labels = nil;
-	timers = {
-		intro = 0,
-		outro = 0,
-		fade = 1,
-		flicker = { intro = 0, outro = 0 },
-		scissor = {
-			intro = 0,
-			outro = { left = 1, right = 0 },
-		},
-	};
+	timers.fade = 1;
+	timers.flicker.i = 0;
+	timers.flicker.o = 0;
+	timers.i = 0;
+	timers.o = 0;
+	timers.scissor.i = 0;
+	timers.scissor.o.l = 1;
+	timers.scissor.o.r = 0;
 end

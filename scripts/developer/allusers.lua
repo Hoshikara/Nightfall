@@ -1,4 +1,4 @@
-local _ = {
+return {
   {
     missing_map = false,
     id = '3537c10d-ad91-494d-84bf-a0d1113c2529',
@@ -80,5 +80,3 @@ local _ = {
     ready = false
   }
 };
-
-return _;

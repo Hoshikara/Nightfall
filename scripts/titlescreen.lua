@@ -1,634 +1,149 @@
-local Controller = require('common/controller');
-local Cursor = require('common/cursor');
+local JSONTable = require('common/jsontable');
+local Knobs = require('common/knobs');
+local Mouse = require('common/mouse');
+local Window = require('common/window');
 
-local controls = require('titlescreen/controls');
-local dialog = require('layout/dialog');
+local Buttons = require('components/titlescreen/buttons');
+local Controls = require('components/titlescreen/controls');
+local PlayerInfo = require('components/titlescreen/playerinfo');
+local Title = require('components/titlescreen/title');
+local UpdatePrompt = require('components/titlescreen/updateprompt');
 
-controls:initializeAll();
+local window = Window:new();
+local mouse = Mouse:new(window);
 
-game.LoadSkinSample('click_button');
-game.LoadSkinSample('intro');
+local playerData = JSONTable:new('player');
+local player = playerData:get();
 
-local activeButton = 1;
-local activePage = 'mainMenu';
+local bg = Image:new('bg.png');
 
-local allowClick = false;
+---@class Titlescreen
+---@field player Player
+local state = {
+	btnCount = 0,
+	btnEvent = nil,
+	checkedUpdate = false,
+	choosingFolder = false,
+	currBtn = 1,
+	currPage = 'mainMenu',
+	hasInfo = player.stats ~= nil,
+	isClickable = false,
+	loaded = false,
+	player = player,
+	promptUpdate = false,
+	refreshInfo = false,
+	samplePlayed = false,
+	viewingControls = false,
+	viewingCharts = false,
+	viewingInfo = false,
 
-local background = New.Image({ path = 'bg.png' });
-
-local buttonCount = {
-	mainMenu = 5,
-	playOptions = 4,
-	update = 3,
-};
-
-local clickAction = nil;
-
-local previousButton = 1;
-local previousPage = '';
-
-local mousePosX = 0;
-local mousePosY = 0;
-
-local showUpdatePrompt = false;
-local updateChecked = false;
-
-local introTimer = 1.2;
-local introSamplePlayed = false;
-local menuLoaded = false;
-
-local hoveredPage = nil;
-local showControls = false;
-
-local cache = { resX = 0, resY = 0 };
-
-local aspectRatio;
-local resX;
-local resY;
-local scaledW;
-local scaledH;
-local scalingFactor;
-
-setupLayout = function()
-  resX, resY = game.GetResolution();
-
-	if ((cache.resX ~= resX) or (cache.resY ~= resY)) then
-		aspectRatio = tonumber(string.format('%.4f', (resX / resY)));
-
-    scaledW = 1920;
-    scaledH = scaledW * (resY / resX);
-    scalingFactor = resX / scaledW;
-
-    cache.resX = resX;
-    cache.resY = resY;
-  end
-
-  gfx.Scale(scalingFactor, scalingFactor);
-end
-
-mouseClipped = function(x, y, w, h)
-	local scaledX = x * scalingFactor;
-	local scaledY = y * scalingFactor;
-	local scaledW = scaledX + (w * scalingFactor);
-	local scaledH = scaledY + (h * scalingFactor);
-
-	return (mousePosX > scaledX)
-		and (mousePosY > scaledY)
-		and (mousePosX < scaledW)
-		and (mousePosY < scaledH);
-end
-
-loadMenu = function(deltaTime)
-	if (not introSamplePlayed) then
-		game.PlaySample('intro');
-
-		introSamplePlayed = true;
-	end
-
-	if (not updateChecked) then
-		updateUrl, updateVersion = game.UpdateAvailable();
-
-		if (updateUrl) then
-			showUpdatePrompt = true;
-			updateChecked = true;
-		end
-	end
-
-	introTimer = math.max(introTimer - (deltaTime / 1.8), 0);
-
-	drawRectangle({
-		x = 0,
-		y = 0,
-		w = scaledW,
-		h = scaledH,
-		alpha = 255 * introTimer,
-		color = 'black',
-	});
-
-	if (introTimer == 0) then
-		menuLoaded = true;
-	end
-end
-
-viewUpdate = function()
-	if (package.config:sub(1,1) == '\\') then
-		updateUrl, updateVersion = game.UpdateAvailable();
-		os.execute('start ' .. updateUrl);
-	else
-		os.execute('xdg-open ' .. updateUrl);
-	end
-end
-
-local setButtonText = function(text)
-	return {
-		font = 'medium',
-		text = text,
-		size = 18,
-	};
-end
-
-local buttons = {
-	activePage = 'mainMenu',
-	cache = { scaledH = 0, scaledW = 0 },
-	cursor = Cursor.New(),
-	images = {
-		button = New.Image({ path = 'buttons/normal.png' }),
-		buttonHover = New.Image({ path = 'buttons/normal_hover.png' }),
-	},
-	labels = nil,
-	margin = 0,
-	x = {},
-	y = 0,
-
-	setSizes = function(self)
-		if ((scaledW ~= self.cache.scaledW) or (scaledH ~= self.cache.scaledH)) then
-			local maxWidth = scaledW - (scaledW / 6);
-
-			self.margin = (maxWidth - (self.images.button.w * 5)) / 4;
-			self.x[1] = scaledW / 20;
-			self.y = scaledH - (scaledH / 4);
-
-			local x = self.x[1];
-
-			for i = 2, 5 do
-				x = x + self.images.button.w + self.margin;
-
-				self.x[i] = x;
-			end
-
-			self.cursor:setSizes({
-				x = self.x[1] + 10,
-				y = self.y + 10,
-				w = self.images.button.w - 20,
-				h = self.images.button.h - 20,
-				margin = self.margin + 20,
-			});
-
-			self.cache.scaledW = scaledW;
-			self.cache.scaledH = scaledH;
-		end
-	end,
-
-	setLabels = function(self)
-		if (not self.labels) then
-			self.labels = {
-				mainMenu = {
-					{
-						action = function()
-							activeButton = 1;
-							activePage = 'playOptions';
-							self.activePage = activePage;
-						end,
-						label = New.Label(setButtonText('PLAY')),
-					},
-					{
-						action = Menu.DLScreen,
-						label = New.Label(setButtonText('NAUTICA')),
-					},
-					{
-						action = function()
-							activeButton = 1;
-							showControls = true;
-						end,
-						label = New.Label(setButtonText('CONTROLS')),
-					},
-					{
-						action = Menu.Settings,
-						label = New.Label(setButtonText('SETTINGS')),
-					},
-					{
-						action = Menu.Exit,
-						label = New.Label(setButtonText('EXIT')),
-					},
-				},
-				playOptions = {
-					{
-						action = Menu.Start,
-						label = New.Label(setButtonText('SINGLEPLAYER')),
-					},
-					{
-						action = Menu.Multiplayer,
-						label = New.Label(setButtonText('MULTIPLAYER')),
-					},
-					{
-						action = Menu.Challenges,
-						label = New.Label(setButtonText('CHALLENGES')),
-					},
-					{
-						action = function()
-							activeButton = 1;
-							activePage = 'mainMenu';
-							self.activePage = activePage;
-						end,
-						label = New.Label(setButtonText('MAIN MENU')),
-					},
-				}
-			};
-		end
-	end,
-
-	drawButton = function(self, i, page, currentAction)
-		local isNavigable = menuLoaded and (not showControls);
-		local allowAction = isNavigable and (not showUpdatePrompt);
-		local isActive = currentAction
-			== (isNavigable and self.labels[page][activeButton].action);
-		local isHovering = mouseClipped(
-			self.x[i],
-			self.y - 10,
-			self.images.button.w,
-			self.images.button.h + 20
-		);
-		local alpha = 255 * ((allowAction and isActive and 1) or 0.2);
-
-		if (allowAction and (isHovering or isActive)) then
-			activeButton = i;
-			allowClick = isHovering;
-			clickAction = currentAction;
-
-			drawImage({
-				x = self.x[i],
-				y = self.y,
-				image = self.images.buttonHover,
-			});
-		else
-			drawImage({
-				x = self.x[i],
-				y = self.y,
-				image = self.images.button,
-			});
-		end
-
-		drawLabel({
-			x = self.x[i] + (self.images.button.w / 8) + 4,
-			y = self.y + (self.images.button.h / 2) - 12,
-			alpha = alpha,
-			color = 'white',
-			label = self.labels[page][i].label,
-		});
-	end,
-
-	render = function(self, deltaTime)
-		self:setSizes();
-
-		self:setLabels();
-
-		local currentButtons = self.labels[self.activePage];
-
-		for i = 1, #currentButtons do
-			self:drawButton(i, self.activePage, currentButtons[i].action);
-		end
-
-		if (menuLoaded and (not showControls) and (not showUpdatePrompt)) then
-			self.cursor:setPosition({
-				current = activeButton,
-				total = 5,
-				horizontal = true,
-			});
-
-			self.cursor:render(deltaTime, {
-				size = 12,
-				stroke = 1.5,
-				horizontal = true,
-			});
-		end
+	set = function(this, newState)
+		for k, v in pairs(newState) do this[k] = v; end
 	end,
 };
 
-local title = {
-	alpha = 0,
-	cache = { scaledW = 0, scaledH = 0 },
-	labels = nil,
-	timer = 0,
-	x = 0,
-	y = 0,
+-- Titlescreen components
+local controls = Controls:new(window, mouse, state);
+local buttons = Buttons:new(window, mouse, state);
+local knobs = Knobs:new(state);
+local playerInfo = PlayerInfo:new(window, mouse, state);
+local title = Title:new(window, state);
+local updatePrompt = UpdatePrompt:new(window, mouse, state);
 
-	setSizes = function(self)
-		if ((scaledW ~= self.cache.scaledW) or (scaledH ~= self.cache.scaledH)) then
-			self.x = scaledW / 20;
-			self.y = scaledH / 4;
+local getInfo = function()
+	if (getSetting('_loadInfo', 'FALSE') == 'TRUE') then
+		player = playerData:get(true);
 
-			self.cache.scaledW = scaledW;
-			self.cache.scaledH = scaledH;
+		if (player.stats) then
+			state.hasInfo = true;
+			state.player = player;
+			state.refreshInfo = true;
+
+			game.SetSkinSetting('_loadInfo', 'FALSE');
 		end
-	end,
-
-	setLabels = function(self)
-		if (not self.labels) then
-			self.labels = {
-				game = New.Label({
-					font = 'medium',
-					text = 'UNNAMED SDVX CLONE',
-					size = 31
-				}),
-			};
-
-			self.labels.skin = New.Label({
-				font = 'medium',
-				text = 'NIGHTFALL',
-				size = 120
-			});
-		end
-	end,
-
-	render = function(self, deltaTime)
-		self:setSizes();
-
-		self:setLabels();
-
-		self.timer = self.timer + deltaTime;
-
-		self.alpha = math.floor(self.timer * 30) % 2;
-		self.alpha = ((self.alpha * 55) + 200) / 255;
+	end
+end
+local debug = require('common/debug');
+-- Called by the game every frame
+---@param dt deltaTime
+render = function(dt)
+	mouse:watch();
 	
-		if (self.timer >= 0.22) then
-			self.alpha = 1;
-		end
-	
-		local alpha = (showControls and 30) or math.floor(255 * self.alpha);
+	knobs:handleChange('btnCount', 'currBtn');
 
-		drawLabel({
-			x = self.x + 8,
-			y = self.y,
-			alpha = alpha,
-			color = 'normal',
-			label = self.labels.game,
-			maxWidth = (self.labels.skin.w * 0.54) - 3,
-		});
-		
-		drawLabel({
-			x = self.x,
-			y = self.y + (self.labels.game.h * 0.25),
-			alpha = alpha,
-			color = 'white',
-			label = self.labels.skin,
-		});
-	end
-};
+	state.btnEvent = nil;
 
-local updatePrompt = {
-	buttons = {
-		normal = New.Image({ path = 'buttons/short.png' }),
-		hover = New.Image({ path = 'buttons/short_hover.png' }),
-		margin = 0,
-		x = {},
-		y = 0,
-	},
-	cache = { scaledH = 0, scaledW = 0 },
-	cursor = Cursor.New(),
-	labels = nil,
-	timer = 0,
+	gfx.Save();
 
-	setSizes = function(self)
-		if ((scaledW ~= self.cache.scaledW) or (scaledH ~= self.cache.scaledH)) then
-			dialog:setSizes(scaledW, scaledH);
+	window:set(true);
 
-			self.buttons.margin = (dialog.w.outer - (self.buttons.normal.w * 3)) / 4;
+	bg:draw({ w = window.w, h = window.h });
 
-			self.buttons.x[3] = dialog.x.outerRight - self.buttons.normal.w;
-			self.buttons.x[2] = self.buttons.x[3]
-				- (self.buttons.normal.w + self.buttons.margin);
-			self.buttons.x[1] = self.buttons.x[2]
-			- (self.buttons.normal.w + self.buttons.margin);
-			self.buttons.y = dialog.y.bottom - self.buttons.normal.h + 10;
+	title:render(dt);
 
-			self.cursor:setSizes({
-				x = self.buttons.x[1] + 10,
-				y = self.buttons.y + 10,
-				w = self.buttons.normal.w - 20,
-				h = self.buttons.normal.h - 20,
-				margin = self.buttons.margin + 20,
-			});
+	buttons:render(dt);
 
-			self.cache.scaledW = scaledW;
-			self.cache.scaledH = scaledH;
-		end
-	end,
+	if (state.loaded and state.promptUpdate) then updatePrompt:render(dt); end
 
-	setLabels = function(self)
-		if (not self.labels) then
-			self.labels = {
-				{
-					action = Menu.Update,
-					label = New.Label(setButtonText('UPDATE')),
-				},
-				{
-					action = viewUpdate,
-					label = New.Label(setButtonText('VIEW')),
-				},
-				{
-					action = function()
-						activeButton = 1;
-						activePage = 'mainMenu';
-						showUpdatePrompt = false;
-					end,
-					label = New.Label(setButtonText('CLOSE')),
-				},
-			};
+	if (state.viewingControls) then controls:render(dt); end
 
-			self.labels.heading = New.Label({
-				font = 'normal',
-				text = 'A NEW UPDATE IS AVAILABLE!',
-				size = 36
-			});
-		end
-	end,
+	if (state.viewingInfo) then
+		getInfo();
 
-	drawButton = function(self, i, button)
-		local isActive = button.action == self.labels[activeButton].action;
-		local isHovering = mouseClipped(
-			self.buttons.x[i],
-			self.buttons.y - 10,
-			self.buttons.normal.w,
-			self.buttons.normal.h + 20
-		);
-		local textAlpha = math.floor(255 * ((isActive and 1) or 0.2));
-
-		if (isHovering or isActive) then
-			activeButton = i;
-			allowClick = isHovering;
-			clickAction = button.action;
-
-			drawImage({
-				x = self.buttons.x[i],
-				y = self.buttons.y,
-				image = self.buttons.hover,
-			});
-		else
-			drawImage({
-				x = self.buttons.x[i],
-				y = self.buttons.y,
-				alpha = 0.45,
-				image = self.buttons.normal,
-			});
-		end
-
-		drawLabel({
-			x = self.buttons.x[i] + (self.buttons.normal.w / 6) + 2,
-			y = self.buttons.y + (self.buttons.normal.h / 2) - 12,
-			alpha = alpha,
-			color = 'white',
-			label = button.label,
-		});
-	end,
-
-	drawCursor = function(self, deltaTime)
-		self.cursor:setPosition({
-			current = activeButton,
-			total = 3,
-			horizontal = true,
-		});
-
-		self.cursor:render(deltaTime, {
-			size = 10,
-			stroke = 1.5,
-			horizontal = true,
-		});
-	end,
-
-	render = function(self, deltaTime)
-		self:setSizes();
-
-		self:setLabels();
-
-		self.timer = math.min(self.timer + (deltaTime * 3), 1);
-
-		drawRectangle({
-			x = 0,
-			y = 0,
-			w = scaledW,
-			h = scaledH,
-			alpha = 150 * self.timer,
-			color = 'black',
-		});
-
-		drawImage({
-			x = scaledW / 2,
-			y = scaledH / 2,
-			alpha = self.timer,
-			centered = true,
-			image = dialog.images.dialogBox,
-		});
-
-		drawLabel({
-			x = dialog.x.outerLeft,
-			y = dialog.y.top - 8,
-			alpha = 255 * self.timer,
-			color = 'white',
-			label = self.labels.heading,
-		});
-
-		for i, button in ipairs(self.labels) do
-			self:drawButton(i, button);
-		end
-
-		self:drawCursor(deltaTime);
-	end,
-};
-
-render = function(deltaTime)
-	setupLayout();
-
-	mousePosX, mousePosY = game.GetMousePos();
-
-	drawImage({
-		x = 0,
-		y = 0,
-		w = scaledW,
-		h = scaledH,
-		image = background,
-	});
-
-	if (not menuLoaded) then
-		loadMenu(deltaTime);
+		playerInfo:render(dt);
 	end
 
-	activeButton = Controller:handleInput({
-		current = activeButton,
-		total = ((showControls and 7) or buttonCount[activePage]),
-	});
+	-- debug({
+	-- 	count=playerInfo.count,
+	-- 	viewingTop50 = playerInfo.viewingTop50,
+	-- 	page = playerInfo.top50Page,
+	-- 	pages = playerInfo.top50Pages,
+	-- 	offset = playerInfo.list.offset
+	-- })
 
-	clickAction = nil;
-
-	buttons:render(deltaTime);
-
-	if (menuLoaded) then
-		if (showUpdatePrompt) then
-			activePage = 'update';
-
-			updatePrompt:render(deltaTime);
-		else
-			title:render(deltaTime);
-		end
-	end
-
-	hoveredPage = controls:render(deltaTime, showControls, activeButton);
-
-	if (aspectRatio ~= 1.7778) then
-		gfx.BeginPath();
-		gfx.FillColor(255, 55, 55, 255);
-		gfx.FontSize(24);
-		alignText('left');
-		loadFont('mono');
-		gfx.Text(
-			'NON 16:9 RESOLUTION DETECTED -- SKIN ELEMENTS MAY NOT RENDER AS INTENDED. ENTER FULLSCREEN WITH  [ALT] + [ENTER]  IF THIS IS A MISTAKE',
-			6, 
-			scaledH - 24
-		);
-	end
-
-	if (previousButton ~= activeButton) then
-		if (showUpdatePrompt) then
-			updatePrompt.cursor.timer.flicker = 0;
-		else
-			buttons.cursor.timer.flicker = 0;
-		end
-		
-		previousButton = activeButton;
-	end
-
-	if (previousPage ~= activePage) then
-		buttons.cursor.timer.flicker = 0;
-
-		previousPage = activePage;
-	end
+	gfx.Restore();
 end
 
-mouse_pressed = function(button)
-	if (showControls and (not hoveredPage)) then
-		activeButton = 1;
-		showControls = false;
-	end
-
-	if (hoveredPage) then
-		activeButton = hoveredPage;
-	end
-
-	if (allowClick and clickAction) then
-		clickAction();
-	end
+-- Called by the game when the mouse is pressed
+---@param btn integer
+mouse_pressed = function(btn)
+	if (state.isClickable and state.btnEvent) then state.btnEvent(); end
 
 	return 0;
 end
 
-button_pressed = function(button)
-	if (button == game.BUTTON_STA) then
-		if (showControls) then
-			activeButton = 1;
-			showControls = false;
-		else
-			clickAction();
+-- Called by the game when a (gamepad) button is pressed
+---@param btn integer
+button_pressed = function(btn)
+	if (btn == game.BUTTON_STA) then 
+		if (state.viewingControls) then
+			state:set({ currBtn = 1, viewingControls = false });
+		elseif (state.choosingFolder) then
+			state.choosingFolder = false;
+
+			playerInfo:toggleSelection();
+		elseif (state.viewingCharts) then
+			state.viewingCharts = false;
+		elseif (state.viewingInfo) then
+			state:set({ currBtn = 1, viewingInfo = false });
+		elseif (state.btnEvent) then
+			state.btnEvent();
 		end
-	elseif (button == game.BUTTON_BCK) then
-		if (showControls) then
-			activeButton = 1;
-			showControls = false;
-		elseif (showUpdatePrompt) then
-			activeButton = 1;
-			showUpdatePrompt = false;
-		elseif ((activePage ~= 'mainMenu') and (buttons.activePage ~= 'mainMenu')) then
-			activeButton = 1;
-			activePage = 'mainMenu';
-			buttons.activePage = activePage;
+	elseif (btn == game.BUTTON_BCK) then
+		if (state.choosingFolder) then
+			state.choosingFolder = false;
+
+			playerInfo:toggleSelection();
+		elseif (state.viewingCharts) then
+			state.viewingCharts = false;
+		elseif (state.viewingControls) then
+			state:set({ currBtn = 1, viewingControls = false });
+		elseif (state.viewingInfo) then
+			state:set({ currBtn = 1, viewingInfo = false });
+		elseif (state.promptUpdate) then
+			state:set({ currBtn = 1, promptUpdate = false });
+		elseif (state.currPage == 'playOptions') then
+			state:set({ currBtn = 1, currPage = 'mainMenu' });
 		else
 			Menu.Exit();
 		end

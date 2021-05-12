@@ -1,522 +1,500 @@
-local GridLayout = require('layout/grid');
+-- Global `filters` table is available for this script
 
-local allowScroll = false;
+local JSONTable = require('common/jsontable');
+local Window = require('common/window');
 
-local initialY = -1000;
+local Grid = require('components/common/grid');
+local Scrollbar = require('components/common/scrollbar');
 
-local isSongSelect = true;
-local rendererSet = false;
-
-local currentFolder = 1;
-local currentLevel = 1;
-local previousFolder = 1;
-
-local choosingFolder = true;
-
-local prefixes = {
+local Prefixes = {
 	'Collection: ',
 	'Folder: ',
 	'Level: ',
 };
 
-local scrollTimers = {};
+local window = Window:new();
+
+local grid = nil;
+
+local foldersData = JSONTable:new('folders');
+local folderNames = nil;
+
+local floor = math.floor;
+local min = math.min;
+
+local allowScroll = false;
+
+local choosingFolder = true;
+
+local currFolder = 1;
+local currLevel = 1;
+local prevFolder = 1;
+
+local labels = nil;
+
 local timers = {
 	folder = 0,
 	level = 0,
 	scroll = 0,
 };
 
-local cache = { resX = 0, resY = 0 };
-
-local resX;
-local resY;
-local scaledW;
-local scaledH;
-local scalingFactor;
-
-setupLayout = function()
-  resX, resY = game.GetResolution();
-
-  if ((cache.resX ~= resX) or (cache.resY ~= resY)) then
-    scaledW = 1920;
-    scaledH = scaledW * (resY / resX);
-		scalingFactor = resX / scaledW;
-		
-		gfx.Scale(scalingFactor, scalingFactor);
-
-    cache.resX = resX;
-		cache.resY = resY;
-	end
-end
-
-local stringReplace = function(str, patternTable, replacement)
-  local replaceWith = replacement or '';
-	local newStr = str;
-
-	for _, pattern in ipairs(patternTable) do
-		newStr = string.gsub(newStr, pattern, replaceWith);
-	end
-
-	return string.upper(newStr);
-end
-
-local labels = nil;
-
-local layout = nil;
-
 local setLabels = function()
 	if (not labels) then
-		local newLabel = function(text)
-			return New.Label({
-				font = 'medium',
-				text = text,
-				size = 18,
-			});
-		end
-
 		labels = {
-			collection = newLabel('COLLECTION'),
-			difficulty = newLabel('DIFFICULTY'),
-			fxl = newLabel('[FX-L]'),
-			start = newLabel('[START]'),
+			collection = makeLabel('med', 'COLLECTION'),
+			difficulty = makeLabel('med', 'DIFFICULTY'),
+			fxl = makeLabel('med', '[FX-L]'),
+			start = makeLabel('med', '[START]'),
 		};
 	end
 end
 
+local replace = function(s)
+	for _, prefix in ipairs(Prefixes) do s = s:gsub(prefix, ''); end
+
+	return s;
+end
+
+local getFolders = function()
+	if ((not folderNames) and getSetting('_songSelect', 'TRUE') == 'TRUE') then
+		folderNames = {};
+
+		for _, folder in ipairs(filters.folder) do
+			if (not folder:find('Collection: ')) then
+				folderNames[#folderNames + 1] = replace(folder);
+			end
+		end
+
+		table.insert(folderNames, 2, "OFFICIAL SOUND VOLTEX CHARTS");
+
+		foldersData:overwrite(folderNames);
+	end
+end
+
 local folders = {
+	cache = { w = 0, h = 0 },
 	count = 0,
+	currFolder = 0,
 	labels = {},
-	previousFolder = 0,
+	max = 18,
+	scrollbar = Scrollbar:new(),
 	timer = 0,
 	timers = {},
-	viewLimit = 18,
 	w = { final = 0, max = 0 },
-	h = {	offset = 0, total = 0 },
+	h = { offset = 0, total = 0 },
 
-	setLabels = function(self, folderCount)
-		if (folderCount ~= self.count) then
-			self.count = 0;
-			self.labels = {};
-			self.timers = {};
-			self.w.final, self.w.max = 0, 0;
-			self.h.offset, self.h.total = 0, 0;
+	setSizes = function(this)
+		if ((this.cache.w ~= window.w) or (this.cache.h ~= window.h)) then
+			this.scrollbar:setSizes({
+				x = grid.dropdown.x[1] + this.w.final + (grid.dropdown.padding * 2),
+				h = this.h.total - (grid.dropdown.padding / 1.5),
+				y = grid.dropdown.y + grid.dropdown.start,
+			});
+
+			this.cache.w = window.w;
+			this.cache.h = window.h;
+		end
+	end,
+
+	setLabels = function(this, count)
+		if (this.count ~= count) then
+			this.count = 0;
+			this.labels = {};
+			this.timers = {};
+			this.w.final, this.w.max = 0, 0;
+			this.h.offset, this.h.total = 0, 0;
 
 			for i, folder in ipairs(filters.folder) do
-				self.labels[i] = New.Label({
-					font = 'normal',
-					text = stringReplace(folder, prefixes),
-					size = 24,
-				});
-				self.timers[folder] = 0;
+				this.labels[i] = makeLabel('norm', replace(folder));
+				
+				this.timers[folder] = 0;
 
-				local width = self.labels[i].w;
+				local w = this.labels[i].w;
+				local dropdownW = grid.dropdown.maxWidth;
 
-				if (width > self.w.max) then
-					local dropdownWidth = layout.dropdown[1].maxWidth;
-
-					if (width > dropdownWidth) then
-						self.w.final = dropdownWidth;
+				if (w > this.w.max) then
+					if (w > dropdownW) then
+						this.w.final = dropdownW;
 					else
-						self.w.final = width;
+						this.w.final = w;
 					end
 
-					self.w.max = width;
+					this.w.max = w;
 				end
 
-				if (i <= self.viewLimit) then
-					self.h.total = self.h.total + self.labels[i].h + layout.dropdown.padding;
+				if (i <= this.max) then
+					this.h.total = this.h.total + this.labels[i].h + grid.dropdown.padding;
 				end
 
-				self.count = self.count + 1;
+				this.count = this.count + 1;
 			end
 		end
 	end,
 
-	drawFolder = function(self, deltaTime, i, y, key, isSelected)
-		local isVisible = true;
-	
-		if (currentFolder > self.viewLimit) then
-			if ((i <= (currentFolder - self.viewLimit)) or (i > currentFolder)) then
-				isVisible = false;
+	drawFolder = function(this, dt, label, i, k, y, isCurr)
+		local isVis = true;
+
+		if (currFolder > this.max) then
+			if ((i <= (currFolder - this.max)) or (i > currFolder)) then
+				isVis = false;
 			end
-		elseif (i > self.viewLimit) then
-			isVisible = false;
+		else
+			isVis = (i <= this.max);
 		end
 
-		if (isVisible) then
-			local baseAlpha = (isSelected and 255) or 150;
-			local alpha = math.floor(baseAlpha * math.min(timers.folder ^ 2, 1));
-			local doesOverflow = self.labels[i].w > layout.dropdown[1].maxWidth;
-			local w = (self.w.final + 16) * smoothstep(self.timer);
+		if (isVis) then
+			local alpha = floor(((isCurr and 255) or 150) * min(timers.folder ^ 2, 1));
+			local doesOverflow = label.w > grid.dropdown.maxWidth;
+			local w = (this.w.final + 16) * smoothstep(this.timer);
 
-			if (isSelected) then
-				drawRectangle({
+			if (isCurr) then
+				drawRect({
 					x = -8,
 					y = y,
 					w = w,
 					h = 30,
 					alpha = alpha * 0.4,
-					color = 'normal',
+					color = 'norm',
 					fast = true,
 				});
 			end
 
 			if (allowScroll and doesOverflow) then
-				if (isSelected) then
-					self.timers[key] = self.timers[key] + deltaTime;
+				if (isCurr) then
+					this.timers[k] = this.timers[k] + dt;
 				else
-					self.timers[key] = 0;
+					this.timers[k] = 0;
 				end
 
-				drawScrollingLabel({
+				label:drawScrolling({
 					x = 0,
 					y = y,
 					alpha = alpha,
 					color = 'white',
-					label = self.labels[i],
-					scale = scalingFactor,
-					timer = self.timers[key],
-					width = layout.dropdown[1].maxWidth,
+					scale = window:getScale(),
+					timer = this.timers[k],
+					width = grid.dropdown.maxWidth,
 				});
 			else
-				drawLabel({
+				label:draw({
 					x = 0,
 					y = y,
 					alpha = alpha,
 					color = 'white',
-					label = self.labels[i],
 				});
 			end
 		end
 
-		return self.labels[1].h + layout.dropdown.padding;
+		return label.h + grid.dropdown.padding;
 	end,
 
-	handleChange = function(self)
-		local delta = currentFolder - self.viewLimit;
+	handleChange = function(this, dt)
+		if (this.currFolder ~= currFolder) then
+			this.timer = 0;
+
+			this.currFolder = currFolder;
+		end
+		
+		this.timer = to1(this.timer, dt, 0.25);
+
+		local delta = this.currFolder - this.max;
 
 		if (delta >= 1) then
-			self.h.offset = -(delta * (self.labels[1].h + layout.dropdown.padding));
+			this.h.offset = -(delta * (this.labels[1].h + grid.dropdown.padding));
 		else
-			self.h.offset = 0;
+			this.h.offset = 0;
 		end
 	end,
 
-	render = function(self, deltaTime, initialY)
-		if (self.previousFolder ~= currentFolder) then
-			self.timer = 0;
+	render = function(this, dt)
+		this:setSizes();
 
-			self.previousFolder = currentFolder;
-		end
-
-		self.timer = math.min(self.timer + (deltaTime * 4), 1);
+		this:handleChange(dt);
 
 		local y = 0;
-
-		self:handleChange();
+		local s = ((#this.labels > this.max) and 3) or 2;
 
 		gfx.Save();
 
+		drawRect({
+			x = grid.dropdown.x[1],
+			y = grid.dropdown.y,
+			w = (grid.dropdown.padding * s) + this.w.final,
+			h = (this.h.total + grid.dropdown.padding) * timers.folder,
+			alpha = 240,
+			color = 'dark',
+			fast = true,
+		});
+
 		gfx.Translate(
-			layout.dropdown[1].x + layout.dropdown.padding,
-			initialY + layout.dropdown.start + self.h.offset
+			grid.dropdown.x[1] + grid.dropdown.padding,
+			grid.dropdown.y + grid.dropdown.start + this.h.offset
 		);
 
-		for i, key in ipairs(filters.folder) do	
-			y = y + self:drawFolder(deltaTime, i, y, key, i == currentFolder);
+		for i, k in ipairs(filters.folder) do
+			y = y + this:drawFolder(dt, this.labels[i], i, k, y, i == currFolder);
 		end
 
 		gfx.Restore();
+
+		if (#this.labels > this.max) then
+			this.scrollbar:render(dt, {
+				alphaMod = min(timers.folder ^ 2, 1),
+				color = 'med',
+				curr = currFolder,
+				total = #this.labels,
+			});
+		end
 	end,
 };
 
 local levels = {
+	currLevel = 0,
 	labels = nil,
-	previousLevel = 0,
 	timer = 0,
 	w = 0,
 	h = 0,
 
-	setLabels = function(self)
-		if (not self.labels) then
-			self.labels = {};
+	setLabels = function(this)
+		if (not this.labels) then
+			this.labels = {};
 
 			for i, level in ipairs(filters.level) do
-				local current = stringReplace(level, prefixes);
-				local font = 'number';
-		
-				if (current == 'ALL') then
-					font = 'normal';
-				elseif (current ~= '∞') then
-					current = string.format(
-						'%02d',
-						tonumber(stringReplace(level, prefixes))
-					);
+				local curr = replace(level);
+				local type = 'num';
+
+				if (curr == 'All') then
+					type = 'norm';
+				elseif (curr ~= '∞') then
+					curr = ('%02d'):format(tonumber(curr));
 				end
-	
-				self.labels[i] = New.Label({
-					font = font,
-					text = current,
-					size = 24,
-				});
-	
-				local width = self.labels[i].w;
-	
-				if (width > self.w) then
-					self.w = width;
+
+				this.labels[i] = makeLabel(type, curr, 24);
+
+				if (this.labels[i].w > this.w) then
+					this.w = this.labels[i].w;
 				end
-	
-				self.h = self.h + self.labels[i].h + (layout.dropdown.padding / 2);
+				
+				this.h = this.h + this.labels[i].h + (grid.dropdown.padding / 2);
 			end
 		end
 	end,
 
-	drawLevel = function(self, i, y, isSelected)
-		local baseAlpha = (isSelected and 255) or 155;
-		local alpha = math.floor(baseAlpha * math.min(timers.level ^ 2, 1));
-		local w = (self.w + 16) * smoothstep(self.timer);
+	drawLevel = function(this, label, y, isCurr)
+		local alpha = floor(((isCurr and 255) or 155)
+			* min(timers.level ^ 2, 1));
+		local w = (this.w + 16) * smoothstep(this.timer);
 
-		if (isSelected) then
-			drawRectangle({
+		if (isCurr) then
+			drawRect({
 				x = -8,
 				y = y,
 				w = w,
 				h = 30,
 				alpha = alpha * 0.4,
-				color = 'normal',
+				color = 'norm',
 				fast = true,
 			});
 		end
 
-		drawLabel({
+		label:draw({
 			x = 0,
 			y = y,
 			alpha = alpha,
 			color = 'white',
-			label = self.labels[i],
 		});
-
-		return self.labels[i].h + (layout.dropdown.padding / 2);
+		
+		return label.h + (grid.dropdown.padding / 2);
 	end,
 
-	render = function(self, deltaTime, initialY)
-		if (self.previousLevel ~= currentLevel) then
-			self.timer = 0;
+	handleChange = function(this, dt)
+		if (this.currLevel ~= currLevel) then
+			this.timer = 0;
 
-			self.previousLevel = currentLevel;
+			this.currLevel = currLevel;
 		end
 
-		self.timer = math.min(self.timer + (deltaTime * 8), 1);
+		this.timer = to1(this.timer, dt, 0.125);
+	end,
 
+	render = function(this, dt)
 		local y = 0;
+		
+		this:handleChange(dt);
 
 		gfx.Save();
 
+		drawRect({
+			x = grid.dropdown.x[2],
+			y = grid.dropdown.y,
+			w = (grid.dropdown.padding * 2) + this.w,
+			h = (this.h + grid.dropdown.padding) * timers.level,
+			alpha = 240,
+			color = 'dark',
+			fast = true,
+		});
+
 		gfx.Translate(
-			layout.dropdown[2].x + layout.dropdown.padding,
-			initialY + layout.dropdown.start
+			grid.dropdown.x[2] + grid.dropdown.padding,
+			grid.dropdown.y + grid.dropdown.start
 		);
 
 		for i, _ in ipairs(filters.level) do
-			y = y + self:drawLevel(i, y, i == currentLevel);
+			y = y + this:drawLevel(this.labels[i], y, i == currLevel);
 		end
 
 		gfx.Restore();
 	end,
 };
 
-local drawCurrentField = function(deltaTime, label, field, displaying, isFolder)
-	local x = layout.field[field].x;
-	local y = layout.field.y;
-	local color;
-	local doesOverflow = false;
+local drawLabels = function(isFiltering)
+	local prefixC = labels.fxl;
+	local prefixD = labels.fxl;
+	local y = (window.h / 20) - 2;
 
-	if (not label) then return end
-
-	if (isFolder) then
-		doesOverflow = label.w > layout.field[1].maxWidth;
-	end
-
-	if (displaying) then
-		if (choosingFolder and isFolder) then
-			color = 'normal';
-		elseif ((not choosingFolder) and (not isFolder)) then
-			color = 'normal';
-		else
-			color = 'white';
-		end
-	else
-		color = 'white';
-	end
-
-	if (doesOverflow) then
-		timers.scroll = timers.scroll + deltaTime;
-
-		drawScrollingLabel({
-			x = x,
-			y = y,
-			alpha = 255,
-			color = color,
-			label = label,
-			scale = scalingFactor,
-			timer = timers.scroll,
-			width = layout.field[1].maxWidth + (layout.dropdown.padding / 2),
-		});
-	else
-		drawLabel({
-			x = x,
-			y = y,
-			color = color,
-			label = label,
-		});
-	end
-end
-
-local drawLabels = function(displaying)
-	local collectionPrefix = labels.fxl;
-	local difficultyPrefix = labels.fxl;
-	local y = (scaledH / 20) - 2;
-
-	if (displaying) then
+	if (isFiltering) then
 		if (choosingFolder) then
-			difficultyPrefix = labels.start;
+			prefixD = labels.start;
 		else
-			collectionPrefix = labels.start;
+			prefixC = labels.start;
 		end
 	end
 
-	drawLabel({
-		x = layout.field[1].x,
-		y = y - 1,
-		color = 'normal',
-		label = collectionPrefix,
-	});
-
-	drawLabel({
-		x = layout.field[1].x + collectionPrefix.w + 8,
+	prefixC:draw({ x = grid.field.x[1], y = y - 1 });
+	
+	labels.collection:draw({
+		x = grid.field.x[1] + prefixC.w + 8,
 		y = y,
 		color = 'white',
-		label = labels.collection,
 	});
 
-	drawLabel({
-		x = layout.field[2].x,
-		y = y - 1,
-		color = 'normal',
-		label = difficultyPrefix,
-	});
+	prefixD:draw({ x = grid.field.x[2], y = y - 1 });
 
-	drawLabel({
-		x = layout.field[2].x + difficultyPrefix.w + 8,
+	labels.difficulty:draw({
+		x = grid.field.x[2] + prefixD.w + 8,
 		y = y,
 		color = 'white',
-		label = labels.difficulty,
 	});
 end
 
-render = function(deltaTime, displaying)
-	if (not rendererSet) then
-		isSongSelect = #filters.level == 21;
+local drawCurrField = function(dt, isFiltering, isFolder)
+	local color = 'white';
+	local label = (isFolder and folders.labels[currFolder])
+		or levels.labels[currLevel];
 
-		rendererSet = true;
+	if (not label) then return; end
+
+	if (isFiltering) then
+		if (choosingFolder and isFolder) then
+			color = 'norm';
+		elseif ((not choosingFolder) and (not isFolder)) then
+			color = 'norm';
+		end
 	end
 
-	if ((not layout) and rendererSet) then
-		layout = GridLayout.New(isSongSelect);
+	if (isFolder and (label.w > grid.field.maxWidth)) then
+		timers.scroll = timers.scroll + dt;
+
+		label:drawScrolling({
+			x = grid.field.x[1],
+			y = grid.field.y,
+			color = color,
+			scale = window:getScale(),
+			timer = timers.scroll,
+			width = grid.field.maxWidth + (grid.dropdown.padding / 2),
+		});
+	else
+		label:draw({
+			x = grid.field.x[(isFolder and 1) or 2],
+			y = grid.field.y,
+			color = color,
+		});
+	end
+end
+
+local handleChange = function(dt, isFiltering)
+	if (not isFiltering) then
+		if (choosingFolder and (timers.folder > 0)) then
+			timers.folder = to0(timers.folder, dt, 0.15);
+		elseif (timers.level > 0) then
+			timers.level = to0(timers.level, dt, 0.15);
+		end
+	else
+		if (choosingFolder) then
+			allowScroll = timers.folder > 0;
+
+			timers.folder = to1(timers.folder, dt, 0.125);
+
+			if (timers.level > 0) then timers.level = to0(timers.level, dt, 0.15); end
+		else
+			allowScroll = timers.level > 0;
+
+			timers.level = to1(timers.level, dt, 0.125);
+
+			if (timers.folder > 0) then
+				timers.folder = to0(timers.folder, dt, 0.15);
+			end
+		end
+	end
+
+	if (prevFolder ~= currFolder) then
+		timers.scroll = 0;
+
+		prevFolder = currFolder;
+	end
+
+	if (filters and filters.folder and (currFolder > #filters.folder)) then
+		currFolder = #filters.folder;
+	end
+end
+
+-- Called by the game every frame
+---@param dt deltaTime
+---@param isFiltering boolean
+render = function(dt, isFiltering)
+	handleChange(dt, isFiltering);
+
+	if (not grid) then
+		grid = Grid:new(window, getSetting('_songSelect', 'TRUE') == 'TRUE');
 	end
 
 	setLabels();
-
+	
 	gfx.Save();
 
-	setupLayout();
+	window:set(false);
 
-	layout:setSizes(scaledW, scaledH);
+	grid:setSizes();
+
+	getFolders();
 
 	folders:setLabels(#filters.folder);
 	levels:setLabels();
 
-	if (currentFolder > #filters.folder) then
-		currentFolder = #filters.folder;
-	end
+	drawLabels(isFiltering);
 
-	if (previousFolder ~= currentFolder) then
-		timers.scroll = 0;
+	drawCurrField(dt, isFiltering, true);
+	drawCurrField(dt, isFiltering, false);
 
-		previousFolder = currentFolder;
-	end
+	if ((timers.folder == 0) and (timers.level == 0)) then return end
 
-	drawLabels(displaying);
-
-	drawCurrentField(deltaTime, folders.labels[currentFolder], 1, displaying, true);
-	drawCurrentField(deltaTime, levels.labels[currentLevel], 2, displaying, false);
-
-	if (not displaying) then
-		if (choosingFolder and (timers.folder > 0)) then
-			timers.folder = math.max(timers.folder - (deltaTime * 6), 0);
-		elseif (timers.level > 0) then
-			timers.level = math.max(timers.level - (deltaTime * 6), 0);
-		end
-	
-		if ((timers.folder == 0) and (timers.level == 0)) then return end
-	else
-		if (choosingFolder) then
-			allowScroll = true;
-			timers.folder = math.min(timers.folder + (deltaTime * 8), 1);
-
-			if (timers.level > 0) then
-				timers.level = math.max(timers.level - (deltaTime * 6), 0);
-			end
-		else
-			timers.level = math.min(timers.level + (deltaTime * 8), 1);
-
-			if (timers.folder > 0) then
-				timers.folder = math.max(timers.folder - (deltaTime * 6), 0);
-			end
-
-			if (timers.folder == 0) then
-				allowScroll = false;
-			end
-		end
-
-		initialY = layout.dropdown.y;
-	end
-
-	drawRectangle({
-		x = layout.dropdown[1].x,
-		y = initialY,
-		w = (layout.dropdown.padding * 2) + folders.w.final,
-		h = (folders.h.total + layout.dropdown.padding) * timers.folder,
-		alpha = 230,
-		color = 'dark',
-		fast = true,
-	});
-
-	drawRectangle({
-		x = layout.dropdown[2].x,
-		y = initialY,
-		w = (layout.dropdown.padding * 2) + levels.w,
-		h = (levels.h + (layout.dropdown.padding * 1.5)) * timers.level,
-		alpha = 230,
-		color = 'dark',
-		fast = true,
-	});
-
-	folders:render(deltaTime, initialY);
-
-	levels:render(deltaTime, initialY);
+	folders:render(dt);
+	levels:render(dt);
 
 	gfx.Restore();
 end
 
-set_selection = function(newIndex, selectingFolder)
-	if (selectingFolder) then
-		currentFolder = newIndex;
+-- Called by the game when selecting a filter
+---@param newIndex integer
+---@param isFolder boolean
+set_selection = function(newIndex, isFolder)
+	if (isFolder) then
+		currFolder = newIndex;
 	else
-		currentLevel = newIndex;
+		currLevel = newIndex;
 	end
 end
 
-set_mode = function(selectingFolder)
-	choosingFolder = selectingFolder;
-end
+-- Called by the game when switching between filters
+---@param isFolder boolean
+set_mode = function(isFolder) choosingFolder = isFolder; end

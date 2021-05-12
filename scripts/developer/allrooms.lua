@@ -1,4 +1,4 @@
-local _ = {
+return {
 	{
     name =  "Hoshikara's Room",
     password =  true,
@@ -56,5 +56,3 @@ local _ = {
     current = 2
 	}
 };
-
-return _;

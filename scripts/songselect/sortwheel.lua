@@ -1,278 +1,206 @@
-local CONSTANTS = require('constants/songwheel');
+-- Global `sorts` table is available for this script
 
-local GridLayout = require('layout/grid');
+local Sorts = require('constants/sorts');
 
-local arrowWidth = 12;
+local Window = require('common/window');
 
-local currentSort = 1;
+local Grid = require('components/common/grid');
 
-local initialY = -1000;
+local min = math.min;
 
-local previousSort = 0;
+local window = Window:new();
 
-local timer = 0;
-local highlightTimer = 0;
+local grid = nil;
 
-local cache = { resX = 0, resY = 0 };
+local arrowSize = 12;
 
-local resX;
-local resY;
-local scaledW;
-local scaledH;
-local scalingFactor;
-
-setupLayout = function()
-  resX, resY = game.GetResolution();
-
-  if ((cache.resX ~= resX) or (cache.resY ~= resY)) then
-    scaledW = 1920;
-    scaledH = scaledW * (resY / resX);
-		scalingFactor = resX / scaledW;
-		
-		gfx.Scale(scalingFactor, scalingFactor);
-
-    cache.resX = resX;
-		cache.resY = resY;
-	end
-end
-
-local layout = nil;
+local currSort = 1;
+local prevSort = 0;
 
 local labels = nil;
+
+local timers = { expand = 0, highlight = 0 };
 
 local setLabels = function()
 	if (not labels) then
 		labels = {
-			maxWidth = 0,
-			maxHeight = 0,
-			fxr = New.Label({
-				font = 'medium',
-				text = '[FX-R]',
-				size = 18,
-			}),
-			sort = New.Label({
-				font = 'medium',
-				text = 'SORT',
-				size = 18,
-			}),
+			fxr = makeLabel('med', '[FX-R]'),
+			sort = makeLabel('med', 'SORT'),
+			w = 0,
+			h = 0,
 		};
 
 		for i, sort in ipairs(sorts) do
-			local label = CONSTANTS.sorts[sort];
+			local label = Sorts[sort];
 
 			if (not label) then
-				label = {
-					name = string.upper(sort);
-					direction = (((i % 2) == 0) and 'DOWN') or 'UP',
-				};
+				label = { dir = (((i % 2) == 0) and 'DOWN') or 'UP', name = sort };
 			end
 
-			labels[i] = {
-				name = New.Label({
-					font = 'normal',
-					text = label.name,
-					size = 24,
-				}),
-				direction = label.direction,
-			};
+			labels[i] = { dir = label.dir, name = makeLabel('norm', label.name) };
 
-			if (labels[i].name.w > labels.maxWidth) then
-				labels.maxWidth = labels[i].name.w;
-			end
+			if (labels[i].name.w > labels.w) then labels.w = labels[i].name.w; end
 
-			labels.maxHeight = labels.maxHeight
-				+ labels[i].name.h
-				+ layout.dropdown.padding;
+			labels.h = labels.h + labels[i].name.h + grid.dropdown.padding;
 		end
 	end
 end
 
-local drawCurrentSort = function(displaying)
-	if (currentSort > #labels) then
-		currentSort = 1;
-	end
-	
-	local color = (displaying and 'normal') or 'white';
-	local x = layout.field[3].x;
-	local y = layout.field.y;
+local drawArrow = function(x, y, color, alpha, dir)
+	gfx.BeginPath();
+	setFill('dark', alpha * 0.5);
 
-	drawLabel({
-		x = x,
-		y = (scaledH / 20) - 3,
-		color = 'normal',
-		label = labels.fxr,
-	});
+	gfx.MoveTo(x + 1, y + 1);
+	gfx.LineTo(x + arrowSize + 1, y + 1);
+	gfx.LineTo(x + (arrowSize / 2) + 1, y + (((dir == 'UP') and 11) or -9));
+	gfx.LineTo(x + 1, y + 1);
+	gfx.Fill();
 
-	drawLabel({
+	gfx.BeginPath();
+	setFill(color, alpha);
+
+	gfx.MoveTo(x, y);
+	gfx.LineTo(x + arrowSize, y);
+	gfx.LineTo(x + (arrowSize / 2), y + (((dir == 'UP') and 10) or -10));
+	gfx.LineTo(x, y);
+	gfx.Fill();
+end
+
+local drawCurrSort = function(isSorting)
+	if (currSort > #labels) then currSort = 1; end
+
+	local color = (isSorting and 'norm') or 'white';
+	local label = labels[currSort];
+	local x = grid.field.x[3];
+	local y = grid.field.y;
+
+	labels.fxr:draw({ x = x, y = (window.h / 20) - 3 });
+
+	labels.sort:draw({
 		x = x + labels.fxr.w + 8,
-		y = (scaledH / 20) - 3,
+		y = (window.h / 20) - 2,
 		color = 'white',
-		label = labels.sort,
 	});
 
-	drawLabel({
+	label.name:draw({
 		x = x,
 		y = y,
 		color = color,
-		label = labels[currentSort].name,
 	});
 
-	gfx.Save();
+	window:scale();
 
-	gfx.Translate(
-		x + labels[currentSort].name.w + arrowWidth,
-		y 
-			+ (labels[currentSort].name.h / 2)
-			+ (((labels[currentSort].direction == 'UP') and 0) or 8)
+	drawArrow(
+		x + label.name.w + arrowSize,
+		y + (label.name.h / 2) + (((label.dir == 'UP') and 0) or 8),
+		color,
+		255,
+		label.dir
 	);
 
-	gfx.BeginPath();
-	setFill('dark', 255 * 0.5);
-	gfx.MoveTo(1, 1);
-	gfx.LineTo(arrowWidth + 1, 1);
-	gfx.LineTo(
-		(arrowWidth / 2) + 1,
-		((labels[currentSort].direction == 'UP') and 11) or -9
-	);
-	gfx.LineTo(1, 1);
-	gfx.Fill();
-
-	gfx.BeginPath();
-	setFill(color);
-	gfx.MoveTo(0, 0);
-	gfx.LineTo(arrowWidth, 0);
-	gfx.LineTo((arrowWidth / 2), ((labels[currentSort].direction == 'UP') and 10) or -10);
-	gfx.LineTo(0, 0);
-	gfx.Fill();
-
-	gfx.Restore();
+	window:unscale();
 end
 
-local drawSortLabel = function(index, y, isSelected)
-	local baseAlpha = (isSelected and 255) or 150;
-	local alpha = math.floor(baseAlpha * math.min(timer ^ 2, 1));
-	local padding = layout.dropdown.padding;
-	local x = layout.dropdown[3].x + padding;
-	local w = (labels.maxWidth + (arrowWidth * 2) + 16)
-		* smoothstep(highlightTimer);
-	
-	if (isSelected) then
-		drawRectangle({
+local drawSort = function(i, y, isCurr)
+	local alpha = ((isCurr and 255) or 150) * min(timers.expand ^ 2, 1);
+	local label = labels[i];
+	local x = grid.dropdown.x[3] + grid.dropdown.padding;
+	local w = (labels.w + (arrowSize * 2) + 16) * smoothstep(timers.highlight);
+
+	window:unscale();
+
+	if (isCurr) then
+		drawRect({
 			x = x - 8,
 			y = y,
 			w = w,
 			h = 30,
 			alpha = alpha * 0.4,
-			color = 'normal',
+			color = 'norm',
 			fast = true,
 		});
 	end
 
-	drawLabel({
+	label.name:draw({
 		x = x,
 		y = y,
 		alpha = alpha,
 		color = 'white',
-		label = labels[index].name,
 	});
 
-	gfx.Save();
+	window:scale();
 
-	gfx.Translate(
-		x + labels[index].name.w + arrowWidth,
-		y 
-			+ (labels[index].name.h / 2)
-			+ (((labels[index].direction == 'UP') and 0) or 8)
+	drawArrow(
+		x + label.name.w + arrowSize,
+		y + (label.name.h / 2) + (((label.dir == 'UP') and 0) or 8),
+		'white',
+		alpha,
+		label.dir
 	);
 
-	gfx.BeginPath();
-	setFill('dark', 255 * 0.5);
-	gfx.MoveTo(1, 1);
-	gfx.LineTo(arrowWidth + 1, 1);
-	gfx.LineTo(
-		(arrowWidth / 2) + 1,
-		((labels[currentSort].direction == 'UP') and 11) or -9
-	);
-	gfx.LineTo(1, 1);
-	gfx.Fill();
-
-	gfx.BeginPath();
-	setFill('white', alpha);
-	gfx.MoveTo(0, 0);
-	gfx.LineTo(arrowWidth, 0);
-	gfx.LineTo((arrowWidth / 2), ((labels[index].direction == 'UP') and 10) or -10);
-	gfx.LineTo(0, 0);
-	gfx.Fill();
-
-	gfx.Restore();
-
-	return labels[index].name.h + padding;
+	return label.name.h + grid.dropdown.padding;
 end
 
-render = function(deltaTime, displaying)
-	if ((not layout) and sorts) then
-		-- sortwheel is rendered by songwheel and chalwheel, but there's no good
-		-- way to determine which of the two is rendering it besides checking
-		-- the amount of sorts available
-		layout = GridLayout.New(#sorts > 8);
+local handleChange = function(dt, isSorting)
+	if (not isSorting) then
+		timers.expand = to0(timers.expand, dt, 0.15);
+	else
+		timers.expand = to1(timers.expand, dt, 0.125);
+
+		if (prevSort ~= currSort) then
+			timers.highlight = 0;
+
+			prevSort = currSort;
+		end
+
+		timers.highlight = to1(timers.highlight, dt, 0.25);
 	end
+end
 
-	if (not layout) then return end
+-- Called by the game every frame
+---@param dt deltaTime
+---@param isSorting boolean
+render = function(dt, isSorting)
+	handleChange(dt, isSorting);
 
-	gfx.Save();
-
-	setupLayout();
-
-	layout:setSizes(scaledW, scaledH);
+	if (not grid) then
+		grid = Grid:new(window, getSetting('_songSelect', 'TRUE') == 'TRUE');
+	end
 
 	setLabels();
 
-	drawCurrentSort(displaying);
+	gfx.ForceRender();
 
-	if (not displaying) then
-		if (timer > 0) then
-			timer = math.max(timer - (deltaTime * 6), 0);
-		end
+	gfx.Save();
 
-		if (timer == 0) then
-			return;
-		end
-	else
-		timer = math.min(timer + (deltaTime * 8), 1);
+	window:set(false);
 
-		if (previousSort ~= currentSort) then
-			highlightTimer = 0;
+	grid:setSizes();
 
-			previousSort = currentSort;
-		end
+	drawCurrSort(isSorting);
 
-		highlightTimer = math.min(highlightTimer + (deltaTime * 4), 1);
+	if (timers.expand == 0) then return end
 
-		initialY = layout.dropdown.y;
-	end
+	window:scale();
 
-	drawRectangle({
-		x = layout.dropdown[3].x,
-		y = initialY,
-		w = (layout.dropdown.padding * 2) + labels.maxWidth + (arrowWidth * 2),
-		h = (labels.maxHeight + layout.dropdown.padding) * timer,
-		alpha = 230,
+	drawRect({
+		x = grid.dropdown.x[3],
+		y = grid.dropdown.y,
+		w = (grid.dropdown.padding * 2) + labels.w + (arrowSize * 2),
+		h = (labels.h + grid.dropdown.padding) * timers.expand,
+		alpha = 240,
 		color = 'dark',
 	});
 
-	gfx.Translate(0, initialY + layout.dropdown.start);
+	local y = grid.dropdown.y + grid.dropdown.start;
 
-	local sortY = 0;
+	for i, _ in ipairs(sorts) do y = y + drawSort(i, y, i == currSort); end
 
-	for sortIndex, _ in ipairs(sorts) do
-		local isSelected = sortIndex == currentSort;
-
-		sortY = sortY + drawSortLabel(sortIndex, sortY, isSelected);
-	end
+	window:unscale();
 
 	gfx.Restore();
 end
 
-set_selection = function(newSort)
-  currentSort = newSort;
-end
+-- Called by the game when selecting a filter
+---@param newSort integer
+set_selection = function(newSort) currSort = newSort; end

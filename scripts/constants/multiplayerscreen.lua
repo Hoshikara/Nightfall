@@ -1,34 +1,24 @@
-local _ = {
-  buttons = {
-    cancel = 'CANCEL',
-    gameInProgress = 'GAME IN PROGRESS',
-    hostSelecting = 'HOST SELECTING SONG',
-    kickUser = 'KICK USER',
-    makeHost = 'MAKE HOST',
-    playersNotReady = 'PLAYERS NOT READY',
-    readyUp = 'READY UP',
-    selectSong = 'SELECT SONG',
-    settings = 'SETTINGS',
-    songMissing = 'SONG MISSING',
-    startGame = 'START GAME',
-    startingGame = 'STARTING GAME',
-  },
+return {
   dialog = {
-    roomCreation = {
+    makeRoom = {
       heading = 'CREATE ROOM',
-      inputLabel = 'ROOM NAME',
+      field = 'ROOM NAME',
+      screen = 'newRoomName',
     },
-    passwordCreation = {
+    makePass = {
       heading = 'SET PASSWORD',
-      inputLabel = 'PASSWORD',
+      field = 'PASSWORD',
+      screen = 'newRoomPassword',
     },
-    passwordRequired = {
+    enterPass = {
       heading = 'PASSWORD REQUIRED',
-      inputLabel = 'PASSWORD',
+      field = 'PASSWORD',
+      screen = 'passwordScreen',
     },
-    usernameCreation = {
+    makeUsername = {
       heading = 'CREATE USERNAME',
-      inputLabel = 'USERNAME',
+      field = 'USERNAME',
+      screen = 'setUsername',
     },
   },
   keys = {
@@ -37,16 +27,33 @@ local _ = {
     esc = 27,
     up = 1073741906,
   },
-  user = {
-    clear = 'CLEAR',
-    grade = 'GRADE',
-    host = 'HOST',
-    level = 'LEVEL',
-    missingSong = 'MISSING SONG',
-    notReady = 'NOT READY',
-    ready = 'READY',
-    score = 'SCORE',
-  }
+  lobby = {
+    btns = {
+      cancel = 'CANCEL',
+      inProgress = 'GAME IN PROGRESS',
+      hard = 'HARD GAUGE',
+      mirror = 'MIRROR MODE',
+      missing = 'CHART MISSING',
+      notReady = 'PLAYERS NOT READY',
+      ready = 'READY UP',
+      rotate = 'ROTATE HOST',
+      select = 'SELECT CHART',
+      selecting = 'HOST SELECTING CHART',
+      settings = 'SETTINGS',
+      start = 'START GAME',
+      starting = 'STARTING GAME',
+    },
+    user = {
+      clear = 'CLEAR',
+      grade = 'GRADE',
+      host = 'HOST',
+      kick = 'KICK USER',
+      level = 'LEVEL',
+      makeHost = 'MAKE HOST',
+      missing = 'MISSING CHART',
+      notReady = 'NOT READY',
+      ready = 'READY',
+      score = 'SCORE',
+    },
+  },
 };
-
-return _;

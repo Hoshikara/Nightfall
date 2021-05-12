@@ -1,5 +1,5 @@
-local CONSTANTS = {
-  challengeHeading = {
+return {
+  heading = {
     challenge = 'CHALLENGE',
     completion = 'COMPLETION',
     date = 'DATE',
@@ -7,7 +7,7 @@ local CONSTANTS = {
     requirements = 'REQUIREMENTS',
     result = 'RESULT',
   },
-  chartsPanel = {
+  charts = {
     bpm = 'BPM',
     clear = 'CLEAR',
     completion = 'COMPLETION',
@@ -23,19 +23,3 @@ local CONSTANTS = {
     title = 'TITLE',
   },
 };
-
-local generate = function(whichStrings)
-  local labels = {};
-
-  for key, name in pairs(CONSTANTS[whichStrings]) do
-    labels[key] = New.Label({
-      font = 'medium',
-      text = name,
-      size = 18,
-    });
-  end
-
-  return labels;
-end
-
-return { generate = generate };

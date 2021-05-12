@@ -1,5 +1,5 @@
 {
-	"// GENERAL //": {
+	"////////// GENERAL //////////": {
 		"type": "label"
 	},
 	"displayName": {
@@ -7,19 +7,15 @@
 		"label": "Player Name",
 		"default": "Guest"
 	},
+	"separator_dvj": {},
 	"nauticaPath": {
 		"type": "text",
-		"label": "Nautica Download Folder i.e. /songs/nautica",
+		"label": "Nautica Download Folder i.e. /songs/nautica (no slashes)",
 		"default": "nautica"
 	},
 	"separator_b": {},
-	"// SONG SELECT //": {
+	"////////// SONG SELECT //////////": {
 		"type": "label"
-	},
-	"controlsShortcut": {
-		"label": "Show Controls when [BT-A] is pressed",
-		"type": "bool",
-		"default": true
 	},
 	"jacketQuality": {
 		"label": "Jacket Image Quality (lower = faster loading)",
@@ -32,11 +28,17 @@
 			"ORIGINAL"
 		]
 	},
+	"separator_ejn": {},
+	"showDensity": {
+		"label": "Show note density graph if available",
+		"default": true,
+		"type": "bool"
+	},
 	"separator_c": {},
-	"// GAMEPLAY //": {
+	"////////// GAMEPLAY //////////": {
 		"type": "label"
 	},
-	"earlatePosition": {
+	"earlatePos": {
 		"type": "selection",
 		"label": "Early / Late Position",
 		"default": "BOTTOM",
@@ -58,40 +60,60 @@
 			"TEXT + DELTA"
 		]
 	},
-	"hitErrorPosition": {
+	"deltaFrom0": {
+		"label": "Show hit delta from 0 (instead of hit delta from critical window)",
+		"default": true,
+		"type": "bool"
+	},
+	"hispeedPos": {
 		"type": "selection",
-		"label": "Hit Error Bar Position",
-		"default": "OFF",
+		"label": "Middle Hi-Speed Position (may overlap with Early / Late Position)",
+		"default": "MIDDLE",
 		"values": [
 			"OFF",
 			"BOTTOM",
 			"MIDDLE",
-			"TOP"
+			"UPPER",
+			"UPPER+"
 		]
 	},
-	"hitErrorScale": {
+	"ignoreSpeedChange": {
+		"default": false,
+		"type": "bool",
+		"label": "Ignore incoming Hi-Speed changes for middle Hi-Speed"
+	},
+	"separator_iuw": {},
+	"showHitDeltaBar": {
+		"default": false,
+		"label": "Show hit delta bar",
+		"type": "bool"
+	},
+	"hitDeltaBarScale": {
 		"type": "float",
-		"label": "Hit Error Bar Size",
+		"label": "Hit Delta Bar Scale: %.2f",
 		"default": 1.0,
 		"max": 2.0,
 		"min": 0.5
 	},
+	"hitDecayTime": {
+		"type": "float",
+		"label": "Hit bar decay time (in seconds): %.2f",
+		"default": 6.0,
+		"max": 10.0,
+		"min": 2.0
+	},
+	"separator_wei": {},
 	"showUserInfo": {
-		"label": "Show Player Name, Hit Windows, and Score Difference",
+		"label": "Show Player Name and Score Difference",
 		"type": "bool",
 		"default": true
 	},
-	"showHitWindows": {
-		"label": "Show Hit Windows",
-		"type": "bool",
-		"default": true
-	},
-	"showScoreDifference": {
+	"showScoreDiff": {
 		"label": "Show Score Difference",
 		"type": "bool",
 		"default": true
 	},
-	"scoreDifferencePosition": {
+	"scoreDiffPos": {
 		"type": "selection",
 		"label": "Score Difference Position",
 		"default": "LEFT",
@@ -102,6 +124,7 @@
 			"BOTTOM"
 		]
 	},
+	"separator_dofn": {},
 	"showPracticeControls": {
 		"label": "Show Controls for Practice Mode",
 		"type": "bool",
@@ -113,14 +136,34 @@
 		"default": true
 	},
 	"separator_d": {},
-	"// RESULTS //": {
+	"////////// RESULTS //////////": {
 		"type": "label"
 	},
-	"suggestOffset": {
-		"label": "Show song offset suggestion",
+	"showHardScores": {
+		"label": "Only show High Scores with harder hit windows",
 		"type": "bool",
-		"default": true
+		"default": false
 	},
+	"separator_kqm": {},
+	"showBestDeltas": {
+		"label": "Show best critical/near/error count indicators",
+		"default": true,
+		"type": "bool"
+	},
+	"separator_shj": {},
+	"suggestOffset": {
+		"label": "Show song offset recommendation",
+		"default": true,
+		"type": "bool"
+	},
+	"minOffset": {
+		"label": "Minimum offset required to show recommendation",
+		"default": 3,
+		"min": 1,
+		"max": 50,
+		"type": "int"
+	},
+	"separator_ivy": {},
 	"dateFormat": {
 		"type": "selection",
 		"label": "Date Format",
@@ -131,6 +174,7 @@
 			"YEAR-MONTH-DAY"
 		]
 	},
+	"separator_owf": {},
 	"screenshotRegion": {
 		"type": "selection",
 		"label": "Screenshot Capture Region",
@@ -140,13 +184,8 @@
 			"PANEL"
 		]
 	},
-	"showHardScores": {
-		"label": "Only show High Scores with harder hit windows",
-		"type": "bool",
-		"default": false
-	},
 	"separator_e": {},
-	"// MULTIPLAYER //": {
+	"////////// MULTIPLAYER //////////": {
 		"type": "label"
 	},
 	"toggleHard": {

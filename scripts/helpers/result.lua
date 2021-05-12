@@ -1,24 +1,35 @@
-local CONSTANTS = require('constants/result');
+local Clears = require('constants/clears');
+local Difficulties = require('constants/difficulties');
+local Grades = require('constants/grades');
 
-local getClear = function(current)
-  local autoplayed = get(current, 'autoplay', false);
-  local clear = get(current, 'badge', 0);
-  local gauge = get(current, 'gauge', 0) * 100;
-  local type = get(current, 'gauge_type', get(current, 'flags', 0));
+local JSONTable = require('common/jsontable');
 
-  if (autoplayed) then
-    return 'AUTO';
-  elseif (clear == 0) then
-    return 'EXIT'
-  elseif (clear <= 5) then
-    if ((type ~= 1) and (gauge < 70)) then
-      return 'CRASH';
-    end
+local ScoreNumber = require('components/common/scorenumber');
 
-    return CONSTANTS.clears[clear];
-  end
+local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
+
+local minOffset = getSetting('minOffset', 1);
+
+-- Get the clear name
+---@param res result
+---@return string
+local getClear = function(res)
+	if (res.autoplay) then return 'AUTO'; end
+
+  local badge = res.badge or 0;
+
+	if (badge == 0) then return 'EXIT'; end
+
+	local gauge = (res.gauge or 0) * 100;
+	local gType = res.gauge_type or res.flags or 0;
+
+  if ((gType ~= 1) and (gauge < 70)) then return 'CRASH'; end
+
+  return Clears[badge].clear;
 end
 
+-- Get the date format template string
+---@return string
 local getDateFormat = function()
   local dateFormat = getSetting('dateFormat', 'DAY-MONTH-YEAR');
 
@@ -33,230 +44,410 @@ local getDateFormat = function()
   end
 end
 
-local getDifficulty = function(current)
-  local jacketPath = get(current, 'jacketPath', '');
-  local difficulty = get(current, 'difficulty', 0);
-  local difficultyIndex = getDifficultyIndex(jacketPath, difficulty);
-
-  return CONSTANTS.difficulties[difficultyIndex];
+-- Delta value label wrapper function
+---@param val number
+---@param positive boolean
+---@return Label
+local deltaLabel = function(val, positive)
+	return makeLabel('num', val, 20, (positive and 'norm') or 'red');
 end
 
-local getDuration = function(current)
-  local duration = get(current, 'duration', 0);
+-- Gets the critical, near, and error deltas relative to the highest/lowest achieved values
+---@param res result
+---@return table<string, Label>
+local getDeltas = function(res)
+	if (#res.highScores == 0) then return {}; end
 
-  return string.format(
-    '%dm %02d.%01ds',
-    duration // 60000,
-    (duration // 1000) % 60,
-    (duration // 100) % 10
-  );
+	local crits = nil;
+	local errors = nil;
+	local nears = nil;
+
+	for _, score in ipairs(res.highScores) do
+		local hardFail = ((score.gauge_type or score.flags or 0) == 1)
+			and (score.badge == 1);
+
+		if (not hardFail) then
+			if (not crits) then crits = score.perfects; end
+			if (not errors) then errors = score.misses; end
+			if (not nears) then nears = score.goods; end
+
+			if (score.perfects > crits) then crits = score.perfects; end
+			if (score.misses < errors) then errors = score.misses; end
+			if (score.goods < nears) then nears = score.goods; end
+		end
+	end
+
+	if ((not crits) or (not errors) or (not nears)) then return {}; end
+
+	return {
+		critical = deltaLabel(crits, res.perfects >= crits),
+		error = deltaLabel(errors, res.misses <= errors),
+		near = deltaLabel(nears, res.goods <= nears),
+	};
 end
 
-local getGauge = function(current)
-  local type = get(current, 'gauge_type', get(current, 'flags', 0));
-  local gauge = get(current, 'gauge', 0) * 100;
+-- Gets the difficulty name
+---@param res result
+---@return string
+local getDiff = function(res)
+  local diffIndex = getDiffIndex(res.jacketPath or '', res.difficulty or 0);
 
-  if (type == 1) then
-    return string.format('%d%% (H)', math.ceil(gauge));
-  end
-
-  return string.format('%d%%', math.ceil(gauge));
+  return Difficulties[diffIndex];
 end
 
-local getGrade = function(current)
-  local grade = get(current, 'grade');
+-- Gets and formats the chart duration
+---@param res result
+---@return string
+local getDuration = function(res)
+	local d = res.duration or 0;
 
-  if (not grade) then
-    local score = get(current, 'score', 0);
+  return ('%dm %02d.%01ds'):format(
+		d // 60000,
+		(d // 1000) % 60,
+		(d // 100) % 10
+	);
+end
 
-    for _, breakpoint in ipairs(CONSTANTS.grades) do
-      if (score >= breakpoint.minimum) then
-        return breakpoint.grade;
-      end
+-- Gets and formats the ending gauge value
+---@param res result
+---@return string
+local getGauge = function(res)
+	local gauge = math.ceil((res.gauge or 0) * 100);
+	local gType = res.gauge_type or res.flags or 0;
+
+  if (gType == 1) then return ('%d%% (H)'):format(gauge); end
+
+	return ('%d%%'):format(gauge);
+end
+
+-- Gets and formats the grade
+---@param res result
+---@return string
+local getGrade = function(res)
+  if (not res.grade) then
+		local score = res.score or 0;
+
+    for _, curr in ipairs(Grades) do
+      if (score >= curr.min) then return curr.grade; end
     end
   end
 
-  return string.upper(grade);
+  return res.grade:upper();
 end
 
-local getMeanDelta = function(current)
-  local meanDelta = get(current, 'meanHitDelta');
+-- Gets and formats the mean hit delta
+---@param res result
+---@return string
+local getMeanDelta = function(res)
+	if (not res.meanHitDelta) then return '-'; end
 
-  return (meanDelta and string.format('%.1f ms', meanDelta)) or '-';
+	return ('%.1f ms'):format(res.meanHitDelta);
 end
 
-local getMedianDelta = function(current)
-  local medianDelta = get(current, 'medianHitDelta');
+-- Gets and formats the median hit delta
+---@param res result
+---@return string
+local getMedianDelta = function(res)
+	if (not res.medianHitDelta) then return '-'; end
 
-  return (medianDelta and string.format('%.1f ms', medianDelta)) or '-';
+	return ('%.1f ms'):format(res.medianHitDelta);
 end
 
-local getName = function(current)
-  local displayName = getSetting('displayName', 'GUEST');
-  local playerName = get(current, 'playerName');
-  local scoreName = get(current, 'name');
+-- Gets the name for a player's score
+---@param res result
+---@return string
+local getName = function(res)
+	local displayName = getSetting('displayName', 'GUEST');
 
-  return string.upper(scoreName or playerName or displayName);
+	return (res.name or res.playerName or displayName or 'GUEST'):upper();
 end
 
-local getScoreIndex = function(current)
-  local uid = get(result, 'uid');
+-- Gets the score index for a player's own score in multiplayer
+---@param res result
+---@return integer
+local getScoreIndex = function(res)
+  local uid = res.uid or '';
 
-  for i, playerScore in ipairs(current.highScores) do
-    if (uid == playerScore.uid) then
-      return i;
-    end
+  for i, score in ipairs(res.highScores) do
+		if (uid == score.uid) then return i; end
   end
 end
 
-local getTimestamp = function(current)
-  local format = getDateFormat();
-  local timestamp = get(current, 'timestamp', os.time());
-
-  return os.date(format, timestamp);
+-- Gets and formats a timestamp
+---@param res result
+local getTimestamp = function(res)
+	return os.date(getDateFormat(), res.timestamp or os.time());
 end
 
-local getTitle = function(current)
-  local playerName = get(current, 'playerName');
-  local realTitle = get(current, 'realTitle');
-  local title = get(current, 'title', '-');
+-- Gets the chart title
+---@param res result
+---@return string
+local getTitle = function(res)
+	if (res.playerName and res.realTitle) then return res.realTitle:upper(); end
 
-  return (playerName and realTitle and string.upper(realTitle))
-    or string.upper(title);
+	return (res.title or ''):upper();
 end
 
-local formatHighScore = function(current)
-  return {
-    clear = {
-      font = 'normal',
-      size = 24,
-      value = getClear(current),
-    },
-    critical = {
-      font = 'number',
-      size = 24,
-      value = get(current, 'perfects', '-'),
-    },
-    gauge = {
-      font = 'number',
-      size = 24,
-      value = getGauge(current),
-    },
-    grade = {
-      font = 'normal',
-      size = 24,
-      value = getGrade(current),
-    },
-    hitWindows = {
-      font = 'number',
-      size = 24,
-      value = string.format(
-        '±%d  /  %d ms',
-        get(current, 'hitWindow.perfect', 46),
-        get(current, 'hitWindow.good', 92)
-      ),
-    },
-    error = {
-      font = 'number',
-      size = 24,
-      value = get(current, 'misses', '-'),
-    },
-    name = {
-      font = 'normal',
-      size = 24,
-      value = getName(current),
-    },
-    near = {
-      font = 'number',
-      size = 24,
-      value = get(current, 'goods', '-'),
-    },
-    score = get(current, 'score', 0),
-    timestamp = {
-      font = 'number',
-      size = 24,
-      value = getTimestamp(current),
-    },
-  };
+-- Filters high scores to only display scores with harder hit windows
+---@param scores Score[]
+---@return Score[]
+local filterScores = function(scores)
+	if ((#scores == 0) or (not scores[1].hitWindow)) then return scores; end
+
+	local s = {};
+
+	for _, score in ipairs(scores) do
+		if (score.hitWindow.perfect < 46) then s[#s + 1] = score; end
+	end
+
+	return s;
 end
 
-local formatScore = function(current)
-  local extendedScore = formatHighScore(current);
+-- Formats a high score
+---@param res result
+---@param i integer
+---@return ResultScore
+local formatHighScore = function(res, i)
+	---@class ResultScore
+  local s = {
+		clear = makeLabel('norm', getClear(res)),
+		critical = ScoreNumber:new({
+			digits = 5,
+			size = 24,
+			val = res.perfects or 0,
+		}),
+		early = makeLabel('num', res.earlies or '-', 24),
+		gauge = makeLabel('num', getGauge(res), 24),
+		grade = makeLabel('norm', getGrade(res)),
+		hitWindows = makeLabel(
+			'num',
+			('±%d  /  %d ms'):format(
+				res.hitWindow and res.hitWindow.perfect or 46,
+				res.hitWindow and res.hitWindow.good or 92
+			),
+			24
+		),
+		error = ScoreNumber:new({
+			digits = 5,
+			size = 24,
+			val = res.misses or 0,
+		}),
+		late = makeLabel('num', res.lates or '-', 24),
+		maxChain = (res.maxCombo and ScoreNumber:new({
+			digits = 5,
+			size = 24,
+			val = res.maxCombo or 0,
+		})) or makeLabel('num', '-', 24),
+		name = makeLabel('norm', getName(res)),
+		near = ScoreNumber:new({
+			digits = 5,
+			size = 24,
+			val = res.goods or 0,
+		}),
+		place = makeLabel('num', i, 90),
+		score = ScoreNumber:new({ size = (i and 90) or 117, val = res.score or 0 }),
+		timestamp = makeLabel('num', getTimestamp(res), 24),
+  };
 
-  extendedScore.early = {
-    font = 'number',
-    size = 24,
-    value = get(current, 'earlies', '-'),
-  };
-  extendedScore.late = {
-    font = 'number',
-    size = 24,
-    value = get(current, 'lates', '-'),
-  };
-  extendedScore.maxChain = {
-    font = 'number',
-    size = 24,
-    value = get(current, 'maxCombo', '-'),
-  };
-  extendedScore.meanDelta = {
-    font = 'number',
-    size = 18,
-    value = getMeanDelta(current),
-  };
-  extendedScore.medianDelta = {
-    font = 'number',
-    raw = get(current, 'medianHitDelta', '0'),
-    size = 18,
-    value = getMedianDelta(current),
-  };
-
-  return extendedScore;
+	return s;
 end
 
-local formatSongInfo = function(current)
-  return {
-    artist = {
-      font = 'jp',
-      size = 30,
-      value = string.upper(get(current, 'artist', '-')),
-    },
-    bpm = {
-      font = 'number',
-      size = 24,
-      value = get(current, 'bpm', '-'),
-    },
-    difficulty = {
-      font = 'normal',
-      size = 24,
-      value = getDifficulty(current),
-    },
-    duration = {
-      font = 'number',
-      size = 24,
-      value = getDuration(current),
-    },
-    effector = {
-      font = 'jp',
-      size = 24,
-      value = string.upper(get(current, 'effector', '-')),
-    },
-    level = {
-      font = 'number',
-      size = 24,
-      value = string.format('%02d', get(current, 'level', '1')),
-    },
-    title = {
-      font = 'jp',
-      size = 36,
-      value = getTitle(current),
-    },
+-- Formats a score
+---@param res result
+---@return ResultScore
+local formatScore = function(res)
+  local base = formatHighScore(res);
+
+	base.deltas = getDeltas(res);
+
+  return base;
+end
+
+-- Formats song information
+---@param res result
+---@return ResultSong
+local formatSong = function(res)
+	local jacket = nil;
+
+	if (res.jacketPath and (res.jacketPath ~= '')) then
+		jacket = gfx.LoadImageJob(
+			res.jacketPath,
+			jacketFallback,
+			500,
+			500
+		);
+	end
+
+	---@class ResultSong
+  local s = {
+		artist = makeLabel('jp', res.artist or '', 28),
+		bpm = makeLabel('num', res.bpm or '', 24),
+		difficulty = makeLabel('norm', getDiff(res)),
+		duration = makeLabel('num', getDuration(res), 24),
+		effector = makeLabel('jp', res.effector or '', 24),
+		level = makeLabel('num', ('%02d'):format(res.level or 1), 24),
+		jacket = jacket,
+		name = makeLabel('norm', getName(res)),
+		timestamp = makeLabel('num', getTimestamp(res), 24),
+		title = makeLabel('jp', getTitle(res), 32),
   };
+
+	return s;
+end
+
+-- Parses and formats data for graph display
+---@param res result
+---@return ResultGraphData
+local getGraphData = function(res)
+	local duration = res.duration;
+	local histogram = {};
+	local hoverScale = 10;
+	local suggestion = nil;
+
+	local count = 0;
+	local data = {};
+	local densities = JSONTable:new('densities');
+	local hardFail = ((res.gauge_type or res.flags or 0) == 1)
+		and (res.badge == 1);
+	local idx = 1;
+	local max = -1;
+	local ms = 1000;
+	local key = getSetting('_diffKey', '');
+	local save = true;
+
+	local early = 0;
+	local errorEarly = 0;
+	local errorLate = 0;
+	local late = 0;
+	local total = res.perfects + res.goods + res.misses;
+
+	local gaugeSamples = (JSONTable:new('samples')):get();
+	local gaugeChange = getSetting('_gaugeChange', '');
+
+	if (duration) then hoverScale = math.max(duration / 10000, 5); end
+
+	if (hardFail) then
+		save = false;
+	elseif (res.badge == 0) then
+		if (res.autoplay) then
+			if (res.score < 10000000) then save = false; end
+		else
+			save = false;
+		end
+	end
+
+	if (res.noteHitStats and (#res.noteHitStats > 0)) then
+		for _, stat in ipairs(res.noteHitStats) do
+			if ((stat.rating == 1) or (stat.rating == 2)) then
+				if (not histogram[stat.delta]) then histogram[stat.delta] = 0; end
+
+				histogram[stat.delta] = histogram[stat.delta] + 1;
+			end
+
+			if (stat.rating == 1) then
+				if (stat.delta < 0) then
+					early = early + 1;
+				else
+					late = late + 1;
+				end
+			elseif (stat.rating == 0) then
+				if (stat.delta < 0) then
+					errorEarly = errorEarly + 1;
+				else
+					errorLate = errorLate + 1;
+				end
+			end
+
+			if (save) then
+				if (stat.time < ms) then
+					count = count + 1;
+				else
+					if (count > max) then max = count; end
+
+					data[idx] = count;
+
+					count = 0;
+					idx = idx + 1;
+					ms = ms + 1000;
+				end
+			end
+		end
+	end
+
+	if (key ~= '') then
+		if (save) then
+			local floor = math.floor;
+			local scale = tonumber(getSetting('_graphSize', '0')) / max;
+
+			for i, v in ipairs(data) do data[i] = floor(v * scale); end
+
+			data[idx] = max;
+
+			densities:set(key, data);
+
+			game.SetSkinSetting('_graphMade', 'TRUE');
+
+			save = false;
+		end
+	end
+
+	errorLate = errorLate + (res.misses - (errorEarly + errorLate));
+
+	if (res.medianHitDelta) then
+		local delta = math.floor(res.medianHitDelta);
+		local offset = tonumber(getSetting('_songOffset', '0')) + delta;
+
+		if (math.abs(delta) > minOffset) then
+			suggestion = {
+				text = makeLabel('med', 'RECOMMENDED SONG OFFSET: ', 18),
+				offset = makeLabel('num', ('%d ms'):format(offset)),
+			};
+		end
+	end
+
+	---@class ResultGraphData
+	local gd = {
+		critWindow = (res.hitWindow and res.hitWindow.perfect) or 46,
+		counts = {
+			critical = res.perfects,
+			early = early,
+			errorEarly = errorEarly,
+			errorLate = errorLate,
+			late = late,
+			total = total,
+		},
+		duration = {
+			label = makeLabel('num', '0'),
+			val = duration or 0,
+		},
+		gauge = {
+			change = (gaugeChange ~= '') and tonumber(gaugeChange),
+			curr = makeLabel('num', '0'),
+			samples = ((res.badge > 0)
+				and (#gaugeSamples > 0)
+				and (not hardFail)
+				and gaugeSamples
+			) or res.gaugeSamples or {},
+			type = res.gauge_type or res.flags or 0,
+			val = makeLabel('num', getGauge(res), 24),
+		},
+		histogram = histogram,
+		hitStats = res.noteHitStats,
+		hoverScale = hoverScale,
+		mean = makeLabel('num', getMeanDelta(res));
+		median = makeLabel('num', getMedianDelta(res));
+		nearWindow = (res.hitWindow and res.hitWindow.good) or 92,
+		suggestion = suggestion,
+	};
+
+	return gd;
 end
 
 return {
+	filterScores = filterScores,
   formatHighScore = formatHighScore,
   formatScore = formatScore,
-  formatSongInfo = formatSongInfo,
+  formatSong = formatSong,
+	getGraphData = getGraphData,
   getScoreIndex = getScoreIndex,
-  getPageBounds = getPageBounds,
 };
