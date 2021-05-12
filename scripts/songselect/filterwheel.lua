@@ -452,6 +452,8 @@ end
 ---@param dt deltaTime
 ---@param isFiltering boolean
 render = function(dt, isFiltering)
+	game.SetSkinSetting('_filtering', (isFiltering and 'TRUE') or 'FALSE');
+
 	handleChange(dt, isFiltering);
 
 	if (not grid) then

@@ -383,6 +383,11 @@ local dialogWindow = {
 };
 
 render = function(dt)
+	game.SetSkinSetting(
+		'_collections',
+		((not dialog.closing) and 'TRUE') or 'FALSE'
+	);
+
 	gfx.Save();
 
 	window:set(true);

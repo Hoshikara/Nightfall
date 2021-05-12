@@ -1,3 +1,7 @@
+##### 1.0.1 - May 12, 2021
+- Fixed Top 50 tab for `Player Info` not scaling properly
+- Prevented player info from being loaded if any menus are open (filtering, sorting, etc.)
+
 ##### 1.0.0 - May 12, 2021
 - Added `Player Info` screen to the main menu
   - To load player info, enter `Song Select` and press `BT-A`, doing this also ensures your player info is fully updated

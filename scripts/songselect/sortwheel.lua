@@ -161,6 +161,8 @@ end
 ---@param dt deltaTime
 ---@param isSorting boolean
 render = function(dt, isSorting)
+	game.SetSkinSetting('_sorting', (isSorting and 'TRUE') or 'FALSE');
+
 	handleChange(dt, isSorting);
 
 	if (not grid) then

@@ -266,6 +266,7 @@ local gameSettings = nil;
 local practiceSettings = nil;
 
 render = function(dt, displaying)
+	game.SetSkinSetting('_gameSettings', (displaying and 'TRUE') or 'FALSE');
 	game.SetSkinSetting('_scoreType', getScoreType());
 	game.SetSkinSetting('_songOffset', tostring(getSongOffset()));
 

@@ -822,19 +822,11 @@ local PlayerInfo = {
 	---@param dt deltaTime
 	---@param top50 TopPlayFormatted[]
 	drawTop50 = function(this, dt, top50)
-		local y = 0;
-
-		gfx.Save();
-
-		this.window:scale();
-
-		gfx.Translate(this.x[2], this.y[2] + this.list.offset);
+		local y = this.y[2] + this.list.offset;
 
 		for i, play in ipairs(top50) do
 			y = y + this:drawTopPlay(y, play, this.list:onPage(i / this.top50PageMax));
 		end
-
-		gfx.Restore();
 	end,
 
 	-- Draw a top play
@@ -847,12 +839,12 @@ local PlayerInfo = {
 
 		if (isVis) then
 			play.place:draw({
-				x = -6,
+				x = this.x[2] - 6,
 				y = y - 25,
 				alpha = 200,
 			});
 
-			local x = size / 2 + 12;
+			local x = this.x[2] + (size / 2) + 12;
 			local labels = this.labels.play;
 
 			if ((not play.jacket) or (play.jacket == jacketFallback)) then
@@ -866,6 +858,8 @@ local PlayerInfo = {
 				);
 			end
 
+			this.window:scale();
+
 			drawRect({
 				x = x,
 				y = y,
@@ -874,6 +868,8 @@ local PlayerInfo = {
 				image = play.jacket,
 				stroke = { color = 'norm', size = 1 },
 			});
+
+			this.window:unscale();
 
 			x = x + size + 36;
 
@@ -1268,24 +1264,16 @@ local PlayerInfo = {
 		local x = this.window.w / 20;
 		local y = this.y[1];
 
+		this.window:scale();
+
 		drawRect({
 			w = this.window.w,
 			h = this.window.h,
 			alpha = 200,
 			color = 'black',
-			fast = true,
 		});
 
-		-- drawRect({
-		-- 	x = this.x[2],
-		-- 	y = this.y[2],
-		-- 	w = this.w[2],
-		-- 	h = this.h[1],
-		-- 	alpha = 150,
-		-- 	color = {0,255,0}
-		-- })
-
-		gfx.ForceRender();
+		this.window:unscale();
 
 		if (not this.state.hasInfo) then
 			dialogBox:draw({

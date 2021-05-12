@@ -69,6 +69,15 @@ local makeStats = function()
 	end
 end
 
+-- Check that all menus are closed
+---@return boolean
+local menusClosed = function()
+	return (getSetting('_filtering', 'FALSE') == 'FALSE')
+		and (getSetting('_sorting', 'FALSE') == 'FALSE')
+		and (getSetting('_gameSettings', 'FALSE') == 'FALSE')
+		and (getSetting('_collections', 'FALSE') == 'FALSE');
+end
+
 -- Called by the game every frame
 ---@param dt deltaTime
 render = function(dt)
@@ -78,7 +87,9 @@ render = function(dt)
 		init = false;
 	end
 
-	if ((not state.infoLoaded) and pressed('BTA')) then makeStats(); end
+	if ((not state.infoLoaded) and pressed('BTA') and menusClosed()) then
+		makeStats();
+	end
 
 	state:watch();
 

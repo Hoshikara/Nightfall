@@ -18,7 +18,7 @@ local Title = {
 			labels = {
 				game = makeLabel('med', 'UNNAMED SDVX CLONE', 31),
 				skin = makeLabel('med', 'NIGHTFALL', 120),
-				version = makeLabel('num', '1.0.0', 20),
+				version = makeLabel('num', '1.0.1', 20),
 			},
 			state = state,
 			timers = { alpha = 0, fade = 1.2 },

@@ -63,7 +63,7 @@ local getInfo = function()
 		end
 	end
 end
-local debug = require('common/debug');
+
 -- Called by the game every frame
 ---@param dt deltaTime
 render = function(dt)
@@ -89,6 +89,8 @@ render = function(dt)
 
 	if (state.viewingInfo) then
 		getInfo();
+
+		gfx.ForceRender();
 
 		playerInfo:render(dt);
 	end
