@@ -1,6 +1,8 @@
 -- This script is loaded for every screen of the game
 -- All of the functions below are available to all of the scripts of the skin
 
+local SkinVersion = '1.0.2';
+
 gfx.LoadSkinFont('DFMGM.ttf');
 
 Image = require('common/image');
@@ -143,7 +145,7 @@ getDiffIndex = function(jacketPath, diffIndex)
 	return diffIndex + 1;
 end
 
----Gets the value of the skin setting by the specified key
+-- Gets the value of the skin setting by the specified key
 ---@param key string
 ---@param default any
 ---@return any
@@ -157,6 +159,10 @@ getSetting = function(key, default)
 
 	return setting;
 end
+
+-- Gets the current skin version
+---@return string
+getSkinVersion = function() return SkinVersion; end
 
 -- Font loading wrapper function
 ---@param f string # `'bold'`, `'jp'`, `'med'`, `'mono'`, `'norm'`, `'num'`

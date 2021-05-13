@@ -6,7 +6,7 @@ local PracticeSettings = require('components/gameplay/practicesettings');
 local window = Window:new();
 
 local scoreType = 'ADDITIVE';
-local songOffset = 0;
+local songOffset = '0';
 local gameIdx = nil;
 local offsetIdx = nil;
 local offsetsIdx = nil;

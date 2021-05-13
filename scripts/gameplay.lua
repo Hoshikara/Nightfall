@@ -290,7 +290,7 @@ end
 render_outro = function(dt, clearState)
 	if (clearState == 0) then return true; end
 
-	bpms:save();
+	if (clearState > 1) then bpms:save(); end
 
 	state.timers.outro = state.timers.outro + dt;
 

@@ -151,6 +151,21 @@ local HitDeltaBar = {
     local crit = this.states.crit;
     local near = this.states.near;
 
+    if (gameplay.progress == 0) then
+      for _, rating in pairs(this.states) do
+        for btn = 1, 6 do
+          if (not rating[btn]) then break; end
+
+          for i = 1, 30 do
+            rating[btn][i].color = 'white';
+            rating[btn][i].delta = 0;
+            rating[btn][i].queued = false;
+            rating[btn][i].timer = 1;
+          end
+        end
+      end
+    end
+
     this:setSizes();
 
     gfx.Save();

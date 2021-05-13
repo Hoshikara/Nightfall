@@ -416,7 +416,7 @@ local SongInfo = {
           this.hispeed.valMiddle:draw({
             x = (this.window.w / 2) - (this.window.w / 32),
             y = this.hispeed.y,
-            alpha = alpha * 0.6,
+            alpha = alpha * (((color == 'white') and 0.65) or 0.9),
             align = 'middle',
             color = color,
             text = str,
@@ -456,6 +456,11 @@ local SongInfo = {
 
     if (not curr) then return; end
 
+    if (gameplay.progress == 0) then
+      this.bpm.idx = 1;
+      this.time.next = 0;
+    end
+
     local bpmChange = '';
     local hiSpeedChange = '';
     local next = this.state.bpms[this.bpm.idx + 1];
@@ -464,9 +469,9 @@ local SongInfo = {
     this.hispeed.isLower = false;
     
     if (next) then
-      this.timers.next = math.min(curr.time + 2.5, next.time);
+      this.time.next = math.min(curr.time + 2.5, next.time);
     else
-      this.timers.next = curr.time + 2.5;
+      this.time.next = curr.time + 2.5;
     end
 
     if (this.timers.curr >= curr.time) then
@@ -478,7 +483,7 @@ local SongInfo = {
         gameplay.hispeed
       );
 
-      if (this.timers.curr >= this.timers.next) then
+      if (this.timers.curr >= this.time.next) then
         this.bpm.idx = this.bpm.idx + 1;
       end
     end

@@ -1,3 +1,8 @@
+##### 1.0.2 - May 13, 2021
+- Fixed BPM data getting wiped on excessive fail
+- Fixed incoming BPM change not appearing when restarting a chart with `F5`
+- Fixed bars for hit delta bar persisting after restarting a chart with `F5`
+
 ##### 1.0.1 - May 12, 2021
 - Fixed Top 50 tab for `Player Info` not scaling properly
 - Prevented player info from being loaded if any menus are open (filtering, sorting, etc.)
