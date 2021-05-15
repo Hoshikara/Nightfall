@@ -127,7 +127,7 @@ local SongInfo = {
       if ((gameplay.progress > 0) and (gameplay.progress < 1)) then
         this.timers.curr = this.timers.curr + dt;
 
-        local total = floor(((1 / gameplay.progress) * this.timers.curr) + 0.5);
+        local total = floor(((1 / gameplay.progress) * this.timers.curr));
 
         if (this.timers.total ~= total) then
           this.time.totalVal = ('/ %02d:%02d'):format(
@@ -278,7 +278,7 @@ local SongInfo = {
         color = 'white',
         text = ('%02d:%02d'):format(
           floor(this.timers.curr / 60),
-          floor((this.timers.curr % 60) + 0.5)
+          floor((this.timers.curr % 60))
         ),
         update = true,
       });

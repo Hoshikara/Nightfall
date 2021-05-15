@@ -371,9 +371,11 @@ local Graphs = {
     end
     
     for i = -max, max do
-      local count = histogram[i - 1] + (histogram[i] * 2) + (histogram[i + 1]);
+      if (histogram[i - 1] and histogram[i] and histogram[i + 1]) then
+        local count = histogram[i - 1] + (histogram[i] * 2) + (histogram[i + 1]);
 
-      if (count > mode) then mode = count; end
+        if (count > mode) then mode = count; end
+      end
     end
 
     gfx.BeginPath();
@@ -381,9 +383,11 @@ local Graphs = {
     gfx.MoveTo(x, y);
 
     for i = -max, max do
-      local count = histogram[i - 1] + (histogram[i] * 2) + (histogram[i + 1]);
+      if (histogram[i - 1] and histogram[i] and histogram[i + 1]) then
+        local count = histogram[i - 1] + (histogram[i] * 2) + (histogram[i + 1]);
 
-      gfx.LineTo(x + (w * (count / mode)), y + (h / 2) + i);
+        gfx.LineTo(x + (w * (count / mode)), y + (h / 2) + i);
+      end
     end
 
     gfx.LineTo(x, y + h);

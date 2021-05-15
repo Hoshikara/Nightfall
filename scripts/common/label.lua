@@ -77,7 +77,7 @@ local Label =  {
   --   y: number = 0,
   --   align: string = 'left',
   --   alpha: number = 255,
-  --   color: string = 'norm',
+  --   color: string|{ r, g, b } = 'norm',
   --   maxWidth: number = -1,
   --   text?: string,
   --   update?: boolean,

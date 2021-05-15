@@ -95,14 +95,6 @@ render = function(dt)
 		playerInfo:render(dt);
 	end
 
-	-- debug({
-	-- 	count=playerInfo.count,
-	-- 	viewingTop50 = playerInfo.viewingTop50,
-	-- 	page = playerInfo.top50Page,
-	-- 	pages = playerInfo.top50Pages,
-	-- 	offset = playerInfo.list.offset
-	-- })
-
 	gfx.Restore();
 end
 
