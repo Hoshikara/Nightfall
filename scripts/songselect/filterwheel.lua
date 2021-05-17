@@ -350,7 +350,7 @@ local levels = {
 local drawLabels = function(isFiltering)
 	local prefixC = labels.fxl;
 	local prefixD = labels.fxl;
-	local y = (window.h / 20) - 2;
+	local y = grid.label.y;
 
 	if (isFiltering) then
 		if (choosingFolder) then

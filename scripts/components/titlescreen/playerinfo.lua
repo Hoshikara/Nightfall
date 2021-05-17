@@ -117,21 +117,6 @@ local PlayerInfo = {
 			h = { 0, 0 },
 		};
 
-		for i, page in ipairs(Constants.pages) do
-			t.btns[i] = {
-				event = function()
-					t.state:set({ currBtn = i });
-
-					t.viewingCharts = false;
-
-					t:resetCharts();
-
-					t.viewingTop50 = i == 5;
-				end,
-				label = makeLabel('med', page, 36),
-			};
-		end
-
 		for k, v in pairs(Constants.labels) do
 			t.labels[k] = makeLabel('med', v, 24);
 		end
@@ -154,24 +139,55 @@ local PlayerInfo = {
 	---@param this PlayerInfo
 	setSizes = function(this)
 		if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-			dialogBox:setSizes(this.window.w, this.window.h);
+			dialogBox:setSizes(this.window.w, this.window.h, this.window.isPortrait);
+
+			this:makeBtns();
+
+			this.w[1] = 0;
 
 			for _, btn in ipairs(this.btns) do
 				if (btn.label.w > this.w[1]) then this.w[1] = btn.label.w; end
 			end
 
-			this.w[2] = this.window.w - (this.window.padding.x * 3.5) - this.w[1];
+			if (this.window.isPortrait) then
+				this.w[2] = this.window.w - (this.window.padding.x * 2);
 
-			this.h[1] = this.window.h - (this.window.padding.y * 5);
-			this.h[2] = this.h[1] // 12;
+				this.h[1] = this.window.h * 0.75;
+				this.h[2] = this.h[1] // 22;
 
-			this.x[1] = this.window.padding.x;
-			this.x[2] = this.x[1] + this.w[1] + (this.window.padding.x * 1.5);
-			this.x[3] = this.window.w - this.window.padding.x;
+				this.x[1] = this.window.padding.x;
+				this.x[2] = this.x[1] - 18;
+				this.x[3] = this.window.w - this.window.padding.x;
 
-			this.y[1] = this.window.padding.y;
-			this.y[2] = this.window.padding.y * 3;
-			this.y[3] = this.window.h - (this.window.padding.y * 1.25) + 6;
+				this.y[1] = this.window.padding.y;
+				this.y[2] = this.window.padding.y * 6;
+				this.y[3] = this.window.h - this.window.padding.y;
+
+				this.jacketSize[1] = 480;
+				this.jacketSize[2] = 240;
+
+				this.chartPageMax = 28;
+				this.top50PageMax = 5;
+			else
+				this.w[2] = this.window.w - (this.window.padding.x * 3.5) - this.w[1];
+
+				this.h[1] = this.window.h - (this.window.padding.y * 5);
+				this.h[2] = this.h[1] // 12;
+
+				this.x[1] = this.window.padding.x;
+				this.x[2] = this.x[1] + this.w[1] + (this.window.padding.x * 1.5);
+				this.x[3] = this.window.w - this.window.padding.x;
+
+				this.y[1] = this.window.padding.y;
+				this.y[2] = this.window.padding.y * 3;
+				this.y[3] = this.window.h - (this.window.padding.y * 1.25) + 6;
+
+				this.jacketSize[1] = 424;
+				this.jacketSize[2] = 240;
+
+				this.chartPageMax = 14;
+				this.top50PageMax = 3;
+			end
 
 			this.margin = (this.h[1] - (this.jacketSize[2] * this.top50PageMax))
 				/ (this.top50PageMax - 1);
@@ -183,6 +199,27 @@ local PlayerInfo = {
 			
 			this.cache.w = this.window.w;
 			this.cache.h = this.window.h;
+		end
+	end,
+
+	-- Make the tab buttons
+	---@param this PlayerInfo
+	makeBtns = function(this)
+		local size = (this.window.isPortrait and 26) or 36;
+
+		for i, page in ipairs(Constants.pages) do
+			this.btns[i] = {
+				event = function()
+					this.state:set({ currBtn = i });
+
+					this.viewingCharts = false;
+
+					this:resetCharts();
+
+					this.viewingTop50 = i == 5;
+				end,
+				label = makeLabel('med', page, size),
+			};
 		end
 	end,
 
@@ -243,12 +280,13 @@ local PlayerInfo = {
 	---@param x number
 	---@param y number
 	---@param isCurr boolean
+	---@param isPortrait boolean
 	---@return number
-	drawBtn = function(this, btn, x, y, isCurr)
+	drawBtn = function(this, btn, x, y, isCurr, isPortrait)
 		if (isCurr) then
 			drawRect({
 				x = x - 12,
-				y = y - 2,
+				y = y - ((isPortrait and 4) or 2),
 				w = (this.w[1] + 48) * smoothstep(this.timer),
 				h = btn.label.h + 16,
 				alpha = 100,
@@ -272,6 +310,8 @@ local PlayerInfo = {
 		) then
 			this.state.btnEvent = btn.event;
 		end
+
+		if (isPortrait) then return this.w[1] + 48; end
 		
 		return btn.label.h * 2;
 	end,
@@ -328,7 +368,13 @@ local PlayerInfo = {
 		this:drawTotals(clears, grades, x + 1, y);
 
 		if (bestPlay) then
-			this:drawBestPlay(bestPlay, labels, x, y + (this.jacketSize[1] / 1.25));
+			if (this.window.isPortrait) then
+				y = y + this.jacketSize[1] * 0.8;
+			else
+				y = y + (this.jacketSize[1] / 1.25);
+			end
+
+			this:drawBestPlay(bestPlay, labels, x, y);
 		end
 	end,
 
@@ -406,7 +452,10 @@ local PlayerInfo = {
 	---@param x number
 	---@param y number
 	drawBestPlay = function(this, bestPlay, labels, x, y)
+		local isPortrait = this.window.isPortrait;
 		local maxWidth = this.w[2] - this.jacketSize[1] - (this.window.w / 40);
+
+		if (isPortrait) then maxWidth = this.w[2]; end
 
 		if ((not this.jacket) or this.jacket == jacketFallback) then
 			this.jacket = gfx.LoadImageJob(
@@ -440,8 +489,13 @@ local PlayerInfo = {
 
 		this.window:unscale();
 
-		x = x + this.jacketSize[1] + (this.window.w / 40);
-		y = y - 6;
+
+		if (isPortrait) then
+			y = y + this.jacketSize[1] + 24;
+		else
+			x = x + this.jacketSize[1] + (this.window.w / 40);
+			y = y - 6;
+		end
 
 		for _, name in ipairs(Order) do
 			if (name ~= 'difficulty') then
@@ -454,12 +508,23 @@ local PlayerInfo = {
 
 			y = y + (labels[name].h * 1.35);
 
-			bestPlay[name]:draw({
-				x = x,
-				y = y,
-				color = 'white',
-				maxWidth = maxWidth,
-			});
+			if (name == 'title') then
+				bestPlay[name]:draw({
+					x = x,
+					y = y,
+					color = 'white',
+					maxWidth = maxWidth,
+					size = 36,
+					update = true,
+				});
+			else
+				bestPlay[name]:draw({
+					x = x,
+					y = y,
+					color = 'white',
+					maxWidth = maxWidth,
+				});
+			end
 
 			if (name == 'difficulty') then
 				bestPlay.level:draw({
@@ -534,10 +599,14 @@ local PlayerInfo = {
 	drawStats = function(this, dt, stats, isClears, x, y)
 		local cols = {};
 		local hovered = stats.hovered;
+		local isPortrait = this.window.isPortrait;
 		local xOffset = (isClears and 204) or 127.5;
+
+		if (isPortrait) then xOffset = (isClears and 160) or 100; end
+
 		local xTemp = x + xOffset;
 		local yTemp = y;
-		local w = this.w[2];
+		local w = this.w[2] + ((isPortrait and 36) or 0);
 		local hBar = this.h[2];
 		local hCat = this.labels.level.h * 1.5;
 
@@ -668,13 +737,15 @@ local PlayerInfo = {
 				alpha = alpha,
 			});
 
-			(((i == hovered.row) and hovered.pct) or curr.pct):draw({
-				x = xTemp + 336,
-				y = cols[#cols] + (hBar / 2) - 2,
-				align = 'rightMid',
-				alpha = alpha,
-				color = 'white',
-			});
+			if (not isPortrait) then
+				(((i == hovered.row) and hovered.pct) or curr.pct):draw({
+					x = xTemp + 336,
+					y = cols[#cols] + (hBar / 2) - 2,
+					align = 'rightMid',
+					alpha = alpha,
+					color = 'white',
+				});
+			end
 
 			cols[#cols] = cols[#cols] + hBar;
 		end
@@ -688,6 +759,7 @@ local PlayerInfo = {
 		local max = this.chartPageMax;
 		local maxWidth = this.w[2] * 0.45;
 		local yTemp = y;
+		local w = this.w[2] + ((this.window.isPortrait and 36) or 0);
 		local hCat = this.labels.level.h * 1.5;
 
 		x = x + 12;
@@ -728,7 +800,7 @@ local PlayerInfo = {
 				drawRect({
 					x = x - 12,
 					y = yTemp - 8,
-					w = this.w[2],
+					w = w,
 					h = 48,
 					alpha = 50,
 					color = 'norm',
@@ -759,7 +831,8 @@ local PlayerInfo = {
 	---@param scores PlayerScoreStats
 	drawScores = function(this, scores, x, y)
 		local cols = { y, y, y };
-		local xTemp = x + 200;
+		local isPortrait = this.window.isPortrait;
+		local xTemp = x + ((isPortrait and 144) or 200);
 		local yTemp = y;
 		local w = this.w[2];
 		local hBar = this.h[2];
@@ -813,7 +886,7 @@ local PlayerInfo = {
 				cols[i] = cols[i] + hBar;
 			end
 
-			xTemp = xTemp + 420;
+			xTemp = xTemp + ((isPortrait and 300) or 420);
 		end
 	end,
 
@@ -822,10 +895,13 @@ local PlayerInfo = {
 	---@param dt deltaTime
 	---@param top50 TopPlayFormatted[]
 	drawTop50 = function(this, dt, top50)
+		local max = this.top50PageMax;
 		local y = this.y[2] + this.list.offset;
 
+		if (this.window.isPortrait) then y = y - (this.labels.totals.h * 1.5); end
+
 		for i, play in ipairs(top50) do
-			y = y + this:drawTopPlay(y, play, this.list:onPage(i / this.top50PageMax));
+			y = y + this:drawTopPlay(y, play, (i % max) ~= 0, this.list:onPage(i / max));
 		end
 	end,
 
@@ -833,23 +909,21 @@ local PlayerInfo = {
 	---@param this PlayerInfo
 	---@param y number
 	---@param play TopPlayFormatted
+	---@param drawSep boolean
 	---@param isVis boolean
-	drawTopPlay = function(this, y, play, isVis)
+	drawTopPlay = function(this, y, play, drawSep, isVis)
 		local size = this.jacketSize[2];
+		local yTemp = y;
 
 		if (isVis) then
-			play.place:draw({
-				x = this.x[2] - 6,
-				y = y - 25,
-				alpha = 200,
-			});
-
-			local x = this.x[2] + (size / 2) + 12;
+			local x = this.x[2];
 			local labels = this.labels.play;
+			local maxWidth = this.w[2] - size - 36;
+			local multi = (this.window.isPortrait and 0.975) or 1;
+
+			if (this.window.isPortrait) then x = x + 14; end
 
 			if ((not play.jacket) or (play.jacket == jacketFallback)) then
-				this.count = this.count + 1;
-
 				play.jacket = gfx.LoadImageJob(
 					play.jacketPath,
 					jacketFallback,
@@ -869,7 +943,22 @@ local PlayerInfo = {
 				stroke = { color = 'norm', size = 1 },
 			});
 
+			drawRect({
+				x = x + 8,
+				y = y + 8,
+				w = 64,
+				h = 52,
+				alpha = 180,
+				color = 'dark',
+			});
+
 			this.window:unscale();
+
+			play.place:draw({
+				x = x + 16,
+				y = y + 10,
+				color = 'white',
+			});
 
 			x = x + size + 36;
 
@@ -883,6 +972,7 @@ local PlayerInfo = {
 				x = x,
 				y = y,
 				color = 'white',
+				maxWidth = maxWidth,
 			});
 
 			y = y + (play.title.h * 2);
@@ -920,24 +1010,43 @@ local PlayerInfo = {
 			y = y + (play.difficulty.h * 2);
 
 			labels.score:draw({ x = x, y = y });
-			labels.grade:draw({ x = x + (size * 1.825), y = y });
-			labels.clear:draw({ x = x + (size * 2.5), y = y });
+			labels.grade:draw({ x = x + (size * 1.825 * multi), y = y });
+			labels.clear:draw({ x = x + (size * 2.5 * multi), y = y });
 
 			play.grade:draw({
-				x = x + (size * 1.825),
+				x = x + (size * 1.825 * multi),
 				y = y + (labels.grade.h * 1.35),
 				color = 'white',
+				size = this.window.isPortrait and 24,
+				update = true,
 			});
 
 			play.clear:draw({
-				x = x + (size * 2.5),
+				x = x + (size * 2.5 * multi),
 				y = y + (labels.clear.h * 1.35),
 				color = 'white',
+				size = this.window.isPortrait and 24,
+				update = true,
 			});
 
 			y = y + (labels.score.h * 0.75);
 
 			play.score:draw({ x = x - 4, y = y - 4 });
+
+			if (drawSep) then
+				this.window:scale();
+
+				drawRect({
+					x = this.x[2] + ((this.window.isPortrait and 12) or -1),
+					y = yTemp + size + (this.margin / 2) - 1;
+					w = this.w[2] + ((this.window.isPortrait and 12) or 0),
+					h = 2,
+					alpha = 100,
+          color = 'norm',
+				});
+
+				this.window:unscale();
+			end
 		end
 
 		return size + this.margin;
@@ -946,14 +1055,18 @@ local PlayerInfo = {
 	-- Draw folder dropdown
 	---@param this PlayerInfo
 	---@param dt deltaTime
-	drawDropdown = function(this, dt, y)
+	---@param isPortrait boolean
+	drawDropdown = function(this, dt, y, isPortrait)
 		local dropdown = this.dropdown;
+		local sign = (isPortrait and -1) or 1;
 		local x = this.window.w - this.window.padding.x + 3;
 
+		if (isPortrait) then x = this.x[1] - 5; end
+
 		drawRect({
-			x = x - dropdown.w,
+			x = x - (dropdown.w * sign),
 			y = y,
-			w = dropdown.w,
+			w = dropdown.w * sign,
 			h = dropdown.h * dropdown.alphaTimer,
 			alpha = 240,
 			color = 'dark',
@@ -963,7 +1076,15 @@ local PlayerInfo = {
 		y = y + 17 + dropdown.offset;
 
 		for i, folder in ipairs(this.folders) do
-			y = y + this:drawFolder(dt, folder.sm, i, x, y, i == this.currFolder);
+			y = y + this:drawFolder(
+				dt,
+				folder.sm,
+				i,
+				x,
+				y,
+				sign,
+				i == this.currFolder
+			);
 		end
 	end,
 
@@ -974,8 +1095,9 @@ local PlayerInfo = {
 	---@param i integer
 	---@param x number
 	---@param y number
+	---@param sign integer
 	---@param isCurr boolean
-	drawFolder = function(this, dt, folder, i, x, y, isCurr)
+	drawFolder = function(this, dt, folder, i, x, y, sign, isCurr)
 		local dropdown = this.dropdown;
 		local isVis = true;
 
@@ -991,13 +1113,15 @@ local PlayerInfo = {
 			local alpha = floor(
 				((isCurr and 255) or 150) * min(dropdown.alphaTimer ^ 2, 1)
 			);
+			local isPortrait = sign == -1;
+			local maxWidth = this.w[2] - 32;
 			local w = (dropdown.w - 32) * smoothstep(dropdown.timer);
 
 			if (isCurr) then
 				drawRect({
-					x = x - 16,
-					y = y,
-					w = -w,
+					x = x - (16 * sign),
+					y = y + ((isPortrait and 1) or 0),
+					w = -w * sign,
 					h = 30,
 					alpha = alpha * 0.4,
 					color = 'norm',
@@ -1006,7 +1130,7 @@ local PlayerInfo = {
 			end
 
 			if (this.mouse:clipped(
-				x - 16 - w,
+				x - (16 * sign) - ((isPortrait and 0) or w),
 				y - 6,
 				w,
 				42)
@@ -1015,11 +1139,12 @@ local PlayerInfo = {
 			end
 
 			folder.name:draw({
-				x = x - 24,
+				x = x - (24 * sign),
 				y = y,
-				align = 'right',
+				align = (isPortrait and 'left') or 'right',
 				alpha = alpha,
 				color = 'white',
+				maxWidth = maxWidth,
 			});
 		end
 
@@ -1029,11 +1154,18 @@ local PlayerInfo = {
 	-- Draws navigation labels
 	---@param this PlayerInfo
 	drawNavigation = function(this, dt)
+		local isPortrait = this.window.isPortrait;
 		local x = this.x[1];
+		local xLeft = this.x[1] - 5;
 		local yTop = this.y[1] - 12;
 		local yBot = this.y[3];
+
+		if (isPortrait) then yTop = this.y[1] + (this.window.padding.y * 1.35); end
 		
-		this.labels.close:draw({ x = x, y = yBot - this.labels.close.h });
+		this.labels.close:draw({
+			x = x - ((isPortrait and 4) or 0),
+			y = yBot - this.labels.close.h
+		});
 
 		if (this.state.hasInfo) then
 			x = this.x[3];
@@ -1076,11 +1208,11 @@ local PlayerInfo = {
 				local clickable = not this.state.choosingFolder
 					and ((this.currBtn == 2) or (this.currBtn == 3));
 
-				this.labels.fxl:draw({
-					x = x - this.labels.folder.w - 8,
-					y = yTop,
-					align = 'right',
-				});
+					this.labels.fxl:draw({
+						x = (isPortrait and xLeft) or (x - this.labels.folder.w - 8),
+						y = yTop,
+						align = (isPortrait and 'left') or 'right',
+					});
 
 				if (clickable) then
 					this.labels.click:draw({
@@ -1094,28 +1226,32 @@ local PlayerInfo = {
 
 			if (this.viewingTop50) then
 				this.folders[2].lg:draw({
-					x = x + 2,
+					x = (isPortrait and xLeft) or (x + 2),
 					y = yTop + 24;
-					align = 'right',
+					align = (isPortrait and 'left') or 'right',
 					color = 'white',
 				});
 			else
 				this.labels.folder:draw({
-					x = x,
+					x = (isPortrait and (xLeft + this.labels.fxl.w + 8)) or x,
 					y = yTop,
-					align = 'right',
+					align = (isPortrait and 'left') or 'right',
 					color = 'white',
 				});
 
 				this.folders[this.currFolder].lg:draw({
-					x = x + 2,
+					x = (isPortrait and xLeft) or (x + 2),
 					y = yTop + 24;
-					align = 'right',
+					align = (isPortrait and 'left') or 'right',
 					color = (this.state.choosingFolder and 'norm') or 'white',
 				});
 
 				if (this.dropdown.alphaTimer > 0) then
-					this:drawDropdown(dt, yTop + 24 + this.folders[this.currFolder].lg.h + 16);
+					this:drawDropdown(
+						dt,
+						yTop + 24 + this.folders[this.currFolder].lg.h + 16,
+						isPortrait
+					);
 				end
 			end
 		end
@@ -1276,11 +1412,15 @@ local PlayerInfo = {
 		this.window:unscale();
 
 		if (not this.state.hasInfo) then
+			this.window:scale();
+
 			dialogBox:draw({
 				x = this.window.w / 2,
 				y = this.window.h / 2,
 				centered = true,
 			});
+
+			this.window:unscale();
 
 			this.labels.noInfo.heading:draw({
 				x = dialogBox.x.outerLeft,
@@ -1313,17 +1453,29 @@ local PlayerInfo = {
 
 			this:handleChange(dt);
 
-			for i, btn in ipairs(this.btns) do
-				y = y + this:drawBtn(
-					btn,
-					x,
-					y,
-					i == this.currBtn
-				);
-			end
+			if (this.window.isPortrait) then
+				y = y + (this.window.padding.y * 1.5);
 
-			x = x + this.w[1] + (this.window.w / 10);
-			y = (this.window.h / 20) + (this.labels.player.h * 2);
+				for i, btn in ipairs(this.btns) do
+					x = x + this:drawBtn(
+						btn,
+						x,
+						y,
+						i == this.currBtn,
+						this.window.isPortrait
+					);
+				end
+			else
+				for i, btn in ipairs(this.btns) do
+					y = y + this:drawBtn(
+						btn,
+						x,
+						y,
+						i == this.currBtn,
+						this.window.isPortrait
+					);
+				end
+			end
 
 			this:drawInfo(dt);
 		end

@@ -63,32 +63,67 @@ local MiscInfo = {
 
     gfx.Save();
 
-    gfx.Translate(
-      (this.window.w / 20) - 1,
-      this.window.h - (this.window.h / 40) - 14
-    );
+    if (this.window.isPortrait) then
+      gfx.Translate(
+        this.window.padding.x - 1,
+        this.window.padding.y / 3
+      );
 
-    if (this.timer > 0) then
-      this.labels.infoLoaded:draw({ color = 'white' });
+      if (this.timer > 0) then
+        this.labels.infoLoaded:draw({ color = 'white' });
+      else
+        this.labels.loadInfo:draw({});
+      end
+
+      gfx.Translate(w + 2, 0);
+    
+      this.labels.vf:draw({ align = 'right' });
+  
+      this.labels.vfVal:draw({
+        x = -(this.labels.vf.w + 4),
+        align = 'right',
+        color = 'white',
+        text = ('%.3f'):format(VF),
+        update = true,
+      });
+
+      gfx.Translate(
+        -w - 2,
+        -(this.window.padding.y / 3)
+          + this.window.h
+          - (this.window.padding.y / 2)
+          - 12
+      );
+  
+      this.labels.gameplaySettings:draw({});
     else
-      this.labels.loadInfo:draw({});
+      gfx.Translate(
+        this.window.padding.x - 1,
+        this.window.h - (this.window.padding.y / 2) - 14
+      );
+
+      if (this.timer > 0) then
+        this.labels.infoLoaded:draw({ color = 'white' });
+      else
+        this.labels.loadInfo:draw({});
+      end
+  
+      gfx.Translate(w + 2, 0);
+  
+      this.labels.vf:draw({ align = 'right' });
+  
+      this.labels.vfVal:draw({
+        x = -(this.labels.vf.w + 4),
+        align = 'right',
+        color = 'white',
+        text = ('%.3f'):format(VF),
+        update = true,
+      });
+  
+      gfx.Translate((this.window.w / 20) - 4, 0);
+  
+      this.labels.gameplaySettings:draw({});
     end
-
-    gfx.Translate(w + 2, 0);
-
-    this.labels.vf:draw({ align = 'right' });
-
-    this.labels.vfVal:draw({
-      x = -(this.labels.vf.w + 4),
-      align = 'right',
-      color = 'white',
-      text = ('%.3f'):format(VF),
-      update = true,
-    });
-
-    gfx.Translate((this.window.w / 20) - 4, 0);
-
-    this.labels.gameplaySettings:draw({});
 
     gfx.Restore();
   end,

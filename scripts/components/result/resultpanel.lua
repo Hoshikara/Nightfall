@@ -113,27 +113,49 @@ local ResultPanel = {
   ---@param this ResultPanel
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.jacketSize = (this.window.w / 7.5) + 2;
+      if (this.window.isPortrait) then
+        this.jacketSize = (this.window.w / 4) - 12;
 
-      this.w = this.window.w / (1920 / this.panel.w);
-      this.h = this.window.h - (this.window.padding.y * 2);
+        this.w = this.window.w - (this.window.padding.x * 2);
+        this.h = (this.window.h / 1.75) - (this.window.padding.y * 3);
 
-      this.x.panel = (this.window.w / 2) - (this.w / 2);
-      this.y.panel = this.window.padding.y;
-
-      if ((not this.state.sp) or (#this.state.scores > 0)) then
         this.x.panel = this.window.padding.x;
-      end
+        this.y.panel = this.window.padding.y;
 
-      this.state.getRegion = function()
-        return (this.x.panel * this.window:getScale()),
-          (this.y.panel * this.window:getScale()),
-          (this.w * this.window:getScale()),
-          (this.h * this.window:getScale()); 
-      end
+        this.padding.x = this.w / 40;
+        this.padding.y = this.h / 24;
 
-      this.padding.x = this.w / 30;
-      this.padding.y = this.h / 24;
+        this.state.getRegion = function()
+          local y = this.window.h - this.h - this.window.padding.y;
+
+          return (this.x.panel * this.window:getScale()),
+            (y * this.window:getScale()),
+            (this.w * this.window:getScale()),
+            (this.h * this.window:getScale());
+        end
+      else
+        this.jacketSize = (this.window.w / 7.5) + 2;
+
+        this.w = this.window.w / (1920 / this.panel.w);
+        this.h = this.window.h - (this.window.padding.y * 2);
+
+        this.x.panel = (this.window.w / 2) - (this.w / 2);
+        this.y.panel = this.window.padding.y;
+
+        if ((not this.state.sp) or (#this.state.scores > 0)) then
+          this.x.panel = this.window.padding.x;
+        end
+
+        this.padding.x = this.w / 30;
+        this.padding.y = this.h / 24;
+
+        this.state.getRegion = function()
+          return (this.x.panel * this.window:getScale()),
+            (this.y.panel * this.window:getScale()),
+            (this.w * this.window:getScale()),
+            (this.h * this.window:getScale());
+        end
+      end
 
       this.maxWidth = this.w - (this.padding.x * 2) - (this.padding.x * 1.75) - 4;
 
@@ -154,6 +176,10 @@ local ResultPanel = {
   setGraphSizes = function(this, y)
     if (not this.setGraph) then return; end
 
+    -- if (this.window.isPortrait and (#this.state.scores == 0)) then
+    --   y = y + (this.h / 2) ;
+    -- end
+
     this.graphs.x = this.x.panel + (this.padding.x * 2);
 
     this.graphs.y.t = y;
@@ -164,6 +190,13 @@ local ResultPanel = {
     this.graphs.w.b = this.maxWidth;
     this.graphs.h.b = this.graphs.h.t + (this.padding.y * 2.25);
 
+    if (this.window.isPortrait) then
+      this.graphs.h.t = ((this.h - y) / 2) - (this.padding.y * 1.75);
+
+      this.graphs.y.b = y + this.graphs.h.t + (this.padding.y * 1.5);
+      this.graphs.h.b = this.graphs.h.t + (this.padding.y * 2);
+    end
+
     this.setGraph = false;
   end,
 
@@ -171,8 +204,12 @@ local ResultPanel = {
   ---@param this ResultPanel
   ---@param dt deltaTime
   drawSongInfo = function(this, dt)
-    local maxWidth = this.maxWidth - (this.jacketSize + this.padding.x);
+    local padX = this.padding.x;
+    local padY = this.padding.y;
+    local scale = (this.window.isPortrait and 1.4) or 1.05;
+    local size = this.jacketSize;
     local song = this.state.song;
+    local maxWidth = this.maxWidth - (size + padX);
     local x = this.x.text[1];
     local y = this.padding.y - 5;
 
@@ -181,41 +218,41 @@ local ResultPanel = {
     gfx.Translate(this.x.panel, this.y.panel);
 
     drawRect({
-      x = this.padding.x * 2,
-      y = this.padding.y,
-      w = this.jacketSize,
-      h = this.jacketSize,
+      x = padX * 2,
+      y = padY,
+      w = size,
+      h = size,
       image = song.jacket,
       stroke = { color = 'norm', size = 1.5 },
     });
 
     drawRect({
-      x = (this.padding.x * 2) + 0.75,
-      y = this.padding.y + (this.jacketSize * 0.75),
-      w = this.jacketSize - 1.5,
-      h = this.jacketSize * 0.25,
+      x = (padX * 2) + 0.75,
+      y = padY + (size * 0.75),
+      w = size - 1.5,
+      h = size * 0.25,
       alpha = 230,
       color = 'black',
     });
 
     this.labels.difficulty:draw({
-      x = (this.padding.x * 2) + 10,
-      y = this.padding.y
-        + this.jacketSize
+      x = (padX * 2) + 10,
+      y = padY
+        + size
         - song.difficulty.h
         - 12
         - (this.labels.difficulty.h * 1.35),
     });
 
     song.difficulty:draw({
-      x = (this.padding.x * 2) + 10,
-      y = this.padding.y + this.jacketSize - song.difficulty.h - 12,
+      x = (padX * 2) + 10,
+      y = padY + size - song.difficulty.h - 12,
       color = 'white',
     });
 
     song.level:draw({
-      x = (this.padding.x * 2) + 10 + song.difficulty.w + 16,
-      y = this.padding.y + this.jacketSize - song.difficulty.h - 12,
+      x = (padX * 2) + 10 + song.difficulty.w + 16,
+      y = padY + size - song.difficulty.h - 12,
       color = 'white',
     });
 
@@ -224,12 +261,12 @@ local ResultPanel = {
 
       if (name == 'bpm') then
         this.labels.timestamp:draw({
-          x = x + (this.padding.x * 4.5),
+          x = x + ((padX * 4.5) * scale),
           y = y,
         });
 
         this.labels.name:draw({
-          x = x + (this.padding.x * 9.25),
+          x = x + ((padX * 9.25) * scale),
           y = y,
         });
       end
@@ -257,13 +294,13 @@ local ResultPanel = {
 
       if (name == 'bpm') then
         song.timestamp:draw({
-          x = x + (this.padding.x * 4.5),
+          x = x + ((padX * 4.5) * scale),
           y = y,
           color = 'white',
         });
 
         song.name:draw({
-          x = x + (this.padding.x * 9.25),
+          x = x + ((padX * 9.25) * scale),
           y = y,
           color = 'white',
         });
@@ -306,7 +343,11 @@ local ResultPanel = {
       end
     end
 
-    x = this.w - (this.padding.x * 7.5);
+    if (this.window.isPortrait) then
+      x = this.w - (this.padding.x * 11);
+    else
+      x = this.w - (this.padding.x * 7.5);
+    end
 
     this.labels.grade:draw({ x = x, y = y });
 
@@ -390,7 +431,7 @@ local ResultPanel = {
   -- Renders the current component
   ---@param this ResultPanel
   ---@param dt deltaTime
-  ---@return number
+  ---@return number w, number h
   render = function(this, dt)
     this:setSizes();
 
@@ -401,7 +442,7 @@ local ResultPanel = {
       y = this.y.panel,
       w = this.w,
       h = this.h,
-      alpha = 0.5,
+      alpha = 0.75,
     });
 
     this:drawSongInfo(dt);
@@ -410,18 +451,29 @@ local ResultPanel = {
 
     this.graphs:render();
 
-    y = this.window.h - (this.window.padding.y) + this.labels.collections.h - 6;
+    if (this.window.isPortrait) then
+      y = this.y.panel - (this.window.padding.y / 1.5);
 
-    this.labels.collections:draw({ x = this.x.panel - 2, y = y });
-    this.labels.screenshot:draw({
-      x = this.x.panel + this.w,
-      y = y,
-      align = 'right',
-    });
+      this.labels.collections:draw({ x = this.x.panel - 2, y = y });
+      this.labels.screenshot:draw({
+        x = this.x.panel + this.w,
+        y = y,
+        align = 'right',
+      });
+    else
+      y = this.window.h - (this.window.padding.y) + this.labels.collections.h - 6;
+
+      this.labels.collections:draw({ x = this.x.panel - 2, y = y });
+      this.labels.screenshot:draw({
+        x = this.x.panel + this.w,
+        y = y,
+        align = 'right',
+      });
+    end
 
     gfx.Restore();
 
-    return this.w;
+    return this.w, this.h;
   end,
 };
 

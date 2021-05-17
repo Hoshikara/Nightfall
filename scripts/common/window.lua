@@ -49,8 +49,13 @@ local Window = {
       this.h = this.w * (resY / resX);
       this.sFactor = resX / this.w;
 
-      this.padding.x = this.w / 20;
-      this.padding.y = this.h / 20;
+      if (this.isPortrait) then
+        this.padding.x = this.w / 18;
+        this.padding.y = this.h / 32;
+      else
+        this.padding.x = this.w / 20;
+        this.padding.y = this.h / 20;
+      end
 
       if (this.move) then
         if (this.sFactor > (resY / this.h)) then

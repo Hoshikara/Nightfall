@@ -74,11 +74,11 @@ local drawCurrSort = function(isSorting)
 	local x = grid.field.x[3];
 	local y = grid.field.y;
 
-	labels.fxr:draw({ x = x, y = (window.h / 20) - 3 });
+	labels.fxr:draw({ x = x, y = grid.label.y });
 
 	labels.sort:draw({
 		x = x + labels.fxr.w + 8,
-		y = (window.h / 20) - 2,
+		y = grid.label.y,
 		color = 'white',
 	});
 

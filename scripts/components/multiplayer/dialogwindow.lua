@@ -162,7 +162,7 @@ local DialogWindow = {
 
 		gfx.ForceRender();
 
-		this.dialogBox:setSizes(this.window.w, this.window.h);
+		this.dialogBox:setSizes(this.window.w, this.window.h, this.window.isPortrait);
 
 		gfx.Save();
 

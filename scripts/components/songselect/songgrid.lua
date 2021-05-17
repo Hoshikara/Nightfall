@@ -119,22 +119,23 @@ local SongGrid = {
   drawJacket = function(this, y, col, diff, isCurr)
     local alpha = (isCurr and 1) or 0.5;
     local fullAlpha = 255 * min(alpha * 1.5, 1);
-    local x = (this.grid.jacketSize + this.grid.margin) * col;
+    local size = this.grid.jacketSize;
+    local x = (size + this.grid.margin) * col;
 
     if (diff) then
       drawRect({
         x = x,
         y = y,
-        w = this.grid.jacketSize,
-        h = this.grid.jacketSize,
+        w = size,
+        h = size,
         color = 'black',
       });
 
       drawRect({
         x = x,
         y = y,
-        w = this.grid.jacketSize,
-        h = this.grid.jacketSize,
+        w = size,
+        h = size,
         alpha = alpha,
         image = diff.jacket,
         stroke = {
@@ -146,33 +147,60 @@ local SongGrid = {
       if (diff.best) then
         local labels = diff.best.labels.small;
 
-        drawRect({
-          x = x + 8,
-          y = y + 8,
-          w = 98,
-          h = 32,
-          alpha = fullAlpha,
-          color = 'dark',
-        });
+        if (this.window.isPortrait) then
+          labels = diff.best.labels.large;
 
-        labels.best:draw({
-          x = x + 16,
-          y = y + 12,
-          alpha = 255 * alpha,
-          color = 'white',
-        });
+          drawRect({
+            x = x + 12,
+            y = y + 12,
+            w = 141,
+            h = 42,
+            alpha = fullAlpha,
+            color = 'dark',
+          });
+  
+          labels.best:draw({
+            x = x + 20,
+            y = y + 15,
+            alpha = 255 * alpha,
+            color = 'white',
+          });
+  
+          labels[diff.best.place]:draw({
+            x = x + 20 + labels.best.w + 12,
+            y = y + 15,
+            alpha = fullAlpha,
+          });
+        else
+          drawRect({
+            x = x + 8,
+            y = y + 8,
+            w = 98,
+            h = 32,
+            alpha = fullAlpha,
+            color = 'dark',
+          });
+  
+          labels.best:draw({
+            x = x + 16,
+            y = y + 12,
+            alpha = 255 * alpha,
+            color = 'white',
+          });
+  
+          labels[diff.best.place]:draw({
+            x = x + 16 + labels.best.w + 8,
+            y = y + 12,
+            alpha = fullAlpha,
+          });
+        end
 
-        labels[diff.best.place]:draw({
-          x = x + 16 + labels.best.w + 8,
-          y = y + 12,
-          alpha = fullAlpha,
-        });
       end
 
       if (diff.grade) then
         drawRect({
-          x = x + this.grid.jacketSize - 8 - this.grid.grade.w,
-          y = y + this.grid.jacketSize - 8 - this.grid.grade.h,
+          x = x + size - 8 - this.grid.grade.w,
+          y = y + size - 8 - this.grid.grade.h,
           w = this.grid.grade.w,
           h = this.grid.grade.h,
           alpha = fullAlpha,
@@ -180,15 +208,15 @@ local SongGrid = {
         });
 
         this.labels.grade:draw({
-          x = x + this.grid.jacketSize - this.grid.grade.w,
-          y = y + this.grid.jacketSize - 4 - this.grid.grade.h,
+          x = x + size - this.grid.grade.w,
+          y = y + size - 4 - this.grid.grade.h,
           alpha = fullAlpha,
         });
 
         diff.grade:draw({
-          x = x + this.grid.jacketSize - this.grid.grade.w,
+          x = x + size - this.grid.grade.w,
           y = y
-            + this.grid.jacketSize
+            + size
             - 4
             - this.grid.grade.h
             + this.labels.grade.h,
@@ -198,7 +226,7 @@ local SongGrid = {
       end
     end
 
-    if (col == 2) then return this.grid.jacketSize + this.grid.margin; end
+    if (col == 2) then return size + this.grid.margin; end
       
     return 0;
   end,
@@ -208,10 +236,17 @@ local SongGrid = {
   drawAmounts = function(this)
     gfx.Save();
 
-    gfx.Translate(
-      this.window.w - (this.window.w / 40) + 16,
-      this.window.h - (this.window.h / 40) - 12
-    );
+    if (this.window.isPortrait) then
+      gfx.Translate(
+        this.window.w - (this.window.padding.x / 2) + 20,
+        this.window.h - (this.window.padding.y / 2) - 10
+      );
+    else
+      gfx.Translate(
+        this.window.w - (this.window.padding.x / 2) + 16,
+        this.window.h - (this.window.padding.y / 2) - 12
+      );
+    end
 
     this.labels.currSong:draw({
       x = -(this.labels.of.w + (this.labels.totalSongs.w * 2) + 24),
@@ -247,7 +282,10 @@ local SongGrid = {
     gfx.Save();
 
     if (songCount > 0) then
-      this.list:handleChange(dt, { watch = this.state.currSong });
+      this.list:handleChange(dt, {
+        isPortrait = this.window.isPortrait,
+        watch = this.state.currSong
+      });
 
       this:drawGrid();
 

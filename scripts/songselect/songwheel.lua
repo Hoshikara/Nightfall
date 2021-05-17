@@ -16,6 +16,7 @@ local SongPanel = require('components/songselect/songpanel');
 local window = Window:new();
 
 local bg = Image:new('bg.png');
+local bgPortrait = Image:new('bg_p.png');
 
 local VF = 0;
 
@@ -51,7 +52,7 @@ local songGrid = SongGrid:new(window, state, songCache);
 local songPanel = SongPanel:new(window, state, songCache);
 
 -- Parses player stats to display on `Player Info` page
-local makeStats = function()
+local makeStats = function(showNotif)
 	local folders = (JSONTable:new('folders')):get();
 	local player = JSONTable:new('player');
 
@@ -64,7 +65,7 @@ local makeStats = function()
 
 			game.SetSkinSetting('_loadInfo', 'TRUE');
 
-			state.infoLoaded = true;
+			if (showNotif) then state.infoLoaded = true; end
 		end
 	end
 end
@@ -88,7 +89,13 @@ render = function(dt)
 	end
 
 	if ((not state.infoLoaded) and pressed('BTA') and menusClosed()) then
+		makeStats(true);
+	end
+
+	if (getSetting('_reloadInfo', 'FALSE') == 'TRUE') then
 		makeStats();
+
+		game.SetSkinSetting('_reloadInfo', 'FALSE');
 	end
 
 	state:watch();
@@ -97,11 +104,16 @@ render = function(dt)
 
 	gfx.Save();
 
-	bg:draw({ w = window.w, h = window.h });	
+	if (window.isPortrait) then
+		bgPortrait:draw({ w = window.w, h = window.h });
+	else
+		bg:draw({ w = window.w, h = window.h });
+	end
+
+	songGrid:render(dt);
 
 	local w = songPanel:render(dt);
-	
-	songGrid:render(dt);
+
 	miscInfo:render(dt, w, VF);
 
 	gfx.Restore();

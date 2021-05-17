@@ -107,15 +107,30 @@ local ScoreList = {
   -- Sets the sizes for the current component
   ---@param this ScoreList
   ---@param w number
-  setSizes = function(this, w)
+  ---@param h number
+  setSizes = function(this, w, h)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.x = (this.window.w / 20) + w + (this.window.w / 40);
-      this.y = this.window.h / 20;
+      if (this.window.isPortrait) then
+        this.x = this.window.padding.x;
+        this.y = (this.window.padding.y * 2) + h;
 
-      this.w = this.window.w - (this.window.w / 10) - w - (this.window.w / 40);
-      this.h.list = this.window.h - (this.window.h / 10);
-      this.h.closed = this.window.h // 7;
-      this.h.open = this.h.closed * 2.125;
+        this.w = this.window.w - (this.window.padding.x * 2);
+        this.h.list = this.window.h - h - (this.window.padding.y * 3);
+        this.h.closed = this.window.h // 12;
+        this.h.open = this.h.closed * 2.125;
+
+        this.max = 3;
+      else
+        this.x = (this.window.w / 20) + w + (this.window.w / 40);
+        this.y = this.window.h / 20;
+
+        this.w = this.window.w - (this.window.w / 10) - w - (this.window.w / 40);
+        this.h.list = this.window.h - (this.window.h / 10);
+        this.h.closed = this.window.h // 7;
+        this.h.open = this.h.closed * 2.125;
+
+        this.max = 4;
+      end
 
       local remaining = this.h.list
         - ((this.h.closed) * (this.max - 1))
@@ -187,7 +202,7 @@ local ScoreList = {
         y = yTemp,
         w = this.w,
         h = h,
-        alpha = 120,
+        alpha = 180,
         color = 'dark',
       });
 
@@ -203,7 +218,7 @@ local ScoreList = {
       if (isCurr) then
         y = y + (this.labels.score.h * 0.75);
       else
-        x = score.score.w + 96;
+        x = score.score.w + ((this.window.isPortrait and 120) or 96);
 
         this.labels.clear:draw({ x = x, y = y });
 
@@ -347,10 +362,17 @@ local ScoreList = {
   drawAmounts = function(this)
     gfx.Save();
 
-    gfx.Translate(
-      this.window.w - (this.window.w / 40) + 16,
-      this.window.h - (this.window.h / 40) - 12
-    );
+    if (this.window.isPortrait) then
+      gfx.Translate(
+        this.window.w - (this.window.padding.x / 2) + 20,
+        this.window.h - (this.window.padding.y / 2) - 10
+      );
+    else
+      gfx.Translate(
+        this.window.w - (this.window.padding.x / 2) + 16,
+        this.window.h - (this.window.padding.y / 2) - 12
+      );
+    end
 
     this.labels.currScore:draw({
       x = -(this.labels.of.w + (this.labels.totalScores.w * 2) + 24),
@@ -407,8 +429,9 @@ local ScoreList = {
   ---@param this ScoreList
   ---@param dt deltaTime
   ---@param w number
-  render = function(this, dt, w)
-    this:setSizes(w);
+  ---@param h number
+  render = function(this, dt, w, h)
+    this:setSizes(w, h);
     
     this:handleChange(dt);
 
@@ -431,10 +454,17 @@ local ScoreList = {
       });
     end
 
-    this.labels.select:draw({
-      x = this.x,
-      y = this.window.h - (this.window.h / 20) + this.labels.select.h - 6,
-    });
+    if (this.window.isPortrait) then
+      this.labels.select:draw({
+        x = this.x,
+        y = this.window.h - (this.window.padding.y) + this.labels.select.h - 3,
+      });
+    else
+      this.labels.select:draw({
+        x = this.x,
+        y = this.window.h - (this.window.h / 20) + this.labels.select.h - 6,
+      });
+    end
 
     gfx.Restore();
   end,

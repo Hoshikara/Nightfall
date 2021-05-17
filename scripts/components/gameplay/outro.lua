@@ -57,6 +57,8 @@ local Outro = {
 
     local label = this.clearStates[clearState];
     local smoothing = smoothstep(this.timers.expand);
+    local y = (this.window.isPortrait and (this.window.h / 2.75))
+      or (this.window.h / 2);
 
     drawRect({
       x = 0,
@@ -76,7 +78,7 @@ local Outro = {
 
     this.cursor:draw({
       x = (this.window.w / 2) - ((label.w / 2) * smoothing),
-      y = (this.window.h / 2) - (label.h / 2) + 10,
+      y = y - (label.h / 2) + 10,
       w = label.w * smoothing,
       h = label.h,
       alpha = 255 * this.timers.expand,
@@ -86,7 +88,7 @@ local Outro = {
 
     label:draw({
       x = this.window.w / 2,
-      y = this.window.h / 2,
+      y = y,
       align = 'middle',
       alpha = 255 * this.alpha,
       color = ((clearState > 1) and 'norm') or 'red',

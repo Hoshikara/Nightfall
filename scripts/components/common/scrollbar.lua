@@ -80,6 +80,7 @@ local Scrollbar = {
   ---@param params table #
   -- ```
   -- {
+  --   color: string|{ r, g, b } = 'dark',
   --   curr: number = 1,
   --   total: number = 1,
   -- }
@@ -98,7 +99,7 @@ local Scrollbar = {
       y = this.y.track,
       w = this.w,
       h = this.h.track,
-      alpha = 120 * (params.alphaMod or 1),
+      alpha = 180 * (params.alphaMod or 1),
       color = params.color or 'dark',
       fast = true,
     });

@@ -9,6 +9,7 @@ local Window = require('common/window');
 local window = Window:new(true);
 
 local bg = Image:new('bg.png');
+local bgPortrait = Image:new('bg_p.png');
 
 local ChalHeading = require('components/challengeresult/chalheading');
 local ChalCharts = require('components/challengeresult/chalcharts');
@@ -40,11 +41,15 @@ end
 render = function(dt, scroll)
 	window:set(true);
 
-	bg:draw({ w = window.w, h = window.h });
+	if (window.isPortrait) then
+		bgPortrait:draw({ w = window.w, h = window.h });
+	else
+		bg:draw({ w = window.w, h = window.h });
+	end
 
-	chalHeading:render(dt);
+	local h = chalHeading:render(dt);
 
-	chalCharts:render(dt);
+	chalCharts:render(dt, h);
 
 	screenshot:render(dt);
 end

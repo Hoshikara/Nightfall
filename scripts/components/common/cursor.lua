@@ -99,7 +99,7 @@ local Cursor =  {
     local y = params.y or (this.y.base + this.y.offset);
     local w = params.w or this.w;
     local h = params.h or this.h;
-    local size = this.size * 0.95;
+    local size = params.size or this.size * 0.95;
     local gap = size / (size * 1.05);
   
     gfx.BeginPath();

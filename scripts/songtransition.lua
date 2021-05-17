@@ -11,6 +11,7 @@ local floor = math.floor;
 local alpha = 0;
 
 local bg = Image:new('bg.png');
+local bgPortrait = Image:new('bg_p.png');
 
 local introDone = false;
 local outroDone = false;
@@ -48,11 +49,17 @@ local drawTransition = function(dt, isIntro);
 
 	window:set(true);
 
+	local maxWidth = window.w - (window.padding.x * 2);
+
 	if (isIntro) then
-		timers.fade = to0(timers.fade, dt, 0.67);
+		timers.fade = to0(timers.fade, dt, (window.isPortrait and 0.4) or 0.67);
 		timers.flicker.i = timers.flicker.i + dt;
 		timers.i = timers.i + dt;
-		timers.scissor.i = to1(timers.scissor.i, dt, 0.25);
+		timers.scissor.i = to1(
+			timers.scissor.i,
+			dt,
+			(window.isPortrait and 0.15) or 0.25
+		);
 
 		alpha = floor(timers.flicker.i * 30) % 2;
 		alpha = ((alpha * 80) + 175) / 255;
@@ -61,10 +68,12 @@ local drawTransition = function(dt, isIntro);
 
 		introDone = timers.i >= 1;
 	else
+		local duration = (window.isPortrait and 0.2) or 0.33;
+
 		timers.flicker.o = timers.flicker.o + dt;
 		timers.o = timers.o + (dt * 2);
-		timers.scissor.o.l = to0(timers.scissor.o.l, dt, 0.33);
-		timers.scissor.o.r = to1(timers.scissor.o.r, dt, 0.33);
+		timers.scissor.o.l = to0(timers.scissor.o.l, dt, duration);
+		timers.scissor.o.r = to1(timers.scissor.o.r, dt, duration);
 
 		alpha = floor(timers.flicker.o * 36) % 2;
 		alpha = ((alpha * 80) + 175) / 255;
@@ -86,11 +95,19 @@ local drawTransition = function(dt, isIntro);
 
 		gfx.Translate(-(window.w / 2), 0);
 
-		bg:draw({
-			x = window.w / 2,
-			y = window.h / 2,
-			centered = true,
-		});
+		if (window.isPortrait) then
+			bgPortrait:draw({
+				x = window.w / 2,
+				y = window.h / 2,
+				centered = true,
+			});
+		else
+			bg:draw({
+				x = window.w / 2,
+				y = window.h / 2,
+				centered = true,
+			});
+		end
 
 		drawRect({
 			w = window.w,
@@ -108,11 +125,19 @@ local drawTransition = function(dt, isIntro);
 			window.h
 		);
 
-		bg:draw({
-			x = window.w / 2,
-			y = window.h / 2,
-			centered = true,
-		});
+		if (window.isPortrait) then
+			bgPortrait:draw({
+				x = window.w / 2,
+				y = window.h / 2,
+				centered = true,
+			});
+		else
+			bg:draw({
+				x = window.w / 2,
+				y = window.h / 2,
+				centered = true,
+			});
+		end
 
 		gfx.ResetScissor();
 
@@ -123,11 +148,19 @@ local drawTransition = function(dt, isIntro);
 			window.h
 		);
 
-		bg:draw({
-			x = window.w / 2,
-			y = window.h / 2,
-			centered = true,
-		});
+		if (window.isPortrait) then
+			bgPortrait:draw({
+				x = window.w / 2,
+				y = window.h / 2,
+				centered = true,
+			});
+		else
+			bg:draw({
+				x = window.w / 2,
+				y = window.h / 2,
+				centered = true,
+			});
+		end
 
 		gfx.ResetScissor();
 	end
@@ -163,6 +196,7 @@ local drawTransition = function(dt, isIntro);
 			align = 'center',
 			alpha = 255 * alpha,
 			color = 'white',
+			maxWidth = maxWidth,
 		});
 
 		labels.artist:draw({
@@ -170,6 +204,7 @@ local drawTransition = function(dt, isIntro);
 			y = 255 + labels.title.h * 1.75,
 			align = 'center',
 			alpha = 255 * alpha,
+			maxWidth = maxWidth,
 		});
 	end
 

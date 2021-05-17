@@ -63,7 +63,7 @@ local dialogWindow = {
 
 	setSizes = function(this)
 		if ((this.cache.w ~= window.w) or (this.cache.h ~= window.h)) then
-			dialogBox:setSizes(window.w, window.h);
+			dialogBox:setSizes(window.w, window.h, window.isPortrait);
 
 			this.button.maxWidth = dialogBox.images.btn.w - 64;
 			this.button.x = dialogBox.x.middleRight - dialogBox.images.btn.w + 36;

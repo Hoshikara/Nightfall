@@ -3,6 +3,7 @@ local Window = require('common/window');
 local window = Window:new();
 
 local bg = Image:new('bg.png');
+local bgPortrait = Image:new('bg_p.png');
 
 local introDone = false;
 local outroDone = false;
@@ -23,14 +24,17 @@ local drawTransition = function(dt, isIntro);
 	window:set(true);
 
 	if (isIntro) then
-		timers.fade = to0(timers.fade, dt, 0.67);
-		timers.scissor.i = to1(timers.scissor.i, dt, 0.25); 
+		timers.fade = to0(timers.fade, dt, (window.isPortrait and 0.4) or 0.67);
+		timers.scissor.i =
+			to1(timers.scissor.i, dt, (window.isPortrait and 0.15) or 0.25); 
 		timers.i = timers.i + dt;
 
 		introDone = timers.i >= 1;
 	else
-		timers.scissor.o.l = to0(timers.scissor.o.l, dt, 0.33);
-		timers.scissor.o.r = to1(timers.scissor.o.r, dt, 0.33);
+		local duration = (window.isPortrait and 0.2) or 0.33;
+
+		timers.scissor.o.l = to0(timers.scissor.o.l, dt, duration);
+		timers.scissor.o.r = to1(timers.scissor.o.r, dt, duration);
 		timers.o = timers.o + (dt * 2);
 		
 		outroDone = timers.o >= 1;
@@ -48,11 +52,19 @@ local drawTransition = function(dt, isIntro);
 
 		gfx.Translate(-(window.w / 2), 0);
 
-		bg:draw({
-			x = window.w / 2,
-			y = window.h / 2,
-			centered = true;
-		});
+		if (window.isPortrait) then
+			bgPortrait:draw({
+				x = window.w / 2,
+				y = window.h / 2,
+				centered = true;
+			});
+		else
+			bg:draw({
+				x = window.w / 2,
+				y = window.h / 2,
+				centered = true;
+			});
+		end
 
 		drawRect({
 			w = window.w,
@@ -70,11 +82,19 @@ local drawTransition = function(dt, isIntro);
 			window.h
 		);
 
-		bg:draw({
-			x = window.w / 2,
-			y = window.h / 2,
-			centered = true;
-		});
+		if (window.isPortrait) then
+			bgPortrait:draw({
+				x = window.w / 2,
+				y = window.h / 2,
+				centered = true;
+			});
+		else
+			bg:draw({
+				x = window.w / 2,
+				y = window.h / 2,
+				centered = true;
+			});
+		end
 
 		gfx.ResetScissor();
 
@@ -85,11 +105,19 @@ local drawTransition = function(dt, isIntro);
 			window.h
 		);
 
-		bg:draw({
-			x = window.w / 2,
-			y = window.h / 2,
-			centered = true;
-		});
+		if (window.isPortrait) then
+			bgPortrait:draw({
+				x = window.w / 2,
+				y = window.h / 2,
+				centered = true;
+			});
+		else
+			bg:draw({
+				x = window.w / 2,
+				y = window.h / 2,
+				centered = true;
+			});
+		end
 
 		gfx.ResetScissor();
 	end

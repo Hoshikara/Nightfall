@@ -45,20 +45,37 @@ local Earlate = {
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
       this.x = this.window.w / 2;
 
-      if (earlatePos == 'BOTTOM') then
-        this.y = this.window.h - (this.window.h / 3.35);
-      elseif (earlatePos == 'MIDDLE') then
-        this.y = this.window.h - (this.window.h / 1.85);
-      elseif (earlatePos == 'UPPER') then
-        this.y = this.window.h - (this.window.h / 1.35);
-      elseif (earlatePos == 'UPPER+') then
-        this.y = this.window.h - (this.window.h / 1.15);
+      if (this.window.isPortrait) then
+        if (earlatePos == 'BOTTOM') then
+          this.y = this.window.h - (this.window.h / 2.35);
+        elseif (earlatePos == 'MIDDLE') then
+          this.y = this.window.h - (this.window.h / 1.85);
+        elseif (earlatePos == 'UPPER') then
+          this.y = this.window.h - (this.window.h / 1.5);
+        elseif (earlatePos == 'UPPER+') then
+          this.y = this.window.h - (this.window.h / 1.35);
+        end
+      else
+        if (earlatePos == 'BOTTOM') then
+          this.y = this.window.h - (this.window.h / 3.35);
+        elseif (earlatePos == 'MIDDLE') then
+          this.y = this.window.h - (this.window.h / 1.85);
+        elseif (earlatePos == 'UPPER') then
+          this.y = this.window.h - (this.window.h / 1.35);
+        elseif (earlatePos == 'UPPER+') then
+          this.y = this.window.h - (this.window.h / 1.15);
+        end
       end
 
       if (earlateType == 'TEXT + DELTA') then
         this.deltaAlign = 'rightMid';
         this.textAlign = 'leftMid';
-        this.offset = this.window.w / 11;
+
+        if (this.window.isPortrait) then
+          this.offset = this.window.w / 5;
+        else
+          this.offset = this.window.w / 11;
+        end
       end
 
       this.cache.w = this.window.w;

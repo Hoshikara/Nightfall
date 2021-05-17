@@ -66,17 +66,32 @@ local Users = {
   -- Sets the sizes for the current component
   ---@param this Users
   ---@param w number
-  setSizes = function(this, w)
+  setSizes = function(this, w, h)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
       this.x.list = (this.window.w / 10) + w;
-      this.y = this.window.h / 20;
+      this.y = this.window.padding.y;
 
-      local wMax = this.window.w - ((this.window.w / 20) * 3) - w;
-      local hMax = this.window.h - (this.window.h / 10);
+      this.h = this.window.h / 11;
+
+      local wMax = this.window.w - (this.window.padding.x * 3) - w;
+      local hMax = this.window.h - (this.window.padding.y * 2);
       local spacing = wMax / 10;
 
+      if (this.window.isPortrait) then
+        this.x.list = this.window.padding.x;
+        this.y = this.window.padding.y + h + (this.window.padding.y * 1.5);
+
+        wMax = this.window.w - (this.window.padding.x * 2);
+        hMax = this.window.h
+          - (this.window.padding.y * 2)
+          - (this.window.padding.y * 1.5)
+          - h;
+        spacing = wMax / 10;
+
+        this.h = this.window.h / 19.5;
+      end
+
       this.w = wMax;
-      this.h = this.window.h / 11;
 
       this.margin = (hMax - (this.h * 8)) / 7;
 
@@ -149,7 +164,7 @@ local Users = {
       y = y,
       w = this.w,
       h = this.h,
-      alpha = 120,
+      alpha = 180,
       color = 'dark',
     });
 
@@ -277,8 +292,9 @@ local Users = {
   -- Renders the current component
   ---@param this Users
   ---@param w number
-  render = function(this, w)
-    this:setSizes(w);
+  ---@param h number
+  render = function(this, w, h)
+    this:setSizes(w, h);
 
     this:makeUsers();
 

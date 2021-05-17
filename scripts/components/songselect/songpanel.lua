@@ -13,6 +13,8 @@ local Order = {
   'bpm',
 };
 
+local floor = math.floor;
+
 -- Gets the difficulty within range 1-4
 ---@param diffs CachedDiff[]
 ---@param i integer
@@ -26,9 +28,6 @@ local getDiff = function(diffs, i)
 
   return diffs[index];
 end
-
----@type boolean
-local showDensity = getSetting('showDensity', true);
 
 ---@class SongPanelClass
 local SongPanel = {
@@ -45,7 +44,6 @@ local SongPanel = {
     ---@field state SongWheel
     ---@field window Window
     local t = {
-      barWidth = 0,
       cache = { w = 0, h = 0 },
       currDiff = 0,
       currSong = 0,
@@ -61,6 +59,7 @@ local SongPanel = {
         btn = Image:new('buttons/short.png'),
         btnH = Image:new('buttons/short_hover.png'),
         panel = Image:new('common/panel.png'),
+        panelPortrait = Image:new('common/panel_wide.png'),
       },
       innerWidth = 0,
       jacketSize = 0,
@@ -85,6 +84,7 @@ local SongPanel = {
       y = 0,
       w = 0,
       h = 0,
+      count = 0,
     };
 
     for i, diff in ipairs(Difficulties) do
@@ -107,47 +107,86 @@ local SongPanel = {
   ---@param this SongPanel
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.jacketSize = this.window.w / 5;
+      if (this.window.isPortrait) then
+        this.jacketSize = this.window.w // 4.75;
 
-      this.barWidth = this.jacketSize / 100;
+        this.w = this.window.w - (this.window.padding.x * 2);
+        this.h = this.window.h // 2.9;
 
-      game.SetSkinSetting('_graphSize', tostring(this.jacketSize / 4));
+        this.padding.x.full = this.w / 36;
+        this.padding.y.full = this.h / 18;
 
-      this.w = this.window.w / (1920 / this.images.panel.w);
-      this.h = this.window.h - (this.window.h / 10);
-      this.x = this.window.w / 20;
-      this.y = this.window.h / 20;
+        this.highScore = ScoreNumber:new({ size = 120 });
+      else
+        this.jacketSize = this.window.w // 5;
+
+        this.w = this.window.w / (1920 / this.images.panel.w);
+        this.h = this.window.h - (this.window.padding.y * 2);
+
+        this.padding.x.full = this.w / 24;
+        this.padding.y.full = this.h / 20;
+
+        this.highScore = ScoreNumber:new({ size = 100 });
+      end
+
+      this.x = this.window.padding.x;
+      this.y = this.window.padding.y;
       this.middle = this.w / 2;
 
-      this.padding.x.full = this.w / 20;
       this.padding.x.double = this.padding.x.full * 2;
-
-      this.padding.y.full = this.h / 20;
       this.padding.y.double = this.padding.y.full * 2;
 
-      this.innerWidth = this.w - (this.padding.x.double * 2);
+      if (this.window.isPortrait) then
+        this.innerWidth = this.w
+          - this.jacketSize
+          - this.padding.x.double
+          - (this.padding.x.double * 2);
+      else
+        this.innerWidth = this.w - (this.padding.x.double * 2);
+      end
 
-      this.cursor:setSizes({
-        x = this.x
-          + this.padding.x.double
-          + this.jacketSize
-          + this.padding.x.full
-          + 8,
-        y = this.y
-          + this.padding.y.double
-          + this.labels.difficulty.h
-          - 20,
-        w = this.images.btn.w - 8,
-        h = this.images.btn.h - 8,
-        margin = (this.images.btn.h / 2.5) + 8,
-      });
+      if (this.window.isPortrait) then
+        this.cursor:setSizes({
+          x = this.x + this.padding.x.full + 23,
+          y = this.y
+            + this.jacketSize
+            + this.padding.y.double
+            + this.labels.difficulty.h
+            - 6,
+          w = this.jacketSize + 5,
+          h = this.images.btn.h - 8,
+          margin = (this.images.btn.h / 2.5) + 8,
+        });
 
-      this.searchBar:setSizes({
-        x = this.x,
-        y = this.y / 2,
-        w = this.w,
-        h = this.window.h / 22,
-      });
+        this.searchBar:setSizes({
+          x = this.x - 8,
+          y = this.y + this.h + (this.window.padding.y / 3) + 2,
+          w = this.w + 8,
+          h = this.window.padding.y * 0.8,
+        });
+      else
+        this.cursor:setSizes({
+          x = this.x
+            + this.padding.x.double
+            + this.jacketSize
+            + this.padding.x.full
+            + 16,
+          y = this.y
+            + this.padding.y.double
+            + this.labels.difficulty.h
+            - 20,
+          w = this.images.btn.w - 8,
+          h = this.images.btn.h - 8,
+          margin = (this.images.btn.h / 2.5) + 8,
+        });
+
+        this.searchBar:setSizes({
+          x = this.x - 2,
+          y = this.y / 2,
+          w = this.w + 3,
+          h = this.window.h / 22,
+        });
+      end
 
       this.cache.w = this.window.w;
       this.cache.h = this.window.h;
@@ -174,29 +213,53 @@ local SongPanel = {
     if (diff.best) then
       local labels = diff.best.labels.large;
 
-      drawRect({
-        x = x + 12,
-        y = y + 12,
-        w = 141,
-        h = 42,
-        color = 'dark',
-      });
+      if (this.window.isPortrait) then
+        labels = diff.best.labels.small;
 
-      labels.best:draw({
-        x = x + 20,
-        y = y + 15,
-        color = 'white',
-      });
+        drawRect({
+          x = x + 8,
+          y = y + 8,
+          w = 98,
+          h = 32,
+          color = 'dark',
+        });
 
-      labels[diff.best.place]:draw({
-        x = x + 20 + labels.best.w + 12,
-        y = y + 15,
-      });
+        labels.best:draw({
+          x = x + 16,
+          y = y + 12,
+          color = 'white',
+        });
+  
+        labels[diff.best.place]:draw({
+          x = x + 16 + labels.best.w + 8,
+          y = y + 12,
+        });
+      else
+        drawRect({
+          x = x + 12,
+          y = y + 12,
+          w = 141,
+          h = 42,
+          color = 'dark',
+        });
+
+        labels.best:draw({
+          x = x + 20,
+          y = y + 15,
+          color = 'white',
+        });
+  
+        labels[diff.best.place]:draw({
+          x = x + 20 + labels.best.w + 12,
+          y = y + 15,
+        });
+      end
     end
 
-    if (showDensity and diff.densityData) then
-      local last = #diff.densityData;
-      local scale = (size - 4) / (last - 1);
+    if (getSetting('showDensity', true) and diff.densityData) then
+      this:normalizeDensity(diff);
+
+      local scale = (size - 4) / #diff.densityData;
 
       drawRect({
         x = x + 1,
@@ -217,7 +280,7 @@ local SongPanel = {
         x = x + 5 + this.labels.peak.w + 8,
         y = y + (size * 0.75) - 5,
         color = 'white',
-        text = diff.densityData[last],
+        text = diff.densityPeak,
         update = true,
       });
 
@@ -226,8 +289,6 @@ local SongPanel = {
       gfx.MoveTo(x + 2, y + size - 1);
 
       for i, v in ipairs(diff.densityData) do
-        if (i == last) then break; end
-
         gfx.LineTo((x + 3) + (i * scale), (y + size - 1) - v);
       end
 
@@ -244,8 +305,16 @@ local SongPanel = {
   ---@param cached CachedSong
   ---@param diff CachedDiff
   drawInfo = function(this, dt, cached, diff)
+    local multi = (this.window.isPortrait and 1.9) or 1;
     local x = this.padding.x.double;
+    local xGrade = x + (this.padding.x.full * 4.5);
     local y = (this.padding.y.double * 0.75) + this.jacketSize;
+
+    if (this.window.isPortrait) then
+      x = (this.padding.x.double * 2) + this.jacketSize;
+      xGrade = x + (this.padding.x.full * 7);
+      y = this.padding.y.full - 5;
+    end
 
     ---@param name string
     for _, name in ipairs(Order) do
@@ -274,7 +343,7 @@ local SongPanel = {
 
       y = y
         + (this.labels[name].h * 1.35)
-        + label.h
+        + (label.h * multi)
         + ((this.padding.y.full / 4) * 1.35);
     end
 
@@ -287,23 +356,23 @@ local SongPanel = {
         color = 'white',
       });
 
-      this.labels.clear:draw({ x = x + (this.padding.x.full * 4.5), y = y });
+      this.labels.clear:draw({ x = xGrade, y = y });
 
       diff.clear:draw({
-        x = x + (this.padding.x.full * 4.5),
+        x = xGrade,
         y = y + (this.labels.clear.h * 1.25);
         color = 'white',
       });
 
       y = y
         + (this.labels.clear.h * 1.35)
-        + (diff.clear.h)
+        + (diff.clear.h * multi)
         + ((this.padding.y.full / 4) * 1.35);
 
       this.labels.highScore:draw({ x = x, y = y });
 
       this.highScore:draw({
-        x = x - 4,
+        x = x - ((this.window.isPortrait and 7) or 4),
         y = y + (this.labels.highScore.h * 0.5),
         val = diff.highScore,
       });
@@ -317,15 +386,26 @@ local SongPanel = {
   ---@param isCurr boolean
   ---@return number
   drawDiff = function(this, y, diff, isCurr)
-    local x = this.padding.x.double + this.jacketSize + this.padding.x.full + 4;
+    local x = this.padding.x.double + this.jacketSize + this.padding.x.full + 12;
+    local w = this.images.btn.w;
+
+    if (this.window.isPortrait) then
+      x = this.padding.x.double - 8;
+      w = this.jacketSize + 14;
+    end
 
     if (isCurr) then
-      this.images.btnH:draw({ x = x, y = y });
+      this.images.btnH:draw({
+        x = x,
+        y = y,
+        w = w,
+      });
     else
       this.images.btn:draw({
         x = x,
         y = y,
-        alpha = 0.45,
+        w = w,
+        alpha = 0.6,
       });
     end
 
@@ -333,17 +413,17 @@ local SongPanel = {
       local i = getDiffIndex(diff.jacketPath, diff.diff);
 
       this.diffs[i]:draw({
-        x = x + (this.images.btn.w / 7),
+        x = x + (w / 7),
         y = y + (this.images.btn.h / 2) - 12,
-        alpha = 255 * ((isCurr and 1) or 0.2),
+        alpha = 255 * ((isCurr and 1) or 0.35),
         color = 'white',
       });
 
       diff.level:draw({
-        x = x + this.images.btn.w - (this.images.btn.w / 7),
+        x = x + w - (w / 7),
         y = y + (this.images.btn.h / 2) - 12,
         align = 'right',
-        alpha = 255 * ((isCurr and 1) or 0.2),
+        alpha = 255 * ((isCurr and 1) or 0.35),
         color = 'white',
       });
     end
@@ -356,16 +436,35 @@ local SongPanel = {
   ---@param dt deltaTime
   drawPanel = function(this, dt)
     local song = songwheel.songs[this.state.currSong];
+    local x = this.padding.x.double + this.jacketSize + this.padding.x.full + 15;
     local y = this.padding.y.double + this.labels.difficulty.h - 24;
+    local yLabel = this.padding.y.full - 5;
     local cached, diff;
 
-    this.images.panel:draw({
-      x = this.x,
-      y = this.y,
-      w = this.w,
-      h = this.h,
-      alpha = 0.5,
-    });
+    if (this.window.isPortrait) then
+      x = this.padding.x.double - 3;
+      y = (this.padding.y.full * 2)
+        + this.jacketSize
+        + this.labels.difficulty.h
+        - 10;
+      yLabel = (this.padding.y.full * 2) + this.jacketSize - 24;
+
+      this.images.panelPortrait:draw({
+        x = this.x,
+        y = this.y,
+        w = this.w,
+        h = this.h,
+        alpha = 0.75,
+      });
+    else
+      this.images.panel:draw({
+        x = this.x,
+        y = this.y,
+        w = this.w,
+        h = this.h,
+        alpha = 0.75,
+      });  
+    end
 
     cached = this.songs:get(song);
 
@@ -381,13 +480,7 @@ local SongPanel = {
 
     this:drawInfo(dt, cached, diff);
 
-    this.labels.difficulty:draw({
-      x = this.padding.x.double
-				+ this.jacketSize
-				+ this.padding.x.full
-				+ 7,
-      y = this.padding.y.full - 5,
-    });
+    this.labels.difficulty:draw({ x = x, y = yLabel });
 
     for i = 1, 4 do
       local currDiff = getDiff(cached.diffs, i);
@@ -399,6 +492,56 @@ local SongPanel = {
     end
 
     gfx.Restore();
+  end,
+
+  -- Normalize density graph to a portion of jacket size
+  ---@param this SongPanel
+  ---@param diff CachedDiff
+  normalizeDensity = function(this, diff)
+    if (diff.densityNormalized) then return; end
+
+    -- Backwards compatibility
+    local normalized = false;
+
+    for _, v in ipairs(diff.densityData) do
+      if (v == 96) then normalized = true; break; end
+    end
+
+    if (normalized) then
+      diff.densityPeak = diff.densityData[#diff.densityData];
+
+      if (this.window.isPortrait) then  
+        local scale = (this.jacketSize / 4) / 96;
+
+        for i, v in ipairs(diff.densityData) do
+          diff.densityData[i] = floor(v * scale);
+        end
+      end
+
+      diff.densityNormalized = true;
+      diff.densityData[#diff.densityData] = nil;
+      
+      return;
+    end
+
+    local setMax = false;
+    local max = -1;
+    local scale = 1;
+
+    for _, v in ipairs(diff.densityData) do if (v > max) then max = v; end end
+
+    setMax = max == -1;
+
+    if (max == 0) then max = 1; end
+
+    scale = (this.jacketSize / 4) / max;
+
+    for i, v in ipairs(diff.densityData) do
+      diff.densityData[i] = floor(v * scale);
+    end
+
+    diff.densityNormalized = true;
+    diff.densityPeak = (setMax and 0) or max;
   end,
 
   -- Resets the timers when the song is changed
@@ -449,7 +592,7 @@ local SongPanel = {
 
     gfx.Restore();
 
-    return this.w;
+    return this.w, this.h;
   end,
 };
 

@@ -25,6 +25,9 @@ local critBar = Image:new('gameplay/crit_bar.png');
 
 local critWindow = nil;
 
+local console = Image:new('gameplay/console/console.png');
+local consoleFront = Image:new('gameplay/console/console_front.png');
+
 ---@type boolean
 local deltaFrom0 = getSetting('deltaFrom0', true);
 
@@ -149,7 +152,7 @@ render_crit_base = function(dt)
 
 	gfx.Translate(gameplay.critLine.xOffset * 10, 0);
 
-	local w = (window.w * 0.9) * window:getScale();
+	local w = (window.w * ((window.isPortrait and 1.02) or 0.9)) * window:getScale();
 	local h = 14 * window:getScale();
 
 	drawRect({
@@ -188,6 +191,19 @@ render_crit_overlay = function(dt)
 	laserAnimation:render(dt);
 
 	setupCritTransform();
+
+	if (window.isPortrait) then
+		window:scale();
+
+		consoleFront:draw({
+			x = -(consoleFront.w  / 2),
+			y = consoleFront.h / 2.4,
+		});
+
+		console:draw({ x = -(console.w / 2)	});
+
+		window:unscale();
+	end
 
 	for i = 0, 1 do
 		local curr = gameplay.critLine.cursors[i];
@@ -252,7 +268,11 @@ render = function(dt)
 		userInfo:render();
 	end
 
-	if (gameplay.multiplayer and players) then scoreboard:render(players); end
+	if (gameplay.multiplayer
+		and (not window.isPortrait)
+		and players) then
+			scoreboard:render(players);
+	end
 
 	if (gameplay.practice_setup ~= nil) then
 		practiceInfo:render();

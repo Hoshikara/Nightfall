@@ -56,20 +56,37 @@ return {
 
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.w = this.window.w / 2.4;
-      this.h = this.window.h / 1.8;
+      if (this.window.isPortrait) then
+        this.w = this.window.w * 0.7;
+        this.h = this.window.h * 0.325;
 
-      this.x.panel[1] = 0;
-      this.x.panel[2] = this.window.w - this.w;
+        this.x.panel[1] = 0;
+        this.x.panel[2] = 0;
 
-      this.y.panel[1] = this.window.h / 4.25;
-      this.y.panel[2] = this.window.h / 4.1;
+        this.y.panel[1] = this.window.h / 4;
+        this.y.panel[2] = this.y.panel[1] + this.h + this.window.padding.y;
+
+        this.x.left[1] = this.window.w / 60;
+        this.x.left[2] = this.w - (this.x.left[1] * 4);
+
+        this.x.right = this.x.panel[2] + this.window.w / 60;
+      else
+        this.w = this.window.w / 2.4;
+        this.h = this.window.h / 1.8;
+
+        this.x.panel[1] = 0;
+        this.x.panel[2] = this.window.w - this.w;
+
+        this.y.panel[1] = this.window.h / 4.25;
+        this.y.panel[2] = this.window.h / 4.25;
+
+        this.x.left[1] = this.window.w / 100;
+        this.x.left[2] = this.w - (this.x.left[1] * 4);
+
+        this.x.right = this.x.panel[2] + this.window.w / 100;
+      end
+
       this.y.navigation = this.y.panel[1] + this.h - 48;
-
-      this.x.left[1] = this.window.w / 100;
-      this.x.left[2] = this.w - (this.x.left[1] * 4);
-
-      this.x.right = this.x.panel[2] + this.window.w / 100;
 
       this.cache.w = this.window.w;
       this.cache.h = this.window.h;
@@ -267,12 +284,12 @@ return {
   drawSteps = function(this, timer)
     local alpha = 255 * timer;
     local x = this.x.right;
-    local y = this.y.panel[1] + (this.setup.heading.h * 1.75);
+    local y = this.y.panel[2] + (this.setup.heading.h * 1.75);
 
     drawRect({
       x = this.x.panel[2],
-      y = this.y.panel[1],
-      w = this.w,
+      y = this.y.panel[2],
+      w = this.w * 2,
       h = this.h,
       alpha = 230 * timer,
       color = 'black',
@@ -281,7 +298,7 @@ return {
 
     this.setup.heading:draw({
       x = x - 2,
-      y = this.y.panel[2],
+      y = this.y.panel[2] + ((this.window.isPortrait and 8) or 0),
       alpha = alpha,
     });
 
@@ -296,11 +313,19 @@ return {
       y = y + (step.h * 2);
     end
 
-    this.setup.disable:draw({
-      x = x,
-      y = this.y.navigation,
-      alpha = alpha,
-    });
+    if (this.window.isPortrait) then
+      this.setup.disable:draw({
+        x = x,
+        y = this.y.navigation + this.h + 56,
+        alpha = alpha,
+      });
+    else
+      this.setup.disable:draw({
+        x = x,
+        y = this.y.navigation,
+        alpha = alpha,
+      });
+    end
   end,
 
   handleChange = function(this, dt)

@@ -66,23 +66,47 @@ local Rooms = {
   ---@param this Rooms
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.w = this.window.w / 1.75;
-      this.h.list = this.window.h - (this.window.h / 3);
-      this.h.item = this.h.list // 6.5;
+      if (this.window.isPortrait) then
+        this.max = 10;
+
+        this.y = this.window.h / 10;
+
+        this.w = this.window.w - (this.window.padding.x * 2);
+
+        this.h.list = this.window.h - (this.window.h / 4);
+        this.h.item = this.h.list // 13;
+
+        this.padding = this.h.item // 4;
+
+        local spacing = (this.w - (this.padding * 2)) / 8;
+
+        this.x.text[1] = 0;
+        this.x.text[2] = spacing * 3.75;
+        this.x.text[3] = spacing * 5.25;
+        this.x.text[4] = spacing * 6.75;
+      else
+        this.max = 5;
+
+        this.y = this.window.h / 6;
+
+        this.w = this.window.w / 1.75;
+
+        this.h.list = this.window.h - (this.window.h / 3);
+        this.h.item = this.h.list // 6.5;
+
+        this.padding = this.h.item // 4;
+
+        local spacing = (this.w - (this.padding * 2)) / 8;
+
+        this.x.text[1] = 0;
+        this.x.text[2] = spacing * 4;
+        this.x.text[3] = spacing * 5.5;
+        this.x.text[4] = spacing * 7;
+      end
 
       this.x.list = (this.window.w / 2) - (this.w / 2);
-      this.y = this.window.h / 6;
 
       this.margin = (this.h.list - (this.h.item * this.max)) / (this.max - 1);
-
-      this.padding = this.h.item // 4;
-
-      local spacing = (this.w - (this.padding * 2)) / 8;
-
-      this.x.text[1] = 0;
-      this.x.text[2] = spacing * 4;
-      this.x.text[3] = spacing * 5.5;
-      this.x.text[4] = spacing * 7;
 
       this.cursor:setSizes({
         x = this.x.list,
@@ -158,7 +182,7 @@ local Rooms = {
         y = y,
         w = this.w,
         h = this.h.item,
-        alpha = 120,
+        alpha = 180,
         color = 'dark',
       });
 
@@ -240,8 +264,8 @@ local Rooms = {
     gfx.Save();
 
     this.labels.heading:draw({
-      x = this.window.w / 20,
-      y = this.window.h / 20,
+      x = this.window.padding.x,
+      y = this.window.padding.y,
       color = 'white',
     });
 

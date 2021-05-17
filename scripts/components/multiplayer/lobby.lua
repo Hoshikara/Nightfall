@@ -31,9 +31,9 @@ local Lobby = {
   render = function(this, dt)
     gfx.Save();
 
-    local w = this.panel:render(dt);
+    local w, h = this.panel:render(dt);
 
-    this.users:render(w);
+    this.users:render(w, h);
 
     gfx.Restore();
   end,

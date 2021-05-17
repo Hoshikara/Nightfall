@@ -11,6 +11,7 @@ local Screenshot = require('components/result/screenshot');
 local window = Window:new(true);
 
 local bg = Image:new('bg.png');
+local bgPortrait = Image:new('bg_p.png');
 
 local shotRegion = getSetting('screenshotRegion', 'PANEL');
 local showHardScores = getSetting('showHardScores', false);
@@ -48,6 +49,8 @@ result_set = function()
 		result.highScores = Helpers.filterScores(result.highScores);
 	end
 
+	if (state.sp) then Helpers.reloadInfo(result); end
+
 	if (not state.myScore) then state.myScore = Helpers.formatScore(result); end
 
 	if (state.sp or result.isSelf) then
@@ -74,18 +77,22 @@ end
 render = function(dt)
 	window:set(true);
 
-	bg:draw({ w = window.w, h = window.h });
+	if (window.isPortrait) then
+		bgPortrait:draw({ w = window.w, h = window.h });
+	else
+		bg:draw({ w = window.w, h = window.h });
+	end
 
-	local w = resultPanel:render(dt);
+	local w, h = resultPanel:render(dt);
 
-	if (state.scoreCount > 0) then scoreList:render(dt, w); end
+	if (state.scoreCount > 0) then scoreList:render(dt, w, h); end
 
 	screenshot:render(dt);
 end
 
 -- Called by the game when `F12` is pressed  
 -- Gets the bounding rectangle for a screenshot
----@return integer, integer, integer, integer
+---@return integer x, integer y, integer w, integer h
 get_capture_rect = function()
 	if (shotRegion == 'FULLSCREEN') then return 0, 0, game.GetResolution(); end
 

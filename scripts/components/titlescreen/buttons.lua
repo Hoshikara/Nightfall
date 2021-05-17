@@ -35,7 +35,7 @@ local Buttons = {
 			state = state,
 			window = window,
 			x = {},
-			y = 0,
+			y = {},
 		};
 
 		setmetatable(t, this);
@@ -48,24 +48,51 @@ local Buttons = {
 	---@param this Buttons
 	setSizes = function(this)
 		if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-			local width = this.window.w - (this.window.w / 6);
 			local x = this.window.padding.x + 6;
+			local y = this.window.h - (this.window.h / 3.5);
 
-			this.margin = (width - (this.images.normal.w * #this.btns.mainMenu))
-				/ (#this.btns.mainMenu + 1);
+			if (this.window.isPortrait) then
+				x = this.window.w / 11;
+				y = this.window.h / 2;
+			end
 
 			this.x[1] = x;
-			this.y = this.window.h - (this.window.h / 4);
+			this.y[1] = y;
 
-			for i = 2, 5 do
-				x = x + this.images.normal.w + this.margin;
+			if (this.window.isPortrait) then
+				local height = (this.window.h / 2) - (this.window.padding.y * 2);
 
-				this.x[i] = x;
+				this.margin = (height - (this.images.normal.h * #this.btns.mainMenu))
+					/ (#this.btns.mainMenu + 1);
+
+				for i = 2, 5 do
+					y = y + this.images.normal.h + this.margin;
+
+					this.y[i] = y;
+				end
+
+				this.cursor.type = 'vertical';
+			else
+				local width = this.window.w - (this.window.w / 6);
+
+				this.margin = (width - (this.images.normal.w * #this.btns.mainMenu))
+					/ (#this.btns.mainMenu + 1);
+
+				for i = 2, 5 do
+					x = x + this.images.normal.w + this.margin;
+
+					this.x[i] = x;
+				end
+
+				this.cursor.type = 'horizontal';
 			end
+
+			this.cursor.x.offset = 0;
+			this.cursor.y.offset = 0;
 
 			this.cursor:setSizes({
 				x = this.x[1] + 4,
-				y = this.y + 4,
+				y = this.y[1] + 4,
 				w = this.images.normal.w - 8,
 				h = this.images.normal.h - 8,
 				margin = this.margin + 8,
@@ -156,6 +183,14 @@ local Buttons = {
 	---@param i integer
 	---@param btn Button
 	drawBtn = function(this, i, btn)
+		local x = this.x[i];
+		local y = this.y[1];
+
+		if (this.window.isPortrait) then
+			x = this.x[1];
+			y = this.y[i];
+		end
+
 		local btns = this.btns[this.state.currPage];
 		local isNavigable = this.state.loaded
 			and (not this.state.viewingControls)
@@ -164,8 +199,8 @@ local Buttons = {
 		local isActive = btn.event
 			== (isNavigable and btns[this.state.currBtn].event);
 		local isHovering = this.mouse:clipped(
-			this.x[i],
-			this.y,
+			x,
+			y,
 			this.images.normal.w,
 			this.images.normal.h
 		);
@@ -177,14 +212,14 @@ local Buttons = {
 				isClickable = isHovering,
 			});
 
-			this.images.hover:draw({ x = this.x[i], y = this.y });
+			this.images.hover:draw({ x = x, y = y });
 		else
-			this.images.normal:draw({ x = this.x[i], y = this.y });
+			this.images.normal:draw({ x = x, y = y });
 		end
 
 		btn.label:draw({
-			x = this.x[i] + (this.images.normal.w / 8),
-			y = this.y + (this.images.normal.h / 2) - 12,
+			x = x + (this.images.normal.w / 8),
+			y = y + (this.images.normal.h / 2) - 12,
 			alpha = 255 * ((isActionable and isActive and 1) or 0.2),
 			color = 'white',
 		});

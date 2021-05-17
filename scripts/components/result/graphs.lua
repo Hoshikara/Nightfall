@@ -164,7 +164,7 @@ local Graphs = {
       y = y,
       w = w,
       h = h,
-      alpha = 120,
+      alpha = 180,
       color = 'dark',
     });
 

@@ -1,5 +1,5 @@
 # Nightfall
-### A custom landscape skin for [Unnamed SDVX Clone (USC)](https://github.com/Drewol/unnamed-sdvx-clone).
+### A custom skin for [Unnamed SDVX Clone (USC)](https://github.com/Drewol/unnamed-sdvx-clone).
 
 
 ## [Installation Guide](https://github.com/Hoshikara/Nightfall/wiki/Installation-Guide)

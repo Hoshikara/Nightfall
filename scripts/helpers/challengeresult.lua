@@ -99,13 +99,13 @@ local formatCharts = function(res)
       clear = makeLabel('norm', getClear(chart)),
       completion = makeLabel('num', ('%d%%'):format(chart.percent), 24),
       critical = ScoreNumber:new({
-        digits = 4,
+        digits = 5,
         size = 24,
         val = chart.perfects,
       });
       difficulty = makeLabel('norm', getDiff(chart)),
       error = ScoreNumber:new({
-        digits = 4,
+        digits = 5,
         size = 24,
         val = chart.misses,
       });
@@ -118,12 +118,12 @@ local formatCharts = function(res)
         1000
       ),
       maxChain = ScoreNumber:new({
-        digits = 4,
+        digits = 5,
         size = 24,
         val = chart.maxCombo,
       });
       near = ScoreNumber:new({
-        digits = 4,
+        digits = 5,
         size = 24,
         val = chart.goods,
       });

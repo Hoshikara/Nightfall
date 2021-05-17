@@ -103,7 +103,7 @@ return {
       keyboard = '[F12]',
     },
   },
-  ['GAMEPLAY SETTINGS'] = {
+  ['GAME SETTINGS'] = {
     {
       action = 'CHANGE TABS',
       controller = '[FX-L]  /  [FX-R]',

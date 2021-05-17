@@ -85,14 +85,26 @@ local ChalPanel = {
   ---@param this ChalPanel
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.jacketSize = this.window.w // 17.25;
 
-      this.x = this.window.w / 20;
-      this.y = this.window.h / 20;
-      this.w.panel = this.window.w / (1920 / this.panel.w);
-      this.h = this.window.h - (this.window.h / 10);
+      this.x = this.window.padding.x;
+      this.y = this.window.padding.y;
 
-      this.padding.x.full = this.w.panel / 24;
+      if (this.window.isPortrait) then
+        this.jacketSize = this.window.w // 9.75;
+
+        this.w.panel = this.window.w - (this.window.padding.x * 2);
+        this.h = this.window.h / 2;
+
+        this.padding.x.full = this.w.panel / 36;
+      else
+        this.jacketSize = this.window.w // 17.25;
+
+        this.w.panel = this.window.w / (1920 / this.panel.w);  
+        this.h = this.window.h - (this.window.h / 10);
+
+        this.padding.x.full = this.w.panel / 32;
+      end
+
       this.padding.x.double = this.padding.x.full * 2;
 
       this.padding.y.full = this.h / 24;
@@ -107,12 +119,21 @@ local ChalPanel = {
         h = (this.jacketSize * 3) + (this.padding.y.full * 2), 
       });
 
-      this.searchBar:setSizes({
-        x = this.x,
-        y = this.y / 2,
-        w = this.w.panel,
-        h = this.window.h / 22,
-      });
+      if (this.window.isPortrait) then
+        this.searchBar:setSizes({
+          x = this.x - 8,
+          y = this.y + this.h + (this.window.padding.y / 3) + 2,
+          w = this.w.panel + 8,
+          h = this.window.padding.y * 0.8,
+        });
+      else
+        this.searchBar:setSizes({
+          x = this.x - 2,
+          y = this.y / 2,
+          w = this.w.panel + 3,
+          h = this.window.h / 22,
+        });
+      end
       
       this.cache.w = this.window.w;
       this.cache.h = this.window.h;
@@ -131,7 +152,7 @@ local ChalPanel = {
       y = this.y,
       w = this.w.panel,
       h = this.h,
-      alpha = 0.5
+      alpha = 0.75,
     });
 
     if (not cached) then return; end
@@ -395,7 +416,7 @@ local ChalPanel = {
 
     gfx.Restore();
 
-    return this.w.panel;
+    return this.w.panel, this.h;
   end,
 };
 

@@ -49,14 +49,22 @@ local Grid = {
   ---@param this Grid
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.w = (this.window.w - ((this.window.w / 20) * 3) - this.panel.w);
+      if (this.window.isPortrait) then
+        this.w = this.window.w - (this.window.padding.x * 2);
+        
+        this.x = this.window.padding.x;
+      else
+        this.w = this.window.w - (this.window.padding.x * 3) - this.panel.w;
+
+        this.x = (this.window.w / 10) + this.panel.w;
+      end
+
       this.h = this.w;
 
       this.jacketSize = this.w / 3.3;
       this.margin = (this.w - (this.jacketSize * 3)) / 2;
 
-      this.x = (this.window.w / 10) + this.panel.w;
-      this.y = (this.window.h - (this.window.h / 20)) - this.h;
+      this.y = this.window.h - this.window.padding.y - this.h;
 
       this.grade.w = (this.jacketSize // 2.2);
       this.grade.h = (this.jacketSize // 4);
@@ -68,7 +76,6 @@ local Grid = {
 				+ (this.jacketSize * 1.5)
 				+ this.margin;
       this.field.x[3] = this.field.x[2] + (this.jacketSize * 0.9);
-      this.field.y = (this.window.h / 20) + this.label.h;
 
       this.dropdown.maxWidth = (this.jacketSize * 3)
         + (this.margin * 2)
@@ -77,7 +84,22 @@ local Grid = {
       this.dropdown.x[1] = this.field.x[1];
       this.dropdown.x[2] = this.field.x[2];
       this.dropdown.x[3] = this.field.x[3];
-      this.dropdown.y = this.field.y + (this.label.h * 1.35);
+
+      if (this.window.isPortrait) then
+        if (getSetting('_songSelect', 'FALSE') == 'TRUE') then
+          this.label.y = this.y - (this.window.padding.y * 1.5);
+          this.field.y = this.label.y + this.label.h;
+          this.dropdown.y = this.field.y + (this.label.h * 1.35);
+        else
+          this.label.y = this.y + (this.window.padding.y * 3.5);
+          this.field.y = this.label.y + this.label.h;
+          this.dropdown.y = this.field.y + (this.label.h * 1.35);
+        end
+      else
+        this.field.y = this.window.padding.y + this.label.h;
+        this.label.y = this.window.padding.y - 2;
+        this.dropdown.y = this.field.y + (this.label.h * 1.35);
+      end
 
       this.cache.w = this.window.w;
       this.cache.h = this.window.h;

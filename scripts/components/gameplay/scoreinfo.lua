@@ -35,8 +35,19 @@ local ScoreInfo = {
   ---@param this ScoreInfo
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.x = this.window.w - (this.window.w / 36);
-      this.y = this.window.h / 14;
+      if (this.window.isPortrait) then
+        this.x = this.window.w - (this.window.w / 9) - 5;
+        this.y = this.window.h / 5;
+
+        this.labels.score = makeLabel('norm', 'SCORE', 36);
+        this.val = ScoreNumber:new({ size = 80 });
+      else
+        this.x = this.window.w - (this.window.w / 36);
+        this.y = this.window.h / 14;
+
+        this.labels.score = makeLabel('norm', 'SCORE', 48);
+        this.val = ScoreNumber:new({ size = 100 });
+      end
 
       this.cache.w = this.window.w;
       this.cache.h = this.window.h;
@@ -49,6 +60,15 @@ local ScoreInfo = {
     this:setSizes();
 
     local alpha = this.state.intro.alpha;
+    local xChain = -((this.labels.maxChain.w * 1.25) + 4);
+    local xLabel = -(this.labels.score.w * 1.675) + 2;
+    local xMax = 0;
+
+    if (this.window.isPortrait) then
+      xLabel = -(this.labels.score.w * 1.1);
+      xMax = (this.labels.maxChain.w * 0.45) + 2;
+      xChain = xMax - this.labels.maxChain.w - 56;
+    end
     
     gfx.Save();
 
@@ -58,7 +78,7 @@ local ScoreInfo = {
     );
 
     this.labels.score:draw({
-      x = -(this.labels.score.w * 1.675) + 2,
+      x = xLabel,
       y = -(this.val.h * 0.35) + 4,
       align = 'right',
       alpha = alpha,
@@ -75,13 +95,14 @@ local ScoreInfo = {
     gfx.Translate(-3, this.val.h - 6);
 
     this.labels.maxChain:draw({
+      x = xMax,
       align = 'right',
       alpha = alpha,
       color = 'white',
     });
 
     this.maxChain:draw({
-      x = -((this.labels.maxChain.w * 1.25) + 4),
+      x = xChain,
       align = 'right',
       alpha = alpha,
       val = this.state.maxChain,

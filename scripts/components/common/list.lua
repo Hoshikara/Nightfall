@@ -7,6 +7,7 @@ local List = {
     ---@class List : ListClass
     local t = {
       currPage = 0,
+      isPortrait = nil,
       max = 0,
       offset = 0,
       prev = 0,
@@ -61,6 +62,12 @@ local List = {
   -- ```
   handleChange = function(this, dt, params)
     local duration = params.duration or 0.25;
+
+    if (params.isPortrait ~= this.isPortrait) then
+      this.timer = 0;
+
+      this.isPortrait = params.isPortrait;
+    end
 
     if (this.watching ~= params.watch) then
       local currPage = this:getPage(params.watch);

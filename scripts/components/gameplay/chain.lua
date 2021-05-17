@@ -51,7 +51,11 @@ local Chain = {
       this.x[3] = x + (w * 0.675);
       this.x[4] = x + (w * 2);
       
-      this.y = (this.window.h * 0.95) - (this.window.h / 6);
+      if (this.window.isPortrait) then
+        this.y = this.window.h - (this.window.h / 2.65);
+      else
+        this.y = (this.window.h * 0.95) - (this.window.h / 6);
+      end
 
       this.cache.w = this.window.w;
       this.cache.h = this.window.h;

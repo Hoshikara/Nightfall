@@ -60,6 +60,7 @@ local Panel = {
         btnMed = Image:new('buttons/medium.png'),
         btnMedH = Image:new('buttons/medium_hover.png'),
         panel = Image:new('common/panel.png'),
+        panelPortrait = Image:new('common/panel_wide.png'),
       },
       info = {
         artist = makeLabel('jp', '', 30),
@@ -114,40 +115,73 @@ local Panel = {
   ---@param this Panel
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.jacketSize = this.window.w / 5;
+      if (this.window.isPortrait) then
+        this.jacketSize = this.window.w // 4.75;
 
-      this.w = this.window.w / (1920 / this.images.panel.w);
-      this.h = this.window.h - (this.window.h / 10);
-      this.x = this.window.w / 20;
-      this.y = this.window.h / 20;
+        this.w = this.window.w - (this.window.padding.x * 2);
+        this.h = this.window.h // 2.9;
+
+        this.padding.x.full = this.w / 36;
+        this.padding.y.full = this.h / 18;
+      else
+        this.jacketSize = this.window.w // 5;
+
+        this.w = this.window.w / (1920 / this.images.panel.w);
+        this.h = this.window.h - (this.window.padding.y * 2);
+
+        this.padding.x.full = this.w / 24;
+        this.padding.y.full = this.h / 20;
+      end
+
+      this.x = this.window.padding.x;
+      this.y = this.window.padding.y;
       this.middle = this.w / 2;
 
-      this.padding.x.full = this.w / 20;
       this.padding.x.double = this.padding.x.full * 2;
-
-      this.padding.y.full = this.h / 20;
       this.padding.y.double = this.padding.y.full * 2;
 
       this.innerWidth = this.w - (this.padding.x.double * 2);
 
-      this.btn.x = this.x + this.padding.x.double - 4;
-      this.btn.y[1] = this.y + this.h - (this.padding.y.double * 2.5) + 24;
-      this.btn.y[2] = this.btn.y[1] + (this.images.btn.h * 1.5);
+      if (this.window.isPortrait) then
+        this.btn.x = this.x
+          + this.w
+          - this.padding.x.double
+          - this.images.btnMed.w
+          + 4;
+        this.btn.y[1] = this.y + this.h - (this.padding.y.double * 2.5) - 4;
+        this.btn.y[2] = this.btn.y[1] + (this.images.btn.h * 1.5);
 
-      this.cursor:setSizes({
-        x = this.x
-          + this.padding.x.double
-          + this.jacketSize
-          + this.padding.x.full
-          + 8,
-        y = this.y
-          + this.padding.y.double
-          + this.labels.difficulty.h
-          - 20,
-        w = this.images.btn.w - 8,
-        h = this.images.btn.h - 8,
-        margin = (this.images.btn.h / 2.5) + 8,
-      });
+        this.cursor:setSizes({
+          x = this.x + this.padding.x.full + 23,
+          y = this.y
+            + this.jacketSize
+            + this.padding.y.double
+            + this.labels.difficulty.h
+            - 6,
+          w = this.jacketSize + 5,
+          h = this.images.btn.h - 8,
+          margin = (this.images.btn.h / 2.5) + 8,
+        });
+      else
+        this.btn.x = this.x + this.padding.x.double - 4;
+        this.btn.y[1] = this.y + this.h - (this.padding.y.double * 2.5) + 24;
+        this.btn.y[2] = this.btn.y[1] + (this.images.btn.h * 1.5);
+
+        this.cursor:setSizes({
+          x = this.x
+            + this.padding.x.double
+            + this.jacketSize
+            + this.padding.x.full
+            + 8,
+          y = this.y
+            + this.padding.y.double
+            + this.labels.difficulty.h
+            - 20,
+          w = this.images.btn.w - 8,
+          h = this.images.btn.h - 8,
+          margin = (this.images.btn.h / 2.5) + 8,
+        });
+      end
 
       this.cache.w = this.window.w;
       this.cache.h = this.window.h;
@@ -184,15 +218,26 @@ local Panel = {
   ---@param diff table
   ---@param isCurr boolean
   drawDiff = function(this, y, i, diff, isCurr)
-    local x = this.padding.x.double + this.jacketSize + this.padding.x.full + 4;
+    local x = this.padding.x.double + this.jacketSize + this.padding.x.full + 12;
+    local w = this.images.btn.w;
+
+    if (this.window.isPortrait) then
+      x = this.padding.x.double - 8;
+      w = this.jacketSize + 14;
+    end
 
     if (isCurr) then
-      this.images.btnH:draw({ x = x, y = y });
+      this.images.btnH:draw({
+        x = x,
+        y = y,
+        w = w,
+      });
     else
       this.images.btn:draw({
         x = x,
         y = y,
-        alpha = 0.45,
+        w = w,
+        alpha = 0.6,
       });
     end
 
@@ -200,14 +245,14 @@ local Panel = {
       local j = getDiffIndex(diff.jacketPath, diff.difficulty);
 
       this.diffs[j]:draw({
-        x = x + (this.images.btn.w / 7),
+        x = x + (w / 7),
         y = y + (this.images.btn.h / 2) - 12,
         alpha = 255 * ((isCurr and 1) or 0.2),
         color = 'white',
       });
 
       this.levels[i]:draw({
-        x = x + this.images.btn.w - (this.images.btn.w / 7),
+        x = x + w - (w / 7),
         y = y + (this.images.btn.h / 2) - 12,
         align = 'right',
         alpha = 255 * ((isCurr and 1) or 0.2),
@@ -224,8 +269,14 @@ local Panel = {
   ---@param this Panel
   ---@param dt deltaTime
   drawInfo = function(this, dt)
+    local multi = (this.window.isPortrait and 1.9) or 1;
     local x = this.padding.x.double;
     local y = (this.padding.y.double * 0.75) + this.jacketSize;
+
+    if (this.window.isPortrait) then
+      x = (this.padding.x.double * 2) + this.jacketSize;
+      y = this.padding.y.full - 5;
+    end
 
     for _, name in ipairs(Order) do
       local label = this.info[name];
@@ -258,7 +309,7 @@ local Panel = {
 
       y = y
         + (this.labels[name].h * 1.35)
-        + label.h
+        + (label.h * multi)
         + ((this.padding.y.full / 4) * 1.35);
     end
   end,
@@ -397,8 +448,13 @@ local Panel = {
   ---@param this Panel
   drawToggles = function(this)
     local lobby = this.state.lobby;
+    local offset = (this.window.isPortrait and 230) or 124;
     local x = this.x + 1;
     local y = this.window.h - (this.window.h / 40) - 12;
+
+    if (this.window.isPortrait) then
+      y = this.y + this.h + (this.window.padding.y / 3);
+    end
 
     gfx.Save();
     
@@ -417,7 +473,7 @@ local Panel = {
       color = 'white',
     });
 
-    x = x + 32 + this.labels.hard.w + 124;
+    x = x + 32 + this.labels.hard.w + offset;
 
     this:drawRadio(
       x,
@@ -434,7 +490,7 @@ local Panel = {
       color = 'white',
     });
 
-    x = x + 32 + this.labels.mirror.w + 124;
+    x = x + 32 + this.labels.mirror.w + offset;
 
     this:drawRadio(
       x,
@@ -458,15 +514,34 @@ local Panel = {
   ---@param this Panel
   ---@param dt deltaTime
   drawPanel = function(this, dt)
+    local x = this.padding.x.double + this.jacketSize + this.padding.x.full + 15;
     local y = this.padding.y.double + this.labels.difficulty.h - 24;
+    local yLabel = this.padding.y.full - 5;
 
-    this.images.panel:draw({
-      x = this.x,
-      y = this.y,
-      w = this.w,
-      h = this.h,
-      alpha = 0.5,
-    });
+    if (this.window.isPortrait) then
+      x = this.padding.x.double - 3;
+      y = (this.padding.y.full * 2)
+        + this.jacketSize
+        + this.labels.difficulty.h
+        - 10;
+      yLabel = (this.padding.y.full * 2) + this.jacketSize - 24;
+
+      this.images.panelPortrait:draw({
+        x = this.x,
+        y = this.y,
+        w = this.w,
+        h = this.h,
+        alpha = 0.75,
+      });
+    else
+      this.images.panel:draw({
+        x = this.x,
+        y = this.y,
+        w = this.w,
+        h = this.h,
+        alpha = 0.75,
+      });  
+    end
 
     gfx.Save();
 
@@ -478,11 +553,8 @@ local Panel = {
       this:drawInfo(dt);
 
       this.labels.difficulty:draw({
-        x = this.padding.x.double
-          + this.jacketSize
-          + this.padding.x.full
-          + 7,
-        y = this.padding.y.full - 5,
+        x = x,
+        y = yLabel,
         color = 'norm',
       });
 
@@ -536,7 +608,7 @@ local Panel = {
   -- Renders the current component
   ---@param this Panel
   ---@param dt deltaTime
-  ---@return number
+  ---@return number w, number h
   render = function(this, dt)
     this:setSizes();
 
@@ -554,7 +626,7 @@ local Panel = {
 
     gfx.Restore();
     
-    return this.w;
+    return this.w, this.h;
   end,
 };
 

@@ -65,7 +65,12 @@ local UserInfo = {
       local w = this.diff.large[1].w * 0.85;
 
       this.x.base = this.window.w / 80;
-      this.y.base = this.window.h / 2.375;
+
+      if (this.window.isPortrait) then
+        this.y.base = this.window.h / 2.75;
+      else
+        this.y.base = this.window.h / 2.375;
+      end
 
       if (scoreDiffPos == 'LEFT') then
         this.x.diff = 91;
@@ -74,12 +79,22 @@ local UserInfo = {
         this.x.diff = (this.window.w / 2) - this.x.base;
         this.y.diff = (this.window.h / 2) - this.y.base;
 
-        if (scoreDiffPos == 'TOP') then
-          this.y.diff = this.y.diff - (this.window.h * 0.35);
-        elseif (scoreDiffPos == 'MIDDLE') then
-          this.y.diff = this.y.diff + (this.window.h * 0.165);
-        elseif (scoreDiffPos == 'BOTTOM') then
-          this.y.diff = this.y.diff + (this.window.h * 0.35);
+        if (this.window.isPortrait) then
+          if (scoreDiffPos == 'TOP') then
+            this.y.diff = this.y.diff - (this.window.h * 0.25);
+          elseif (scoreDiffPos == 'MIDDLE') then
+            this.y.diff = this.y.diff + (this.window.h * 0.05);
+          elseif (scoreDiffPos == 'BOTTOM') then
+            this.y.diff = this.y.diff + (this.window.h * 0.165);
+          end
+        else
+          if (scoreDiffPos == 'TOP') then
+            this.y.diff = this.y.diff - (this.window.h * 0.35);
+          elseif (scoreDiffPos == 'MIDDLE') then
+            this.y.diff = this.y.diff + (this.window.h * 0.165);
+          elseif (scoreDiffPos == 'BOTTOM') then
+            this.y.diff = this.y.diff + (this.window.h * 0.35);
+          end
         end
       end
 

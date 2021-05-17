@@ -2,6 +2,7 @@
 local DialogBox = {
 	images = {
 		dialogBox = Image:new('common/dialog.png'),
+		dialogBoxPortrait = Image:new('common/dialog_p.png'),
 		btn = Image:new('buttons/long.png'),
 		btnH = Image:new('buttons/long_hover.png'),
 	},
@@ -50,12 +51,21 @@ local DialogBox = {
 	---@param this DialogBox
 	---@param w number
 	---@param h number
-	setSizes = function(this, w, h)
+	setSizes = function(this, w, h, isPortrait)
 		if ((this.cache.w ~= w) or (this.cache.h ~= h)) then
-			this.w.inner = w / (1920 / 446); 
-			this.w.middle = w / (1920 / 624);
-			this.w.outer = w / (1920 / 800);
-			this.h.outer = h / (1080 / 306);
+			this.isPortrait = isPortrait;
+
+			if (isPortrait) then
+				this.w.inner = w / (1080 / 446); 
+				this.w.middle = w / (1080 / 624);
+				this.w.outer = w / (1080 / 800);
+				this.h.outer = h / (1920 / 306);
+			else
+				this.w.inner = w / (1920 / 446); 
+				this.w.middle = w / (1920 / 624);
+				this.w.outer = w / (1920 / 800);
+				this.h.outer = h / (1080 / 306);
+			end
 
 			this.maxWidth = this.w.outer - (176 / 2);
 	
@@ -95,7 +105,13 @@ local DialogBox = {
 	-- 	}
 	-- }
 	-- ```
-	draw = function(this, params) this.images.dialogBox:draw(params); end,
+	draw = function(this, params)
+		if (this.isPortrait) then
+			this.images.dialogBoxPortrait:draw(params);
+		else
+			this.images.dialogBox:draw(params);
+		end
+	end,
 };
 
 return DialogBox;

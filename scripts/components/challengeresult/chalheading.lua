@@ -23,7 +23,16 @@ local ChalHeading = {
     local t = {
       cache = { w = 0, h = 0 },
       padding = { x = 0, y = 0 },
-      labels = {},
+      labels = {
+        screenshot = makeLabel(
+          'med',
+          {
+            { color = 'norm', text = '[F12]' },
+            { color = 'white', text = 'SCREENSHOT' },
+          },
+          20
+        ),
+      },
       state = state,
       timer = 0,
       window = window,
@@ -50,11 +59,19 @@ local ChalHeading = {
       this.x = this.window.padding.x;
       this.y = this.window.padding.y;
 
-      this.w = (this.window.w - (this.window.padding.x * 2)) * (3 / 4);
-      this.h = this.window.h / 2.625;
+      if (this.window.isPortrait) then
+        this.w = this.window.w - (this.window.padding.x * 2);
+        this.h = (this.window.h / 3.775) - this.window.padding.y;
+
+        this.padding.y = this.h / 20;
+      else
+        this.w = (this.window.w - (this.window.padding.x * 2)) * (3 / 4);
+        this.h = this.window.h / 2.625;
+
+        this.padding.y = this.h / 12;
+      end
 
       this.padding.x = this.w / 30;
-      this.padding.y = this.h / 12;
 
       this.maxWidth = this.w - (this.padding.x * 2);
 
@@ -68,12 +85,18 @@ local ChalHeading = {
   ---@param dt deltaTime
   drawHeading = function(this, dt)
     local chal = this.state.chal;
+    local isPortrait = this.window.isPortrait;
+    local scale = (isPortrait and 1.25) or 1;
     local x = this.x + this.padding.x;
     local y = this.y + this.padding.y;
 
     this.labels.challenge:draw({ x = x, y = y });
 
-    y = y + (this.labels.challenge.h * 1.25);
+    if (isPortrait) then
+      y = y + (this.labels.challenge.h * 1.5);
+    else
+      y = y + (this.labels.challenge.h * 1.25);
+    end
 
     if (chal.title.w > this.maxWidth) then
       this.timer = this.timer + dt;
@@ -97,7 +120,7 @@ local ChalHeading = {
     y = y + (chal.title.h * 0.85) + this.padding.y;
 
     for i, name in ipairs(Order) do
-			local xTemp = x + (this.padding.x * ((i - 1) * 5));
+			local xTemp = x + (this.padding.x * ((i - 1) * 5) * scale);
 
 			this.labels[name]:draw({ x = xTemp, y = y });
 
@@ -117,7 +140,7 @@ local ChalHeading = {
     local yTemp = y;
 
     for i, req in ipairs(chal.reqs) do
-      if (i == 5) then
+      if ((i == 5) and (not isPortrait)) then
         x = x + (this.w / 2);
         y = yTemp;
       end
@@ -145,13 +168,20 @@ local ChalHeading = {
       y = this.y,
       w = this.w,
       h = this.h,
-      alpha = 120,
+      alpha = 180,
       color = 'dark',
     });
 
     this:drawHeading(dt);
 
+    this.labels.screenshot:draw({
+      x = this.x,
+      y = this.y - (this.window.padding.y / 1.5),
+    });
+
     gfx.Restore();
+
+    return this.h;
   end,
 };
 

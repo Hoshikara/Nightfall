@@ -52,10 +52,17 @@ local GaugeBar = {
   ---@param this GaugeBar
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.x = this.window.w - (this.window.w / 6.5);
-      this.y = this.window.h / 3.5;
+      if (this.window.isPortrait) then
+        this.x = this.window.w - (this.window.w / 14);
+        this.y = this.window.h / 3.3;
+        this.h = this.window.h / 3.5;
+      else
+        this.x = this.window.w - (this.window.w / 6.5);
+        this.y = this.window.h / 3.5;
+        this.h = this.window.h / 2;
+      end
+
       this.w = 20;
-      this.h = this.window.h / 2;
 
       this.cache.w = this.window.w;
       this.cache.h = this.window.h;

@@ -16,6 +16,7 @@ local playerData = JSONTable:new('player');
 local player = playerData:get();
 
 local bg = Image:new('bg.png');
+local bgPortrait = Image:new('bg_p.png');
 
 ---@class Titlescreen
 ---@field player Player
@@ -77,7 +78,11 @@ render = function(dt)
 
 	window:set(true);
 
-	bg:draw({ w = window.w, h = window.h });
+	if (window.isPortrait) then
+		bgPortrait:draw({ w = window.w, h = window.h });
+	else
+		bg:draw({ w = window.w, h = window.h });
+	end
 
 	title:render(dt);
 

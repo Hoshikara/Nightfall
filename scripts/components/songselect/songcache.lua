@@ -87,24 +87,27 @@ local SongCache = {
         cached.diffs = this:makeDiffs(song);
       else
         for i, diff in ipairs(song.difficulties) do
-          if (diff.topBadge ~= 0) then
+          if (diff and (diff.topBadge > 0)) then
             cached.diffs[i].clear = this.clears[diff.topBadge];
             cached.diffs[i].grade = this:getGrade(diff.scores[1]);
             cached.diffs[i].highScore = (diff.scores[1]
               and diff.scores[1].score)
               or 0;
-
-            if (getSetting('_graphMade', 'FALSE') == 'TRUE') then
-              local key = diff.hash or ('%s_%d'):format(song.title, diff.level);
-              local densityData = this.densities:get(true, key);
-          
-              if (densityData) then
-                cached.diffs[i].densityData = densityData;
-  
-                game.SetSkinSetting('_graphMade', 'FALSE');
-              end
-            end
           end
+        end
+      end
+    end
+
+    if (getSetting('_graphMade', 'FALSE') == 'TRUE') then
+      for i, diff in ipairs(song.difficulties) do
+        local key = diff.hash or ('%s_%d'):format(song.title, diff.level);
+        local densityData = this.densities:get(true, key);
+    
+        if (densityData) then
+          cached.diffs[i].densityData = densityData;
+          cached.diffs[i].densityNormalized = false;
+
+          game.SetSkinSetting('_graphMade', 'FALSE');
         end
       end
     end
@@ -121,10 +124,13 @@ local SongCache = {
       local key = curr.hash or ('%s_%d'):format(song.title, curr.level);
 
       ---@class CachedDiff
+      ---@field densityData number[]|nil
       local diff = {
         best = this:getBest(curr.id),
         clear = this.clears[curr.topBadge],
         densityData = this.densities:get(false, key),
+        densityNormalized = false,
+        densityPeak = -1,
         diff = curr.difficulty,
         effector = makeLabel('jp', curr.effector),
         grade = this:getGrade(curr.scores[1]),

@@ -21,7 +21,7 @@ return {
       local key = this.state:gsub(this.state.settings[1].name);
       local settings = this.settings[this.state.tab.name];
 
-      dialogBox:setSizes(this.window.w, this.window.h);
+      dialogBox:setSizes(this.window.w, this.window.h, this.window.isPortrait);
 
       this.scrollbar:setSizes({
         x = dialogBox.x.middleLeft - 36,

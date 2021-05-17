@@ -67,7 +67,13 @@ local HitDeltaBar = {
   ---@param this HitDeltaBar
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.w = this.window.w / 3;
+      if (this.window.isPortrait) then
+        this.w = this.window.w * 0.495;
+        this.y = (this.window.h / 6) + 12;
+      else
+        this.w = this.window.w / 3;
+        this.y = 40;
+      end
 
       this.x.base = this.window.w / 2;
       this.x.near = this.w / 4;

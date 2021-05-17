@@ -11,6 +11,7 @@ local ChalPanel = require('components/chalwheel/chalpanel');
 local window = Window:new();
 
 local bg = Image:new('bg.png');
+local bgPortrait = Image:new('bg_p.png');
 
 local init = true;
 
@@ -38,11 +39,15 @@ render = function(dt)
 
   gfx.Save();
 
-  bg:draw({ w = window.w, h = window.h });
+  if (window.isPortrait) then
+		bgPortrait:draw({ w = window.w, h = window.h });
+	else
+		bg:draw({ w = window.w, h = window.h });
+	end
 
-  local w = chalPanel:render(dt);
+  local w, h = chalPanel:render(dt);
 
-  chalList:render(dt, w);
+  chalList:render(dt, w, h);
 
   gfx.Restore();
 end

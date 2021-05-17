@@ -18,6 +18,7 @@ local allowHardToggle = getSetting('toggleHard', false);
 local allowMirrorToggle = getSetting('toggleMirror', false);
 
 local bg = Image:new('bg.png');
+local bgPortrait = Image:new('bg_p.png');
 
 ---@class Multiplayer
 local state = {
@@ -146,7 +147,11 @@ render = function(dt)
 
 	state.btnEvent = nil;
 
-	bg:draw({ w = window.w, h = window.h });
+	if (window.isPortrait) then
+		bgPortrait:draw({ w = window.w, h = window.h });
+	else
+		bg:draw({ w = window.w, h = window.h });
+	end
 
 	if (screenState == 'setUsername') then
 		state.loading = false;

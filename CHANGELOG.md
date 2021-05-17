@@ -1,3 +1,8 @@
+##### 1.1.0 - May 17, 2021
+- Added support for portrait orientation
+- Added a check to automatically refresh player info when a play meeting the collection criteria is met (level >= 10 chart cleared with at least 8700000 score)
+- Fixed a results screen crash from invalid density graph data
+
 ##### 1.0.4 - May 17, 2021
 - Fix challenge wheel error
 

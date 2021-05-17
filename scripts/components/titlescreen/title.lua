@@ -37,7 +37,12 @@ local Title = {
 	---@param this Title
 	setSizes = function(this)
 		if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-			this.x = this.window.w / 20;
+			if (this.window.isPortrait) then
+				this.x = this.window.w / 11;	
+			else
+				this.x = this.window.padding.x;
+			end
+
 			this.y = this.window.h / 4;
 
 			this.cache.w = this.window.w;

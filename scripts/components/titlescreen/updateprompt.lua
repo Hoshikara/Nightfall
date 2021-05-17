@@ -58,7 +58,7 @@ local UpdatePrompt = {
 	---@param this UpdatePrompt
 	setSizes = function(this)
 		if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-			dialogBox:setSizes(this.window.w, this.window.h);
+			dialogBox:setSizes(this.window.w, this.window.h, this.window.isPortrait);
 
 			this.margin = (dialogBox.w.outer - (this.images.btn.w * #this.btns))
 				/ (#this.btns + 1);

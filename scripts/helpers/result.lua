@@ -310,7 +310,6 @@ local getGraphData = function(res)
 	local hardFail = ((res.gauge_type or res.flags or 0) == 1)
 		and (res.badge == 1);
 	local idx = 1;
-	local max = -1;
 	local ms = 1000;
 	local key = getSetting('_diffKey', '');
 	local save = true;
@@ -362,8 +361,6 @@ local getGraphData = function(res)
 				if (stat.time < ms) then
 					count = count + 1;
 				else
-					if (count > max) then max = count; end
-
 					data[idx] = count;
 
 					count = 0;
@@ -376,13 +373,6 @@ local getGraphData = function(res)
 
 	if (key ~= '') then
 		if (save) then
-			local floor = math.floor;
-			local scale = tonumber(getSetting('_graphSize', '0')) / max;
-
-			for i, v in ipairs(data) do data[i] = floor(v * scale); end
-
-			data[idx] = max;
-
 			densities:set(key, data);
 
 			game.SetSkinSetting('_graphMade', 'TRUE');
@@ -443,6 +433,15 @@ local getGraphData = function(res)
 	return gd;
 end
 
+-- Force player info reload if play meets collection criteria  
+-- Level >= 10, cleared, grade at least A
+---@param res result
+local reloadInfo = function(res)
+	if ((res.level >= 10) and (res.badge > 1) and (res.score >= 8700000)) then
+		game.SetSkinSetting('_reloadInfo', 'TRUE');
+	end
+end
+
 return {
 	filterScores = filterScores,
   formatHighScore = formatHighScore,
@@ -450,4 +449,5 @@ return {
   formatSong = formatSong,
 	getGraphData = getGraphData,
   getScoreIndex = getScoreIndex,
+	reloadInfo = reloadInfo,
 };

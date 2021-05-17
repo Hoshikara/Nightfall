@@ -29,6 +29,16 @@ local Screenshot = {
 
       gfx.Save();
 
+      drawRect({
+        x = 0,
+        y = 0,
+        w = 4000,
+        h = this.labels.path.h * 1.75;
+        alpha = 255 * (this.state.shotTimer / 5),
+        color = 'black',
+        fast = true,
+      });
+
       gfx.Translate(8, 4);
 
       this.labels.saved:draw({ alpha = 255 * (this.state.shotTimer / 5) });

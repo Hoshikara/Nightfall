@@ -59,16 +59,36 @@ local ChalList = {
   -- Sets the sizes for the current component
   ---@param this ChalList
   ---@param w number
-  setSizes = function(this, w)
+  ---@param h number
+  setSizes = function(this, w, h)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.w.list = this.window.w - ((this.window.w / 20) * 3) - w;
-      this.w.max = this.w.list - (this.w.list / 10);
+      if (this.window.isPortrait) then
+        this.w.list = this.window.w - (this.window.padding.x * 2);
+      else
+        this.w.list = this.window.w - ((this.window.padding.x) * 3) - w;
+      end
 
-      this.h.list = math.floor(this.w.list * 1.125);
-      this.h.item = this.h.list // 7.5;
+      if (this.window.isPortrait) then
+        this.w.max = this.w.list - (this.w.list / 16);
 
-      this.x = (this.window.w / 10) + w;
-      this.y = this.window.h - (this.window.h / 20) - this.h.list;
+        this.h.list = math.floor(this.w.list * 0.65);
+        this.h.item = this.h.list // 5;
+
+        this.x = this.window.padding.x;
+        this.y = this.window.padding.y + h + (this.window.padding.y * 3);
+
+        this.state.max = 4;
+      else
+        this.w.max = this.w.list - (this.w.list / 10);
+
+        this.h.list = math.floor(this.w.list * 1.125);
+        this.h.item = this.h.list // 7.5;
+
+        this.x = (this.window.padding.x * 2) + w;
+        this.y = this.window.h - this.window.padding.y - this.h.list;
+
+        this.state.max = 6;
+      end
 
       this.margin = (this.h.list - (this.h.item * this.state.max))
         / (this.state.max - 1);
@@ -133,6 +153,8 @@ local ChalList = {
     local alpha = (isCurr and 255) or 80;
     local x = this.w.list / 20;
 
+    if (this.window.isPortrait) then x = this.w.list / 32; end
+
     if (not onPage) then
       chal.timer = 0;
     else
@@ -141,10 +163,10 @@ local ChalList = {
         y = y,
         w = this.w.list,
         h = this.h.item,
-        alpha = 120,
+        alpha = 180,
         color = 'dark',
       });
-
+      
       y = y + (this.h.item / 5);
 
       this.labels.challenge:draw({
@@ -221,8 +243,9 @@ local ChalList = {
   ---@param this ChalList
   ---@param dt deltaTime
   ---@param w number
-  render = function(this, dt, w)
-    this:setSizes(w);
+  ---@param h number
+  render = function(this, dt, w, h)
+    this:setSizes(w, h);
 
     gfx.Save();
 

@@ -53,8 +53,11 @@ local SongInfo = {
       jacketSize = 135,
       labels = {
         artist = makeLabel('jp', gameplay.artist:upper(), 24),
+        artistLg = makeLabel('jp', gameplay.artist:upper(), 30),
         level = makeLabel('num', ('%02d'):format(gameplay.level), 18),
+        levelLg = makeLabel('num', ('%02d'):format(gameplay.level), 24),
         title = makeLabel('jp', gameplay.title:upper(), 30),
+        titleLg = makeLabel('jp', gameplay.title:upper(), 36),
       },
       maxWidth = 0,
       state = state,
@@ -88,6 +91,7 @@ local SongInfo = {
     local diffIndex = getDiffIndex(gameplay.jacketPath, gameplay.difficulty);
 
     t.labels.diff = makeLabel('med', Difficulties[diffIndex], 18);
+    t.labels.diffLg = makeLabel('med', Difficulties[diffIndex], 24);
 
     setmetatable(t, this);
     this.__index = this;
@@ -99,20 +103,39 @@ local SongInfo = {
   ---@param this SongInfo
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.x = this.window.w / 32;
-      this.y = this.window.h / 20;
+      if (this.window.isPortrait) then
+        this.jacketSize = 208;
+        this.maxWidth = this.window.w - (this.window.w / 16) - 28 - this.jacketSize;
 
-      if (hispeedPos == 'BOTTOM') then
-        this.hispeed.y = this.window.h - (this.window.h / 3.35) - this.y;
-      elseif (hispeedPos == 'MIDDLE') then
-        this.hispeed.y = this.window.h - (this.window.h / 1.85) - this.y;
-      elseif (hispeedPos == 'UPPER') then
-        this.hispeed.y = this.window.h - (this.window.h / 1.35) - this.y;
-      elseif (hispeedPos == 'UPPER+') then
-        this.hispeed.y = this.window.h - (this.window.h / 1.15) - this.y;
+        this.y = this.window.h / 14;
+        
+        if (hispeedPos == 'BOTTOM') then
+          this.hispeed.y = this.window.h - (this.window.h / 2.35) - this.y;
+        elseif (hispeedPos == 'MIDDLE') then
+          this.hispeed.y = this.window.h - (this.window.h / 1.85) - this.y;
+        elseif (hispeedPos == 'UPPER') then
+          this.hispeed.y = this.window.h - (this.window.h / 1.5) - this.y;
+        elseif (hispeedPos == 'UPPER+') then
+          this.hispeed.y = this.window.h - (this.window.h / 1.35) - this.y;
+        end
+      else
+        this.jacketSize = 135;
+        this.maxWidth = (this.window.w / 4) - this.jacketSize;
+
+        this.y = this.window.h / 20;
+
+        if (hispeedPos == 'BOTTOM') then
+          this.hispeed.y = this.window.h - (this.window.h / 3.35) - this.y;
+        elseif (hispeedPos == 'MIDDLE') then
+          this.hispeed.y = this.window.h - (this.window.h / 1.85) - this.y;
+        elseif (hispeedPos == 'UPPER') then
+          this.hispeed.y = this.window.h - (this.window.h / 1.35) - this.y;
+        elseif (hispeedPos == 'UPPER+') then
+          this.hispeed.y = this.window.h - (this.window.h / 1.15) - this.y;
+        end
       end
-      
-      this.maxWidth = (this.window.w / 4) - this.jacketSize;
+
+      this.x = this.window.w / 32;
 
       this.cache.w = this.window.w;
       this.cache.h = this.window.h;
@@ -146,18 +169,21 @@ local SongInfo = {
   -- Draw the jacket and difficulty
   ---@param this SongInfo
   drawJacket = function(this)
+    local isPortrait = this.window.isPortrait;
+    local size = this.jacketSize;
+
     if ((not this.jacket) or (this.jacket == jacketFallback)) then
       this.jacket = gfx.LoadImageJob(
         gameplay.jacketPath,
         jacketFallback,
-        this.jacketSize,
-        this.jacketSize
+        size,
+        size
       );
     end
 
     drawRect({
-      w = this.jacketSize,
-      h = this.jacketSize,
+      w = size,
+      h = size,
       image = this.jacket,
       stroke = {
         color = 'norm',
@@ -165,21 +191,33 @@ local SongInfo = {
       },
     });
 
-    this.labels.diff:draw({ x = -2, y = this.jacketSize + 6 });
+    if (isPortrait) then
+      this.labels.diffLg:draw({ x = -2, y = size + 6 });
 
-    this.labels.level:draw({
-      x = this.jacketSize + 2,
-      y = this.jacketSize + 6,
-      align = 'right',
-      color = 'white',
-    });
+      this.labels.levelLg:draw({
+        x = size + 2,
+        y = size + 6,
+        align = 'right',
+        color = 'white',
+      });
+    else
+      this.labels.diff:draw({ x = -2, y = size + 6 });
+
+      this.labels.level:draw({
+        x = size + 2,
+        y = size + 6,
+        align = 'right',
+        color = 'white',
+      });
+    end
 
     this.cursor:draw({
       x = 0,
       y = 0,
-      w = this.jacketSize,
-      h = this.jacketSize + (this.labels.diff.h * 1.5),
+      w = size,
+      h = size + (this.labels.diff.h * 1.5),
       alpha = 255,
+      size = (this.window.isPortrait and 16) or 12,
     });
   end,
 
@@ -189,13 +227,20 @@ local SongInfo = {
   ---@param alpha number
   ---@return number x, number y
   drawNames = function(this, dt, alpha)
+    local artist = this.labels.artist;
+    local title = this.labels.title;
     local x = this.jacketSize + 28;
     local y = -8;
 
-    if (this.labels.title.w > this.maxWidth) then
+    if (this.window.isPortrait) then
+      artist = this.labels.artistLg;
+      title = this.labels.titleLg;
+    end
+
+    if (title.w > this.maxWidth) then
       this.timers.title = this.timers.title + dt;
       
-      this.labels.title:drawScrolling({
+      title:drawScrolling({
         x = x,
         y = y,
         alpha = alpha,
@@ -205,7 +250,7 @@ local SongInfo = {
         width = this.maxWidth,
       });
     else
-      this.labels.title:draw({
+      title:draw({
         x = x,
         y = y,
         alpha = alpha,
@@ -213,12 +258,12 @@ local SongInfo = {
       });
     end
 
-    y = y + (this.labels.title.h * 1.25);
+    y = y + (title.h * 1.25);
 
-    if (this.labels.artist.w > this.maxWidth) then
+    if (artist.w > this.maxWidth) then
       this.timers.artist = this.timers.artist + dt;
       
-      this.labels.artist:drawScrolling({
+      artist:drawScrolling({
         x = x + 1,
         y = y,
         alpha = alpha,
@@ -228,7 +273,7 @@ local SongInfo = {
         width = this.maxWidth,
       });
     else
-      this.labels.artist:draw({
+      artist:draw({
         x = x + 1,
         y = y,
         alpha = alpha,
@@ -247,7 +292,12 @@ local SongInfo = {
   ---@return number x, number y
   drawProgress = function(this, x, y, alpha)
     x = x + 1;
-    y = y + this.labels.artist.h * 1.75;
+
+    if (this.window.isPortrait) then
+      y = y + (this.labels.artistLg.h * 1.75);
+    else
+      y = y + (this.labels.artist.h * 1.75);
+    end
 
     drawRect({
       x = x,
@@ -294,6 +344,11 @@ local SongInfo = {
       });
     end
 
+    if (this.window.isPortrait) then
+      x = x - this.maxWidth - (this.window.w / 20) + 30;
+      y = y + this.jacketSize - 12;
+    end
+
     return x, y;
   end,
 
@@ -303,7 +358,7 @@ local SongInfo = {
   ---@param y number
   ---@param alpha number
   drawBPM = function(this, x, y, alpha)
-    local xOffset = -64;
+    local xOffset = -72;
     local yOffset = this.bpm.label.h * 1.375;
   
     y = y + (this.labels.artist.h * 1.425);
@@ -531,7 +586,7 @@ local SongInfo = {
 
     x, y = this:drawProgress(x, y, alpha);
 
-    this:drawBPM(x - 1, y, alpha);
+    if (not gameplay.practice_setup) then this:drawBPM(x - 1, y, alpha); end
 
     gfx.Restore();
   end,

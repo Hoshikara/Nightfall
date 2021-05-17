@@ -24,6 +24,7 @@ local LaserAlerts = {
         makeLabel('norm', 'L', 120),
         makeLabel('norm', 'R', 120),
       },
+      size = 128,
       start = { false, false },
       state = state,
       timers = {
@@ -53,11 +54,32 @@ local LaserAlerts = {
   ---@param this LaserAlerts
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.x[1] = (this.window.w / 2) - (this.window.w / 3.75);
-      this.x[2] = (this.window.w / 3.75) * 2;
+      if (this.window.isPortrait) then
+        this.x[1] = (this.window.w / 2) - (this.window.w / 2.4);
+        this.x[2] = (this.window.w / 2.4) * 2;
 
-      this.y[1] = (this.window.h * 0.95) - (this.window.h / 6);
-      this.y[2] = 0;
+        this.y[1] = this.window.h - (this.window.h / 2.8);
+        this.y[2] = 0;
+
+        this.size = 108;
+
+        this.labels[1] = makeLabel('norm', 'L', 100);
+        this.labels[2] = makeLabel('norm', 'R', 100);
+
+      else
+        this.x[1] = (this.window.w / 2) - (this.window.w / 3.75);
+        this.x[2] = (this.window.w / 3.75) * 2;
+
+        this.y[1] = (this.window.h * 0.95) - (this.window.h / 6);
+        this.y[2] = 0;
+
+        this.size = 128;
+
+        this.labels[1] = makeLabel('norm', 'L', 120);
+        this.labels[2] = makeLabel('norm', 'R', 120);
+      end
+
+      this.offset = -(this.labels[1].h / 5.5);
 
       this.cache.w = this.window.w;
       this.cache.h = this.window.h;
@@ -69,6 +91,8 @@ local LaserAlerts = {
   ---@param dt deltaTime
   render = function(this, dt)
     this:setSizes();
+
+    local size = this.size;
 
     gfx.Save();
 
@@ -90,10 +114,10 @@ local LaserAlerts = {
       gfx.Translate(this.x[i], this.y[i]);
 
       gfx.Scissor(
-        -64 * this.window:getScale(),
-        -64 * this.window:getScale(),
-        128,
-        128 * this.timers.fade[i]
+        -(size / 2) * this.window:getScale(),
+        -(size / 2) * this.window:getScale(),
+        size,
+        size * this.timers.fade[i]
       );
 
       this.labels[i]:draw({
@@ -113,10 +137,10 @@ local LaserAlerts = {
       gfx.ResetScissor();
 
       this.cursor:draw({
-        x = -64 * this.timers.fade[i],
-        y = -64 * this.timers.fade[i],
-        w = 128 * this.timers.fade[i],
-        h = 128 * this.timers.fade[i],
+        x = -(size / 2) * this.timers.fade[i],
+        y = -(size / 2) * this.timers.fade[i],
+        w = size * this.timers.fade[i],
+        h = size * this.timers.fade[i],
         alpha = 255 * this.timers.fade[i],
       });
     end

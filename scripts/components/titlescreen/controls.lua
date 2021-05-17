@@ -3,7 +3,7 @@ local Constants = require('constants/controls');
 local Pages = {
 	'GENERAL',
 	'SONG SELECT',
-	'GAMEPLAY SETTINGS',
+	'GAME SETTINGS',
 	'GAMEPLAY',
 	'RESULTS',
 	'MULTIPLAYER',
@@ -26,14 +26,21 @@ local Controls = {
 		---@field window Window
 		local t = {
 			btns = {},
+			cache = { w = 0, h = 0 },
 			currBtn = 0,
 			labels = {
-				action = makeLabel('med', 'ACTION', 30),
-				close = makeLabel('med', 'CLOSE', 24),
-				controller = makeLabel('med', 'CONTROLLER', 30),
+				action = makeLabel('med', 'ACTION', 24),
+				controller = makeLabel('med', 'CONTROLLER', 24),
 				heading = makeLabel('med', 'CONTROLS', 60),
-				keyboard = makeLabel('med', 'KEYBOARD', 30),
-				startEsc = makeLabel('med', '[START]  /  [ESC]', 24),
+				keyboard = makeLabel('med', 'KEYBOARD', 24),
+				close = makeLabel(
+					'med',
+					{
+						{ color = 'norm', text = '[START]  /  [ESC]' },
+						{ color = 'white', text = 'EXIT' },
+					},
+					24
+				),
 			},
 			lists = {},
 			maxWidth = 0,
@@ -41,36 +48,81 @@ local Controls = {
 			state = state,
 			timer = 0,
 			window = window,
+			x = {},
+			y = {},
+			w = {},
 		};
 
+		setmetatable(t, this);
+		this.__index = this;
+
+		return t;
+	end,
+
+	-- Sets the sizes for the current component
+	---@param this Controls
+	setSizes = function(this)
+		if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
+			this:makeBtns();
+
+			this.w[1] = 0;
+
+			for _, btn in ipairs(this.btns) do
+				if (btn.label.w > this.w[1]) then this.w[1] = btn.label.w; end
+			end
+
+			if (this.window.isPortrait) then
+				this.w[2] = this.window.w - (this.window.padding.x * 2);
+
+				this.x[1] = this.window.padding.x;
+				this.x[2] = this.x[1];
+
+				this.y[1] = this.window.padding.y;
+				this.y[2] = this.window.padding.y * 9.5;
+			else
+				this.w[2] = this.window.w - (this.window.padding.x * 3.5) - this.w[1];
+
+				this.x[1] = this.window.padding.x;
+				this.x[2] = this.x[1] + this.w[1] + (this.window.padding.x * 1.5);
+
+				this.y[1] = this.window.padding.y;
+				this.y[2] = this.window.padding.y * 3;
+			end
+
+			this.cache.w = this.window.w;
+			this.cache.h = this.window.h;
+		end
+	end,
+
+	-- Make the tab buttons
+	makeBtns = function(this)
+		local isPortrait = this.window.isPortrait;
+		local sizeBtn = (isPortrait and 24) or 36;
+		local sizeCtrl = (isPortrait and 20) or 24;
+
 		for i, page in ipairs(Pages) do
-			t.btns[i] = {
-				event = function() t.state:set({ currBtn = i }); end,
-				label = makeLabel('med', page, 36),
+			this.btns[i] = {
+				event = function() this.state:set({ currBtn = i }); end,
+				label = makeLabel('med', page, sizeBtn),
 			};
 
-			t.lists[i] = {};
+			this.lists[i] = {};
 
 			for j, control in ipairs(Constants[page]) do
 				---@class Control
 				---@field lineBreak boolean
 				---@field note boolean
 				local c = {
-					action = makeLabel('norm', control.action),
-					controller = makeLabel('med', control.controller, 24),
-					keyboard = makeLabel('med', control.keyboard, 24),
+					action = makeLabel((isPortrait and 'med') or 'norm', control.action, sizeCtrl),
+					controller = makeLabel('med', control.controller, sizeCtrl),
+					keyboard = makeLabel('med', control.keyboard, sizeCtrl),
 					lineBreak = control.lineBreak,
 					note = control.note,
 				};
 
-				t.lists[i][j] = c;
+				this.lists[i][j] = c;
 			end
 		end
-
-		setmetatable(t, this);
-		this.__index = this;
-
-		return t;
 	end,
 
 	-- Draw a button for a tab
@@ -83,7 +135,7 @@ local Controls = {
 		if (isCurr) then
 			drawRect({
 				x = x - 12,
-				y = y - 2,
+				y = y - 2 - ((this.window.isPortrait and 3) or 0),
 				w = (this.maxWidth + 48) * smoothstep(this.timer),
 				h = btn.label.h + 16,
 				alpha = 100,
@@ -115,9 +167,12 @@ local Controls = {
 	-- Draw the list of controls
 	---@param this Controls
 	---@param list Control
-	---@param x number
-	---@param y number
-	drawControls = function(this, list, x, y)
+	drawControls = function(this, list)
+		local offset = (this.window.isPortrait and 290) or 350;
+		local shift = (this.window.isPortrait and 2) or 0;
+		local x = this.x[2];
+		local y = this.y[2] - 50;
+
 		this.labels.controller:draw({
 			x = x,
 			y = y,
@@ -125,25 +180,25 @@ local Controls = {
 		});
 
 		this.labels.keyboard:draw({
-			x = x + 350,
+			x = x + offset,
 			y = y,
 			color = 'white',
 		});
 
 		this.labels.action:draw({
-			x = x + 700,
+			x = x + (offset * 2),
 			y = y,
 			color = 'white',
 		});
 
-		y = y + 60;
+		y = y + 43;
 
 		for i, control in ipairs(list) do
 			if (((i % 2) ~= 0) and (not control.note)) then
 				drawRect({
 					x = x - 12,
 					y = y - 6,
-					w = this.window.w / 1.6,
+					w = this.w[2] + 24,
 					h = 45,
 					alpha = 50,
 					color = 'norm',
@@ -153,19 +208,19 @@ local Controls = {
 
 			control.controller:draw({
 				x = x,
-				y = y,
+				y = y + shift,
 				color = (control.note and 'white') or 'norm',
 			});
 
 			control.keyboard:draw({
-				x = x + 350,
-				y = y,
+				x = x + offset,
+				y = y + shift,
 				color = (control.note and 'white') or 'norm',
 			});
 
 			control.action:draw({
-				x = x + 700,
-				y = y,
+				x = x + (offset * 2),
+				y = y + shift,
 				color = 'white',
 			});
 
@@ -176,15 +231,16 @@ local Controls = {
 	-- Draw the navigation controls
 	---@param this Controls
 	drawNavigation = function(this)
-		local x = this.window.w / 20;
-		local y = this.window.h - (this.window.h / 10);
+		local x = this.x[1];
+		local y = this.window.h - (this.window.padding.y * 1.25) + 6;
 
-		this.labels.startEsc:draw({ x = x, y = y - 1 });
+		if (this.window.isPortrait) then
+			y = this.window.h - this.window.padding.y;
+		end
 
 		this.labels.close:draw({
-			x = x + this.labels.startEsc.w + 8,
-			y = y,
-			color = 'white',
+			x = x - ((this.window.isPortrait and 4) or 0),
+			y = y - this.labels.close.h
 		});
 	end,
 
@@ -192,6 +248,8 @@ local Controls = {
 	---@param this Controls
 	---@param dt deltaTime
 	render = function(this, dt)
+		this:setSizes();
+
 		if (this.currBtn ~= this.state.currBtn) then
 			this.timer = 0;
 
@@ -200,8 +258,8 @@ local Controls = {
 
 		this.timer = to1(this.timer, dt, 0.25);
 
-		local x = this.window.w / 20;
-		local y = this.window.h / 20;
+		local x = this.x[1];
+		local y = this.y[1];
 
 		drawRect({
 			w = this.window.w,
@@ -211,22 +269,15 @@ local Controls = {
 			fast = true,
 		});
 
-		this.labels.heading:draw({
-			x = x - 3,
-			y = y,
-			color = 'white',
-		});
+		this.labels.heading:draw({ x = x - 3, y = y - 12 });
 
-		y = y + (this.labels.heading.h * 2);
+		y = y + (this.labels.heading.h * 2) - 17;
 
 		for i, btn in ipairs(this.btns) do
 			y = y + this:drawBtn(btn, x, y, i == this.state.currBtn);
 		end
 
-		x = x + this.maxWidth + 96;
-		y = (this.window.h / 20) + (this.labels.heading.h * 2);
-
-		this:drawControls(this.lists[this.state.currBtn], x, y);
+		this:drawControls(this.lists[this.state.currBtn]);
 
 		this:drawNavigation();
 
