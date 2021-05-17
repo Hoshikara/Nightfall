@@ -68,6 +68,7 @@ local ResultPanel = {
           },
           20
         ),
+        minus = makeLabel('num', '-', 38);
         plus = makeLabel('num', '+', 30);
         screenshot = makeLabel(
           'med',
@@ -339,6 +340,27 @@ local ResultPanel = {
           x = xTemp - 24,
           y = y + 2,
           color = 'white',
+        });
+      end
+    elseif (this.state.downScore) then
+      if (not this.downScore) then
+        this.downScore = ScoreNumber:new({
+          size = 30,
+          val = this.state.downScore,
+        });
+      else
+        local xTemp = x - 7 + stats.score.w - this.downScore.w - 6;
+
+        this.downScore:draw({
+          x = xTemp,
+          y = y + 2,
+          color = 'red',
+        });
+
+        this.labels.minus:draw({
+          x = xTemp - 20,
+          y = y - 6,
+          color = 'red',
         });
       end
     end

@@ -1,6 +1,10 @@
+##### 1.1.1 - May 17, 2021
+- Add display for down score to results screen
+- Added a check to only show up/down score if a chart has been completed
+
 ##### 1.1.0 - May 17, 2021
 - Added support for portrait orientation
-- Added a check to automatically refresh player info when a play meeting the collection criteria is met (level >= 10 chart cleared with at least 8700000 score)
+- Added a check to automatically refresh player info when a play meeting the collection criteria is made (level >= 10 chart cleared with at least 8700000 score)
 - Fixed a results screen crash from invalid density graph data
 
 ##### 1.0.4 - May 17, 2021

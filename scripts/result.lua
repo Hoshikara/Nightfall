@@ -20,6 +20,7 @@ local showHardScores = getSetting('showHardScores', false);
 ---@field scores ResultScore[]
 local state = {
 	currScore = 1,
+	downScore = nil,
 	jacket = nil,
 	myScore = nil,
 	scores = {},
@@ -54,9 +55,11 @@ result_set = function()
 	if (not state.myScore) then state.myScore = Helpers.formatScore(result); end
 
 	if (state.sp or result.isSelf) then
-		if (#result.highScores > 0) then
+		if ((#result.highScores > 0) and (result.badge > 0)) then
 			if (result.score > result.highScores[1].score) then
 				state.upScore = result.score - result.highScores[1].score;
+			else
+				state.downScore = result.highScores[1].score - result.score;
 			end
 		end
 
