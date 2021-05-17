@@ -32,6 +32,7 @@ local ChalPanel = {
     local t = {
       cache = { w = 0, h = 0 },
       chals = chals,
+      charts = 3,
       chartPages = 1,
       currChal = 0,
       currPage = 1,
@@ -342,7 +343,7 @@ local ChalPanel = {
       this.currChal = this.state.currChal;
     end
 
-    if (this.charts > 3) then
+    if (this.charts and (this.charts > 3)) then
       if ((not this.pressedBTA) and pressed('BTA')) then
         if ((this.startingChart + 3) > this.charts) then
           this.startingChart = 1;
@@ -374,7 +375,7 @@ local ChalPanel = {
 
     this:drawPanel(dt);
 
-    if (this.charts > 3) then
+    if (this.charts and (this.charts > 3)) then
       this.scrollbar:render(dt, {
         color = 'med',
         curr = this.currPage,

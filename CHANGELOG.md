@@ -1,9 +1,11 @@
+##### 1.0.4 - May 17, 2021
+- Fix challenge wheel error
+
 ##### 1.0.3 - May 13, 2021
 - Adjusted crit line texture color and size slightly
 - Fixed results screen crash from missing histogram data
 - Fixed chart length not rolling over properly at 60 seconds
 - Removed some unused files
-
 
 ##### 1.0.2 - May 13, 2021
 - Fixed BPM data getting wiped on excessive fail
