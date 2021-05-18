@@ -1,7 +1,7 @@
 -- This script is loaded for every screen of the game
 -- All of the functions below are available to all of the scripts of the skin
 
-local SkinVersion = '1.1.1';
+SkinVersion = '1.1.2';
 
 gfx.LoadSkinFont('DFMGM.ttf');
 
@@ -159,10 +159,6 @@ getSetting = function(key, default)
 
 	return setting;
 end
-
--- Gets the current skin version
----@return string
-getSkinVersion = function() return SkinVersion; end
 
 -- Font loading wrapper function
 ---@param f string # `'bold'`, `'jp'`, `'med'`, `'mono'`, `'norm'`, `'num'`

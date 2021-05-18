@@ -56,7 +56,7 @@ local replace = function(s)
 end
 
 local getFolders = function()
-	if ((not folderNames) and getSetting('_songSelect', 'TRUE') == 'TRUE') then
+	if ((not folderNames) and (getSetting('_songSelect', 'TRUE') == 'TRUE')) then
 		folderNames = {};
 
 		for _, folder in ipairs(filters.folder) do
@@ -65,7 +65,7 @@ local getFolders = function()
 			end
 		end
 
-		table.insert(folderNames, 2, "OFFICIAL SOUND VOLTEX CHARTS");
+		table.insert(folderNames, 2, 'OFFICIAL SOUND VOLTEX CHARTS');
 
 		foldersData:overwrite(folderNames);
 	end

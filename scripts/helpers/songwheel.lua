@@ -194,6 +194,8 @@ end
 ---@param scoreStats ScoreStats
 ---@param score integer
 local updateScores = function(scoreStats, score)
+  if (not scoreStats) then return; end
+
 	scoreStats.count = scoreStats.count + 1;
 	scoreStats.total = scoreStats.total + (score / 10000);
 
@@ -213,6 +215,8 @@ end
 ---@param artist string
 ---@param title string
 local updateCat = function(cat, folder, updateAll, artist, title)
+  if (not cat[folder]) then return; end
+
   cat[folder].total = cat[folder].total + 1;
 
   if (updateAll) then cat.All.total = cat.All.total + 1; end

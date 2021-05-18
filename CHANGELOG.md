@@ -1,3 +1,6 @@
+##### 1.1.2 - May 17, 2021
+- Fix an error occuring after clearing a chart
+
 ##### 1.1.1 - May 17, 2021
 - Add display for down score to results screen
 - Added a check to only show up/down score if a chart has been completed
