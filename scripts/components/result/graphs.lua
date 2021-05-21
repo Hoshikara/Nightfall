@@ -494,7 +494,9 @@ local Graphs = {
       gfx.ResetScissor();
 
       if (this.data.gauge.change) then
-        gfx.Scissor(x, y - 2, w * this.data.gauge.change, h + 2);
+        local excessive = w * (this.data.gauge.change / 256);
+
+        gfx.Scissor(x, y - 2, (excessive - focus) * scale + focus, h + 2);
         gfx.StrokeColor(255, 155, 55, a);
         gfx.Stroke();
         gfx.ResetScissor();

@@ -14,25 +14,25 @@ local SongCache = {
     ---@class SongCache : SongCacheClass
     local t = {
       ---@type table<integer, string>
-      best = {},
       clears = {},
       densities = JSONTable:new('densities'),
       grades = {},
       labels = {
-        best = {
+        top = {
           large = {
             ['20'] = makeLabel('num', '20', 28),
             ['50'] = makeLabel('num', '50', 28),
-            best = makeLabel('med', 'BEST', 28),
+            top = makeLabel('med', 'TOP', 28),
           },
           small = {
             ['20'] = makeLabel('num', '20'),
             ['50'] = makeLabel('num', '50'),
-            best = makeLabel('med', 'BEST'),
+            top = makeLabel('med', 'TOP'),
           },
         },
       },
       songs = {},
+      top = {},
     };
 
     for i, curr in ipairs(Clears) do
@@ -52,15 +52,6 @@ local SongCache = {
     return t;
   end,
 
-  -- Gets the label and place for a chart of the best 50
-  ---@param id integer # difficulty id
-  ---@param this SongCache
-  getBest = function(this, id)
-    if (this.best[id]) then
-      return { labels = this.labels.best, place = this.best[id] };
-    end
-  end,
-
   -- Gets the grade for a play
   ---@param this SongCache
   ---@return Label|nil
@@ -72,6 +63,15 @@ local SongCache = {
 
     for _, grade in pairs(this.grades) do
       if (highScore >= grade.min) then return grade.label; end
+    end
+  end,
+
+  -- Gets the label and place for a chart in the top 50
+  ---@param id integer # difficulty id
+  ---@param this SongCache
+  getTop = function(this, id)
+    if (this.top[id]) then
+      return { labels = this.labels.top, place = this.top[id] };
     end
   end,
   
@@ -126,7 +126,7 @@ local SongCache = {
       ---@class CachedDiff
       ---@field densityData number[]|nil
       local diff = {
-        best = this:getBest(curr.id),
+        top = this:getTop(curr.id),
         clear = this.clears[curr.topBadge],
         densityData = this.densities:get(false, key),
         densityNormalized = false,

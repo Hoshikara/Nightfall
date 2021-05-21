@@ -43,7 +43,7 @@ local Window = {
   set = function(this, scale)
     local resX, resY = game.GetResolution();
 
-    if ((this.resX ~= resX) or (this.resY ~= this.resY)) then
+    if ((this.resX ~= resX) or (this.resY ~= resY)) then
       this.isPortrait = resY > resX;
       this.w = (this.isPortrait and 1080) or 1920;
       this.h = this.w * (resY / resX);

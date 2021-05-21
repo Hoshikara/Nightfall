@@ -103,7 +103,7 @@ local formatTop50 = function(top50)
     if (l.VF == r.VF) then return (l.scores[1].score > r.scores[1].score); end
 
     return (l.VF > r.VF);
-  end)
+  end);
 
   local t = {};
 
@@ -237,29 +237,34 @@ local updateCat = function(cat, folder, updateAll, artist, title)
 end
 
 -- Gets total VF from top 50 scores
----@param bestScores table
+---@param topScores table
 ---@return number, BestPlay
-local getVF = function(bestScores)
+local getVF = function(topScores)
   local diffs = {};
   local VF = 0;
 
   for i, song in ipairs(songwheel.allSongs) do
     for _, diff in ipairs(song.difficulties) do
       diff.songIndex = i;
+      diff.score = (diff.scores[1] and diff.scores[1].score) or 0;
       diff.VF = calcVF(diff);
 
       diffs[#diffs + 1] = diff;
     end
   end
 
-  table.sort(diffs, function(l, r) return l.VF > r.VF; end)
+  table.sort(diffs, function(l, r)
+    if (l.VF == r.VF) then return (l.score > r.score); end
+
+    return (l.VF > r.VF);
+  end);
 
   for i, diff in ipairs(diffs) do
     if (diff.VF > 0) then
       if (i <= 20) then
-        bestScores[diff.id] = '20';
+        topScores[diff.id] = '20';
       else
-        bestScores[diff.id] = '50';
+        topScores[diff.id] = '50';
       end
 
       VF = VF + diff.VF;

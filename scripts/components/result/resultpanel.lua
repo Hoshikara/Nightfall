@@ -164,6 +164,7 @@ local ResultPanel = {
       this.x.text[2] = this.padding.x * 2;
       this.y.text = (this.padding.y * 1.5) + this.jacketSize;
 
+      this.graphs.hitStatScale = nil;
       this.setGraph = true;
 
       this.cache.w = this.window.w;

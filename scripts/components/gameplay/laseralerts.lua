@@ -20,10 +20,7 @@ local LaserAlerts = {
       cache = { w = 0, h = 0 },
       colors = {},
       cursor = Cursor:new({ size = 16, stroke = 2 }, true);
-      labels = {
-        makeLabel('norm', 'L', 120),
-        makeLabel('norm', 'R', 120),
-      },
+      labels = {},
       size = 128,
       start = { false, false },
       state = state,
@@ -42,8 +39,6 @@ local LaserAlerts = {
       t.colors[i] = { r, g, b };
     end
 
-    t.offset = -(t.labels[1].h / 5.5);
-
     setmetatable(t, this);
     this.__index = this;
 
@@ -54,7 +49,11 @@ local LaserAlerts = {
   ---@param this LaserAlerts
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
+      local labelSize = 120;
+
       if (this.window.isPortrait) then
+        labelSize = 100;
+
         this.x[1] = (this.window.w / 2) - (this.window.w / 2.4);
         this.x[2] = (this.window.w / 2.4) * 2;
 
@@ -62,10 +61,6 @@ local LaserAlerts = {
         this.y[2] = 0;
 
         this.size = 108;
-
-        this.labels[1] = makeLabel('norm', 'L', 100);
-        this.labels[2] = makeLabel('norm', 'R', 100);
-
       else
         this.x[1] = (this.window.w / 2) - (this.window.w / 3.75);
         this.x[2] = (this.window.w / 3.75) * 2;
@@ -74,10 +69,10 @@ local LaserAlerts = {
         this.y[2] = 0;
 
         this.size = 128;
-
-        this.labels[1] = makeLabel('norm', 'L', 120);
-        this.labels[2] = makeLabel('norm', 'R', 120);
       end
+
+      this.labels[1] = makeLabel('norm', 'L', labelSize);
+      this.labels[2] = makeLabel('norm', 'R', labelSize);
 
       this.offset = -(this.labels[1].h / 5.5);
 

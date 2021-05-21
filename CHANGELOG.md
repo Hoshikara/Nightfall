@@ -1,5 +1,14 @@
+##### 1.1.3 - May 21, 2021
+- Added a score check for song select Top 50 charts to prevent cases where charts would fall into the incorrect label breakpoint
+- Changed song select `BEST 20/50` label to `TOP 20/50`
+- Decreased lead-in time for gameplay
+- Increased laser cursor size slightly
+- Fixed ARS gauge graph displaying incorrect switch point when a chart was restarted with F5
+- Fixed ARS gauge graph zoom portion
+- Fixed down score being displayed for scores that were tied with best
+
 ##### 1.1.2 - May 17, 2021
-- Fix an error occuring after clearing a chart
+- Fixed an error occuring after clearing a chart
 
 ##### 1.1.1 - May 17, 2021
 - Add display for down score to results screen
@@ -11,7 +20,7 @@
 - Fixed a results screen crash from invalid density graph data
 
 ##### 1.0.4 - May 17, 2021
-- Fix challenge wheel error
+- Fixed challenge wheel error
 
 ##### 1.0.3 - May 13, 2021
 - Adjusted crit line texture color and size slightly

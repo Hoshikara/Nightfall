@@ -58,7 +58,7 @@ result_set = function()
 		if ((#result.highScores > 0) and (result.badge > 0)) then
 			if (result.score > result.highScores[1].score) then
 				state.upScore = result.score - result.highScores[1].score;
-			else
+			elseif (result.score < result.highScores[1].score) then
 				state.downScore = result.highScores[1].score - result.score;
 			end
 		end

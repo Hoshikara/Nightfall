@@ -411,7 +411,10 @@ local getGraphData = function(res)
 			val = duration or 0,
 		},
 		gauge = {
-			change = (gaugeChange ~= '') and tonumber(gaugeChange),
+			change = (gaugeChange ~= '')
+				and (not hardFail)
+				and ((res.badge > 0))
+				and tonumber(gaugeChange),
 			curr = makeLabel('num', '0'),
 			samples = ((res.badge > 0)
 				and (#gaugeSamples > 0)

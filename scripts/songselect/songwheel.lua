@@ -145,7 +145,7 @@ end
 songs_changed = function(withAll)
 	if (not withAll) then return end
 
-	songCache.best = {};
+	songCache.top = {};
 
-	VF = Helpers.getVF(songCache.best);
+	VF = Helpers.getVF(songCache.top);
 end

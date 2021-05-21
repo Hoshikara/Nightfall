@@ -210,47 +210,47 @@ local SongPanel = {
       stroke = { color = 'norm', size = 2 },
     });
 
-    if (diff.best) then
-      local labels = diff.best.labels.large;
+    if (diff.top) then
+      local labels = diff.top.labels.large;
 
       if (this.window.isPortrait) then
-        labels = diff.best.labels.small;
+        labels = diff.top.labels.small;
 
         drawRect({
           x = x + 8,
           y = y + 8,
-          w = 98,
+          w = 84,
           h = 32,
           color = 'dark',
         });
 
-        labels.best:draw({
+        labels.top:draw({
           x = x + 16,
           y = y + 12,
           color = 'white',
         });
   
-        labels[diff.best.place]:draw({
-          x = x + 16 + labels.best.w + 8,
+        labels[diff.top.place]:draw({
+          x = x + 16 + labels.top.w + 8,
           y = y + 12,
         });
       else
         drawRect({
           x = x + 12,
           y = y + 12,
-          w = 141,
+          w = 125,
           h = 42,
           color = 'dark',
         });
 
-        labels.best:draw({
+        labels.top:draw({
           x = x + 20,
           y = y + 15,
           color = 'white',
         });
   
-        labels[diff.best.place]:draw({
-          x = x + 20 + labels.best.w + 12,
+        labels[diff.top.place]:draw({
+          x = x + 20 + labels.top.w + 12,
           y = y + 15,
         });
       end

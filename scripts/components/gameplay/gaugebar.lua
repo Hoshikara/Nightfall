@@ -4,7 +4,7 @@ local abs = math.abs;
 local cos = math.cos;
 local floor = math.floor;
 
-local sampleInterval = 1 / 256;
+local sampleInterval = 1 / 255;
 
 ---@class GaugeBarClass
 local GaugeBar = {
@@ -74,16 +74,24 @@ local GaugeBar = {
   ---@param gaugeType integer
   ---@param gaugeVal number
   gatherData = function(this, gaugeType, gaugeVal)
-    if (not this.gaugeType) then this.gaugeType = gaugeType; end
-
     if (gameplay.progress == 0) then
+      game.SetSkinSetting('_gaugeChange', '');
+
+      this.gaugeType = nil;
+      this.saveChange = true;
+
       this.samples = {};
       this.sampleIdx = 1;
       this.sampleProg = 0;
     end
 
+    if (not this.gaugeType) then this.gaugeType = gaugeType; end
+
     if ((this.gaugeType == 1) and (gaugeType == 0) and this.saveChange) then
-      game.SetSkinSetting('_gaugeChange', gameplay.progress);
+      game.SetSkinSetting(
+        '_gaugeChange',
+        tostring(math.max(0, this.sampleIdx - 1))
+      );
 
       this.saveChange = false;
     end

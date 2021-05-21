@@ -128,7 +128,9 @@ button_hit = function(btn, rating, delta)
 		end
 	end
 
-	if (showHitDeltaBar) then hitDeltaBar:trigger(btn, rating, delta); end
+	if (showHitDeltaBar and hitDeltaBar) then
+		hitDeltaBar:trigger(btn, rating, delta);
+	end
 
 	hitAnimation:trigger(btn, rating);
 end
@@ -186,6 +188,8 @@ end
 -- Drawn above built-in particle effects but before the main `render` function
 ---@param dt deltaTime
 render_crit_overlay = function(dt)
+	local scale = window:getScale();
+
 	hitAnimation:render(dt);
 
 	laserAnimation:render(dt);
@@ -193,7 +197,7 @@ render_crit_overlay = function(dt)
 	setupCritTransform();
 
 	if (window.isPortrait) then
-		window:scale();
+		gfx.Scale(scale, scale);
 
 		consoleFront:draw({
 			x = -(consoleFront.w  / 2),
@@ -202,7 +206,7 @@ render_crit_overlay = function(dt)
 
 		console:draw({ x = -(console.w / 2)	});
 
-		window:unscale();
+		gfx.Scale(1 / scale, 1 / scale);
 	end
 
 	for i = 0, 1 do
@@ -215,7 +219,7 @@ render_crit_overlay = function(dt)
 			x = curr.pos,
 			alpha = curr.alpha,
 			centered = true;
-			scale = 0.35 * window:getScale(),
+			scale = 0.42 * scale,
 			tint = { r, g, b },
 		});
 
@@ -223,7 +227,7 @@ render_crit_overlay = function(dt)
 			x = curr.pos,
 			alpha = curr.alpha,
 			centered = true,
-			scale = 0.35 * window:getScale(),
+			scale = 0.42 * scale,
 		});
 
 		gfx.SkewX(-curr.skew);
@@ -300,7 +304,7 @@ render_intro = function(dt)
 		state.intro.offset = t ^ 4;
 	end
 
-	return state.timers.intro <= 0;
+	return state.timers.intro <= 0.75;
 end
 
 -- Called by the game every frame until it returns `true`

@@ -144,30 +144,30 @@ local SongGrid = {
         },
       });
 
-      if (diff.best) then
-        local labels = diff.best.labels.small;
+      if (diff.top) then
+        local labels = diff.top.labels.small;
 
         if (this.window.isPortrait) then
-          labels = diff.best.labels.large;
+          labels = diff.top.labels.large;
 
           drawRect({
             x = x + 12,
             y = y + 12,
-            w = 141,
+            w = 125,
             h = 42,
             alpha = fullAlpha,
             color = 'dark',
           });
   
-          labels.best:draw({
+          labels.top:draw({
             x = x + 20,
             y = y + 15,
             alpha = 255 * alpha,
             color = 'white',
           });
   
-          labels[diff.best.place]:draw({
-            x = x + 20 + labels.best.w + 12,
+          labels[diff.top.place]:draw({
+            x = x + 20 + labels.top.w + 12,
             y = y + 15,
             alpha = fullAlpha,
           });
@@ -175,21 +175,21 @@ local SongGrid = {
           drawRect({
             x = x + 8,
             y = y + 8,
-            w = 98,
+            w = 86,
             h = 32,
             alpha = fullAlpha,
             color = 'dark',
           });
   
-          labels.best:draw({
+          labels.top:draw({
             x = x + 16,
             y = y + 12,
             alpha = 255 * alpha,
             color = 'white',
           });
   
-          labels[diff.best.place]:draw({
-            x = x + 16 + labels.best.w + 8,
+          labels[diff.top.place]:draw({
+            x = x + 16 + labels.top.w + 8,
             y = y + 12,
             alpha = fullAlpha,
           });
