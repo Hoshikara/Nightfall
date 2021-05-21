@@ -41,9 +41,6 @@ local players = nil;
 ---@type boolean
 local showHitDeltaBar = getSetting('showHitDeltaBar', true);
 
----@type boolean
-local showUserInfo = getSetting('showUserInfo', true);
-
 ---@class Gameplay
 local state = {
 	bpms = nil,
@@ -265,10 +262,7 @@ render = function(dt)
 		hitDeltaBar:render(dt);
 	end
 
-	if (showUserInfo
-		and (not gameplay.multiplayer)
-		and (gameplay.practice_setup == nil)
-	) then
+	if ((not gameplay.multiplayer) and (gameplay.practice_setup == nil)) then
 		userInfo:render();
 	end
 

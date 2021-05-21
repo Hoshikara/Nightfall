@@ -31,6 +31,14 @@ local Buttons = {
 				normal = Image:new('buttons/normal.png'),
 			},
 			margin = 0,
+			mainMenu = makeLabel(
+				'med',
+				{
+					{ color = 'norm', text = '[BACK]' },
+					{ color = 'white', text = 'MAIN MENU' },
+				},
+				20
+			),
 			mouse = mouse,
 			state = state,
 			window = window,
@@ -159,19 +167,20 @@ local Buttons = {
 							this.state:set({
 								currBtn = 1,
 								currPage = 'playOptions',
-								viewingInfo = true,
+								viewingPreview = true,
 							});
 						end,
-						label = makeLabel('med', 'PLAYER INFO'),
+						label = makeLabel('med', 'IN-GAME PREVIEW'),
 					},
 					{
 						event = function()
 							this.state:set({
 								currBtn = 1,
-								currPage = 'mainMenu',
+								currPage = 'playOptions',
+								viewingInfo = true,
 							});
 						end,
-						label = makeLabel('med', 'MAIN MENU'),
+						label = makeLabel('med', 'PLAYER INFO'),
 					},
 				},
 			};
@@ -194,7 +203,8 @@ local Buttons = {
 		local btns = this.btns[this.state.currPage];
 		local isNavigable = this.state.loaded
 			and (not this.state.viewingControls)
-			and (not this.state.viewingInfo);
+			and (not this.state.viewingInfo)
+			and (not this.state.viewingPreview);
 		local isActionable = isNavigable and (not this.state.promptUpdate);
 		local isActive = btn.event
 			== (isNavigable and btns[this.state.currBtn].event);
@@ -218,7 +228,7 @@ local Buttons = {
 		end
 
 		btn.label:draw({
-			x = x + (this.images.normal.w / 8),
+			x = x + (this.images.normal.w / 9),
 			y = y + (this.images.normal.h / 2) - 12,
 			alpha = 255 * ((isActionable and isActive and 1) or 0.2),
 			color = 'white',
@@ -237,10 +247,19 @@ local Buttons = {
 			this:drawBtn(i, btn);
 		end
 
+		if (this.state.currPage == 'playOptions') then
+			this.mainMenu:draw({
+				x = this.x[1] + 4,
+				y = this.window.h - (this.window.padding.y * 1.5),
+				alpha = 255,
+			});
+		end
+
 		if (this.state.loaded
+			and (not this.state.promptUpdate)
 			and (not this.state.viewingControls)
 			and (not this.state.viewingInfo)
-			and (not this.state.promptUpdate)
+			and (not this.state.viewingPreview)
 		) then
 			this.cursor:render(dt, {
 				curr = this.state.currBtn,

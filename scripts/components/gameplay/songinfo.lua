@@ -4,7 +4,10 @@ local Cursor = require('components/common/cursor');
 
 local floor = math.floor;
 
-local hispeedPos = getSetting('hispeedPos', 'BOTTOM');
+local hispeedX = getSetting('hispeedX', 0.5);
+local hispeedY = getSetting('hispeedY', 0.5);
+local showHispeed = getSetting('showHispeed', true);
+
 local ignoreChange = getSetting('ignoreSpeedChange', false);
 
 local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
@@ -103,39 +106,27 @@ local SongInfo = {
   ---@param this SongInfo
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
+      this.x = this.window.w / 32;
+
       if (this.window.isPortrait) then
         this.jacketSize = 208;
         this.maxWidth = this.window.w - (this.window.w / 16) - 28 - this.jacketSize;
 
         this.y = this.window.h / 14;
-        
-        if (hispeedPos == 'BOTTOM') then
-          this.hispeed.y = this.window.h - (this.window.h / 2.35) - this.y;
-        elseif (hispeedPos == 'MIDDLE') then
-          this.hispeed.y = this.window.h - (this.window.h / 1.85) - this.y;
-        elseif (hispeedPos == 'UPPER') then
-          this.hispeed.y = this.window.h - (this.window.h / 1.5) - this.y;
-        elseif (hispeedPos == 'UPPER+') then
-          this.hispeed.y = this.window.h - (this.window.h / 1.35) - this.y;
-        end
+
+        this.hispeed.y = ((this.window.h * 0.625) * hispeedY)
+          + (this.window.h * 0.125)
+          - this.y;
       else
         this.jacketSize = 135;
         this.maxWidth = (this.window.w / 4) - this.jacketSize;
 
         this.y = this.window.h / 20;
 
-        if (hispeedPos == 'BOTTOM') then
-          this.hispeed.y = this.window.h - (this.window.h / 3.35) - this.y;
-        elseif (hispeedPos == 'MIDDLE') then
-          this.hispeed.y = this.window.h - (this.window.h / 1.85) - this.y;
-        elseif (hispeedPos == 'UPPER') then
-          this.hispeed.y = this.window.h - (this.window.h / 1.35) - this.y;
-        elseif (hispeedPos == 'UPPER+') then
-          this.hispeed.y = this.window.h - (this.window.h / 1.15) - this.y;
-        end
+        this.hispeed.y = (this.window.h * hispeedY) - this.y;
       end
 
-      this.x = this.window.w / 32;
+      this.hispeed.x = (this.window.w * hispeedX) - this.x;
 
       this.cache.w = this.window.w;
       this.cache.h = this.window.h;
@@ -449,7 +440,7 @@ local SongInfo = {
           update = true,
         });
 
-        if (hispeedPos ~= 'OFF') then
+        if (showHispeed) then
           local color = 'white';
           local str = ('%.0f  (%.1f)'):format(
             gameplay.bpm * gameplay.hispeed,
@@ -469,7 +460,7 @@ local SongInfo = {
           end
         
           this.hispeed.valMiddle:draw({
-            x = (this.window.w / 2) - (this.window.w / 32),
+            x = this.hispeed.x,
             y = this.hispeed.y,
             alpha = alpha * (((color == 'white') and 0.65) or 0.9),
             align = 'middle',

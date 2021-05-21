@@ -1,3 +1,21 @@
+##### 1.1.5 - May 22, 2021
+- Added the `In-game Preview` screen, accessible by a button on the second menu page of the titlescreen
+  - Real-time preview of specific gameplay elements
+  - The following settings can be adjusted or enabled/disabled in this screen:
+    - `Early / Late` type and position
+    - `Hi-Speed` position
+    - `Score Difference` position
+    - `Hit Delta Bar` scale
+- Removed the following skin settings, in favor of new ones to work with the screen above
+  - `Early / Late Position`
+  - `Hi-Speed Position`
+  - `Score Difference Position`
+- Removed the option to enable/disable `User Info`, username will now always be shown
+- Removed the `Main Menu` button on the second menu page of the titlescreen, a button prompt will be shown instead
+
+##### 1.1.4 - May 21, 2021
+- Fixed laser texture segments being visible
+
 ##### 1.1.3 - May 21, 2021
 - Added a score check for song select Top 50 charts to prevent cases where charts would fall into the incorrect label breakpoint
 - Changed song select `BEST 20/50` label to `TOP 20/50`
