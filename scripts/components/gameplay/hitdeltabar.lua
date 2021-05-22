@@ -31,6 +31,7 @@ local HitDeltaBar = {
       x = { base = 0, near = 0 },
       y = 40,
       w = 0,
+      wBar = { 3, 2 },
       h = 30,
     };
 
@@ -68,17 +69,19 @@ local HitDeltaBar = {
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
       if (this.window.isPortrait) then
-        this.w = this.window.w * 0.495;
-        this.y = (this.window.h / 6) + 12;
+        this.w = this.window.w * 0.495 * hitDeltaBarScale;
+        this.y = this.window.h / 6;
       else
-        this.w = this.window.w / 3;
-        this.y = 40;
+        this.w = (this.window.w / 3) * hitDeltaBarScale;
+        this.y = 28;
       end
 
       this.x.base = this.window.w / 2;
       this.x.near = this.w / 4;
 
-      this.y = this.y * hitDeltaBarScale;
+      this.wBar[1] = 3 * hitDeltaBarScale;
+      this.wBar[2] = 2 * hitDeltaBarScale;
+      this.h = 30 * hitDeltaBarScale;
 
       this.critScale = (this.w / 4) / this.critWin;
       this.nearScale = (this.w / 4) / (this.nearWin - this.critWin);
@@ -96,9 +99,9 @@ local HitDeltaBar = {
     state.timer = to0(state.timer, dt, hitDecayTime);
 
     drawRect({
-      x = state.delta - 1,
-      y = -((this.h - 8) / 2),
-      w = 2,
+      x = state.delta - (this.wBar[2] / 2),
+      y = 4,
+      w = this.wBar[2],
       h = this.h - 8,
       alpha = 255 * (state.timer ^ 2),
       blendOp = gfx.BLEND_OP_LIGHTER,
@@ -174,11 +177,12 @@ local HitDeltaBar = {
 
     this:setSizes();
 
+    local w = this.wBar[1];
+    local h = this.h;
+
     gfx.Save();
 
     gfx.Translate(this.x.base, this.y);
-
-    gfx.Scale(hitDeltaBarScale, hitDeltaBarScale);
 
     for btn = 1, 6 do
       for _, state in ipairs(crit[btn]) do
@@ -191,91 +195,89 @@ local HitDeltaBar = {
     end
 
     drawRect({
-      x = -1.5,
-      y = -(this.h / 2),
-      w = 3,
-      h = this.h,
+      x = -(w / 2),
+      y = 0,
+      w = w,
+      h = h,
       alpha = 200,
       color = 'white',
     });
 
     drawRect({
-      x = -this.x.near - 1.5,
-      y = -(this.h / 2),
-      w = 3,
-      h = this.h,
+      x = -this.x.near - (w / 2),
+      y = 0,
+      w = w,
+      h = h,
       alpha = 100,
       color = this.colors.crit,
     });
 
     drawRect({
-      x = this.x.near - 1.5,
-      y = -(this.h / 2),
-      w = 3,
-      h = this.h,
+      x = this.x.near - (w / 2),
+      y = 0,
+      w = w,
+      h = h,
       alpha = 100,
       color = this.colors.crit,
     });
 
     drawRect({
-      x = -(this.w / 2) - 1.5,
-      y = -(this.h / 2),
-      w = 3,
-      h = this.h,
+      x = -(this.w / 2) - (w / 2),
+      y = 0,
+      w = w,
+      h = h,
       alpha = 100,
       color = this.colors.early,
     });
 
     drawRect({
-      x = (this.w / 2) - 1.5,
-      y = -(this.h / 2),
-      w = 3,
-      h = this.h,
+      x = (this.w / 2) - (w / 2),
+      y = 0,
+      w = w,
+      h = h,
       alpha = 100,
       color = this.colors.late,
     });
 
-    
     if (gameplay.progress > 0) then this.timer = to0(this.timer, dt, 1); end
 
     if (this.timer > 0) then
       this.labels.zero:draw({
         x = 0,
-        y = -this.h - 10,
-        align = 'center',
+        y = -16,
+        align = 'middle',
         alpha = alpha,
         color = 'white',
       });
 
       this.labels.critNeg:draw({
         x = -this.x.near - 1,
-        y = -this.h - 10,
-        align = 'center',
+        y = -16,
+        align = 'middle',
         alpha = alpha,
         color = this.colors.crit,
       });
 
-
       this.labels.critPos:draw({
         x = this.x.near,
-        y = -this.h - 10,
-        align = 'center',
+        y = -16,
+        align = 'middle',
         alpha = alpha,
         color = this.colors.crit,
       });
 
       this.labels.nearNeg:draw({
         x = -(this.w / 2) - 1,
-        y = -this.h - 10,
-        align = 'center',
+        y = -16,
+        align = 'middle',
         alpha = alpha,
         color = this.colors.early,
       });
 
       this.labels.nearPos:draw({
         x = this.w / 2,
-        y = -this.h - 10,
-        align = 'center',
+        y = -16,
+        align = 'middle',
         alpha = alpha,
         color = this.colors.late,
       });

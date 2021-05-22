@@ -1,5 +1,9 @@
----@type string
-local earlatePos = getSetting('earlatePos', 'BOTTOM');
+---@type number
+local earlateX = getSetting('earlateX', 0.5);
+local earlateY = getSetting('earlateY', 0.75);
+local earlateGap = getSetting('earlateGap', 0.25);
+local showEarlate = getSetting('showEarlate', true);
+
 ---@type string
 local earlateType = getSetting('earlateType', 'TEXT');
 
@@ -43,28 +47,14 @@ local Earlate = {
   ---@param this Earlate
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      this.x = this.window.w / 2;
+      this.offset = 0;
+
+      this.x = this.window.w * earlateX;
 
       if (this.window.isPortrait) then
-        if (earlatePos == 'BOTTOM') then
-          this.y = this.window.h - (this.window.h / 2.35);
-        elseif (earlatePos == 'MIDDLE') then
-          this.y = this.window.h - (this.window.h / 1.85);
-        elseif (earlatePos == 'UPPER') then
-          this.y = this.window.h - (this.window.h / 1.5);
-        elseif (earlatePos == 'UPPER+') then
-          this.y = this.window.h - (this.window.h / 1.35);
-        end
+        this.y = ((this.window.h * 0.625) * earlateY) + (this.window.h * 0.125);
       else
-        if (earlatePos == 'BOTTOM') then
-          this.y = this.window.h - (this.window.h / 3.35);
-        elseif (earlatePos == 'MIDDLE') then
-          this.y = this.window.h - (this.window.h / 1.85);
-        elseif (earlatePos == 'UPPER') then
-          this.y = this.window.h - (this.window.h / 1.35);
-        elseif (earlatePos == 'UPPER+') then
-          this.y = this.window.h - (this.window.h / 1.15);
-        end
+        this.y = this.window.h * earlateY;
       end
 
       if (earlateType == 'TEXT + DELTA') then
@@ -72,9 +62,9 @@ local Earlate = {
         this.textAlign = 'leftMid';
 
         if (this.window.isPortrait) then
-          this.offset = this.window.w / 5;
+          this.offset = this.window.w * (earlateGap * 0.4);
         else
-          this.offset = this.window.w / 11;
+          this.offset = this.window.w * (earlateGap * 0.25);
         end
       end
 
@@ -87,7 +77,7 @@ local Earlate = {
   ---@param this Earlate
   ---@param dt deltaTime
   render = function(this, dt)
-    if (earlatePos == 'OFF') then return; end
+    if (not showEarlate) then return; end
 
     this.state.timers.earlate = to0(this.state.timers.earlate, dt, 1);
 

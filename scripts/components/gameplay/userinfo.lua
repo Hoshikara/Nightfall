@@ -1,7 +1,7 @@
----@type string
-local scoreDiffPos = getSetting('scoreDiffPos', 'LEFT');
----@type boolean
-local showScoreDiff = getSetting('showScoreDiff', false);
+local scoreDiffX = getSetting('scoreDiffX', 0.05);
+local scoreDiffY = getSetting('scoreDiffY', 0.50);
+local showScoreDiff = getSetting('showScoreDiff', true);
+
 ---@type string
 local username = getSetting('displayName', 'GUEST');
 
@@ -18,18 +18,15 @@ local UserInfo = {
     ---@field window Window
     local t = {
       cache = { w = 0, h = 0 },
-      diff = {
-        large = {
-          makeLabel('num', '0', 50),
-          makeLabel('num', '0', 50),
-          makeLabel('num', '0', 50),
-        },
-        small = makeLabel('num', '0', 40),
+      num = {
+        makeLabel('num', '0', 50),
+        makeLabel('num', '0', 50),
+        makeLabel('num', '0', 50),
+        makeLabel('num', '0', 40),
       },
       isAdditive = nil,
       labels = {
         player = makeLabel('med', 'PLAYER'),
-        scoreDifference = makeLabel('med', 'SCORE DIFFERENCE'),
       },
       player = makeLabel(
         'norm',
@@ -62,41 +59,20 @@ local UserInfo = {
   ---@param this UserInfo
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-      local w = this.diff.large[1].w * 0.85;
+      local w = this.num[1].w * 0.85;
 
       this.x.base = this.window.w / 80;
 
       if (this.window.isPortrait) then
         this.y.base = this.window.h / 2.75;
+        this.y.diff = ((this.window.h * 0.625) * scoreDiffY)
+          + (this.window.h * 0.125);
       else
         this.y.base = this.window.h / 2.375;
+        this.y.diff = this.window.h * scoreDiffY;
       end
 
-      if (scoreDiffPos == 'LEFT') then
-        this.x.diff = 91;
-        this.y.diff = 0;
-      else
-        this.x.diff = (this.window.w / 2) - this.x.base;
-        this.y.diff = (this.window.h / 2) - this.y.base;
-
-        if (this.window.isPortrait) then
-          if (scoreDiffPos == 'TOP') then
-            this.y.diff = this.y.diff - (this.window.h * 0.25);
-          elseif (scoreDiffPos == 'MIDDLE') then
-            this.y.diff = this.y.diff + (this.window.h * 0.05);
-          elseif (scoreDiffPos == 'BOTTOM') then
-            this.y.diff = this.y.diff + (this.window.h * 0.165);
-          end
-        else
-          if (scoreDiffPos == 'TOP') then
-            this.y.diff = this.y.diff - (this.window.h * 0.35);
-          elseif (scoreDiffPos == 'MIDDLE') then
-            this.y.diff = this.y.diff + (this.window.h * 0.165);
-          elseif (scoreDiffPos == 'BOTTOM') then
-            this.y.diff = this.y.diff + (this.window.h * 0.35);
-          end
-        end
-      end
+      this.x.diff = (this.window.w * scoreDiffX) - this.x.base;
 
       this.x.num[1] = this.x.diff - (w * 1.75);
       this.x.num[2] = this.x.diff - (w * 0.6);
@@ -112,14 +88,12 @@ local UserInfo = {
 
   -- Draw the score difference
   ---@param this UserInfo
-  ---@param y number
   ---@param alpha number
-  drawScoreDiff = function(this, y, alpha)
-    y = ((scoreDiffPos == 'LEFT') and y) or this.y.diff;
-
+  drawScoreDiff = function(this, alpha)
     local abs = 0;
     local diff = 0;
     local prefix = 'plus';
+    local y = this.y.diff;
 
     if (this.isAdditive) then
       diff = this.state.score - gameplay.scoreReplays[1].currentScore;
@@ -149,27 +123,21 @@ local UserInfo = {
       });
     end
 
-    for i = 1, 3 do
-      this.diff.large[i]:draw({
+    for i, num in ipairs(this.num) do
+      local offset = ((i > 3) and 4.5) or 0;
+      local color = ((i < 4) and 'white')
+        or (((prefix == 'plus') and 'norm') or 'red');
+
+      num:draw({
         x = this.x.num[i],
-        y = y,
+        y = y + offset,
         align = 'middle',
         alpha = numAlpha[i],
-        color = 'white',
+        color = color,
         text = diffStr:sub(i + 1, i + 1),
         update = true,
       });
     end
-
-    this.diff.small:draw({
-      x = this.x.num[4],
-      y = y + 4.5,
-      align = 'middle',
-      alpha = numAlpha[4],
-      color = ((prefix == 'plus') and 'norm') or 'red',
-      text = diffStr:sub(5, 5),
-      update = true,
-    });
   end,
 
   -- Renders the current component
@@ -182,13 +150,13 @@ local UserInfo = {
     this:setSizes();
 
     local alpha = this.state.intro.alpha;
-    local y = 0;
+    local y = this.y.base;
 
     gfx.Save();
 
     gfx.Translate(
       this.x.base - ((this.window.w / 40) * this.state.intro.offset),
-      this.y.base
+      0
     );
 
     this.labels.player:draw({ y = y, alpha = alpha });
@@ -201,16 +169,8 @@ local UserInfo = {
       alpha = alpha,
     });
 
-    y = y + (this.player.h * 1.75);
-
     if (showScoreDiff and gameplay.scoreReplays[1]) then
-      if (scoreDiffPos == 'LEFT') then
-        this.labels.scoreDifference:draw({ y = y, alpha = alpha });
-
-        y = y + (this.labels.scoreDifference.h * 2.5);
-      end
-
-      this:drawScoreDiff(y, alpha);
+      this:drawScoreDiff(alpha);
     end
 
     gfx.Restore();

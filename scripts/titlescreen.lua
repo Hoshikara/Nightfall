@@ -5,6 +5,7 @@ local Window = require('common/window');
 
 local Buttons = require('components/titlescreen/buttons');
 local Controls = require('components/titlescreen/controls');
+local IngamePreview = require('components/titlescreen/ingamepreview');
 local PlayerInfo = require('components/titlescreen/playerinfo');
 local Title = require('components/titlescreen/title');
 local UpdatePrompt = require('components/titlescreen/updateprompt');
@@ -37,6 +38,7 @@ local state = {
 	viewingControls = false,
 	viewingCharts = false,
 	viewingInfo = false,
+	viewingPreview = false,
 
 	set = function(this, newState)
 		for k, v in pairs(newState) do this[k] = v; end
@@ -47,6 +49,7 @@ local state = {
 local controls = Controls:new(window, mouse, state);
 local buttons = Buttons:new(window, mouse, state);
 local knobs = Knobs:new(state);
+local ingamePreview = IngamePreview:new(window, mouse, state);
 local playerInfo = PlayerInfo:new(window, mouse, state);
 local title = Title:new(window, state);
 local updatePrompt = UpdatePrompt:new(window, mouse, state);
@@ -100,6 +103,8 @@ render = function(dt)
 		playerInfo:render(dt);
 	end
 
+	ingamePreview:render(dt);
+
 	gfx.Restore();
 end
 
@@ -125,6 +130,8 @@ button_pressed = function(btn)
 			state.viewingCharts = false;
 		elseif (state.viewingInfo) then
 			state:set({ currBtn = 1, viewingInfo = false });
+		elseif (state.viewingPreview) then
+			state:set({ currBtn = 1, viewingPreview = false });
 		elseif (state.btnEvent) then
 			state.btnEvent();
 		end
@@ -139,6 +146,8 @@ button_pressed = function(btn)
 			state:set({ currBtn = 1, viewingControls = false });
 		elseif (state.viewingInfo) then
 			state:set({ currBtn = 1, viewingInfo = false });
+		elseif (state.viewingPreview) then
+			state:set({ currBtn = 1, viewingPreview = false });
 		elseif (state.promptUpdate) then
 			state:set({ currBtn = 1, promptUpdate = false });
 		elseif (state.currPage == 'playOptions') then

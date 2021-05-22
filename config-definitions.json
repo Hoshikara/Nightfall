@@ -38,17 +38,10 @@
 	"////////// GAMEPLAY //////////": {
 		"type": "label"
 	},
-	"earlatePos": {
-		"type": "selection",
-		"label": "Early / Late Position",
-		"default": "BOTTOM",
-		"values": [
-			"OFF",
-			"BOTTOM",
-			"MIDDLE",
-			"UPPER",
-			"UPPER+"
-		]
+	"showEarlate": {
+		"label": "Show Early / Late Display",
+		"type": "bool",
+		"default": true
 	},
 	"earlateType": {
 		"type": "selection",
@@ -60,27 +53,56 @@
 			"TEXT + DELTA"
 		]
 	},
+	"earlateX": {
+		"type": "float",
+		"label": "Early / Late X-Position (%.2f)",
+		"default": 0.5,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"earlateY": {
+		"type": "float",
+		"label": "Early / Late Y-Position (%.2f)",
+		"default": 0.75,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"earlateGap": {
+		"type": "float",
+		"label": "Early / Late Text/Delta Gap (%.2f)",
+		"default": 0.4,
+		"min": 0.25,
+		"max": 1.0
+	},
 	"deltaFrom0": {
 		"label": "Show hit delta from 0 (instead of hit delta from critical window)",
 		"default": true,
 		"type": "bool"
 	},
-	"hispeedPos": {
-		"type": "selection",
-		"label": "Middle Hi-Speed Position (may overlap with Early / Late Position)",
-		"default": "MIDDLE",
-		"values": [
-			"OFF",
-			"BOTTOM",
-			"MIDDLE",
-			"UPPER",
-			"UPPER+"
-		]
+	"separator_mdu": {},
+	"showHispeed": {
+		"label": "Show Hi-Speed Display",
+		"type": "bool",
+		"default": true
+	},
+	"hispeedX": {
+		"type": "float",
+		"label": "Hi-Speed X-Position (%.2f)",
+		"default": 0.5,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"hispeedY": {
+		"type": "float",
+		"label": "Hi-Speed Y-Position (%.2f)",
+		"default": 0.5,
+		"min": 0.0,
+		"max": 1.0
 	},
 	"ignoreSpeedChange": {
 		"default": false,
 		"type": "bool",
-		"label": "Ignore incoming Hi-Speed changes for middle Hi-Speed"
+		"label": "Ignore incoming Hi-Speed changes"
 	},
 	"separator_iuw": {},
 	"showHitDeltaBar": {
@@ -103,26 +125,24 @@
 		"min": 2.0
 	},
 	"separator_wei": {},
-	"showUserInfo": {
-		"label": "Show Player Name and Score Difference",
-		"type": "bool",
-		"default": true
-	},
 	"showScoreDiff": {
 		"label": "Show Score Difference",
 		"type": "bool",
 		"default": true
 	},
-	"scoreDiffPos": {
-		"type": "selection",
-		"label": "Score Difference Position",
-		"default": "LEFT",
-		"values": [
-			"TOP",
-			"LEFT",
-			"MIDDLE",
-			"BOTTOM"
-		]
+	"scoreDiffX": {
+		"type": "float",
+		"label": "Score Difference X-Position (%.2f)",
+		"default": 0.05,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"scoreDiffY": {
+		"type": "float",
+		"label": "Score Difference Y-Position (%.2f)",
+		"default": 0.50,
+		"min": 0.0,
+		"max": 1.0
 	},
 	"separator_dofn": {},
 	"showPracticeControls": {
