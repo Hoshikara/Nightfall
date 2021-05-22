@@ -1,3 +1,6 @@
+##### 1.1.4 - May 21, 2021
+- Fixed laser texture segments being visible
+
 ##### 1.1.3 - May 21, 2021
 - Added a score check for song select Top 50 charts to prevent cases where charts would fall into the incorrect label breakpoint
 - Changed song select `BEST 20/50` label to `TOP 20/50`
