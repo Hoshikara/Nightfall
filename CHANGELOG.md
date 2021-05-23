@@ -1,3 +1,9 @@
+##### 1.1.6 - May 23, 2021
+- Modified song transition to show effector and illustrator
+- Fixed a challenge wheel error occuring after completing a challenge
+- Fixed best play jacket not updating when a new best play was set
+- Fixed landscape `In-game Preview` not showing chain
+
 ##### 1.1.5 - May 22, 2021
 - Added the `In-game Preview` screen, accessible by a button on the second menu page of the titlescreen
   - Real-time preview of specific gameplay elements

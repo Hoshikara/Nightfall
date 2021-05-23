@@ -298,7 +298,7 @@ render_intro = function(dt)
 		state.intro.offset = t ^ 4;
 	end
 
-	return state.timers.intro <= 0.75;
+	return state.timers.intro <= 1;
 end
 
 -- Called by the game every frame until it returns `true`

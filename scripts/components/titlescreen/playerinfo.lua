@@ -229,6 +229,7 @@ local PlayerInfo = {
 	loadInfo = function(this, t)
 		t = t or this;
 
+		t.jacket = nil;
 		t.bestPlay, t.top50 = Helpers.makeTop50(t.state.player.stats.top50);
 		t.clears, t.grades, t.scores =
 			Helpers.makeAllStats(t.state.player.stats.levels);

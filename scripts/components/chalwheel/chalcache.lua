@@ -94,7 +94,7 @@ local ChalCache = {
       local cachedChal = {
         charts = this:makeCharts(chal.charts),
         clear = this.clears[chal.topBadge],
-        grade = (chal.topBadge ~= 0) and makeLabel('norm', chal.grade, 30),
+        grade = makeLabel('norm', chal.grade or '', 30),
         missing = chal.missing_chart,
         pct = makeLabel('num', '0%', 30),
         reqs = getReqs(chal),
