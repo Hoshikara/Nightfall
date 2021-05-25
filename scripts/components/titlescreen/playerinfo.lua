@@ -98,8 +98,6 @@ local PlayerInfo = {
 			margin = 0,
 			maxWidth = { 0, 0 },
 			mouse = mouse,
-			playPage = 1,
-			playPages = 1,
 			pressedFXL = false,
 			pressedFXR = false,
 			state = state,
@@ -110,7 +108,6 @@ local PlayerInfo = {
 			top50PageMax = 3,
 			viewingTop50 = false,
 			window = window,
-			count = 0,
 			x = { 0, 0, 0 },
 			y = { 0, 0, 0 },
 			w = { 0, 0 },
@@ -229,6 +226,8 @@ local PlayerInfo = {
 	loadInfo = function(this, t)
 		t = t or this;
 
+		t.currFolder = 1;
+
 		t.jacket = nil;
 		t.bestPlay, t.top50 = Helpers.makeTop50(t.state.player.stats.top50);
 		t.clears, t.grades, t.scores =
@@ -245,6 +244,12 @@ local PlayerInfo = {
 		};
 
 		t.folders = {};
+		t.folderCache = {};
+
+		if (t.dropdown) then
+			t.dropdown.w = 0;
+			t.dropdown.h = 0;
+		end
 
 		for i, name in ipairs(t.state.player.stats.folders) do
 			local f = {

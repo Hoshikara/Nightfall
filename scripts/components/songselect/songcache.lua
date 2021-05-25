@@ -93,6 +93,7 @@ local SongCache = {
             cached.diffs[i].highScore = (diff.scores[1]
               and diff.scores[1].score)
               or 0;
+            cached.diffs[i].top = this:getTop(diff.id);
           end
         end
       end
@@ -126,7 +127,6 @@ local SongCache = {
       ---@class CachedDiff
       ---@field densityData number[]|nil
       local diff = {
-        top = this:getTop(curr.id),
         clear = this.clears[curr.topBadge],
         densityData = this.densities:get(false, key),
         densityNormalized = false,
@@ -137,6 +137,7 @@ local SongCache = {
         highScore = (curr.scores[1] and curr.scores[1].score) or 0,
         jacketPath = curr.jacketPath,
         level = makeLabel('num', ('%02d'):format(curr.level)),
+        top = this:getTop(curr.id),
       };
 
       d[i] = diff;

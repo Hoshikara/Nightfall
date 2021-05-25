@@ -1,3 +1,10 @@
+##### 1.1.7 - May 25, 2021
+- Fixed `TOP 20/50` label not appearing immediately after setting a play that would fall into either category
+- Fixed the following after reloading player info
+  - Folder dropdown height being increased
+  - Incorrect folder stats being shown
+  - Stale folder data (list of charts, clear/grade totals, etc.)
+
 ##### 1.1.6 - May 23, 2021
 - Modified song transition to show effector and illustrator
 - Fixed a challenge wheel error occuring after completing a challenge
