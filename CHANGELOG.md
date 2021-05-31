@@ -1,3 +1,8 @@
+##### 1.1.8 - May 30, 2021
+- Brightened laser textures slightly
+- Modified yellow laser textures to be less yellow
+- Reduced brightness of lasers that are missed
+
 ##### 1.1.7 - May 25, 2021
 - Fixed `TOP 20/50` label not appearing immediately after setting a play that would fall into either category
 - Fixed the following after reloading player info

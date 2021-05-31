@@ -29,15 +29,15 @@ void main() {
 	
 	float x = fsTex.x;
 
-	x -= (laserSize / 2);
-	x /= laserSize;
-	x += (laserSize / 2);
-
 	if (x < 0.0 || x > 1.0) {
-		target = vec4(0);
+		target = vec4(0.0);
 
 		return;
 	}
+
+	x -= (laserSize / 2);
+	x /= laserSize;
+	x += (laserSize / 2);
 
 	float y = 0.34 * ceil(float(hitState) / 2);
 
