@@ -69,7 +69,7 @@ local Graphs = {
       },
       buttons = {},
       data = nil,
-      histogramNormalized = false,
+      histSet = false,
       hitStatScale = nil,
       labels = {
         critical = makeLabel('med', 'CRITICAL', 20),
@@ -80,6 +80,7 @@ local Graphs = {
         mean = makeLabel('med', 'MEAN'),
         median = makeLabel('med', 'MEDIAN'),
       },
+      mode = 0,
       mouse = Mouse:new(),
       state = state,
       window = window,
@@ -346,48 +347,39 @@ local Graphs = {
   ---@param w number
   ---@param h number
   drawRight = function(this, x, y, w, h)
+    if (not this.hitStatScale) then this.hitStatScale = 1; end
+
     local histogram = this.data.histogram;
-    local max = floor(h / 2);
-    local mode = 0;
+    local scale = this.hitStatScale;
+    local max = floor(h / 2 / scale);
+    local mode = this.mode;
 
-    if (not this.histogramNormalized) then
-      if (not this.hitStatScale) then this.hitStatScale = 1; end
-
-      local hist = {};
-      local scale = this.hitStatScale;
+    if (not this.histSet) then
+      local m = 0;
 
       for i = (-max - 1), (max + 1) do
-        hist[floor(i * scale)] = histogram[i] or 0;
+        if (not histogram[i]) then histogram[i] = 0; end
       end
 
-      for i = (-max - 1), (max + 1) do
-        if (not hist[i]) then hist[i] = 0; end
+      for i = -max, max do
+        local count = histogram[i - 1] + (histogram[i] * 2) + histogram[i + 1];
+
+        if (count > m) then m = count; end
       end
 
-      this.data.histogram = hist;
-      this.histogramNormalized = true;
-
-      histogram = hist;
+      mode = m;
+      this.mode = m;
+      this.histSet = true;
     end
     
-    for i = -max, max do
-      if (histogram[i - 1] and histogram[i] and histogram[i + 1]) then
-        local count = histogram[i - 1] + (histogram[i] * 2) + (histogram[i + 1]);
-
-        if (count > mode) then mode = count; end
-      end
-    end
-
     gfx.BeginPath();
     setStroke({ color = 'norm', size = 1.5 });
     gfx.MoveTo(x, y);
 
     for i = -max, max do
-      if (histogram[i - 1] and histogram[i] and histogram[i + 1]) then
-        local count = histogram[i - 1] + (histogram[i] * 2) + (histogram[i + 1]);
+      local count = histogram[i - 1] + (histogram[i] * 2) + histogram[i + 1];
 
-        gfx.LineTo(x + (w * (count / mode)), y + (h / 2) + i);
-      end
+      gfx.LineTo(x + (w * (count / mode)), y + (h / 2) + (i * scale));
     end
 
     gfx.LineTo(x, y + h);

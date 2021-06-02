@@ -63,6 +63,7 @@ local SongInfo = {
         titleLg = makeLabel('jp', gameplay.title:upper(), 36),
       },
       maxWidth = 0,
+      playbackSpeed = makeLabel('num', '0', 24),
       state = state,
       sudden = {
         cutoff = {
@@ -349,10 +350,31 @@ local SongInfo = {
   ---@param y number
   ---@param alpha number
   drawBPM = function(this, x, y, alpha)
+    local bpm = gameplay.bpm;
     local xOffset = -72;
     local yOffset = this.bpm.label.h * 1.375;
   
     y = y + (this.labels.artist.h * 1.425);
+
+    if (gameplay.practice_setup ~= nil) then
+      local playbackSpeed = tonumber(getSetting('_playbackSpeed', '100'));
+
+      if (playbackSpeed) then
+        bpm = floor(bpm * (playbackSpeed / 100));
+
+        this.playbackSpeed:draw({
+          x = x + 8,
+          y = y,
+          align = 'left',
+          alpha = alpha,
+          color = 'white',
+          text = ('- %d%%'):format(playbackSpeed),
+          update = true,
+        });
+      end
+    end
+
+    bpm = ('%.0f'):format(bpm);
 
     this.bpm.val:draw({
       x = x,
@@ -360,7 +382,7 @@ local SongInfo = {
       align = 'right',
       alpha = alpha,
       color = 'white',
-      text = ('%.0f'):format(gameplay.bpm),
+      text = bpm,
       update = true,
     });
 

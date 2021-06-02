@@ -1,3 +1,9 @@
+##### 1.1.9 - June 2, 2021
+- Added a display for current playback speed during practice mode; the displayed BPM will also change accordingly
+- Fixed a dip occuring at 0 for the result histogram
+- Fixed player info being loaded when search input is active
+- Increased hit delta bar and laser slam animation queues to decrease chances of either not playing
+
 ##### 1.1.8 - May 30, 2021
 - Brightened laser textures slightly
 - Modified yellow laser textures to be less yellow

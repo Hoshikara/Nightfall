@@ -6,11 +6,16 @@ local PracticeSettings = require('components/gameplay/practicesettings');
 local window = Window:new();
 
 local scoreType = 'ADDITIVE';
-local songOffset = '0';
 local gameIdx = nil;
+local scoreIdx = nil;
+
 local offsetIdx = nil;
 local offsetsIdx = nil;
-local scoreIdx = nil;
+local songOffset = '0';
+
+local mainIdx = nil;
+local playbackIdx = nil;
+local playbackSpeed = '100';
 
 local timer = 0;
 
@@ -155,13 +160,39 @@ local getScoreType = function()
 	return scoreType;
 end
 
+local getPlaybackSpeed = function()
+	if (SettingsDiag.tabs[1].name ~= 'Main') then return playbackSpeed; end
+
+	if (mainIdx and playbackIdx) then
+		local setting = SettingsDiag.tabs[mainIdx].settings[playbackIdx];
+
+		if (setting) then return tostring(setting.value or playbackSpeed); end
+	end
+
+	for i, tab in ipairs(SettingsDiag.tabs) do
+		if (tab.name == 'Main') then
+			mainIdx = i;
+
+			for j, setting in ipairs(tab.settings) do
+				if (setting.name == 'Playback speed (%)') then
+					playbackIdx = j;
+
+					return tostring(setting.value or playbackSpeed);
+				end
+			end
+		end
+	end
+
+	return playbackSpeed;
+end
+
 local getSongOffset = function()
 	if (SettingsDiag.tabs[1].name == 'Main') then return songOffset; end
 
 	if (offsetsIdx and offsetIdx) then
 		local setting = SettingsDiag.tabs[offsetsIdx].settings[offsetIdx];
 
-		if (setting) then return setting.value or songOffset; end
+		if (setting) then return tostring(setting.value or songOffset); end
 	end
 
 	for i, tab in ipairs(SettingsDiag.tabs) do
@@ -172,7 +203,7 @@ local getSongOffset = function()
 				if (setting.name == 'Song Offset') then
 					offsetIdx = j;
 
-					return setting.value or songOffset;
+					return tostring(setting.value or songOffset);
 				end
 			end
 		end
@@ -267,16 +298,17 @@ local practiceSettings = nil;
 
 render = function(dt, displaying)
 	game.SetSkinSetting('_gameSettings', (displaying and 'TRUE') or 'FALSE');
+	game.SetSkinSetting('_playbackSpeed', getPlaybackSpeed());
 	game.SetSkinSetting('_scoreType', getScoreType());
-	game.SetSkinSetting('_songOffset', tostring(getSongOffset()));
+	game.SetSkinSetting('_songOffset', getSongOffset());
 
 	if (displaying) then timer = to1(timer, dt, 0.125); end
 
 	if ((timer > 0) and (not displaying)) then
 		timer = to0(timer, dt, 0.167);
-
-		if (timer == 0) then return; end
 	end
+
+	if (timer == 0) then return; end
 
 	state:watch();
 

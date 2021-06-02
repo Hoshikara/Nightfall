@@ -57,7 +57,7 @@ local LaserAnimation = {
       for _, part in pairs(t.states) do
         part[i] = {};
 
-        for j = 1, 8 do
+        for j = 1, 16 do
           part[i][j] = {
             frame = 1,
             pos = 0,

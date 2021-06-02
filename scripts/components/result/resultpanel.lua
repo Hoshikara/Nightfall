@@ -165,6 +165,7 @@ local ResultPanel = {
       this.y.text = (this.padding.y * 1.5) + this.jacketSize;
 
       this.graphs.hitStatScale = nil;
+      this.graphs.histSet = false;
       this.setGraph = true;
 
       this.cache.w = this.window.w;
@@ -177,10 +178,6 @@ local ResultPanel = {
   ---@param y number
   setGraphSizes = function(this, y)
     if (not this.setGraph) then return; end
-
-    -- if (this.window.isPortrait and (#this.state.scores == 0)) then
-    --   y = y + (this.h / 2) ;
-    -- end
 
     this.graphs.x = this.x.panel + (this.padding.x * 2);
 

@@ -76,7 +76,8 @@ local menusClosed = function()
 	return (getSetting('_filtering', 'FALSE') == 'FALSE')
 		and (getSetting('_sorting', 'FALSE') == 'FALSE')
 		and (getSetting('_gameSettings', 'FALSE') == 'FALSE')
-		and (getSetting('_collections', 'FALSE') == 'FALSE');
+		and (getSetting('_collections', 'FALSE') == 'FALSE')
+		and (not songwheel.searchInputActive);
 end
 
 -- Called by the game every frame

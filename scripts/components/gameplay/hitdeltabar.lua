@@ -47,7 +47,7 @@ local HitDeltaBar = {
       for btn = 1, 6 do
         rating[btn] = {};
 
-        for i = 1, 30 do
+        for i = 1, 40 do
           rating[btn][i] = {
             color = 'white',
             delta = 0,
