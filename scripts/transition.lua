@@ -1,5 +1,3 @@
-local Window = require('common/window');
-
 local window = Window:new();
 
 local bg = Image:new('bg.png');
@@ -21,7 +19,7 @@ local timers = {
 local drawTransition = function(dt, isIntro);
 	gfx.Save();
 
-	window:set(true);
+	window:set();
 
 	if (isIntro) then
 		timers.fade = to0(timers.fade, dt, (window.isPortrait and 0.4) or 0.67);

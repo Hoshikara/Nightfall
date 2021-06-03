@@ -5,8 +5,12 @@ return {
       name = 'GLOBAL  OFFSET',
       special = 'TIME',
     },
-    ['Input Offset'] = {
-      name = 'INPUT OFFSET',
+    ['Button Input Offset'] = {
+      name = 'BUTTON INPUT OFFSET',
+      special = 'TIME',
+    },
+    ['Laser Input Offset'] = {
+      name = 'LASER INPUT OFFSET',
       special = 'TIME',
     },
     ['Song Offset'] = {
@@ -91,6 +95,10 @@ return {
     },
     ['Hold Window'] = {
       name = 'HOLD WINDOW',
+      special = 'TIME WINDOW',
+    },
+    ['Slam Window'] = {
+      name = 'SLAM WINDOW',
       special = 'TIME WINDOW',
     },
     ['Set to NORMAL'] = { name = 'SET TO DEFAULT VALUES' },

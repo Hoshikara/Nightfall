@@ -1,5 +1,3 @@
-local Window = require('common/window');
-
 local Cursor = require('components/common/cursor');
 
 local Order = {
@@ -145,7 +143,7 @@ end
 ---@param dt deltaTime
 ---@param isIntro boolean
 local renderTransition = function(dt, isIntro);
-	window:set(true);
+	window:set();
 
 	handleTimers(dt, isIntro);
 

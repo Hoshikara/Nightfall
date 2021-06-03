@@ -59,6 +59,13 @@ CreateImage = function(filename, flags) end
 ---@param monospace boolean
 CreateLabel = function(text, size, monospace) end
 
+-- Creates a new `ShadedMesh` object
+---@param materialName string
+---@param path? string # Optional path to the material, loads from the current skin's `shaders` folder otherwise  
+-- `<materialName>.fs` and `<materialName>.vs` must exist at either location
+---@return ShadedMesh
+CreateShadedMesh = function(materialName, path) end
+
 -- Loads an image from the specified filename, prepended with `skins/<skin>/textures/`
 ---@param filename string
 ---@param flags? integer
@@ -507,6 +514,7 @@ gfx = {
   ClosePath = ClosePath,
   CreateImage = CreateImage,
   CreateLabel = CreateLabel,
+  CreateShadedMesh = CreateShadedMesh,
   CreateSkinImage = CreateSkinImage,
   DrawGauge = DrawGauge,
   DrawLabel = DrawLabel,

@@ -2,8 +2,6 @@
 
 local Sorts = require('constants/sorts');
 
-local Window = require('common/window');
-
 local Grid = require('components/common/grid');
 
 local min = math.min;
@@ -175,13 +173,13 @@ render = function(dt, isSorting)
 
 	gfx.Save();
 
-	window:set(false);
+	window:set(true);
 
 	grid:setSizes();
 
 	drawCurrSort(isSorting);
 
-	if (timers.expand == 0) then return end
+	if (timers.expand == 0) then return; end
 
 	window:scale();
 

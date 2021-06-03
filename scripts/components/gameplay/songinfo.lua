@@ -351,30 +351,27 @@ local SongInfo = {
   ---@param alpha number
   drawBPM = function(this, x, y, alpha)
     local bpm = gameplay.bpm;
+    local playbackSpeed = tonumber(getSetting('_playbackSpeed', '1'));
+    local playbackText = '';
     local xOffset = -72;
     local yOffset = this.bpm.label.h * 1.375;
   
     y = y + (this.labels.artist.h * 1.425);
 
-    if (gameplay.practice_setup ~= nil) then
-      local playbackSpeed = tonumber(getSetting('_playbackSpeed', '100'));
-
-      if (playbackSpeed) then
-        bpm = floor(bpm * (playbackSpeed / 100));
-
-        this.playbackSpeed:draw({
-          x = x + 8,
-          y = y,
-          align = 'left',
-          alpha = alpha,
-          color = 'white',
-          text = ('- %d%%'):format(playbackSpeed),
-          update = true,
-        });
-      end
+    if (playbackSpeed ~= 1) then
+      bpm = floor(bpm * (playbackSpeed / 100));
+      playbackText = ('- %d%%'):format(playbackSpeed);
     end
 
-    bpm = ('%.0f'):format(bpm);
+    this.playbackSpeed:draw({
+      x = x + 8,
+      y = y,
+      align = 'left',
+      alpha = alpha,
+      color = 'white',
+      text = playbackText,
+      update = true,
+    });
 
     this.bpm.val:draw({
       x = x,
@@ -382,7 +379,7 @@ local SongInfo = {
       align = 'right',
       alpha = alpha,
       color = 'white',
-      text = bpm,
+      text = ('%.0f'):format(bpm),
       update = true,
     });
 

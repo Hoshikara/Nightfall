@@ -1,5 +1,3 @@
-local Window = require('common/window');
-
 local GameSettings = require('components/songselect/gamesettings');
 local PracticeSettings = require('components/gameplay/practicesettings');
 
@@ -15,7 +13,7 @@ local songOffset = '0';
 
 local mainIdx = nil;
 local playbackIdx = nil;
-local playbackSpeed = '100';
+local playbackSpeed = '1';
 
 local timer = 0;
 
@@ -314,7 +312,7 @@ render = function(dt, displaying)
 
 	gfx.Save();
 
-	window:set();
+	window:set(true);
 
 	if (state.isSongSelect) then
 		if (not gameSettings) then

@@ -36,7 +36,23 @@ local Rooms = {
         create = makeLabel('med', 'CREATE ROOM'),
         heading = makeLabel('norm', 'MULTIPLAYER ROOMS', 60),
         name = makeLabel('med', 'NAME'),
+        nav = makeLabel(
+					'med',
+					{
+            { color = 'norm', text = '[KNOB-L]  /  [KNOB-R]' },
+						{ color = 'white', text = 'SELECT ROOM' },
+					},
+					20
+				),
         password = makeLabel('med', 'PASSWORD'),
+        start = makeLabel(
+					'med',
+					{
+            { color = 'norm', text = '[START]' },
+						{ color = 'white', text = 'ENTER ROOM' },
+					},
+					20
+				),
         status = makeLabel('med', 'STATUS'),
       },
       list = List:new(),
@@ -284,6 +300,16 @@ local Rooms = {
           });
         end
       end
+
+      this.labels.nav:draw({
+        x = this.window.padding.x + 4,
+        y = this.window.h - this.window.padding.y - (this.labels.nav.h * 3),
+      });
+
+      this.labels.start:draw({
+        x = this.window.padding.x + 4,
+        y = this.window.h - this.window.padding.y - (this.labels.nav.h * 1.5),
+      });
     end
 
     if (not this.state.loading) then this:drawBtn(isSelecting); end

@@ -1,5 +1,3 @@
-local Window = require('common/window');
-
 local Cursor = require('components/common/cursor');
 local DialogBox = require('components/common/dialogbox');
 local Scrollbar = require('components/common/scrollbar');
@@ -390,7 +388,7 @@ render = function(dt)
 
 	gfx.Save();
 
-	window:set(true);
+	window:set();
 
 	dialogWindow:render(dt);
 

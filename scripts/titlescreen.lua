@@ -1,7 +1,6 @@
 local JSONTable = require('common/jsontable');
 local Knobs = require('common/knobs');
 local Mouse = require('common/mouse');
-local Window = require('common/window');
 
 local Buttons = require('components/titlescreen/buttons');
 local Controls = require('components/titlescreen/controls');
@@ -79,7 +78,7 @@ render = function(dt)
 
 	gfx.Save();
 
-	window:set(true);
+	window:set();
 
 	if (window.isPortrait) then
 		bgPortrait:draw({ w = window.w, h = window.h });

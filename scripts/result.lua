@@ -2,8 +2,6 @@
 
 local Helpers = require('helpers/result');
 
-local Window = require('common/window');
-
 local ResultPanel = require('components/result/resultpanel');
 local ScoreList = require('components/result/scorelist');
 local Screenshot = require('components/result/screenshot');
@@ -78,7 +76,7 @@ end
 -- Called by the game every frame
 ---@param dt deltaTime
 render = function(dt)
-	window:set(true);
+	window:set();
 
 	if (window.isPortrait) then
 		bgPortrait:draw({ w = window.w, h = window.h });

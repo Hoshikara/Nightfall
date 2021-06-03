@@ -4,8 +4,6 @@
 
 local Helpers = require('helpers/challengeresult');
 
-local Window = require('common/window');
-
 local window = Window:new(true);
 
 local bg = Image:new('bg.png');
@@ -39,7 +37,7 @@ end
 ---@param dt deltaTime
 ---@param scroll number
 render = function(dt, scroll)
-	window:set(true);
+	window:set();
 
 	if (window.isPortrait) then
 		bgPortrait:draw({ w = window.w, h = window.h });

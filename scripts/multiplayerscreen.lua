@@ -4,7 +4,6 @@ local JSON = require('lib/json');
 
 local Knobs = require('common/knobs');
 local Mouse = require('common/mouse');
-local Window = require('common/window');
 
 local DialogWindow = require('components/multiplayer/dialogwindow');
 local Lobby = require('components/multiplayer/lobby');
@@ -13,9 +12,6 @@ local Sounds = require('components/multiplayer/sounds');
 
 local window = Window:new();
 local mouse = Mouse:new(window);
-
-local allowHardToggle = getSetting('toggleHard', false);
-local allowMirrorToggle = getSetting('toggleMirror', false);
 
 local bg = Image:new('bg.png');
 local bgPortrait = Image:new('bg_p.png');
@@ -47,21 +43,6 @@ local state = {
 		name = '',
 		ready = false,
 	},
-
-	exit = function(this, inLobby)
-		if (inLobby) then
-			screenState = 'roomList';
-
-			this.currRoom = 1;
-			this.roomList = {};
-
-			this.lobby.jacket = nil;
-		else
-			this.exited = true;
-
-			mpScreen.Exit();
-		end
-	end,
 
 	joinRoom = function(this)
 		local room = this.roomList[this.currRoom];
@@ -117,12 +98,6 @@ local state = {
 	watch = function(this)
 		this.roomCount = #this.roomList;
 		this.lobby.userCount = #this.lobby.users;
-
-		if (this.currRoom > this.roomCount) then
-			this.currRoom = 1;
-		elseif (this.currRoom < 1) then
-			this.currRoom = this.roomCount;
-		end
 	end,
 };
 
@@ -136,6 +111,8 @@ local makeUsername = DialogWindow:new(window, Constants.dialog.makeUsername);
 local rooms = Rooms:new(window, mouse, state);
 local sounds = Sounds:new();
 
+-- Called by the game every frame
+---@param dt deltaTime
 render = function(dt)
 	mouse:watch();
 
@@ -143,7 +120,7 @@ render = function(dt)
 
 	gfx.Save();
 
-	window:set(true)
+	window:set();
 
 	state.btnEvent = nil;
 
@@ -176,7 +153,7 @@ render = function(dt)
 	sounds:play(dt);
 end
 
-button_pressed = function(btn)
+button_released = function(btn)
 	if (btn == game.BUTTON_STA) then
 		if (state.lobby.starting) then return; end
 
@@ -209,41 +186,26 @@ button_pressed = function(btn)
 		end
 	end
 
-	if ((btn == game.BUTTON_FXL) and allowHardToggle) then state:toggleHard(); end
-
-	if ((btn == game.BUTTON_FXR) and allowMirrorToggle) then
-		state:toggleMirror();
-	end
-end
-
-key_pressed = function(key)
-	if (key == Constants.keys.esc) then
+	if (btn == game.BUTTON_BCK) then
 		if (screenState == 'roomList') then
 			state.exited = true;
 
 			mpScreen.Exit();
 
 			return;
-		else
-			screenState = 'roomList';
-
-			state.currRoom = 1;
-			state.roomList = {};
-
-			state.lobby.jacket = nil;
 		end
-	end
 
-	if (screenState == 'roomList') then
-		if (key == Constants.keys.down) then
-			state.currRoom = state.currRoom + 1;
-		elseif (key == Constants.keys.up) then
-			state.currRoom = state.currRoom - 1;
-		elseif (key == Constants.keys.enter) then
-			state:joinRoom();
-		end
+		screenState = 'roomList';
+		selected_song = nil;
+
+		state.currRoom = 1;
+		state.roomList = {};
+
+		state.lobby.jacket = nil;
 	end
 end
+
+key_pressed = function(key) end
 
 mouse_pressed = function(btn)
 	if (state.btnEvent) then state:btnEvent(); end

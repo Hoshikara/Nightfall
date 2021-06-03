@@ -193,7 +193,7 @@ return {
     local which = (SettingsDiag.tabs[1].settings[5].value and 'fxlfxr')
       or 'backesc';
     local x1 = this.x.left[1];
-    local x2 = this.x.left[2]+ 56;
+    local x2 = this.x.left[2]+ 48;
     local y = this.y.navigation - (this.controls.fxl.h * 1.875);
 
     this.controls.fxl:draw({
@@ -298,7 +298,7 @@ return {
 
     this.setup.heading:draw({
       x = x - 2,
-      y = this.y.panel[2] + ((this.window.isPortrait and 8) or 0),
+      y = this.y.panel[2] + 8,
       alpha = alpha,
     });
 
@@ -348,7 +348,7 @@ return {
     gfx.Save();
 
     drawRect({
-      x = this.x.left[1],
+      x = 0,
       y = this.y.panel[1],
       w = this.w,
       h = this.h,
@@ -358,7 +358,7 @@ return {
 
     heading:draw({
       x = this.x.left[1] - 2,
-      y = this.y.panel[1],
+      y = this.y.panel[1] + 8,
       alpha = 255 * timer,
     });
 

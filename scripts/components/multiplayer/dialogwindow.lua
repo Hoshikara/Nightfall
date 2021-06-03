@@ -5,8 +5,8 @@ local DialogWindow = {
 	confirm = makeLabel(
 		'med',
 		{
-			{ color = 'norm', text = '[ENTER]' },
 			{ color = 'white', text = 'CONFIRM' },
+			{ color = 'norm', text = '[ENTER]' },
 		}
 	),
 	dialogBox = DialogBox:new(),

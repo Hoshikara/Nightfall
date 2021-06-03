@@ -6,7 +6,6 @@ game.LoadSkinSample('click_song');
 local Helpers = require('helpers/songwheel');
 
 local JSONTable = require('common/jsontable');
-local Window = require('common/window');
 
 local MiscInfo = require('components/songselect/miscinfo');
 local SongCache = require('components/songselect/songcache');
@@ -101,7 +100,7 @@ render = function(dt)
 
 	state:watch();
 
-	window:set(true);
+	window:set();
 
 	gfx.Save();
 

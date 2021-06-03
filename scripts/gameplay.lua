@@ -2,8 +2,6 @@
 
 local JSON = require('lib/JSON');
 
-local Window = require('common/window');
-
 local BPMS = require('components/gameplay/bpms');
 local Chain = require('components/gameplay/chain');
 local Earlate = require('components/gameplay/earlate');
@@ -145,7 +143,7 @@ end
 -- Drawn before built-in particle effects
 ---@param dt deltaTime
 render_crit_base = function(dt)
-	window:set();
+	window:set(true);
 
 	setupCritTransform();
 
@@ -238,7 +236,7 @@ end
 render = function(dt)
 	gfx.ResetTransform();
 
-	window:set(true);
+	window:set();
 
 	bpms:get(dt);
 

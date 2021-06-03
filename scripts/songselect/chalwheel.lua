@@ -2,8 +2,6 @@
 
 game.LoadSkinSample('click_song');
 
-local Window = require('common/window');
-
 local ChalCache = require('components/chalwheel/chalcache');
 local ChalList = require('components/chalwheel/challist');
 local ChalPanel = require('components/chalwheel/chalpanel');
@@ -35,7 +33,7 @@ render = function(dt)
     init = false;
   end
 
-  window:set(true);
+  window:set();
 
   gfx.Save();
 

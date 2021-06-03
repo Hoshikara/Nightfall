@@ -1,3 +1,11 @@
+##### 1.1.10 - June 8, 2021
+- `Multiplayer` changes:
+  - Added control hints for selecting and entering a room when viewing the room list
+  - Removed the ability to toggle hard gauge and mirror with `FX-L` / `FX-R` as they conflicted with the controls to open the game settings window
+  - Removed the respective skin settings for the change above
+- Fixed the gap on the left side of the practice mode window
+- Potentially fixed a crash that occurred when entering and starting practice mode
+
 ##### 1.1.9 - June 2, 2021
 - Added a display for current playback speed during practice mode; the displayed BPM will also change accordingly
 - Fixed a dip occuring at 0 for the result histogram

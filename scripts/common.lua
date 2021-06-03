@@ -1,12 +1,13 @@
 -- This script is loaded for every screen of the game
 -- All of the functions below are available to all of the scripts of the skin
 
-SkinVersion = '1.1.9';
+SkinVersion = '1.1.10';
 
 gfx.LoadSkinFont('DFMGM.ttf');
 
 Image = require('common/image');
 Label = require('common/label');
+Window = require('common/window');
 
 local Constants = require('constants/common');
 local Alignments = Constants.Alignments;

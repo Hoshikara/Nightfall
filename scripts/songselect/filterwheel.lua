@@ -1,7 +1,6 @@
 -- Global `filters` table is available for this script
 
 local JSONTable = require('common/jsontable');
-local Window = require('common/window');
 
 local Grid = require('components/common/grid');
 local Scrollbar = require('components/common/scrollbar');
@@ -464,7 +463,7 @@ render = function(dt, isFiltering)
 	
 	gfx.Save();
 
-	window:set(false);
+	window:set(true);
 
 	grid:setSizes();
 

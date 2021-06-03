@@ -203,19 +203,5 @@
 			"FULLSCREEN",
 			"PANEL"
 		]
-	},
-	"separator_e": {},
-	"////////// MULTIPLAYER //////////": {
-		"type": "label"
-	},
-	"toggleHard": {
-		"label": "Toggle Hard Gauge when [FX-L] is pressed",
-		"type": "bool",
-		"default": true
-	},
-	"toggleMirror": {
-		"label": "Toggle Mirror Mode when [FX-R] is pressed",
-		"type": "bool",
-		"default": true
 	}
 }

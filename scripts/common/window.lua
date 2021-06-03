@@ -39,8 +39,8 @@ local Window = {
 
   -- Sets the scaling factor, scaled width, and scaled height for the current window
   ---@param this Window
-  ---@param scale boolean
-  set = function(this, scale)
+  ---@param dontScale boolean
+  set = function(this, dontScale)
     local resX, resY = game.GetResolution();
 
     if ((this.resX ~= resX) or (this.resY ~= resY)) then
@@ -71,7 +71,7 @@ local Window = {
       this.resY = resY;
     end
 
-    if (scale) then this:scale(); end
+    if (not dontScale) then this:scale(); end
   end,
 };
 
