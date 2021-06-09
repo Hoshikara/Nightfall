@@ -4,6 +4,8 @@ local JSON = require('lib/JSON');
 
 local BPMS = require('components/gameplay/bpms');
 local Chain = require('components/gameplay/chain');
+local Console = require('components/gameplay/console');
+local CritBar = require('components/gameplay/critbar');
 local Earlate = require('components/gameplay/earlate');
 local GaugeBar = require('components/gameplay/gaugebar');
 local HitAnimation = require('components/gameplay/hitanimation');
@@ -19,12 +21,7 @@ local UserInfo = require('components/gameplay/userinfo');
 
 local window = Window:new();
 
-local critBar = Image:new('gameplay/crit_bar.png');
-
 local critWindow = nil;
-
-local console = Image:new('gameplay/console/console.png');
-local consoleFront = Image:new('gameplay/console/console_front.png');
 
 ---@type boolean
 local deltaFrom0 = getSetting('deltaFrom0', true);
@@ -61,6 +58,8 @@ local state = {
 -- Gameplay components
 local bpms = BPMS:new(state);
 local chain = nil;
+local console = Console:new(window, state);
+local critBar = CritBar:new(window);
 local earlate = nil;
 local gaugeBar = nil;
 local hitAnimation = HitAnimation:new(window);
@@ -147,34 +146,7 @@ render_crit_base = function(dt)
 
 	setupCritTransform();
 
-	gfx.Translate(gameplay.critLine.xOffset * 10, 0);
-
-	local w = (window.w * ((window.isPortrait and 1.02) or 0.9)) * window:getScale();
-	local h = 14 * window:getScale();
-
-	drawRect({
-		x = -window.w,
-		y = h / 2,
-		w = window.w * 2,
-		h = window.h,
-		alpha = 200,
-		color = 'black',
-	});
-
-	critBar:draw({
-		w = w,
-		h = h,
-		blendOp = gfx.BLEND_OP_LIGHTER,
-		centered = true,
-	});
-
-	critBar:draw({
-		w = w,
-		h = h,
-		alpha = 0.5,
-		blendOp = gfx.BLEND_OP_SOURCE_OVER,
-		centered = true,
-	});
+	critBar:render(dt);
 
 	gfx.ResetTransform();
 end
@@ -191,18 +163,7 @@ render_crit_overlay = function(dt)
 
 	setupCritTransform();
 
-	if (window.isPortrait) then
-		gfx.Scale(scale, scale);
-
-		consoleFront:draw({
-			x = -(consoleFront.w  / 2),
-			y = consoleFront.h / 2.4,
-		});
-
-		console:draw({ x = -(console.w / 2)	});
-
-		gfx.Scale(1 / scale, 1 / scale);
-	end
+	if (window.isPortrait) then console:render(dt); end
 
 	for i = 0, 1 do
 		local curr = gameplay.critLine.cursors[i];

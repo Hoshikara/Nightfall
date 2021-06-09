@@ -293,6 +293,7 @@ end
 
 local gameSettings = nil;
 local practiceSettings = nil;
+local notMulti = nil;
 
 render = function(dt, displaying)
 	game.SetSkinSetting('_gameSettings', (displaying and 'TRUE') or 'FALSE');
@@ -308,11 +309,18 @@ render = function(dt, displaying)
 
 	if (timer == 0) then return; end
 
+	if (notMulti == nil) then
+		local settings = (SettingsDiag.tabs[3] and SettingsDiag.tabs[3].settings)
+			or {};
+
+		notMulti = #settings > 2;
+	end
+
 	state:watch();
 
 	gfx.Save();
 
-	window:set(true);
+	window:set(notMulti);
 
 	if (state.isSongSelect) then
 		if (not gameSettings) then

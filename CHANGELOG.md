@@ -1,3 +1,10 @@
+##### 1.1.11 - June 9, 2021
+- Portrait-specific changes:
+  - Added button lights to the console
+  - Added knob animations to indicate active state and upcoming lasers
+  - Separated console and console front textures so they respond to tilt effects properly
+- Fixed scaling issue for game settings window during multiplayer
+
 ##### 1.1.10 - June 8, 2021
 - `Multiplayer` changes:
   - Added control hints for selecting and entering a room when viewing the room list

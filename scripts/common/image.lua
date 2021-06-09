@@ -55,9 +55,7 @@ local Image = {
 
 		gfx.BeginPath();
 
-		if (params.blendOp) then
-			gfx.GlobalCompositeOperation(params.blendOp);
-		end
+		gfx.GlobalCompositeOperation(params.blendOp or 0);
 
 		if (params.tint) then
 			gfx.SetImageTint(params.tint[1], params.tint[2], params.tint[3]);
