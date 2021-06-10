@@ -63,18 +63,17 @@ local Animation = {
   start = function(this, dt, state, effect)
     state.timer = state.timer + dt;
 
-    if (state.timer > this.frameTime) then
+    if (state.timer >= this.frameTime) then
       state.frame = state.frame + 1;
       state.timer = 0;
     end
 
-    if (state.timer < this.frameTime) then
-      this.frames[state.frame]:draw({
-        blendOp = this.blendOp,
-        centered = this.centered,
-        scale = this.scale,
-      });
-    end
+    this.frames[state.frame]:draw({
+      alpha = state.alpha or this.alpha,
+      blendOp = this.blendOp,
+      centered = this.centered,
+      scale = this.scale,
+    });
 
     if (state.frame == this.frameCount) then
       if (this.loop) then

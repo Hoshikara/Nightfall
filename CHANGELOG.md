@@ -1,3 +1,11 @@
+##### 1.1.12 - June 10, 2021
+- Added a new gauge text to indicate if ARS is enabled
+- Added a new ring animation for holds and lasers
+- Added a new start and ending animation for holds
+- Added new skin settings to select the color for the laser ring, tail, and slam animations (no effect on laser cursor and alert colors)
+- Removed optional laser animation colors as a result of the changes above
+- Removed several images used for animations as a result of the changes above
+
 ##### 1.1.11 - June 9, 2021
 - Portrait-specific changes:
   - Added button lights to the console

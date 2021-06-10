@@ -1,19 +1,9 @@
 local GameSettings = require('components/songselect/gamesettings');
 local PracticeSettings = require('components/gameplay/practicesettings');
 
+local makeParser = require('helpers/gamesettings');
+
 local window = Window:new();
-
-local scoreType = 'ADDITIVE';
-local gameIdx = nil;
-local scoreIdx = nil;
-
-local offsetIdx = nil;
-local offsetsIdx = nil;
-local songOffset = '0';
-
-local mainIdx = nil;
-local playbackIdx = nil;
-local playbackSpeed = '1';
 
 local timer = 0;
 
@@ -128,87 +118,10 @@ local state = {
 	end,
 };
 
-local getScoreType = function()
-	if (SettingsDiag.tabs[1].name == 'Main') then return scoreType; end
-
-	if (gameIdx and scoreIdx) then
-		local setting = SettingsDiag.tabs[gameIdx].settings[settingIdx];
-		
-		if (setting and setting.options and setting.value) then
-			return (setting.options[setting.value] or scoreType):upper();
-		end
-	end
-
-	for i, tab in ipairs(SettingsDiag.tabs) do
-		if (tab.name == 'Game') then
-			gameIdx = i;
-
-			for j, setting in ipairs(tab.settings) do
-				if (setting.name == 'Score Display') then
-					scoreIdx = j;
-
-					if (setting.options and setting.value) then
-						return (setting.options[setting.value] or scoreType):upper();
-					end
-				end
-			end
-		end
-	end
-
-	return scoreType;
-end
-
-local getPlaybackSpeed = function()
-	if (SettingsDiag.tabs[1].name ~= 'Main') then return playbackSpeed; end
-
-	if (mainIdx and playbackIdx) then
-		local setting = SettingsDiag.tabs[mainIdx].settings[playbackIdx];
-
-		if (setting) then return tostring(setting.value or playbackSpeed); end
-	end
-
-	for i, tab in ipairs(SettingsDiag.tabs) do
-		if (tab.name == 'Main') then
-			mainIdx = i;
-
-			for j, setting in ipairs(tab.settings) do
-				if (setting.name == 'Playback speed (%)') then
-					playbackIdx = j;
-
-					return tostring(setting.value or playbackSpeed);
-				end
-			end
-		end
-	end
-
-	return playbackSpeed;
-end
-
-local getSongOffset = function()
-	if (SettingsDiag.tabs[1].name == 'Main') then return songOffset; end
-
-	if (offsetsIdx and offsetIdx) then
-		local setting = SettingsDiag.tabs[offsetsIdx].settings[offsetIdx];
-
-		if (setting) then return tostring(setting.value or songOffset); end
-	end
-
-	for i, tab in ipairs(SettingsDiag.tabs) do
-		if (tab.name == 'Offsets') then
-			offsetsIdx = i;
-
-			for j, setting in ipairs(tab.settings) do
-				if (setting.name == 'Song Offset') then
-					offsetIdx = j;
-
-					return tostring(setting.value or songOffset);
-				end
-			end
-		end
-	end
-
-	return songOffset;
-end
+local arsEnabled = makeParser('Offsets', 'false', 'Game', 'Backup Gauge');
+local playbackSpeed = makeParser('Main', '1', 'Main', 'Playback speed (%)');
+local scoreType = makeParser('Offsets', 'ADDITIVE', 'Game', 'Score Display');
+local songOffset = makeParser('Offsets', '0', 'Offsets', 'Song Offset');
 
 local makeSettings = function(Constants)
 	local s = {
@@ -296,10 +209,11 @@ local practiceSettings = nil;
 local notMulti = nil;
 
 render = function(dt, displaying)
+	game.SetSkinSetting('_arsEnabled', tostring(arsEnabled:get()));
 	game.SetSkinSetting('_gameSettings', (displaying and 'TRUE') or 'FALSE');
-	game.SetSkinSetting('_playbackSpeed', getPlaybackSpeed());
-	game.SetSkinSetting('_scoreType', getScoreType());
-	game.SetSkinSetting('_songOffset', getSongOffset());
+	game.SetSkinSetting('_playbackSpeed', tostring(playbackSpeed:get()));
+	game.SetSkinSetting('_scoreType', scoreType:get():upper());
+	game.SetSkinSetting('_songOffset', tostring(songOffset:get()));
 
 	if (displaying) then timer = to1(timer, dt, 0.125); end
 

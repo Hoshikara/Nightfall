@@ -1,26 +1,16 @@
-The following must be renamed to include the appropriate suffix depending on the side you want to use it on; an example for changing the right laser:
-    "laser.png" -> "laser_r.png"
-    "laser_exit.png" -> "laser_exit_r.png"
-    "tail.png" -> "tail_r.png"
-    "laser" (folder) -> "laser_r"
+The following must be renamed to include the appropriate suffix depending on the side you want to use it on, e.g:
+    "laser.png" -> "laser_l.png" or "laser_r.png"
+    "laser_exit.png" -> "laser_exit_l.png" or "laser_exit_l.png"
 
-For the left side, the suffix is "_l" instead of "_r"
-
-This does not apply to "laser_entry_l.png" or "laser_entry_r.png", just copy over the one you want to use
+This does not apply to "laser_entry_l.png" or "laser_entry_r.png", just choose over the one you want to use
 
 The textures inside the "tracks" folder must be renamed to "track.png", just choose the texture with the correct corresponding colors
 
 The following files go into .../textures/
-    "laser_r.png"
-    "laser_entry_r.png"
-    "laser_exit_r.png"
+    "laser_l.png" or "laser_r.png"
+    "laser_entry_l.png" or "laser_entry_l.png"
+    "laser_exit_l.png" or "laser_exit_r.png"
     "track.png"
-
-This file goes into .../textures/gameplay/laser_cursor/
-    "tail_r.png"
-
-This folder goes into .../textures/gameplay/hit_animation/
-    "laser_r"
 
 Accept all file overwrites
 

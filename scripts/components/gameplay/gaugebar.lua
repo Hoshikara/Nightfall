@@ -23,6 +23,7 @@ local GaugeBar = {
       cache = { w = 0, h = 0 },
       gaugeType = nil,
       labels = {
+        ars = makeLabel('norm', 'EXCESSIVE RATE + ARS'),
         effective = makeLabel('norm', 'EFFECTIVE RATE'),
         excessive = makeLabel('norm', 'EXCESSIVE RATE'),
         pct = makeLabel('num', '0', 24),
@@ -119,6 +120,7 @@ local GaugeBar = {
     this.alpha = abs(1 * cos(this.timer * 2));
 
     local alpha = this.state.intro.alpha;
+    local ars = getSetting('_arsEnabled', 'false') == 'true';
     local color = { 255, 255, 255 };
     local gauge = { type = 0, val = 0 };
     local gaugeAlpha = 255;
@@ -223,7 +225,7 @@ local GaugeBar = {
         color = 'white',
       });
     else
-      this.labels.excessive:draw({
+      ((ars and this.labels.ars) or this.labels.excessive):draw({
         x = -3,
         y = -this.labels.excessive.h - 29,
         alpha = alpha,

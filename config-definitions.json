@@ -38,6 +38,29 @@
 	"////////// GAMEPLAY //////////": {
 		"type": "label"
 	},
+	"leftColor": {
+		"label": "Left Laser Animation Color",
+		"type": "selection",
+		"default": "BLUE",
+		"values": [
+			"RED",
+			"GREEN",
+			"BLUE",
+			"YELLOW"
+		]
+	},
+	"rightColor": {
+		"label": "Right Laser Animation Color",
+		"type": "selection",
+		"default": "RED",
+		"values": [
+			"RED",
+			"GREEN",
+			"BLUE",
+			"YELLOW"
+		]
+	},
+	"separator_mcv": {},
 	"showEarlate": {
 		"label": "Show Early / Late Display",
 		"type": "bool",

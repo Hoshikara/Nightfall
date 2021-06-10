@@ -1,5 +1,7 @@
 local Animation = require('common/animation');
 
+local RingAnimation = require('components/gameplay/ringanimation');
+
 -- Lane position map
 local Lanes = {
   1.5 / 6,
@@ -28,47 +30,7 @@ local HitAnimation = {
         path = 'gameplay/hit_animation/critical',
         scale = 0.65,
       }),
-      hold = {
-        ending = Animation:new({
-          alpha = 1.5,
-          centered = true,
-          blendOp = gfx.BLEND_OP_LIGHTER,
-          fps = 38,
-          frameCount = 8,
-          path = 'gameplay/hit_animation/hold/ending',
-          scale = 0.625,
-        }),
-        inner = Animation:new({
-          alpha = 1.35,
-          centered = true,
-          blendOp = gfx.BLEND_OP_LIGHTER,
-          fps = 38,
-          frameCount = 14,
-          loop = true,
-          loopPoint = 10,
-          path = 'gameplay/hit_animation/hold/inner',
-          scale = 0.625,
-        }),
-        outer = Animation:new({
-          alpha = 1.5,
-          centered = true,
-          blendOp = gfx.BLEND_OP_LIGHTER,
-          fps = 38,
-          frameCount = 82,
-          loop = true,
-          loopPoint = 10,
-          path = 'gameplay/hit_animation/hold/outer',
-          scale = 0.625,
-        }),
-      },
-      ---@type table<string, AnimationState[]>
-      states = {
-        crit = {},
-        ending = {},
-        inner = {},
-        near = {},
-        outer = {},
-      },
+      hold = RingAnimation:new(),
       near = Animation:new({
         alpha = 1,
         centered = true,
@@ -77,12 +39,18 @@ local HitAnimation = {
         path = 'gameplay/hit_animation/near',
         scale = 0.975,
       }),
+      ---@type table<string, AnimationState[]>
+      states = {
+        crit = {},
+        hold = {},
+        near = {},
+      },
       window = window,
     };
 
     for name, part in pairs(t.states) do
       for btn = 1, 6 do
-        if ((name == 'crit') or (name == 'near')) then
+        if (name ~= 'hold') then
           part[btn] = {};
 
           for i = 1, 8 do
@@ -94,8 +62,18 @@ local HitAnimation = {
           end
         else
           part[btn] = {
-            frame = 1,
-            queued = false,
+            active = false,
+            alpha = 0,
+            effect = {
+              alpha = 1,
+              playIn = true,
+              playOut = false,
+              timer = 0,
+            },
+            inner = {
+              frame = 1,
+              timer = 0,
+            },
             timer = 0,
           };
         end
@@ -137,7 +115,7 @@ local HitAnimation = {
         * lane
     );
     gfx.Rotate(-gameplay.critLine.rotation);
-    gfx.Scale(this.window:getScale(), this.window:getScale());
+    this.window:scale();
   end,
 
   -- Play the given animation
@@ -161,10 +139,8 @@ local HitAnimation = {
   ---@param dt deltaTime
   render = function(this, dt)
     local crit = this.states.crit;
-    local ending = this.states.ending;
-    local inner = this.states.inner;
+    local hold = this.states.hold;
     local near = this.states.near;
-    local outer = this.states.outer;
 
     for btn = 1, 6 do
       ---@param state AnimationState
@@ -181,25 +157,9 @@ local HitAnimation = {
         end
       end
 
-      if (gameplay.noteHeld[btn]) then
-         this:play(dt, this.hold.inner, Lanes[btn], inner[btn]);
-         this:play(dt, this.hold.outer, Lanes[btn], outer[btn]);
-  
-         ending[btn].queued = true;
-      else
-        inner[btn].frame = 1;
-        inner[btn].timer = 0;
+      hold[btn].active = gameplay.noteHeld[btn];
 
-        outer[btn].frame = 1;
-        inner[btn].timer = 0;
-
-        if (ending[btn].queued) then
-          this:play(dt, this.hold.ending, Lanes[btn], ending[btn]);
-        else
-          ending[btn].frame = 1;
-          ending[btn].timer = 0;
-        end
-      end
+      this:play(dt, this.hold, Lanes[btn], hold[btn]);
     end
   end,
 };

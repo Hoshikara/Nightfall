@@ -1,5 +1,17 @@
 local Animation = require('common/animation');
 
+local RingAnimation = require('components/gameplay/ringanimation');
+
+local Colors = {
+  RED = 'r',
+  GREEN = 'g',
+  BLUE = 'b',
+  YELLOW = 'y',
+};
+
+local colL = Colors[getSetting('leftColor', 'BLUE')];
+local colR = Colors[getSetting('rightColor', 'RED')];
+
 ---@class LaserAnimationClass
 local LaserAnimation = {
   -- LaserAnimation constructor
@@ -10,70 +22,56 @@ local LaserAnimation = {
     ---@class LaserAnimation : LaserAnimationClass
     ---@field window Window
     local t = {
-      dome = {},
-      domeSize = 0,
-      ---@type table<string, Animation[]>
-      ending = { inner = {}, outer = {} },
+      ring = {},
+      slam = {},
       ---@type table<string, AnimationState[]>
       states = {
-        inner = {},
-        outer = {},
+        ring = {},
+        slam = {},
       },
-      ---@type Image[]
-      tail = {},
       window = window,
     };
 
     for i = 1, 2 do
-      local side = ((i == 1) and 'l') or 'r';
+      local color = ((i == 1) and colL) or colR;
 
-      t.dome[i] = gfx.LoadSkinAnimation(
-        ('gameplay/hit_animation/laser_%s/dome'):format(side),
-        (1 / 30.0)
-      );
+      t.ring[i] = RingAnimation:new(color);
 
-      t.tail[i] = Image:new(('gameplay/laser_cursor/tail_%s.png'):format(side));
-
-      t.ending.inner[i] = Animation:new({
-        alpha = 2,
-        blendOp = gfx.BLEND_OP_SOURCE_OVER,
+      t.slam[i] = Animation:new({
+        alpha = 1.5,
+        blendOp = 8,
         centered = true,
         fps = 52,
-        frameCount = 13,
-        path = ('gameplay/hit_animation/laser_%s/inner'):format(side),
-        scale = 0.75,
-      });
-			
-      t.ending.outer[i] = Animation:new({
-        alpha = 1,
-        blendOp = gfx.BLEND_OP_LIGHTER,
-        centered = true,
-        fps = 52,
-        frameCount = 13,
-        path = ('gameplay/hit_animation/laser_%s/outer'):format(side),
+        frameCount = 12,
+        path = ('gameplay/hit_animation/slam/%s'):format(color),
         scale = 0.625,
       });
 
-      for _, part in pairs(t.states) do
-        part[i] = {};
+      for name, part in pairs(t.states) do
+        if (name ~= 'ring') then
+          part[i] = {};
 
-        for j = 1, 16 do
-          part[i][j] = {
-            frame = 1,
-            pos = 0,
-            queued = false,
+          for j = 1, 16 do
+            part[i][j] = {
+              frame = 1,
+              pos = 0,
+              queued = false,
+              timer = 0,
+            };
+          end
+        else
+          part[i] = {
+            active = false,
+            alpha = 0,
+            inner = {
+              frame = 1,
+              timer = 0,
+            },
             timer = 0,
           };
         end
       end
     end
-
-    local frame = gfx.CreateSkinImage(
-      'gameplay/hit_animation/laser_l/dome/0001.png',
-      0
-    );
-
-    t.domeSize = gfx.ImageSize(frame) * 0.625;
 
     setmetatable(t, this);
     this.__index = this;
@@ -86,13 +84,10 @@ local LaserAnimation = {
   ---@param pos number # x-position relative to the center of the crit line
   ---@param laser integer # Laser index, `1 = left`, `2 = right`
   trigger = function(this, pos, laser)
-    for i, state in ipairs(this.states.inner[laser]) do
+    for _, state in ipairs(this.states.slam[laser]) do
       if (not state.queued) then
         state.pos = 0.5 + (pos * 0.8);
-        this.states.outer[laser][i].pos = 0.5 + (pos * 0.8);
-
         state.queued = true;
-        this.states.outer[laser][i].queued = true;
 
         break;
       end
@@ -111,6 +106,7 @@ local LaserAnimation = {
         gameplay.critLine.line.y1
           + (gameplay.critLine.line.y2 - gameplay.critLine.line.y1)
           * pos
+          - (36 * this.window:getScale())
       );
     else
       gfx.Translate(gameplay.critLine.x, gameplay.critLine.y);
@@ -139,39 +135,19 @@ local LaserAnimation = {
   -- Play the cursor animation and draw the cursor tail
   ---@param this LaserAnimation
   ---@param dt deltaTime
-  ---@param dome any
-  ---@param tail Image
-  ---@param alpha number
+  ---@param ring RingAnimation
   ---@param pos number
-  ---@param skew number
-  playCursor = function(this, dt, dome, tail, alpha, pos, skew)
-    local size = this.domeSize * this.window:getScale();
+  playRing = function(this, dt, ring, state, pos)
+    ring.scale = 0.85 * this.window:getScale();
+    ring.inner.scale = 1.1 * this.window:getScale();
 
     gfx.Save();
 
     this:transform();
 
-    gfx.BeginPath();
-    gfx.GlobalCompositeOperation(gfx.BLEND_OP_LIGHTER);
-    gfx.ImageRect(
-      pos - (size / 2),
-      -(size / 2),
-      size,
-      size,
-      dome,
-      1.5,
-      0
-    );
-    gfx.TickAnimation(dome, dt);
+    gfx.Translate(pos, 0);
 
-    gfx.SkewX(skew);
-    tail:draw({
-      x = pos,
-      alpha = alpha,
-      blendOp = gfx.BLEND_OP_LIGHTER,
-      centered = true,
-      scale = 0.625 * this.window:getScale(),
-    });
+    ring:start(dt, state);
 
     gfx.Restore();
   end,
@@ -180,30 +156,20 @@ local LaserAnimation = {
   ---@param this LaserAnimation
   ---@param dt deltaTime
   render = function(this, dt)
-    local inner = this.states.inner;
-    local outer = this.states.outer;
+    local ring = this.states.ring;
+    local slam = this.states.slam;
 
     for laser = 1, 2 do
+      local curr = gameplay.critLine.cursors[laser - 1];
+
       ---@param state AnimationState
-      for i, state in ipairs(inner[laser]) do
-        if (state.queued) then
-          this:play(dt, this.ending.inner[laser], state);
-          this:play(dt, this.ending.outer[laser], outer[laser][i]);
-        end
+      for _, state in ipairs(slam[laser]) do
+        if (state.queued) then this:play(dt, this.slam[laser], state); end
       end
 
-      if (gameplay.laserActive[laser]) then
-        local curr = gameplay.critLine.cursors[laser - 1];
+      ring[laser].active = gameplay.laserActive[laser];
   
-        this:playCursor(
-          dt,
-          this.dome[laser],
-          this.tail[laser],
-          curr.alpha,
-          curr.pos,
-          curr.skew
-        );
-      end
+      this:playRing(dt, this.ring[laser], ring[laser], curr.pos);
     end
   end,
 };

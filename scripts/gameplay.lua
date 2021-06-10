@@ -12,6 +12,7 @@ local HitAnimation = require('components/gameplay/hitanimation');
 local HitDeltaBar = require('components/gameplay/hitdeltabar');
 local LaserAlerts = require('components/gameplay/laseralerts');
 local LaserAnimation = require('components/gameplay/laseranimation');
+local LaserCursors = require('components/gameplay/lasercursors');
 local Outro = require('components/gameplay/outro');
 local PracticeInfo = require('components/gameplay/practiceinfo');
 local ScoreInfo = require('components/gameplay/scoreinfo');
@@ -25,11 +26,6 @@ local critWindow = nil;
 
 ---@type boolean
 local deltaFrom0 = getSetting('deltaFrom0', true);
-
-local laser = {
-	fill = Image:new('gameplay/laser_cursor/fill.png');
-	overlay = Image:new('gameplay/laser_cursor/overlay.png');
-};
 
 local players = nil;
 
@@ -66,6 +62,7 @@ local hitAnimation = HitAnimation:new(window);
 local hitDeltaBar = nil;
 local laserAlerts = nil;
 local laserAnimation = LaserAnimation:new(window);
+local laserCursors = LaserCursors:new(window);
 local outro = nil;
 local practiceInfo = nil;
 local scoreInfo = nil;
@@ -155,8 +152,6 @@ end
 -- Drawn above built-in particle effects but before the main `render` function
 ---@param dt deltaTime
 render_crit_overlay = function(dt)
-	local scale = window:getScale();
-
 	hitAnimation:render(dt);
 
 	laserAnimation:render(dt);
@@ -165,29 +160,7 @@ render_crit_overlay = function(dt)
 
 	if (window.isPortrait) then console:render(dt); end
 
-	for i = 0, 1 do
-		local curr = gameplay.critLine.cursors[i];
-		local r, g, b = game.GetLaserColor(i);
-
-		gfx.SkewX(curr.skew);
-
-		laser.fill:draw({
-			x = curr.pos,
-			alpha = curr.alpha,
-			centered = true;
-			scale = 0.42 * scale,
-			tint = { r, g, b },
-		});
-
-		laser.overlay:draw({
-			x = curr.pos,
-			alpha = curr.alpha,
-			centered = true,
-			scale = 0.42 * scale,
-		});
-
-		gfx.SkewX(-curr.skew);
-	end
+	laserCursors:render(dt);
 
 	gfx.ResetTransform();
 end
