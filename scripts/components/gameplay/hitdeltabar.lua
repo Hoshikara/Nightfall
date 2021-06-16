@@ -158,6 +158,7 @@ local HitDeltaBar = {
   render = function(this, dt)
     local alpha = 255 * this.timer;
     local crit = this.states.crit;
+    local critCol = this.colors.crit;
     local near = this.states.near;
 
     if (gameplay.progress == 0) then
@@ -209,7 +210,7 @@ local HitDeltaBar = {
       w = w,
       h = h,
       alpha = 100,
-      color = this.colors.crit,
+      color = critCol,
     });
 
     drawRect({
@@ -218,7 +219,7 @@ local HitDeltaBar = {
       w = w,
       h = h,
       alpha = 100,
-      color = this.colors.crit,
+      color = critCol,
     });
 
     drawRect({
@@ -255,7 +256,7 @@ local HitDeltaBar = {
         y = -16,
         align = 'middle',
         alpha = alpha,
-        color = this.colors.crit,
+        color = critCol,
       });
 
       this.labels.critPos:draw({
@@ -263,7 +264,7 @@ local HitDeltaBar = {
         y = -16,
         align = 'middle',
         alpha = alpha,
-        color = this.colors.crit,
+        color = critCol,
       });
 
       this.labels.nearNeg:draw({

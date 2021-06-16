@@ -19,7 +19,10 @@ local Buttons = {
 		---@field state Titlescreen
 		---@field window Window
 		local t = {
+			alpha = 1,
+			allowAction = true,
 			cache = { w = 0, h = 0 },
+			currPage = 'mainMenu',
 			cursor = Cursor:new({
 				size = 12,
 				stroke = 1.5,
@@ -200,12 +203,14 @@ local Buttons = {
 			y = this.y[i];
 		end
 
-		local btns = this.btns[this.state.currPage];
+		local alpha = this.alpha;
+		local btns = this.btns[this.currPage];
 		local isNavigable = this.state.loaded
 			and (not this.state.viewingControls)
 			and (not this.state.viewingInfo)
 			and (not this.state.viewingPreview);
-		local isActionable = isNavigable and (not this.state.promptUpdate);
+		local isActionable = isNavigable and (not this.state.promptUpdate)
+			and this.allowAction;
 		local isActive = btn.event
 			== (isNavigable and btns[this.state.currBtn].event);
 		local isHovering = this.mouse:clipped(
@@ -222,17 +227,50 @@ local Buttons = {
 				isClickable = isHovering,
 			});
 
-			this.images.hover:draw({ x = x, y = y });
+			this.images.hover:draw({
+				x = x,
+				y = y,
+				alpha = alpha,
+			});
 		else
-			this.images.normal:draw({ x = x, y = y });
+			this.images.normal:draw({
+				x = x,
+				y = y,
+				alpha = alpha,
+			});
 		end
 
 		btn.label:draw({
 			x = x + (this.images.normal.w / 9),
 			y = y + (this.images.normal.h / 2) - 12,
-			alpha = 255 * ((isActionable and isActive and 1) or 0.2),
+			alpha = 255 * ((isActionable and isActive and 1) or 0.2) * alpha,
 			color = 'white',
 		});
+	end,
+
+	-- Handle the transition effect
+	---@param this Buttons
+	---@param dt deltaTime
+	handleChange = function(this, dt)
+		if (this.state.currPage == 'mainMenu') then
+			if (this.currPage == 'playOptions') then
+				this.alpha = to0(this.alpha, dt, 0.1);
+
+				if (this.alpha == 0) then this.currPage = 'mainMenu'; end
+			else
+				this.alpha = to1(this.alpha, dt, 0.1);
+			end
+		elseif (this.state.currPage == 'playOptions') then
+			if (this.currPage == 'mainMenu') then
+				this.alpha = to0(this.alpha, dt, 0.1);
+
+				if (this.alpha == 0) then this.currPage = 'playOptions'; end
+			else
+				this.alpha = to1(this.alpha, dt, 0.1);
+			end
+		end
+
+		this.allowAction = this.alpha == 1;
 	end,
 
 	-- Renders the current component
@@ -242,16 +280,18 @@ local Buttons = {
 		this:makeBtns();
 
 		this:setSizes();
+
+		this:handleChange(dt);
 	
-		for i, btn in ipairs(this.btns[this.state.currPage]) do
+		for i, btn in ipairs(this.btns[this.currPage]) do
 			this:drawBtn(i, btn);
 		end
 
-		if (this.state.currPage == 'playOptions') then
+		if (this.currPage == 'playOptions') then
 			this.mainMenu:draw({
 				x = this.x[1] + 4,
 				y = this.window.h - (this.window.padding.y * 1.5),
-				alpha = 255,
+				alpha = 255 * this.alpha,
 			});
 		end
 
@@ -262,12 +302,13 @@ local Buttons = {
 			and (not this.state.viewingPreview)
 		) then
 			this.cursor:render(dt, {
+				alphaMod = this.alpha,
 				curr = this.state.currBtn,
-				total = #this.btns[this.state.currPage],
+				total = #this.btns[this.currPage],
 			});
 		end
 
-		this.state.btnCount = #this.btns[this.state.currPage];
+		this.state.btnCount = #this.btns[this.currPage];
 	end,
 };
 

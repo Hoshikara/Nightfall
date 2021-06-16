@@ -12,7 +12,6 @@ local Colors = {
   errorEarly = { 205, 0, 0 },
   errorLate = { 205, 0, 0 },
   late = { 105, 205, 255 },
-  maxChain = { 255, 235, 100 },
 };
 
 -- Button letters
@@ -81,7 +80,7 @@ local Graphs = {
         median = makeLabel('med', 'MEDIAN'),
       },
       mode = 0,
-      mouse = Mouse:new(),
+      mouse = Mouse:new(window),
       state = state,
       window = window,
       x = 0,
@@ -91,7 +90,7 @@ local Graphs = {
     };
 
     for btn, letter in pairs(Lanes) do
-      t.buttons[btn] = makeLabel('med', letter, 14);
+      t.buttons[btn] = makeLabel('med', letter, 18);
     end
 
     setmetatable(t, this);
@@ -401,6 +400,7 @@ local Graphs = {
     if (not this.hitStatScale) then this.hitStatScale = 1; end
 
     local hitStatScale = this.hitStatScale;
+    local hovering = this.mouse:clipped(x, y, w, h);
 
     for _, stat in ipairs(this.data.hitStats) do
       local color = Colors[stat.rating];
@@ -425,13 +425,20 @@ local Graphs = {
           yStat = h - 12;
         end
 
-        this.buttons[stat.lane]:draw({
-          x = x + xStat - 1,
-          y = y + yStat,
-          align = 'middle',
-          alpha = 150,
-          color = color,
-        });
+        if (hovering) then
+          this.buttons[stat.lane]:draw({
+            x = x + xStat - 4,
+            y = y + yStat - 4,
+            align = 'middle',
+            alpha = 180,
+            color = color,
+          });
+        else
+          gfx.BeginPath();
+          setFill(color, 180);
+          gfx.Circle(x + xStat - 2, y + yStat - 2, 4);
+          gfx.Fill();
+        end
       end
     end
   end,

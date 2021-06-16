@@ -110,6 +110,8 @@ return {
       if (setting.type == 'INT') then
         if (setting.special == 'TIME WINDOW') then
           setting.value:update({ text = ('±%d ms'):format(base.value) });
+
+          if (base.value < base.max) then params.color = 'red'; end
         elseif ((setting.special == 'TIME')
           or (base.name:upper()):find('OFFSET')
         ) then

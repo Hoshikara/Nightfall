@@ -124,7 +124,7 @@ local handleTimers = function(dt, isIntro)
 
 		introDone = timers.i >= 2;
 	else
-		local duration = (window.isPortrait and 0.2) or 0.3;
+		local duration = (window.isPortrait and 0.2) or 0.28;
 
 		timers.flicker.o = timers.flicker.o + dt;
 		timers.o = timers.o + (dt * 2);

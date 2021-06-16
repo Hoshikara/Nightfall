@@ -318,6 +318,7 @@ local Panel = {
   ---@param this Panel
   drawBtns = function(this)
     local event = function() end;
+    local altLabel = nil;
     local isClickable = true;
     local label = '';
     local labelOffset = (this.images.btnMed.h / 2) - 12;
@@ -352,6 +353,7 @@ local Panel = {
             label = 'start';
           else
             event = this.state.selectSong;
+            altLabel = 'select';
             label = 'notReady';
           end
         else
@@ -377,6 +379,7 @@ local Panel = {
 
     if (isClickable and topHover) then
       this.state.btnEvent = event;
+      label = altLabel or label;
 
       this.images.btnMedH:draw({ x = this.btn.x, y = this.btn.y[1] });
     else

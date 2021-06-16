@@ -60,6 +60,19 @@
 			"YELLOW"
 		]
 	},
+	"separator_lbr": {},
+	"showCritDelta": {
+		"label": "Show Critical hit delta (Early / Late Display must be enabled)",
+		"type": "bool",
+		"default": false
+	},
+	"minCritDelta": {
+		"label": "Minimum value to show critical delta",
+		"default": 23,
+		"min": 0,
+		"max": 46,
+		"type": "int"
+	},
 	"separator_mcv": {},
 	"showEarlate": {
 		"label": "Show Early / Late Display",
@@ -96,11 +109,6 @@
 		"default": 0.4,
 		"min": 0.25,
 		"max": 1.0
-	},
-	"deltaFrom0": {
-		"label": "Show hit delta from 0 (instead of hit delta from critical window)",
-		"default": true,
-		"type": "bool"
 	},
 	"separator_mdu": {},
 	"showHispeed": {

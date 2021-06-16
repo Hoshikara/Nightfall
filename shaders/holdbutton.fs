@@ -10,9 +10,8 @@ uniform float objectGlow;
 // 20Hz flickering. 0 = Miss, 1 = Inactive, 2 & 3 = Active alternating.
 uniform int hitState;
 
-void main()
-{
-	float s = float(hitState);
-	vec4 color = texture(mainTex, vec2(fsTex.x, s / 4 + fsTex.y / 4));
-	target = color;
+void main() {
+	float y = 0.34 * ceil(float(hitState) / 2);
+	
+	target = texture(mainTex, vec2(fsTex.x, y));
 }

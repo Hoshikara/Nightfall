@@ -115,7 +115,7 @@ local getGauge = function(res)
 	local gauge = math.ceil((res.gauge or 0) * 100);
 	local gType = res.gauge_type or res.flags or 0;
 
-  if (gType == 1) then return ('%d%% (H)'):format(gauge); end
+  if (gType == 1) then return ('%d%% (EXC)'):format(gauge); end
 
 	return ('%d%%'):format(gauge);
 end

@@ -1,3 +1,9 @@
+local Colors = {
+  crit = { 255, 235, 100 },
+  early = { 255, 105, 255 },
+  late = { 105, 205, 255 },
+};
+
 ---@type number
 local earlateX = getSetting('earlateX', 0.5);
 local earlateY = getSetting('earlateY', 0.75);
@@ -90,10 +96,12 @@ local Earlate = {
     this.alpha = math.floor(this.timer * 30) % 2;
     this.alpha = ((this.alpha * 175) + 80) / 255;
 
-    local color = (this.state.isLate and { 105, 205, 255 }) or { 255, 105, 255 };
+    local color = (this.state.isLate and Colors.late) or Colors.early;
     ---@type Label
     local label = (this.state.isLate and this.labels.late) or this.labels.early;
     local deltaStr = ('%.1f ms'):format(this.state.buttonDelta);
+
+    if (this.state.isCrit) then color = Colors.crit; end
 
     if (this.state.buttonDelta > 0) then
       deltaStr = ('+%.1f ms'):format(this.state.buttonDelta);
@@ -103,7 +111,7 @@ local Earlate = {
 
     gfx.Translate(this.x, this.y);
 
-    if (earlateType ~= 'DELTA') then
+    if ((earlateType ~= 'DELTA') and (not this.state.isCrit)) then
       label:draw({
         x = -this.offset;
         y = 2,

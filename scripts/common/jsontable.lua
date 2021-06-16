@@ -1,4 +1,4 @@
-local JSON = require('lib/JSON');
+local JSON = require('lib/json');
 
 -- Gets the path to the JSON file
 ---@param fileName string

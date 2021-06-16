@@ -225,6 +225,9 @@ local Rooms = {
   drawBtn = function(this, allowClick)
     local x = (this.window.w / 2) - (this.images.btn.w / 2);
     local y = this.window.h - (this.window.h / 20) - this.images.btn.h;
+
+    if (this.window.isPortrait) then y = y - 40; end
+
     local isClickable = allowClick and this.mouse:clipped(
       x,
       y,

@@ -1,3 +1,15 @@
+##### 1.2.0 - June 15, 2021
+- Added a display for critical hit delta and skin settings to toggle and adjust the minimum value required to display
+- Added a small fade transition when entering and exiting the play options menu
+- Added the multiplayer scoreboard for portrait orientation
+- Changed game settings hit window texts to be red if it is below the default values
+- Changed the multiplayer lobby `Players Not Ready` button text to show `Select Chart` on mouse hover
+- Changed result hit graph letters to circles when not hovered and increased letter size for better readability
+- Changed the mouse cursor
+- Fixed multiplayer scoreboard names not matching up with their respective scores
+- Fixed multiplayer room list control hints overlapping with the `Create Room` button for portrait orientation
+- Modified hold textures and shaders to potentially fix a visual artifact when a new hold is started while one is currently active
+
 ##### 1.1.12 - June 10, 2021
 - Added a new gauge text to indicate if ARS is enabled
 - Added a new ring animation for holds and lasers

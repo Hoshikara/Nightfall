@@ -1,6 +1,6 @@
 -- Global `gameplay` table is available for this script and its related scripts
 
-local JSON = require('lib/JSON');
+local JSON = require('lib/json');
 
 local BPMS = require('components/gameplay/bpms');
 local Chain = require('components/gameplay/chain');
@@ -22,10 +22,10 @@ local UserInfo = require('components/gameplay/userinfo');
 
 local window = Window:new();
 
-local critWindow = nil;
+local abs = math.abs;
 
----@type boolean
-local deltaFrom0 = getSetting('deltaFrom0', true);
+local minCritDelta = getSetting('minCritDelta', 23);
+local showCritDelta = getSetting('showCritDelta', false);
 
 local players = nil;
 
@@ -38,6 +38,7 @@ local state = {
 	buttonDelta = 0,
 	chain = 0,
 	intro = { alpha = 255, offset = 0 },
+	isCrit = false,
 	isLate = false,
 	maxChain = 0,
 	score = 0,
@@ -104,17 +105,14 @@ end
 ---@param delta integer # delta from 0 of the hit, in milliseconds
 button_hit = function(btn, rating, delta)
 	if (rating == 1) then
-		if (deltaFrom0) then
-			state.buttonDelta = delta;
-		else
-			if (not critWindow) then
-				critWindow = (gameplay.hitWindow and gameplay.hitWindow.perfect) or 46;
-			end
-
-			if (delta < 0) then
-				state.buttonDelta = delta + critWindow;
-			else
-				state.buttonDelta = delta - critWindow;
+		state.isCrit = false;
+		state.buttonDelta = delta;
+	elseif (rating == 2) then
+		if (showCritDelta) then
+			if (abs(delta) >= minCritDelta) then
+				state.isCrit = true;
+				state.buttonDelta = delta;
+				state.timers.earlate = 0.75;
 			end
 		end
 	end
@@ -198,11 +196,7 @@ render = function(dt)
 		userInfo:render();
 	end
 
-	if (gameplay.multiplayer
-		and (not window.isPortrait)
-		and players) then
-			scoreboard:render(players);
-	end
+	if (gameplay.multiplayer and players) then scoreboard:render(players); end
 
 	if (gameplay.practice_setup ~= nil) then
 		practiceInfo:render();

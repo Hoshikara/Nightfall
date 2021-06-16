@@ -1,4 +1,4 @@
-local JSON = require('lib/JSON');
+local JSON = require('lib/json');
 
 local t1 = 'Nightfall Log: %s';
 local t2 = 'Nightfall Log: Invalid data type provided (expected a string, got a %s)';

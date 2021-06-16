@@ -1,4 +1,4 @@
-local JSON = require('lib/JSON');
+local JSON = require('lib/json');
 
 local Clears = require('constants/Clears');
 local Grades = require('constants/grades');

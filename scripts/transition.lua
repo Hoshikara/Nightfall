@@ -22,14 +22,14 @@ local drawTransition = function(dt, isIntro);
 	window:set();
 
 	if (isIntro) then
-		timers.fade = to0(timers.fade, dt, (window.isPortrait and 0.4) or 0.67);
+		timers.fade = to0(timers.fade, dt, (window.isPortrait and 0.4) or 0.6);
 		timers.scissor.i =
-			to1(timers.scissor.i, dt, (window.isPortrait and 0.15) or 0.25); 
+			to1(timers.scissor.i, dt, (window.isPortrait and 0.15) or 0.2);
 		timers.i = timers.i + dt;
 
 		introDone = timers.i >= 1;
 	else
-		local duration = (window.isPortrait and 0.2) or 0.33;
+		local duration = (window.isPortrait and 0.2) or 0.28;
 
 		timers.scissor.o.l = to0(timers.scissor.o.l, dt, duration);
 		timers.scissor.o.r = to1(timers.scissor.o.r, dt, duration);

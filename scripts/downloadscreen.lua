@@ -1,4 +1,4 @@
-JSON = require('lib/JSON');
+JSON = require('lib/json');
 
 local header = {}
 header["user-agent"] = "unnamed_sdvx_clone"

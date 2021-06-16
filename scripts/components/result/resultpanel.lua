@@ -205,12 +205,15 @@ local ResultPanel = {
   drawSongInfo = function(this, dt)
     local padX = this.padding.x;
     local padY = this.padding.y;
-    local scale = (this.window.isPortrait and 1.4) or 1.05;
     local size = this.jacketSize;
     local song = this.state.song;
     local maxWidth = this.maxWidth - (size + padX);
+    local namePadding = (this.window.isPortrait and (padX * 11)) or (padX * 8);
+    local datePadding = (this.window.isPortrait and namePadding * 1.75)
+      or (namePadding * 1.65);
     local x = this.x.text[1];
     local y = this.padding.y - 5;
+    local w = this.w;
 
     gfx.Save();
 
@@ -259,15 +262,9 @@ local ResultPanel = {
       this.labels[name]:draw({ x = x, y = y });
 
       if (name == 'bpm') then
-        this.labels.timestamp:draw({
-          x = x + ((padX * 4.5) * scale),
-          y = y,
-        });
+        this.labels.timestamp:draw({ x = w - datePadding, y = y });
 
-        this.labels.name:draw({
-          x = x + ((padX * 9.25) * scale),
-          y = y,
-        });
+        this.labels.name:draw({ x = w - namePadding, y = y });
       end
 
       y = y + (this.labels[name].h * 1.35);
@@ -293,13 +290,13 @@ local ResultPanel = {
 
       if (name == 'bpm') then
         song.timestamp:draw({
-          x = x + ((padX * 4.5) * scale),
+          x = w - datePadding,
           y = y,
           color = 'white',
         });
 
         song.name:draw({
-          x = x + ((padX * 9.25) * scale),
+          x = w - namePadding,
           y = y,
           color = 'white',
         });
@@ -366,7 +363,7 @@ local ResultPanel = {
     if (this.window.isPortrait) then
       x = this.w - (this.padding.x * 11);
     else
-      x = this.w - (this.padding.x * 7.5);
+      x = this.w - (this.padding.x * 8);
     end
 
     this.labels.grade:draw({ x = x, y = y });
