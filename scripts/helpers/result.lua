@@ -54,26 +54,51 @@ end
 
 -- Gets the critical, near, and error deltas relative to the highest/lowest achieved values
 ---@param res result
----@return table<string, Label>
+---@return table
 local getDeltas = function(res)
 	if (#res.highScores == 0) then return {}; end
 
 	local crits = nil;
+	local critIdx = nil;
 	local errors = nil;
+	local errorIdx = nil;
 	local nears = nil;
+	local nearIdx = nil;
 
-	for _, score in ipairs(res.highScores) do
+	for i, score in ipairs(res.highScores) do
 		local hardFail = ((score.gauge_type or score.flags or 0) == 1)
 			and (score.badge == 1);
 
 		if (not hardFail) then
-			if (not crits) then crits = score.perfects; end
-			if (not errors) then errors = score.misses; end
-			if (not nears) then nears = score.goods; end
+			if (not crits) then
+				crits = score.perfects;
+				critIdx = i;
+			end
 
-			if (score.perfects > crits) then crits = score.perfects; end
-			if (score.misses < errors) then errors = score.misses; end
-			if (score.goods < nears) then nears = score.goods; end
+			if (not errors) then
+				errors = score.misses;
+				errorIdx = i;
+			end
+
+			if (not nears) then
+				nears = score.goods;
+				nearIdx = i;
+			end
+
+			if (score.perfects > crits) then
+				crits = score.perfects;
+				critIdx = i;
+			end
+
+			if (score.misses < errors) then
+				errors = score.misses;
+				errorIdx = i;
+			end
+
+			if (score.goods < nears) then
+				nears = score.goods;
+				nearIdx = i;
+			end
 		end
 	end
 
@@ -81,8 +106,11 @@ local getDeltas = function(res)
 
 	return {
 		critical = deltaLabel(crits, res.perfects >= crits),
+		critIdx = critIdx,
 		error = deltaLabel(errors, res.misses <= errors),
+		errorIdx = errorIdx,
 		near = deltaLabel(nears, res.goods <= nears),
+		nearIdx = nearIdx,
 	};
 end
 
@@ -407,7 +435,7 @@ local getGraphData = function(res)
 			total = total,
 		},
 		duration = {
-			label = makeLabel('num', '0'),
+			label = makeLabel('num', '0', 20),
 			val = duration or 0,
 		},
 		gauge = {

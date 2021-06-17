@@ -1,5 +1,7 @@
 local Constants = require('constants/result');
 
+local Mouse = require('common/mouse');
+
 local ScoreNumber = require('components/common/scorenumber');
 
 local Graphs = require('components/result/graphs');
@@ -11,6 +13,12 @@ local Colors = {
   error = { 205, 0, 0 },
   late = { 105, 205, 255 },
   maxChain = { 255, 235, 100 },
+};
+
+local DeltaMap = {
+  critical = 'critIdx',
+  error = 'errorIdx',
+  near = 'nearIdx',
 };
 
 -- Drawing orders
@@ -55,6 +63,7 @@ local ResultPanel = {
     ---@class ResultPanel : ResultPanelClass
     ---@field graphs Graphs
     ---@field labels table<string, Label>
+    ---@field state Result
     local t = {
       cache = { w = 0, h = 0 },
       jacketSize = 0,
@@ -64,7 +73,7 @@ local ResultPanel = {
           'med',
           {
             { color = 'norm', text = '[BT-B] + [BT-C]' },
-            { color = 'white', text = 'OPEN SONG COLLECTIONS' },
+            { color = 'white', text = 'SONG COLLECTIONS' },
           },
           20
         ),
@@ -80,6 +89,7 @@ local ResultPanel = {
         ),
       },
       maxWidth = 0,
+      mouse = Mouse:new(window),
       padding = { x = 0, y = 0 },
       panel = Image:new('common/panel_wide.png'),
       setGraph = false,
@@ -143,7 +153,7 @@ local ResultPanel = {
         this.x.panel = (this.window.w / 2) - (this.w / 2);
         this.y.panel = this.window.padding.y;
 
-        if ((not this.state.sp) or (#this.state.scores > 0)) then
+        if ((not this.state.sp) or (this.state.scoreCount > 0)) then
           this.x.panel = this.window.padding.x;
         end
 
@@ -403,10 +413,21 @@ local ResultPanel = {
       });
 
       if (stats.deltas[name] and showBestDeltas) then
-        stats.deltas[name]:draw({
-          x = x + 1 + stats[name].w + 8,
-          y = y + (this.labels[name].h * 1.35) + 4,
-        });
+        local allowAction = this.state.sp and (this.state.scoreCount > 0);
+        local idx = stats.deltas[DeltaMap[name]];
+        local xD = x + 1 + stats[name].w + 8;
+        local yD = y + (this.labels[name].h * 1.35) + 4;
+
+        stats.deltas[name]:draw({ x = xD, y = yD });
+
+        if (allowAction and idx and this.mouse:clipped(
+          this.x.panel + xD - 4,
+          this.y.panel + yD - 2,
+          stats.deltas[name].w + 8,
+          stats.deltas[name].h + 8
+        )) then
+          this.state.currScore = idx;
+        end
       end
 
       if (name ~= 'near') then
@@ -450,6 +471,8 @@ local ResultPanel = {
   ---@param dt deltaTime
   ---@return number w, number h
   render = function(this, dt)
+    this.mouse:watch();
+
     this:setSizes();
 
     gfx.Save();

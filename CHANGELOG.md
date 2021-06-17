@@ -1,3 +1,9 @@
+##### 1.2.1 - June 16, 2021
+- Added the ability to mouse over the best critical/near/error counts which will cause the corresponding score in the score list to be selected
+- Fixed hit stat graph letters and circles being too high
+- Modified all gauge colors for gameplay and results screen
+- Moved the results screen hit window labels to the right side of the main panel
+
 ##### 1.2.0 - June 15, 2021
 - Added a display for critical hit delta and skin settings to toggle and adjust the minimum value required to display
 - Added a small fade transition when entering and exiting the play options menu

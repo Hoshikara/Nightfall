@@ -7,6 +7,10 @@ local Colors = {
   [0] = { 205, 0, 0 },
   [2] = { 255, 235, 100 },
   critical = { 255, 235, 100 },
+  effFail = { 20, 120, 240 },
+  effPass = { 220, 20, 140 },
+  excPass = { 240, 80, 40 },
+  excWarn = { 220, 100, 20 },
   near = { 255, 105, 255 },
   early = { 255, 105, 255 },
   errorEarly = { 205, 0, 0 },
@@ -230,10 +234,9 @@ local Graphs = {
       gfx.Stroke();
 
       this.labels[name].neg:draw({
-        x = x - 4,
+        x = x + w - 2,
         y = y - window - 13,
         align = 'right',
-        alpha = 150,
         color = color,
       });
 
@@ -251,10 +254,9 @@ local Graphs = {
       gfx.Stroke();
 
       this.labels[name].pos:draw({
-        x = x - 4,
+        x = x + w - 2,
         y = y + window - 11,
         align = 'right',
-        alpha = 150,
         color = color,
       });
     end
@@ -332,7 +334,7 @@ local Graphs = {
 
     this.data.duration.label:draw({
       x = x + w + 5,
-      y = y + h - this.data.duration.label.h - 3,
+      y = y + h - this.data.duration.label.h - 4,
       color = 'white',
       text = ('%02d:%02d'):format(currTime // 60000, (currTime // 1000) % 60),
       update = true,
@@ -428,7 +430,7 @@ local Graphs = {
         if (hovering) then
           this.buttons[stat.lane]:draw({
             x = x + xStat - 4,
-            y = y + yStat - 4,
+            y = y + yStat - 2,
             align = 'middle',
             alpha = 180,
             color = color,
@@ -436,7 +438,7 @@ local Graphs = {
         else
           gfx.BeginPath();
           setFill(color, 180);
-          gfx.Circle(x + xStat - 2, y + yStat - 2, 4);
+          gfx.Circle(x + xStat - 2, y + yStat + 1, 4);
           gfx.Fill();
         end
       end
@@ -479,24 +481,29 @@ local Graphs = {
     end
     
     if (this.data.gauge.type == 1) then
-      gfx.StrokeColor(255, 155, 55, a);
+      local c = Colors.excPass;
+      gfx.StrokeColor(c[1], c[2], c[3], a);
       gfx.Stroke();
     else
+      local c1 = Colors.effFail;
+      local c2 = Colors.effPass;
+
       gfx.Scissor(x, y + (h * 0.3) - 2, w, (h * 0.7) + 2);
-      gfx.StrokeColor(55, 155, 255, a);
+      gfx.StrokeColor(c1[1], c1[2], c1[3], a);
       gfx.Stroke();
       gfx.ResetScissor();
 
       gfx.Scissor(x, y - 2, w, (h * 0.3) + 2);
-      gfx.StrokeColor(255, 55, 205, a);
+      gfx.StrokeColor(c2[1], c2[2], c2[3], a);
       gfx.Stroke();
       gfx.ResetScissor();
 
       if (this.data.gauge.change) then
+        local c3 = Colors.excPass;
         local excessive = w * (this.data.gauge.change / 256);
 
         gfx.Scissor(x, y - 2, (excessive - focus) * scale + focus, h + 2);
-        gfx.StrokeColor(255, 155, 55, a);
+        gfx.StrokeColor(c3[1], c3[2], c3[3], a);
         gfx.Stroke();
         gfx.ResetScissor();
       end

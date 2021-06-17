@@ -1,5 +1,12 @@
 local JSONTable = require('common/jsontable');
 
+local Colors = {
+  effFail = { 20, 120, 240 },
+  effPass = { 220, 20, 140 },
+  excPass = { 240, 80, 40 },
+  excWarn = { 220, 100, 20 },
+};
+
 local abs = math.abs;
 local cos = math.cos;
 local floor = math.floor;
@@ -19,7 +26,6 @@ local GaugeBar = {
     ---@field state Gameplay
     ---@field window Window
     local t = {
-      alpha = 0,
       cache = { w = 0, h = 0 },
       gaugeType = nil,
       labels = {
@@ -116,12 +122,9 @@ local GaugeBar = {
   render = function(this, dt)
     this:setSizes();
 
-    this.timer = this.timer + dt;
-    this.alpha = abs(1 * cos(this.timer * 2));
-
     local alpha = this.state.intro.alpha;
     local ars = getSetting('_arsEnabled', 'false') == 'true';
-    local color = { 255, 255, 255 };
+    local color = Colors.effFail;
     local gauge = { type = 0, val = 0 };
     local gaugeAlpha = 255;
 
@@ -138,18 +141,18 @@ local GaugeBar = {
 
     if (gauge.type == 0) then
       if (gauge.val < 0.7) then
-        color = { 25, 125, 255 };
+        color = Colors.effFail;
       else
-        color = { 225, 25, 155 };
+        color = Colors.effPass;
       end
     else
       if (gauge.val < 0.3) then
-        color = { 225, 25, 25 };
+        this.timer = this.timer + dt;
+        
+        color = Colors.excWarn;
         gaugeAlpha = abs(255 * cos(this.timer * 12));
-
-        this.alpha = 0;
       else
-        color = { 225, 105, 25 };
+        color = Colors.excPass;
       end
     end
 
@@ -173,14 +176,6 @@ local GaugeBar = {
       h = -(this.h * gauge.val),
       alpha = gaugeAlpha,
       color = color,
-    });
-
-    drawRect({
-      y = this.h,
-      w = this.w,
-      h = -(this.h * gauge.val),
-      alpha = (alpha / 5) * this.alpha,
-      color = 'white',
     });
 
     drawRect({
