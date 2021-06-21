@@ -66,8 +66,13 @@
 		"type": "bool",
 		"default": false
 	},
+	"useDiffColor": {
+		"label": "Use different colors for early and late critical hit delta",
+		"type": "bool",
+		"default": false
+	},
 	"minCritDelta": {
-		"label": "Minimum value to show critical delta",
+		"label": "Minimum value to show critical hit delta",
 		"default": 23,
 		"min": 0,
 		"max": 46,

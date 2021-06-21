@@ -4,7 +4,7 @@ local Colors = {
   effFail = { 20, 120, 240 },
   effPass = { 220, 20, 140 },
   excPass = { 240, 80, 40 },
-  excWarn = { 220, 100, 20 },
+  excWarn = { 240, 20, 10 },
 };
 
 local abs = math.abs;

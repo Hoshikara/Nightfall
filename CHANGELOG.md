@@ -1,3 +1,7 @@
+##### 1.2.2 - June 20, 2021
+- Added a skin setting to distinguish early and late critical hit delta by different colors
+- Fixed excessive warning color being too bright
+
 ##### 1.2.1 - June 16, 2021
 - Added the ability to mouse over the best critical/near/error counts which will cause the corresponding score in the score list to be selected
 - Fixed hit stat graph letters and circles being too high

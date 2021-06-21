@@ -1,5 +1,7 @@
 local Colors = {
   crit = { 255, 235, 100 },
+  critEarly = { 205, 55, 205 },
+  critLate = { 55, 155, 205 },
   early = { 255, 105, 255 },
   late = { 105, 205, 255 },
 };
@@ -9,6 +11,7 @@ local earlateX = getSetting('earlateX', 0.5);
 local earlateY = getSetting('earlateY', 0.75);
 local earlateGap = getSetting('earlateGap', 0.25);
 local showEarlate = getSetting('showEarlate', true);
+local useDiffColor = getSetting('useDiffColor', false);
 
 ---@type string
 local earlateType = getSetting('earlateType', 'TEXT');
@@ -101,7 +104,17 @@ local Earlate = {
     local label = (this.state.isLate and this.labels.late) or this.labels.early;
     local deltaStr = ('%.1f ms'):format(this.state.buttonDelta);
 
-    if (this.state.isCrit) then color = Colors.crit; end
+    if (this.state.isCrit) then
+      if (useDiffColor) then
+        if (this.state.buttonDelta >= 0) then
+          color = Colors.critLate;
+        else
+          color = Colors.critEarly;
+        end
+      else
+        color = Colors.crit;
+      end
+    end
 
     if (this.state.buttonDelta > 0) then
       deltaStr = ('+%.1f ms'):format(this.state.buttonDelta);
