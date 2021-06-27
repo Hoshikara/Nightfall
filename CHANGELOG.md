@@ -1,3 +1,6 @@
+##### 1.2.3 - June 27, 2021
+- Updated gameplay shader files
+
 ##### 1.2.2 - June 20, 2021
 - Added a skin setting to distinguish early and late critical hit delta by different colors
 - Fixed excessive warning color being too bright
