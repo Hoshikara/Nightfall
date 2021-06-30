@@ -6,6 +6,7 @@ local ScoreNumber = require('components/common/scorenumber');
 local Colors = {
   [0] = { 205, 0, 0 },
   [2] = { 255, 235, 100 },
+  blastive = { 120, 120, 200 },
   critical = { 255, 235, 100 },
   effFail = { 20, 120, 240 },
   effPass = { 220, 20, 140 },
@@ -480,8 +481,11 @@ local Graphs = {
       gfx.LineTo(x + xSample, y + h - (h * samples[i]) - 1);
     end
     
-    if (this.data.gauge.type == 1) then
+    if (this.data.gauge.type >= 1) then
       local c = Colors.excPass;
+
+      if (this.data.gauge.type == 3) then c = Colors.blastive; end
+
       gfx.StrokeColor(c[1], c[2], c[3], a);
       gfx.Stroke();
     else

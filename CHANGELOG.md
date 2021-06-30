@@ -1,3 +1,12 @@
+##### 1.2.4 - June 29, 2021
+- Added a chart loading indicator to song select
+- Added an update check indicator to the main menu
+- Fixed a note density graph bug potentially
+- Reduced the brightness of gameplay hit beams
+- `Develop Channel` 
+  - Added color-coding for gameplay XMOD/MMOD adjustments
+  - Added support for permissive and blastive gauges
+
 ##### 1.2.3 - June 27, 2021
 - Updated gameplay shader files
 

@@ -22,28 +22,34 @@ return {
   ['HiSpeed'] = {
     name = 'HI-SPEED',
     ['Speed Mod'] = {
-      name = 'SPEED MOD',
+      name = 'MODE',
       options = {
         'XMOD',
-        'MMOD',
+        'MMOD  (RECOMMENDED)',
         'CMOD',
       },
     },
-    ['HiSpeed'] = { name = 'HI-SPEED' },
-    ['ModSpeed'] = { name = 'MOD SPEED' },
+    ['HiSpeed'] = { name = 'MULTIPLIER  (XMOD)' },
+    ['ModSpeed'] = { name = 'VALUE  (MMOD)' },
   },
   ['Game'] = {
     name = 'GAMEPLAY',
     ['Gauge'] = {
       name = 'GAUGE TYPE',
       options = {
-        'NORMAL',
-        'HARD',
+        'EFFECTIVE',
+        'EXCESSIVE',
+        'PERMISSIVE',
+        'BLASTIVE',
       },
+    },
+    ['Blastive Rate Level'] = {
+      name = 'BLASTIVE RATE LEVEL',
+      special = 'PERCENTAGE',
     },
     ['Backup Gauge'] = {
       invert = false,
-      name = 'BACKUP GAUGE (ARS)',
+      name = 'BACKUP GAUGE  (ARS)',
     },
     ['Random'] = {
       invert = false,
@@ -86,7 +92,7 @@ return {
   ['Judgement'] = {
     name = 'HIT WINDOWS',
     ['Crit Window'] = {
-      name = 'CRIT WINDOW',
+      name = 'CRITICAL WINDOW',
       special = 'TIME WINDOW',
     },
     ['Near Window'] = {

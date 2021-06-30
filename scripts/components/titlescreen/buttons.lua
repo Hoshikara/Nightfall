@@ -283,11 +283,9 @@ local Buttons = {
 
 		this:handleChange(dt);
 	
-		for i, btn in ipairs(this.btns[this.currPage]) do
-			this:drawBtn(i, btn);
-		end
+		for i, btn in ipairs(this.btns[this.currPage]) do this:drawBtn(i, btn); end
 
-		if (this.currPage == 'playOptions') then
+		if ((this.currPage == 'playOptions') and (not this.state.viewingInfo)) then
 			this.mainMenu:draw({
 				x = this.x[1] + 4,
 				y = this.window.h - (this.window.padding.y * 1.5),

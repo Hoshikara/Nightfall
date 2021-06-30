@@ -2,6 +2,8 @@ local Difficulties = require('constants/difficulties');
 
 local Cursor = require('components/common/cursor');
 
+local Green = { 120, 240, 80 };
+
 local floor = math.floor;
 
 local hispeedX = getSetting('hispeedX', 0.5);
@@ -43,11 +45,16 @@ local SongInfo = {
         },
       },
       hispeed = {
+        adjust = {
+          bpm = makeLabel('num', '0', 24),
+          equals = makeLabel('num', '=', 24),
+          multi = makeLabel('num', '0', 24),
+          x = makeLabel('num', 'x', 24),
+        },
         change = makeLabel('num', '0', 24),
         changeStr = '',
         isLower = false,
         label = makeLabel('norm', 'HI-SPEED', 24),
-        multi = makeLabel('num', '0', 24),
         val = makeLabel('num', '0', 24),
         valMiddle = makeLabel('num', '0', 30),
         y = 0,
@@ -391,103 +398,97 @@ local SongInfo = {
     });
 
     if (pressed('STA') and this.state.showAdjustments) then
-      -- if (pressed('BTB') or pressed('BTC')) then
-      if (false) then -- does anyone even use this?
-        local which = (pressed('BTB') and 'cutoff') or 'fade';
-        local hiddenVal = gameplay.hiddenCutoff * 100;
-        local suddenVal = gameplay.suddenCutoff * 100;
+      local adjust = this.hispeed.adjust;
+      local hispeedColor = Green;
+      local multiColor = 'white';
+      local xTemp = x + xOffset;
+      local yTemp = y + yOffset;
 
-        if (which == 'fade') then
-          hiddenVal = gameplay.hiddenFade * 100;
-          suddenVal = gameplay.suddenFade * 100;
-        end
+      if (gameplay.hispeedAdjust and (gameplay.hispeedAdjust == 1)) then
+        hispeedColor = 'white';
+        multiColor = Green;
+      end
 
-        this.hidden[which].val:draw({
-          x = x,
-          y = y + yOffset,
-          align = 'right',
-          alpha = alpha,
-          text = ('%.0f%%'):format(hiddenVal),
-          update = true,
-        });
+      this.hispeed.val:draw({
+        x = x,
+        y = y + yOffset,
+        align = 'right',
+        alpha = alpha,
+        color = hispeedColor,
+        text = ('%.0f'):format(gameplay.bpm * gameplay.hispeed),
+        update = true,
+      });
 
-        this.sudden[which].val:draw({
-          x = x,
-          y = y + (yOffset * 2),
-          align = 'right',
-          alpha = alpha,
-          text = ('%.0f%%'):format(suddenVal),
-          update = true,
-        });
+      adjust.equals:draw({
+        x = xTemp,
+        y = yTemp,
+        align = 'right',
+        alpha = alpha,
+        color = 'white',
+      });
 
-        this.hidden[which].label:draw({
-          x = x + xOffset,
-          y = y + yOffset,
-          align = 'right',
-          alpha = alpha,
-          color = 'white',
-        });
+      xTemp = xTemp - adjust.equals.w - 12;
 
-        this.sudden[which].label:draw({
-          x = x + xOffset,
-          y = y + (yOffset * 2),
-          align = 'right',
-          alpha = alpha,
-          color = 'white',
-        });
-      else
-        this.hispeed.val:draw({
-          x = x,
-          y = y + yOffset,
-          align = 'right',
-          alpha = alpha,
-          color = 'white',
-          text = ('%.0f'):format(gameplay.bpm * gameplay.hispeed),
-          update = true,
-        });
+      adjust.multi:draw({
+        x = xTemp,
+        y = yTemp,
+        align = 'right',
+        alpha = alpha,
+        color = multiColor,
+        text = ('%.1f'):format(gameplay.hispeed),
+        update = true,
+      });
 
-        this.hispeed.multi:draw({
-          x = x + xOffset,
-          y = y + yOffset,
-          align = 'right',
-          alpha = alpha,
-          color = 'white',
-          text = ('%.0f  x  %.1f  ='):format(
-            gameplay.bpm,
-            gameplay.hispeed
-          ),
-          update = true,
-        });
+      xTemp = xTemp - adjust.multi.w - 12;
 
-        if (showHispeed) then
-          local color = 'white';
-          local str = ('%.0f  (%.1f)'):format(
-            gameplay.bpm * gameplay.hispeed,
-            gameplay.hispeed
-          );
+      adjust.x:draw({
+        x = xTemp,
+        y = yTemp,
+        align = 'right',
+        alpha = alpha,
+        color = 'white',
+      });
 
-          if (this.hispeed.changeStr ~= '') then
-            if (not ignoreChange) then
-              if (this.hispeed.isLower) then
-                color = 'light';
-              else
-                color = 'red';
-              end
-              
-              str = this.hispeed.changeStr;
+      xTemp = xTemp - adjust.x.w - 12;
+
+      adjust.bpm:draw({
+        x = xTemp,
+        y = yTemp,
+        align = 'right',
+        alpha = alpha,
+        color = 'white',
+        text = ('%.0f'):format(gameplay.bpm),
+        update = true,
+      });
+
+      if (showHispeed) then
+        local color = 'white';
+        local str = ('%.0f  (%.1f)'):format(
+          gameplay.bpm * gameplay.hispeed,
+          gameplay.hispeed
+        );
+
+        if (this.hispeed.changeStr ~= '') then
+          if (not ignoreChange) then
+            if (this.hispeed.isLower) then
+              color = 'light';
+            else
+              color = 'red';
             end
+            
+            str = this.hispeed.changeStr;
           end
-        
-          this.hispeed.valMiddle:draw({
-            x = this.hispeed.x,
-            y = this.hispeed.y,
-            alpha = alpha * (((color == 'white') and 0.65) or 0.9),
-            align = 'middle',
-            color = color,
-            text = str,
-            update = true,
-          });
         end
+      
+        this.hispeed.valMiddle:draw({
+          x = this.hispeed.x,
+          y = this.hispeed.y,
+          alpha = alpha * (((color == 'white') and 0.65) or 0.9),
+          align = 'middle',
+          color = color,
+          text = str,
+          update = true,
+        });
       end
     else
       this.hispeed.val:draw({

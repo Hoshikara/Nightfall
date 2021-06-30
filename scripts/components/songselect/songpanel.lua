@@ -4,6 +4,7 @@ local Labels = require('constants/songwheel');
 local Cursor = require('components/common/cursor');
 local ScoreNumber = require('components/common/scorenumber');
 local SearchBar = require('components/common/searchbar');
+local Spinner = require('components/common/spinner');
 
 -- Drawing order
 local Order = {
@@ -64,6 +65,7 @@ local SongPanel = {
       innerWidth = 0,
       jacketSize = 0,
       labels = {
+        loading = makeLabel('med', 'LOADING CHARTS'),
         peak = makeLabel('med', 'PEAK', 18),
         peakVal = makeLabel('num', '0', 18)
       },
@@ -71,8 +73,9 @@ local SongPanel = {
         x = { double = 0, full = 0 },
         y = { double = 0, full = 0 },
       },
-      searchBar = SearchBar:new();
+      searchBar = SearchBar:new(),
       songs = songs,
+      spinner = Spinner:new(),
       state = state,
       timers = {
         artist = 0,
@@ -84,7 +87,6 @@ local SongPanel = {
       y = 0,
       w = 0,
       h = 0,
-      count = 0,
     };
 
     for i, diff in ipairs(Difficulties) do
@@ -257,7 +259,7 @@ local SongPanel = {
     end
 
     if (getSetting('showDensity', true) and diff.densityData) then
-      this:normalizeDensity(diff);
+      if (not diff.densityNormalized) then this:normalizeDensity(diff); end
 
       local scale = (size - 4) / #diff.densityData;
 
@@ -498,32 +500,6 @@ local SongPanel = {
   ---@param this SongPanel
   ---@param diff CachedDiff
   normalizeDensity = function(this, diff)
-    if (diff.densityNormalized) then return; end
-
-    -- Backwards compatibility
-    local normalized = false;
-
-    for _, v in ipairs(diff.densityData) do
-      if (v == 96) then normalized = true; break; end
-    end
-
-    if (normalized) then
-      diff.densityPeak = diff.densityData[#diff.densityData];
-
-      if (this.window.isPortrait) then  
-        local scale = (this.jacketSize / 4) / 96;
-
-        for i, v in ipairs(diff.densityData) do
-          diff.densityData[i] = floor(v * scale);
-        end
-      end
-
-      diff.densityNormalized = true;
-      diff.densityData[#diff.densityData] = nil;
-      
-      return;
-    end
-
     local setMax = false;
     local max = -1;
     local scale = 1;
@@ -589,6 +565,24 @@ local SongPanel = {
       input = songwheel.searchText,
       isActive = songwheel.searchInputActive,
     });
+
+    if ((songwheel.searchStatus or ''):find('Discovered')) then
+      local x = this.x + this.w;
+      local y = this.y / 2;
+
+      if (this.window.isPortrait) then
+        y = this.y + this.h + (this.window.padding.y / 3) + 2;
+      end
+
+      this.labels.loading:draw({
+        x = x,
+        y = y - 4,
+        align = 'right',
+        color = 'white',
+      });
+
+      this.spinner:render(dt, x - this.labels.loading.w - 12, y - 5);
+    end
 
     gfx.Restore();
 

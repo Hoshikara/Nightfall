@@ -1,5 +1,7 @@
 game.LoadSkinSample('intro');
 
+local Spinner = require('components/common/spinner');
+
 ---@class TitleClass
 local Title = {
 	-- Title constructor
@@ -16,10 +18,12 @@ local Title = {
 			alpha = 0,
 			cache = { w = 0, h = 0 },
 			labels = {
+				checking = makeLabel('med', 'CHECKING FOR UPDATES'),
 				game = makeLabel('med', 'UNNAMED SDVX CLONE', 31),
 				skin = makeLabel('med', 'NIGHTFALL', 120),
 				version = makeLabel('num', SkinVersion, 20),
 			},
+			spinner = Spinner:new(),
 			state = state,
 			timers = { alpha = 0, fade = 1.2 },
 			window = window,
@@ -54,6 +58,11 @@ local Title = {
 	---@param this Title
 	---@param dt deltaTime
 	load = function(this, dt)
+		if (this.state.loaded) then return; end
+
+		local x = this.window.w - this.window.padding.x;
+		local y = this.window.h - this.window.padding.y - this.labels.checking.h;
+
 		if (not this.state.samplePlayed) then
 			game.PlaySample('intro');
 	
@@ -68,7 +77,7 @@ local Title = {
 			end
 		end
 	
-		this.timers.fade = math.max(this.timers.fade - (dt / 1.8), 0);
+		this.timers.fade = to0(this.timers.fade, dt, 1.8);
 	
 		drawRect({
 			w = this.window.w,
@@ -76,6 +85,15 @@ local Title = {
 			alpha = 255 * this.timers.fade,
 			color = 'black',
 		});
+
+		this.labels.checking:draw({
+			x = x,
+			y = y,
+			align = 'right',
+			color = 'white',
+		});
+
+		this.spinner:render(dt, x - this.labels.checking.w - 12, y - 1);
 	
 		this.state.loaded = this.timers.fade == 0;
 	end,

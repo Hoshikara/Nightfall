@@ -143,7 +143,13 @@ local getGauge = function(res)
 	local gauge = math.ceil((res.gauge or 0) * 100);
 	local gType = res.gauge_type or res.flags or 0;
 
-  if (gType == 1) then return ('%d%% (EXC)'):format(gauge); end
+  if (gType == 1) then
+		return ('%d%% (EXC)'):format(gauge);
+	elseif (gType == 2) then
+		return ('%d%% (PMS)'):format(gauge);
+	elseif (gType == 3) then
+		return ('%d%% (BLS)'):format(gauge);
+	end
 
 	return ('%d%%'):format(gauge);
 end

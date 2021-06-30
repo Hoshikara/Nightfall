@@ -1,6 +1,8 @@
 local DialogBox = require('components/common/dialogbox');
 local Scrollbar = require('components/common/scrollbar');
 
+local max = math.max;
+
 local dialogBox = DialogBox:new();
 
 return {
@@ -57,8 +59,8 @@ return {
       local isCurr = i == index;
       local alpha = (isCurr and (255 * timer)) or (125 * timer);
 
-      if ((index > this.max) and (i <= (index - this.max))
-        or ((not isCurr) and (i > this.max))
+      if (((index > this.max) and (i <= (index - this.max)))
+        or (i > max(this.max, index))
       ) then
         alpha = 0;
       end
@@ -80,16 +82,20 @@ return {
         gfx.Restore();
       end
 
-      setting.name:draw({
-        x = x,
-        y = y,
-        alpha = alpha,
-        color = 'white',
-      });
+      if (setting) then
+        setting.name:draw({
+          x = x,
+          y = y,
+          alpha = alpha,
+          color = 'white',
+        });
 
-      this:drawValue(y, alpha, baseSetting, isCurr, setting);
+        this:drawValue(y, alpha, baseSetting, isCurr, setting);
 
-      y = y + (setting.name.h * 1.75);
+        y = y + (setting.name.h * 1.75);
+      else
+        y = y + 64;
+      end
     end
   end,
 
@@ -123,7 +129,9 @@ return {
         min = base.value == base.min;
         max = base.value == base.max;
       elseif (setting.type == 'FLOAT') then
-        if (base.max <= 1) then
+        if ((base.max <= 1)
+          or (setting.special and setting.special == 'PERCENTAGE')
+        ) then
           setting.value:update({ text = ('%.f%%'):format(base.value * 100) });
         else
           setting.value:update({ text = ('%.2f'):format(base.value) });
@@ -145,7 +153,7 @@ return {
 
       if (value) then
         value:draw(params);
-      else
+      elseif (setting and setting.value and setting.value.draw) then
         setting.value:draw(params);
       end
     end
@@ -235,7 +243,7 @@ return {
 
     heading:draw({
       x = dialogBox.x.outerLeft - 2,
-      y = dialogBox.y.top - (heading.h / 1.25),
+      y = dialogBox.y.top - (heading.h * 0.925),
       alpha = 255 * timer,
     });
 

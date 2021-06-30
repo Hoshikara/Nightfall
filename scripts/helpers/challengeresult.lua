@@ -51,7 +51,13 @@ local getGauge = function(chart)
 	local gauge = math.ceil((chart.gauge or 0) * 100);
 	local gType = chart.gauge_type or chart.flags or 0;
 
-  if (gType == 1) then return ('%d%% (H)'):format(gauge); end
+  if (gType == 1) then
+		return ('%d%% (EXC)'):format(gauge);
+	elseif (gType == 2) then
+		return ('%d%% (PMS)'):format(gauge);
+	elseif (gType == 3) then
+		return ('%d%% (BLS)'):format(gauge);
+	end
 
 	return ('%d%%'):format(gauge);
 end

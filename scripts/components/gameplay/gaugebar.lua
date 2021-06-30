@@ -1,6 +1,8 @@
 local JSONTable = require('common/jsontable');
 
 local Colors = {
+  blastPass = { 120, 120, 200 },
+  blastWarn = { 100, 80, 160 },
   effFail = { 20, 120, 240 },
   effPass = { 220, 20, 140 },
   excPass = { 240, 80, 40 },
@@ -30,9 +32,11 @@ local GaugeBar = {
       gaugeType = nil,
       labels = {
         ars = makeLabel('norm', 'EXCESSIVE RATE + ARS'),
+        blastive = makeLabel('norm', 'BLASTIVE RATE'),
         effective = makeLabel('norm', 'EFFECTIVE RATE'),
         excessive = makeLabel('norm', 'EXCESSIVE RATE'),
         pct = makeLabel('num', '0', 24),
+        permissive = makeLabel('norm', 'PERMISSIVE RATE'),
       },
       sampleIdx = 1,
       sampleJSON = JSONTable:new('samples'),
@@ -149,10 +153,19 @@ local GaugeBar = {
       if (gauge.val < 0.3) then
         this.timer = this.timer + dt;
         
-        color = Colors.excWarn;
+        if (gauge.type == 3) then
+          color = Colors.blastWarn;
+        else
+          color = Colors.excWarn;
+        end
+
         gaugeAlpha = abs(255 * cos(this.timer * 12));
       else
-        color = Colors.excPass;
+        if (gauge.type == 3) then
+          color = Colors.blastPass;
+        else
+          color = Colors.excPass;
+        end
       end
     end
 
@@ -209,20 +222,35 @@ local GaugeBar = {
     });
 
     gfx.BeginPath();
+
     gfx.Rotate(90);
 
-    if (gauge.type == 0) then
-      this.labels.effective:draw({
-        x = this.h + 1,
-        y = -this.labels.effective.h - 29,
-        align = 'right',
+    if (gauge.type == 1) then
+      ((ars and this.labels.ars) or this.labels.excessive):draw({
+        x = -3,
+        y = -this.labels.excessive.h - 29,
+        alpha = alpha,
+        color = 'white',
+      });
+    elseif (gauge.type == 2) then
+      this.labels.permissive:draw({
+        x = -3,
+        y = -this.labels.permissive.h - 29,
+        alpha = alpha,
+        color = 'white',
+      });
+    elseif (gauge.type == 3) then
+      this.labels.blastive:draw({
+        x = -3,
+        y = -this.labels.blastive.h - 29,
         alpha = alpha,
         color = 'white',
       });
     else
-      ((ars and this.labels.ars) or this.labels.excessive):draw({
-        x = -3,
-        y = -this.labels.excessive.h - 29,
+      this.labels.effective:draw({
+        x = this.h + 1,
+        y = -this.labels.effective.h - 29,
+        align = 'right',
         alpha = alpha,
         color = 'white',
       });

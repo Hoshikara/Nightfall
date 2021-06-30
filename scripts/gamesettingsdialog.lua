@@ -149,6 +149,17 @@ local makeSettings = function(Constants)
 
 		s.settings[tKey] = {};
 
+		-- TODO: find a better way to do this
+		if ((tKey == 'Game')
+			and (currTab.settings[1].options and (#currTab.settings[1].options > 2))
+			and (currTab.settings[1].value and currTab.settings[1].value ~= 4)
+		) then
+			table.insert(currTab.settings, 2, {
+				name = 'Blastive Rate Level',
+				type = 'float',
+			});
+		end
+
 		for __, currSetting in ipairs(currTab.settings) do
 			local sKey = (currSetting.name or ''):gsub(' %((.*)%)', '');
 			local sType = (currSetting.type or ''):upper();
@@ -241,7 +252,7 @@ render = function(dt, displaying)
 			local Constants = require('constants/gamesettings');
 
 			gameSettings = GameSettings:new(makeSettings(Constants));
-		elseif (gameSettings) then
+		else
 			gameSettings:render(dt, timer);
 		end
 	else
