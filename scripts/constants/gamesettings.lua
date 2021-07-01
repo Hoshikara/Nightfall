@@ -43,10 +43,7 @@ return {
         'BLASTIVE',
       },
     },
-    ['Blastive Rate Level'] = {
-      name = 'BLASTIVE RATE LEVEL',
-      special = 'PERCENTAGE',
-    },
+    ['Blastive Rate Level'] = { name = 'BLASTIVE RATE LEVEL' },
     ['Backup Gauge'] = {
       invert = false,
       name = 'BACKUP GAUGE  (ARS)',

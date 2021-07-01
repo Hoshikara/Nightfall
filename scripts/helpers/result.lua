@@ -338,11 +338,12 @@ local getGraphData = function(res)
 	local hoverScale = 10;
 	local suggestion = nil;
 
+	local gaugeType = res.gauge_type or res.flags or 0;
+
 	local count = 0;
 	local data = {};
 	local densities = JSONTable:new('densities');
-	local hardFail = ((res.gauge_type or res.flags or 0) == 1)
-		and (res.badge == 1);
+	local hardFail = (gaugeType == 1) and (res.badge == 1);
 	local idx = 1;
 	local ms = 1000;
 	local key = getSetting('_diffKey', '');
@@ -354,6 +355,7 @@ local getGraphData = function(res)
 	local late = 0;
 	local total = res.perfects + res.goods + res.misses;
 
+	local blastiveLevel = getSetting('_blastiveLevel', '');
 	local gaugeSamples = (JSONTable:new('samples')):get();
 	local gaugeChange = getSetting('_gaugeChange', '');
 
@@ -445,6 +447,9 @@ local getGraphData = function(res)
 			val = duration or 0,
 		},
 		gauge = {
+			blastiveLevel = (gaugeType == 3)
+				and (blastiveLevel ~= '')
+				and makeLabel('num', blastiveLevel, 24),
 			change = (gaugeChange ~= '')
 				and (not hardFail)
 				and ((res.badge > 0))
@@ -455,7 +460,7 @@ local getGraphData = function(res)
 				and (not hardFail)
 				and gaugeSamples
 			) or res.gaugeSamples or {},
-			type = res.gauge_type or res.flags or 0,
+			type = gaugeType,
 			val = makeLabel('num', getGauge(res), 24),
 		},
 		histogram = histogram,

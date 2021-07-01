@@ -33,6 +33,7 @@ local GaugeBar = {
       labels = {
         ars = makeLabel('norm', 'EXCESSIVE RATE + ARS'),
         blastive = makeLabel('norm', 'BLASTIVE RATE'),
+        blastiveLevel = makeLabel('num', '0', 24),
         effective = makeLabel('norm', 'EFFECTIVE RATE'),
         excessive = makeLabel('norm', 'EXCESSIVE RATE'),
         pct = makeLabel('num', '0', 24),
@@ -220,6 +221,17 @@ local GaugeBar = {
       text = ('%d%%'):format(floor(gauge.val * 100)),
       update = true,
     });
+
+    if (gauge.type == 3) then
+      this.labels.blastiveLevel:draw({
+        x = this.w + 6,
+        y = this.h - this.labels.blastiveLevel.h + 5,
+        alpha = alpha,
+        color = 'white',
+        text = getSetting('_blastiveLevel', ''),
+        update = true,
+      });
+    end
 
     gfx.BeginPath();
 

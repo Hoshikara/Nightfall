@@ -1,3 +1,7 @@
+##### 1.2.5 - July 1, 2021
+- `Develop Channel`
+  - Added blastive rate level display to gameplay and results screen
+
 ##### 1.2.4 - June 29, 2021
 - Added a chart loading indicator to song select
 - Added an update check indicator to the main menu

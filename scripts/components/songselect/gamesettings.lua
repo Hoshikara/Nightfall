@@ -129,9 +129,7 @@ return {
         min = base.value == base.min;
         max = base.value == base.max;
       elseif (setting.type == 'FLOAT') then
-        if ((base.max <= 1)
-          or (setting.special and setting.special == 'PERCENTAGE')
-        ) then
+        if (base.max <= 1) then
           setting.value:update({ text = ('%.f%%'):format(base.value * 100) });
         else
           setting.value:update({ text = ('%.2f'):format(base.value) });

@@ -331,6 +331,14 @@ local Graphs = {
         y = y,
         color = 'white',
       });
+
+      if (this.data.gauge.blastiveLevel) then
+        this.data.gauge.blastiveLevel:draw({
+          x = x + w + 5,
+          y = y + this.data.gauge.val.h,
+          color = 'white',
+        });
+      end
     end
 
     this.data.duration.label:draw({

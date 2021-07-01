@@ -119,6 +119,7 @@ local state = {
 };
 
 local arsEnabled = makeParser('Offsets', 'false', 'Game', 'Backup Gauge');
+local blastiveLevel = makeParser('Offsets', '0.5', 'Game', 'Blastive Rate Level');
 local playbackSpeed = makeParser('Main', '1', 'Main', 'Playback speed (%)');
 local scoreType = makeParser('Offsets', 'ADDITIVE', 'Game', 'Score Display');
 local songOffset = makeParser('Offsets', '0', 'Offsets', 'Song Offset');
@@ -152,7 +153,7 @@ local makeSettings = function(Constants)
 		-- TODO: find a better way to do this
 		if ((tKey == 'Game')
 			and (currTab.settings[1].options and (#currTab.settings[1].options > 2))
-			and (currTab.settings[1].value and currTab.settings[1].value ~= 4)
+			and (currTab.settings[1].value and (currTab.settings[1].value ~= 4))
 		) then
 			table.insert(currTab.settings, 2, {
 				name = 'Blastive Rate Level',
@@ -216,11 +217,25 @@ local makeSettings = function(Constants)
 end
 
 local gameSettings = nil;
+local hasBlastive = nil;
 local practiceSettings = nil;
 local notMulti = nil;
 
 render = function(dt, displaying)
+	if (hasBlastive == nil) then
+		local gameTab = SettingsDiag.tabs[3] or { name = '', settings = {} };
+
+		hasBlastive = (gameTab.name == 'Game')
+			and gameTab.settings[1]
+			and gameTab.settings[1].options
+			and (#gameTab.settings[1].options > 2);
+	end
+
 	game.SetSkinSetting('_arsEnabled', tostring(arsEnabled:get()));
+	game.SetSkinSetting(
+		'_blastiveLevel',
+		(hasBlastive and tostring(blastiveLevel:get())) or ''
+	);
 	game.SetSkinSetting('_gameSettings', (displaying and 'TRUE') or 'FALSE');
 	game.SetSkinSetting('_playbackSpeed', tostring(playbackSpeed:get()));
 	game.SetSkinSetting('_scoreType', scoreType:get():upper());
