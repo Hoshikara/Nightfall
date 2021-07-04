@@ -119,7 +119,7 @@ local state = {
 };
 
 local arsEnabled = makeParser('Offsets', 'false', 'Game', 'Backup Gauge');
-local blastiveLevel = makeParser('Offsets', '0.5', 'Game', 'Blastive Rate Level');
+local blastiveLevel = makeParser('Offsets', 0.5, 'Game', 'Blastive Rate Level');
 local playbackSpeed = makeParser('Main', '1', 'Main', 'Playback speed (%)');
 local scoreType = makeParser('Offsets', 'ADDITIVE', 'Game', 'Score Display');
 local songOffset = makeParser('Offsets', '0', 'Offsets', 'Song Offset');
@@ -231,11 +231,11 @@ render = function(dt, displaying)
 			and (#gameTab.settings[1].options > 2);
 	end
 
+	if (hasBlastive) then
+		game.SetSkinSetting('_blastiveLevel', blastiveLevel:get());
+	end
+
 	game.SetSkinSetting('_arsEnabled', tostring(arsEnabled:get()));
-	game.SetSkinSetting(
-		'_blastiveLevel',
-		(hasBlastive and tostring(blastiveLevel:get())) or ''
-	);
 	game.SetSkinSetting('_gameSettings', (displaying and 'TRUE') or 'FALSE');
 	game.SetSkinSetting('_playbackSpeed', tostring(playbackSpeed:get()));
 	game.SetSkinSetting('_scoreType', scoreType:get():upper());

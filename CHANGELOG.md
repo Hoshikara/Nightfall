@@ -1,3 +1,7 @@
+##### 1.2.6 - July 3, 2021
+- `Develop Channel`
+  - Fixed error when entering practice mode
+
 ##### 1.2.5 - July 1, 2021
 - `Develop Channel`
   - Added blastive rate level display to gameplay and results screen
