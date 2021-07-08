@@ -1,3 +1,8 @@
+##### 1.2.7 - July 8, 2021
+- `Player Info` changes
+  - Added score and total charts fields to the chart display screen; charts are now be sorted by score
+  - Changed hint to click on clear/grade totals to only appear on mouse hover
+
 ##### 1.2.6 - July 3, 2021
 - `Develop Channel`
   - Fixed error when entering practice mode

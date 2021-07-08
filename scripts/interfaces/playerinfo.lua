@@ -25,7 +25,6 @@ Level = {};
 ---@field folders string[] # Array of folder names
 ---@field levels table<string, Level> # Table of Levels, indexed by level string
 ---@field playCount integer # Total play count (submitted scores)
----@field songCount integer # Total amount of charts
 ---@field top50 TopPlay[] # Array of top 50 (or up to 50) plays
 PlayerStats = {};
 

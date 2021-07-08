@@ -58,12 +58,14 @@ local PlayerInfo = {
 				h = 0,
 			},
 			folderCache = {},
+			hoverTimer = 0,
 			jacket = nil,
 			jacketSize = { 424, 240 },
 			labels = {
 				artist = makeLabel('med', 'ARTIST'),
 				chartPage = makeLabel('num', '00', 20),
-				click = makeLabel('med', '* CLICK ON A TOTAL TO VIEW CHARTS', 20),
+				chartTotal = makeLabel('num', '00', 30),
+				click = makeLabel('med', 'CLICK TO VIEW CHARTS', 18),
 				folder = makeLabel('med', 'FOLDER', 20),
 				fxl = makeLabel('med', '[FX-L]', 20),
 				noInfo = {
@@ -755,6 +757,34 @@ local PlayerInfo = {
 
 			cols[#cols] = cols[#cols] + hBar;
 		end
+
+		if (hovered.key ~= '') then
+			this.hoverTimer = this.hoverTimer + dt;
+		else
+			this.hoverTimer = 0;
+		end
+
+		if (this.hoverTimer >= 0.4) then
+			local scale = 1 / this.window:getScale();
+			local x = this.mouse.x * scale;
+			local y = this.mouse.y * scale;
+
+			drawRect({
+				x = x + 20,
+				y = y - 28,
+				w = 240,
+				h = 28,
+				alpha = 200,
+				color = 'dark',
+				fast = true,
+			});
+
+			this.labels.click:draw({
+				x = x + 26,
+				y = y - 25,
+				color = 'white',
+			});
+		end
 	end,
 
 	-- Draw the list of charts of a level and category
@@ -763,27 +793,35 @@ local PlayerInfo = {
 	---@param y number
 	drawCharts = function(this, x, y)
 		local max = this.chartPageMax;
-		local maxWidth = this.w[2] * 0.45;
+		local maxWidth = this.w[2] * 0.35;
 		local yTemp = y;
 		local w = this.w[2] + ((this.window.isPortrait and 36) or 0);
 		local hCat = this.labels.level.h * 1.5;
 
 		x = x + 12;
 
-		this.labels.level:draw({ x = x, y = yTemp - hCat });
-		this.labels.category:draw({
-			x = x + this.labels.level.w + 96,
-			y = yTemp - hCat,
+		this.labels.total:draw({ x = x, y = yTemp - hCat });
+
+		this.labels.level:draw({ x = x + 160, y = yTemp - hCat });
+
+		this.labels.category:draw({ x = x + 320, y = yTemp - hCat });
+
+		this.labels.chartTotal:draw({
+			x = x,
+			y = yTemp - 5,
+			color = 'white',
+			text = #(this.charts or {}),
+			update = true,
 		});
 
 		this.level:draw({
-			x = x,
+			x = x + 160,
 			y = yTemp - 5,
 			color ='white',
 		});
 
 		this.category:draw({
-			x = x + this.labels.level.w + 96,
+			x = x + 320,
 			y = yTemp - 5,
 			color ='white',
 			size = 30,
@@ -792,8 +830,9 @@ local PlayerInfo = {
 
 		yTemp = yTemp + (this.category.h * 2.5);
 
-		this.labels.title:draw({ x = x, y = yTemp });
-		this.labels.artist:draw({ x = x + maxWidth + 36, y = yTemp });
+		this.labels.score:draw({ x = x, y = yTemp });
+		this.labels.title:draw({ x = x + 200, y = yTemp });
+		this.labels.artist:draw({ x = x + 200 + maxWidth + 36, y = yTemp });
 
 		yTemp = yTemp + (this.labels.title.h * 2);
 
@@ -805,7 +844,7 @@ local PlayerInfo = {
 			if (((i % max) % 2) == 1) then
 				drawRect({
 					x = x - 12,
-					y = yTemp - 8,
+					y = yTemp - 9,
 					w = w,
 					h = 48,
 					alpha = 50,
@@ -814,15 +853,17 @@ local PlayerInfo = {
 				});
 			end
 
+			curr.score:draw({ x = x, y = yTemp });
+
 			curr.title:draw({
-				x = x,
+				x = x + 200,
 				y = yTemp,
 				color = 'white',
 				maxWidth = maxWidth,
 			});
 
 			curr.artist:draw({
-				x = x + maxWidth + 36,
+				x = x + 200 + maxWidth + 36,
 				y = yTemp,
 				color = 'white',
 				maxWidth = maxWidth,
@@ -1211,23 +1252,11 @@ local PlayerInfo = {
 					});
 				end
 			else
-				local clickable = not this.state.choosingFolder
-					and ((this.currBtn == 2) or (this.currBtn == 3));
-
-					this.labels.fxl:draw({
-						x = (isPortrait and xLeft) or (x - this.labels.folder.w - 8),
-						y = yTop,
-						align = (isPortrait and 'left') or 'right',
-					});
-
-				if (clickable) then
-					this.labels.click:draw({
-						x = x,
-						y = yBot - this.labels.click.h,
-						align = 'right',
-						color = 'white',
-					});
-				end
+				this.labels.fxl:draw({
+					x = (isPortrait and xLeft) or (x - this.labels.folder.w - 8),
+					y = yTop,
+					align = (isPortrait and 'left') or 'right',
+				});
 			end
 
 			if (this.viewingTop50) then

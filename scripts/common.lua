@@ -1,7 +1,7 @@
 -- This script is loaded for every screen of the game
 -- All of the functions below are available to all of the scripts of the skin
 
-SkinVersion = '1.2.6';
+SkinVersion = '1.2.7';
 
 gfx.LoadSkinFont('DFMGM.ttf');
 

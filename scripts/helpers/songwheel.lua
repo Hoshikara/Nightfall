@@ -214,22 +214,24 @@ end
 ---@param updateAll boolean
 ---@param artist string
 ---@param title string
-local updateCat = function(cat, folder, updateAll, artist, title)
+local updateCat = function(cat, folder, updateAll, artist, title, score)
   if (not cat[folder]) then return; end
 
   cat[folder].total = cat[folder].total + 1;
 
   if (updateAll) then cat.All.total = cat.All.total + 1; end
 
-  if (artist and title) then
+  if (artist and title and score) then
     cat[folder].charts[#cat[folder].charts + 1] = {
       artist = artist,
+      score = score,
       title = title,
     };
 
     if (updateAll) then
       cat.All.charts[#cat.All.charts + 1] = {
         artist = artist,
+        score = score,
         title = title,
       };
     end
@@ -312,23 +314,23 @@ local getStats = function(folders)
           local score = diff.scores[1].score;
           local clear = level.clears[Clears[diff.topBadge].clear];
 
-          updateCat(clear, folder, true, song.artist, song.title);
+          updateCat(clear, folder, true, song.artist, song.title, score);
           updateCat(level.clearTotals, folder, true);
 
           if (official) then
-            updateCat(clear, Official, false, song.artist, song.title);
+            updateCat(clear, Official, false, song.artist, song.title, score);
             updateCat(level.clearTotals, Official, false);
           end
 
           if (score >= 8700000) then
             local grade = level.grades[getGrade(score)];
 
-            updateCat(grade, folder, true, song.artist, song.title);
+            updateCat(grade, folder, true, song.artist, song.title, score);
             updateCat(level.gradeTotals, folder, true);
             updateScores(level.scoreStats[folder], score);
 
             if (official) then
-              updateCat(grade, Official, false, song.artist, song.title);
+              updateCat(grade, Official, false, song.artist, song.title, score);
               updateCat(level.gradeTotals, Official, false);
               updateScores(level.scoreStats[Official], score);
             end
@@ -356,11 +358,49 @@ local getStats = function(folders)
     end
   end
 
+  for _, level in pairs(levels) do
+    local clears = level.clears;
+    local grades = level.grades;
+
+    for _, curr in ipairs(Clears) do
+      if (curr.clear ~= 'PLAYED') then
+        local clearTotals = clears[curr.clear];
+
+        if (clearTotals) then
+          for _, folderName in pairs(folders) do
+            local currFolder = clearTotals[folderName] or {};
+            local charts = currFolder.charts or {};
+
+            if (#charts > 1) then
+              table.sort(charts, function(l, r) return l.score > r.score end);
+            end
+          end
+        end
+      end
+    end
+
+    for _, curr in ipairs(Grades) do
+      if (curr.grade == 'B') then break; end
+
+      local gradeTotals = grades[curr.grade];
+
+      if (gradeTotals) then
+        for _, folderName in pairs(folders) do
+          local currFolder = gradeTotals[folderName] or {};
+          local charts = currFolder.charts or {};
+
+          if (#charts > 1) then
+            table.sort(charts, function(l, r) return l.score > r.score end);
+          end
+        end
+      end
+    end
+  end
+
   return {
     folders = folders,
     levels = levels,
     playCount = playCount,
-    songCount = #songwheel.allSongs,
     top50 = formatTop50(top50),
   };
 end

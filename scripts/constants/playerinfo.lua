@@ -27,6 +27,7 @@ return {
 		},
 		completed = 'COMPLETED',
 		level = 'LEVEL',
+		score = 'SCORE',
 		title = 'TITLE',
 		total = 'TOTAL',
 		totals = 'TOTALS',

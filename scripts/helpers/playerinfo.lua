@@ -69,11 +69,13 @@ local makeStats = function(levels, folder, clears)
 			for i, chart in ipairs(curr[alias][cat][folder].charts) do
 				charts[i] = {
 					artist = makeLabel('jp', chart.artist),
+					score = ScoreNumber:new({ size = 24, val = chart.score }),
 					title = makeLabel('jp', chart.title),
 				};
 
 				t[cat].charts[#t[cat].charts + 1] = {
 					artist = makeLabel('jp', chart.artist),
+					score = ScoreNumber:new({ size = 24, val = chart.score }),
 					title = makeLabel('jp', chart.title),
 				};
 			end
