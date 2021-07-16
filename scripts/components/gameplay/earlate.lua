@@ -96,8 +96,7 @@ local Earlate = {
 
     this.timer = this.timer + dt;
 
-    this.alpha = math.floor(this.timer * 30) % 2;
-    this.alpha = ((this.alpha * 175) + 80) / 255;
+    this.alpha = (this.timer * 18) % 1;
 
     local color = (this.state.isLate and Colors.late) or Colors.early;
     ---@type Label
@@ -129,7 +128,7 @@ local Earlate = {
         x = -this.offset;
         y = 2,
         align = this.textAlign,
-        alpha = 100,
+        alpha = 100 * this.alpha,
         color = { 150, 150, 150 },
       });
 
@@ -147,7 +146,7 @@ local Earlate = {
         x = this.offset,
         y = 6,
         align = this.deltaAlign,
-        alpha = 100,
+        alpha = 100 * this.alpha,
         color = { 150, 150, 150 },
         text = deltaStr,
         update = true,

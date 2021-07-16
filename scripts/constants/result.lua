@@ -11,10 +11,9 @@ return {
     critical = 'CRITICAL',
     early = 'EARLY',
     error = 'ERROR',
+    exScore = 'EX SCORE',
     gauge = 'GAUGE',
     grade = 'GRADE',
-    critWindow = 'CRIT WINDOW',
-    nearWindow = 'NEAR WINDOW',
     hitWindows = 'HIT WINDOWS',
     late = 'LATE',
     maxChain = 'MAX CHAIN',
@@ -22,5 +21,6 @@ return {
     near = 'NEAR',
     score = 'SCORE',
     timestamp = 'DATE',
+    volforce = 'VOLFORCE',
   },
 };

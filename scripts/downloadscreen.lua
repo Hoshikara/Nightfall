@@ -3,7 +3,7 @@ JSON = require('lib/json');
 local header = {}
 header["user-agent"] = "unnamed_sdvx_clone"
 
-local jacketFallback = gfx.CreateSkinImage("common/loading.png", 0)
+local jacketFallback = gfx.CreateSkinImage("loading.png", 0)
 local diffColors = {{50,50,127}, {50,127,50}, {127,50,50}, {127, 50, 127}}
 local entryW = 770
 local entryH = 320
@@ -50,7 +50,7 @@ function addsong(song)
   table.insert(songs, song)
 end
 local yOffset = 0
-local backgroundImage = gfx.CreateSkinImage("bg.png", 1);
+local background = Background:new();
 
 dlcache = io.open(cachepath, "r")
 if dlcache then
@@ -224,8 +224,7 @@ function render_info()
 end
 
 function render(deltaTime)
-  gfx.BeginPath()
-  gfx.ImageRect(0, 0, resX, resY, backgroundImage, 1, 0);
+  background:render({ w = resX, h = resY });
   gfx.LoadSkinFont("NotoSans-Regular.ttf");
   displayCursorPosX = displayCursorPosX - (displayCursorPosX - cursorPosX) * deltaTime * 10
   displayCursorPosY = displayCursorPosY - (displayCursorPosY - cursorPosY) * deltaTime * 10

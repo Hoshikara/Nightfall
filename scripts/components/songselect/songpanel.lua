@@ -1,6 +1,7 @@
 local Difficulties = require('constants/difficulties');
 local Labels = require('constants/songwheel');
 
+local Button = require('components/common/button');
 local Cursor = require('components/common/cursor');
 local ScoreNumber = require('components/common/scorenumber');
 local SearchBar = require('components/common/searchbar');
@@ -45,6 +46,7 @@ local SongPanel = {
     ---@field state SongWheel
     ---@field window Window
     local t = {
+      button = Button:new(198, 50),
       cache = { w = 0, h = 0 },
       currDiff = 0,
       currSong = 0,
@@ -56,12 +58,6 @@ local SongPanel = {
       cursorIdx = 0,
       diffs = {},
       highScore = ScoreNumber:new({ size = 100 }),
-      images = {
-        btn = Image:new('buttons/short.png'),
-        btnH = Image:new('buttons/short_hover.png'),
-        panel = Image:new('common/panel.png'),
-        panelPortrait = Image:new('common/panel_wide.png'),
-      },
       innerWidth = 0,
       jacketSize = 0,
       labels = {
@@ -112,6 +108,8 @@ local SongPanel = {
       if (this.window.isPortrait) then
         this.jacketSize = this.window.w // 4.75;
 
+        this.button.w = this.jacketSize;
+
         this.w = this.window.w - (this.window.padding.x * 2);
         this.h = this.window.h // 2.9;
 
@@ -122,7 +120,9 @@ local SongPanel = {
       else
         this.jacketSize = this.window.w // 5;
 
-        this.w = this.window.w / (1920 / this.images.panel.w);
+        this.button.w = 198;
+
+        this.w = this.window.w / (1920 / 748);
         this.h = this.window.h - (this.window.padding.y * 2);
 
         this.padding.x.full = this.w / 24;
@@ -156,8 +156,8 @@ local SongPanel = {
             + this.labels.difficulty.h
             - 6,
           w = this.jacketSize + 5,
-          h = this.images.btn.h - 8,
-          margin = (this.images.btn.h / 2.5) + 8,
+          h = this.button.h,
+          margin = this.button.h * 0.75,
         });
 
         this.searchBar:setSizes({
@@ -176,10 +176,10 @@ local SongPanel = {
           y = this.y
             + this.padding.y.double
             + this.labels.difficulty.h
-            - 20,
-          w = this.images.btn.w - 8,
-          h = this.images.btn.h - 8,
-          margin = (this.images.btn.h / 2.5) + 8,
+            - 32,
+          w = this.button.w,
+          h = this.button.h,
+          margin = this.button.h * 0.925,
         });
 
         this.searchBar:setSizes({
@@ -388,49 +388,41 @@ local SongPanel = {
   ---@param isCurr boolean
   ---@return number
   drawDiff = function(this, y, diff, isCurr)
-    local x = this.padding.x.double + this.jacketSize + this.padding.x.full + 12;
-    local w = this.images.btn.w;
+    local scale = 0.925;
+    local x = this.padding.x.double + this.jacketSize + this.padding.x.full + 16;
 
     if (this.window.isPortrait) then
-      x = this.padding.x.double - 8;
+      scale = 0.75;
+      x = this.padding.x.double - 1;
       w = this.jacketSize + 14;
     end
 
-    if (isCurr) then
-      this.images.btnH:draw({
-        x = x,
-        y = y,
-        w = w,
-      });
-    else
-      this.images.btn:draw({
-        x = x,
-        y = y,
-        w = w,
-        alpha = 0.6,
-      });
-    end
+    this.button:render({
+      x = x,
+      y = y,
+      accentAlpha = (isCurr and 1) or 0.3,
+    });
 
     if (diff) then
       local i = getDiffIndex(diff.jacketPath, diff.diff);
 
       this.diffs[i]:draw({
-        x = x + (w / 7),
-        y = y + (this.images.btn.h / 2) - 12,
+        x = x + 24,
+        y = y + (this.button.h * 0.5) - 12,
         alpha = 255 * ((isCurr and 1) or 0.35),
         color = 'white',
       });
 
       diff.level:draw({
-        x = x + w - (w / 7),
-        y = y + (this.images.btn.h / 2) - 12,
+        x = x + this.button.w - 24,
+        y = y + (this.button.h * 0.5) - 12,
         align = 'right',
         alpha = 255 * ((isCurr and 1) or 0.35),
         color = 'white',
       });
     end
 
-    return this.images.btn.h + (this.images.btn.h / 2.5);
+    return this.button.h + (this.button.h * scale);
   end,
 
   -- Draw the song panel
@@ -439,7 +431,7 @@ local SongPanel = {
   drawPanel = function(this, dt)
     local song = songwheel.songs[this.state.currSong];
     local x = this.padding.x.double + this.jacketSize + this.padding.x.full + 15;
-    local y = this.padding.y.double + this.labels.difficulty.h - 24;
+    local y = this.padding.y.double + this.labels.difficulty.h - 32;
     local yLabel = this.padding.y.full - 5;
     local cached, diff;
 
@@ -448,25 +440,18 @@ local SongPanel = {
       y = (this.padding.y.full * 2)
         + this.jacketSize
         + this.labels.difficulty.h
-        - 10;
-      yLabel = (this.padding.y.full * 2) + this.jacketSize - 24;
-
-      this.images.panelPortrait:draw({
-        x = this.x,
-        y = this.y,
-        w = this.w,
-        h = this.h,
-        alpha = 0.75,
-      });
-    else
-      this.images.panel:draw({
-        x = this.x,
-        y = this.y,
-        w = this.w,
-        h = this.h,
-        alpha = 0.75,
-      });  
+        - 7;
+      yLabel = (this.padding.y.full * 2) + this.jacketSize - 24; 
     end
+
+    drawRect({
+      x = this.x,
+      y = this.y,
+      w = this.w,
+      h = this.h,
+      alpha = 180,
+      color = 'dark',
+    });  
 
     cached = this.songs:get(song);
 

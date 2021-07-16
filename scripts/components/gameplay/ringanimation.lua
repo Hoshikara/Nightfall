@@ -58,7 +58,11 @@ local RingAnimation = {
   ---@param state AnimationState
   start = function(this, dt, state)
     if (state.active) then
-      state.alpha = to1(state.alpha, dt, 0.1);
+      if (this.isHold) then
+        state.alpha = to1(state.alpha, dt, 0.1);
+      else
+        state.alpha = 1;
+      end
     else
       if (state.effect) then
         if (state.effect.playIn) then
@@ -76,7 +80,12 @@ local RingAnimation = {
         end
       elseif (state.alpha == 0) then return; end
 
-      state.alpha = to0(state.alpha, dt, 0.1);
+      if (this.isHold) then
+        state.alpha = to0(state.alpha, dt, 0.1);
+      else
+        state.alpha = 0;
+      end
+      
       state.timer = 0;
     end
 

@@ -7,9 +7,7 @@ local ScoreList = require('components/result/scorelist');
 local Screenshot = require('components/result/screenshot');
 
 local window = Window:new(true);
-
-local bg = Image:new('bg.png');
-local bgPortrait = Image:new('bg_p.png');
+local background = Background:new(window);
 
 local shotRegion = getSetting('screenshotRegion', 'PANEL');
 local showHardScores = getSetting('showHardScores', false);
@@ -19,6 +17,7 @@ local showHardScores = getSetting('showHardScores', false);
 local state = {
 	currScore = 1,
 	downScore = nil,
+	graphData = nil,
 	jacket = nil,
 	myScore = nil,
 	scores = {},
@@ -78,11 +77,7 @@ end
 render = function(dt)
 	window:set();
 
-	if (window.isPortrait) then
-		bgPortrait:draw({ w = window.w, h = window.h });
-	else
-		bg:draw({ w = window.w, h = window.h });
-	end
+	background:render();
 
 	local w, h = resultPanel:render(dt);
 

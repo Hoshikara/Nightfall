@@ -6,6 +6,7 @@ local JSON = require('lib/json');
 local Difficulties = require('constants/difficulties');
 local Labels = require('constants/songwheel');
 
+local Button = require('components/common/button');
 local Cursor = require('components/common/cursor');
 
 local Order = {
@@ -15,7 +16,7 @@ local Order = {
   'bpm',
 };
 
-local fallback = gfx.CreateSkinImage('common/loading.png', 0);
+local fallback = gfx.CreateSkinImage('loading.png', 0);
 
 local getDiff = function(diffs, i)
   local index = nil;
@@ -45,6 +46,10 @@ local Panel = {
     ---@field window Window
     local t = {
       btn = { x = 0, y = {} },
+      buttons = {
+        med = Button:new(355, 50),
+        norm = Button:new(198, 50),
+      },
       cache = { w = 0, h = 0 },
       currDiff = 1,
       cursor = Cursor:new({
@@ -54,14 +59,6 @@ local Panel = {
       }),
       cursorIdx = 0,
       diffs = {},
-      images = {
-        btn = Image:new('buttons/short.png'),
-        btnH = Image:new('buttons/short_hover.png'),
-        btnMed = Image:new('buttons/medium.png'),
-        btnMedH = Image:new('buttons/medium_hover.png'),
-        panel = Image:new('common/panel.png'),
-        panelPortrait = Image:new('common/panel_wide.png'),
-      },
       info = {
         artist = makeLabel('jp', '', 30),
         bpm = makeLabel('num', '', 24),
@@ -118,6 +115,8 @@ local Panel = {
       if (this.window.isPortrait) then
         this.jacketSize = this.window.w // 4.75;
 
+        this.buttons.norm.w = this.jacketSize;
+
         this.w = this.window.w - (this.window.padding.x * 2);
         this.h = this.window.h // 2.9;
 
@@ -126,7 +125,9 @@ local Panel = {
       else
         this.jacketSize = this.window.w // 5;
 
-        this.w = this.window.w / (1920 / this.images.panel.w);
+        this.buttons.norm.w = 198;
+
+        this.w = this.window.w / (1920 / 748);
         this.h = this.window.h - (this.window.padding.y * 2);
 
         this.padding.x.full = this.w / 24;
@@ -146,10 +147,10 @@ local Panel = {
         this.btn.x = this.x
           + this.w
           - this.padding.x.double
-          - this.images.btnMed.w
+          - this.buttons.med.w
           + 4;
         this.btn.y[1] = this.y + this.h - (this.padding.y.double * 2.5) - 4;
-        this.btn.y[2] = this.btn.y[1] + (this.images.btn.h * 1.5);
+        this.btn.y[2] = this.btn.y[1] + (this.buttons.med.h * 1.5);
 
         this.cursor:setSizes({
           x = this.x + this.padding.x.full + 23,
@@ -159,27 +160,27 @@ local Panel = {
             + this.labels.difficulty.h
             - 6,
           w = this.jacketSize + 5,
-          h = this.images.btn.h - 8,
-          margin = (this.images.btn.h / 2.5) + 8,
+          h = this.buttons.norm.h,
+          margin = this.buttons.norm.h * 0.75,
         });
       else
         this.btn.x = this.x + this.padding.x.double - 4;
         this.btn.y[1] = this.y + this.h - (this.padding.y.double * 2.5) + 24;
-        this.btn.y[2] = this.btn.y[1] + (this.images.btn.h * 1.5);
+        this.btn.y[2] = this.btn.y[1] + (this.buttons.med.h * 1.5);
 
         this.cursor:setSizes({
           x = this.x
             + this.padding.x.double
             + this.jacketSize
             + this.padding.x.full
-            + 8,
+            + 16,
           y = this.y
             + this.padding.y.double
             + this.labels.difficulty.h
-            - 20,
-          w = this.images.btn.w - 8,
-          h = this.images.btn.h - 8,
-          margin = (this.images.btn.h / 2.5) + 8,
+            - 32,
+          w = this.buttons.norm.w,
+          h = this.buttons.norm.h,
+          margin = this.buttons.norm.h * 0.925,
         });
       end
 
@@ -218,42 +219,34 @@ local Panel = {
   ---@param diff table
   ---@param isCurr boolean
   drawDiff = function(this, y, i, diff, isCurr)
-    local x = this.padding.x.double + this.jacketSize + this.padding.x.full + 12;
-    local w = this.images.btn.w;
+    local scale = 0.925;
+    local x = this.padding.x.double + this.jacketSize + this.padding.x.full + 16;
 
     if (this.window.isPortrait) then
-      x = this.padding.x.double - 8;
+      scale = 0.75;
+      x = this.padding.x.double - 1;
       w = this.jacketSize + 14;
     end
 
-    if (isCurr) then
-      this.images.btnH:draw({
-        x = x,
-        y = y,
-        w = w,
-      });
-    else
-      this.images.btn:draw({
-        x = x,
-        y = y,
-        w = w,
-        alpha = 0.6,
-      });
-    end
+    this.buttons.norm:render({
+      x = x,
+      y = y,
+      accentAlpha = (isCurr and 1) or 0.3,
+    });
 
     if (diff) then
       local j = getDiffIndex(diff.jacketPath, diff.difficulty);
 
       this.diffs[j]:draw({
-        x = x + (w / 7),
-        y = y + (this.images.btn.h / 2) - 12,
+        x = x + 24,
+        y = y + (this.buttons.norm.h * 0.5) - 12,
         alpha = 255 * ((isCurr and 1) or 0.2),
         color = 'white',
       });
 
       this.levels[i]:draw({
-        x = x + w - (w / 7),
-        y = y + (this.images.btn.h / 2) - 12,
+        x = x + this.buttons.norm.w - 24,
+        y = y + (this.buttons.norm.h * 0.5) - 12,
         align = 'right',
         alpha = 255 * ((isCurr and 1) or 0.2),
         color = 'white',
@@ -262,7 +255,7 @@ local Panel = {
       });
     end
 
-    return this.images.btn.h + (this.images.btn.h / 2.5);
+    return this.buttons.norm.h + (this.buttons.norm.h * scale);
   end,
 
   -- Draw the chart info
@@ -321,22 +314,22 @@ local Panel = {
     local altLabel = nil;
     local isClickable = true;
     local label = '';
-    local labelOffset = (this.images.btnMed.h / 2) - 12;
+    local labelOffset = (this.buttons.med.h * 0.5) - 12;
     local lobby = this.state.lobby;
     local user = this.state.user;
     local topHover = this.mouse:clipped(
       this.btn.x,
       this.btn.y[1],
-      this.images.btnMed.w,
-      this.images.btnMed.h
+      this.buttons.med.w,
+      this.buttons.med.h
     );
     local botHover = this.mouse:clipped(
       this.btn.x,
       this.btn.y[2],
-      this.images.btnMed.w,
-      this.images.btnMed.h
+      this.buttons.med.w,
+      this.buttons.med.h
     );
-    local x = this.btn.x + (this.images.btnMed.w / 10);
+    local x = this.btn.x + 24;
 
     if (lobby.starting) then
       label = 'starting';
@@ -380,15 +373,13 @@ local Panel = {
     if (isClickable and topHover) then
       this.state.btnEvent = event;
       label = altLabel or label;
-
-      this.images.btnMedH:draw({ x = this.btn.x, y = this.btn.y[1] });
-    else
-      this.images.btnMed:draw({
-        x = this.btn.x,
-        y = this.btn.y[1],
-        alpha = 0.75,
-      });
     end
+
+    this.buttons.med:render({
+      x = this.btn.x,
+      y = this.btn.y[1],
+      accentAlpha = (isClickable and topHover and 1) or 0.3,
+    });
 
     this.labels[label]:draw({
       x = x;
@@ -399,15 +390,13 @@ local Panel = {
 
     if (isClickable and botHover) then
       this.state.btnEvent = mpScreen.OpenSettings;
-
-      this.images.btnMedH:draw({ x = this.btn.x, y = this.btn.y[2] });
-    else
-      this.images.btnMed:draw({
-        x = this.btn.x,
-        y = this.btn.y[2],
-        alpha = 0.75,
-      });
     end
+
+    this.buttons.med:render({
+      x = this.btn.x,
+      y = this.btn.y[2],
+      accentAlpha = (isClickable and botHover and 1) or 0.3,
+    });
 
     this.labels.settings:draw({
       x = x;
@@ -518,7 +507,7 @@ local Panel = {
   ---@param dt deltaTime
   drawPanel = function(this, dt)
     local x = this.padding.x.double + this.jacketSize + this.padding.x.full + 15;
-    local y = this.padding.y.double + this.labels.difficulty.h - 24;
+    local y = this.padding.y.double + this.labels.difficulty.h - 32;
     local yLabel = this.padding.y.full - 5;
 
     if (this.window.isPortrait) then
@@ -526,25 +515,18 @@ local Panel = {
       y = (this.padding.y.full * 2)
         + this.jacketSize
         + this.labels.difficulty.h
-        - 10;
+        - 7;
       yLabel = (this.padding.y.full * 2) + this.jacketSize - 24;
-
-      this.images.panelPortrait:draw({
-        x = this.x,
-        y = this.y,
-        w = this.w,
-        h = this.h,
-        alpha = 0.75,
-      });
-    else
-      this.images.panel:draw({
-        x = this.x,
-        y = this.y,
-        w = this.w,
-        h = this.h,
-        alpha = 0.75,
-      });  
     end
+
+    drawRect({
+      x = this.x,
+      y = this.y,
+      w = this.w,
+      h = this.h,
+      alpha = 180,
+      color = 'dark',
+    });
 
     gfx.Save();
 
@@ -589,23 +571,23 @@ local Panel = {
   handleChange = function(this)
     if (not selected_song) then return; end
 
-    if (this.song ~= selected_song) then
-      game.PlaySample('click_song');
+      if (this.song ~= selected_song) then
+        game.PlaySample('click_song');
 
-      this:resetTimers();
+        this:resetTimers();
 
-      this.state.lobby.jacket = nil;
+        this.state.lobby.jacket = nil;
 
-      this.song = selected_song;
-    end
+        this.song = selected_song;
+      end
 
-    if (this.currDiff ~= selected_song.difficulty) then
-      game.PlaySample('click_difficulty');
+      if (this.currDiff ~= selected_song.difficulty) then
+        game.PlaySample('click_difficulty');
 
-      this:resetTimers();
+        this:resetTimers();
 
-      this.currDiff = selected_song.difficulty;
-    end
+        this.currDiff = selected_song.difficulty;
+      end
   end,
 
   -- Renders the current component

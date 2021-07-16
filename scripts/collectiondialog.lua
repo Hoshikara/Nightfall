@@ -63,10 +63,10 @@ local dialogWindow = {
 		if ((this.cache.w ~= window.w) or (this.cache.h ~= window.h)) then
 			dialogBox:setSizes(window.w, window.h, window.isPortrait);
 
-			this.button.maxWidth = dialogBox.images.btn.w - 64;
-			this.button.x = dialogBox.x.middleRight - dialogBox.images.btn.w + 36;
+			this.button.maxWidth = dialogBox.button.w - 48;
+			this.button.x = dialogBox.x.middleRight - dialogBox.button.w + 36;
 			this.button.y = dialogBox.y.center + 12;
-			this.button.h = dialogBox.images.btn.h;
+			this.button.h = dialogBox.button.h;
 
 			this.input.x = dialogBox.x.middleLeft + 24;
 			this.input.y = dialogBox.y.center + (dialogBox.h.outer / 10);
@@ -75,17 +75,17 @@ local dialogWindow = {
 			this.input.maxWidth = this.input.w - 20;
 
 			this.cursor:setSizes({
-				x = this.button.x + 4,
-				y = this.button.y + 4,
-				w = this.button.maxWidth + 64 - 8,
-				h = this.button.h - 8,
-				margin = this.button.margin + 8,
+				x = this.button.x,
+				y = this.button.y,
+				w = dialogBox.button.w,
+				h = this.button.h,
+				margin = this.button.margin,
 			});
 
 			this.scrollbar:setSizes({
-				x = this.button.x + this.button.maxWidth + 64 + 24,
-				y = this.button.y + 5,
-				h = (this.button.h * 2) + this.button.margin - 10,
+				x = this.button.x + dialogBox.button.w + 24,
+				y = this.button.y,
+				h = (this.button.h * 2) + this.button.margin,
 			});
 
 			this.cache.w = window.w;
@@ -194,19 +194,13 @@ local dialogWindow = {
 		local x = this.button.x;
 
 		if (isVis) then
-			if (isCurr) then
-				dialogBox.images.btnH:draw({
-					x = x,
-					y = y,
-					alpha = this.timers.fade,
-				});
-			else
-				dialogBox.images.btn:draw({
-					x = x,
-					y = y,
-					alpha = 0.45 * this.timers.fade,
-				});
-			end
+			dialogBox.button:render({
+				x = x,
+				y = y,
+				accentAlpha = ((isCurr and 1) or 0.3) * this.timers.fade,
+				alpha = this.timers.fade,
+				color = 'med',
+			});
 
 			window:unscale();
 
@@ -218,8 +212,8 @@ local dialogWindow = {
 				end
 
 				label:drawScrolling({
-					x = x + 30,
-					y = y + label.h + 3,
+					x = x + 24,
+					y = y + (this.button.h * 0.5) - 12,
 					alpha = alpha,
 					color = 'white',
 					scale = window:getScale(),
@@ -228,8 +222,8 @@ local dialogWindow = {
 				});
 			else
 				label:draw({
-					x = x + 30,
-					y = y + label.h + 3,
+					x = x + 24,
+					y = y + (this.button.h * 0.5) - 12,
 					alpha = alpha,
 					color = 'white',
 				});
@@ -347,7 +341,6 @@ local dialogWindow = {
 			x = window.w / 2,
 			y = window.h / 2,
 			alpha = this.timers.fade,
-			centered = true,
 		});
 
 		this:drawSongInfo(dt);
@@ -397,6 +390,12 @@ render = function(dt)
 	return not (dialog.closing and (dialogWindow.timers.fade <= 0));
 end
 
+makeCollection = function(name)
+	return function()
+		menu.Confirm(name);
+	end
+end
+
 open = function()
 	curr = 0;
 	options = {};
@@ -418,7 +417,7 @@ open = function()
 		end
 
 		options[i] = {
-			event = function() menu.Confirm(collection.name); end,
+			event = makeCollection(collection.name),
 			label = makeLabel('med', name),
 		};
 	end

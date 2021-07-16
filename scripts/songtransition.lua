@@ -8,6 +8,7 @@ local Order = {
 };
 
 local window = Window:new();
+local background = Background:new(window);
 
 local cursor = Cursor:new({ size = 26, stroke = 2.5 }, true);
 
@@ -15,14 +16,11 @@ local floor = math.floor;
 
 local alpha = 0;
 
-local bg = Image:new('bg.png');
-local bgPortrait = Image:new('bg_p.png');
-
 local introDone = false;
 local outroDone = false;
 
 local jacket = nil;
-local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
+local jacketFallback = gfx.CreateSkinImage('loading.png', 0);
 local jacketSize = nil;
 
 local labels = nil;
@@ -38,16 +36,11 @@ local songInfo = nil;
 local timers = {
 	artist = 0,
 	effector = 0,
-	fade = 1,
 	flicker = { i = 0, o = 0 },
 	illustrator = 0,
+	title = 0,
 	i = 0,
 	o = 0,
-	scissor = {
-		i = 0,
-		o = { l = 1, r = 0 },
-	},
-	title = 0,
 };
 
 local setSizes = function()
@@ -88,21 +81,15 @@ end
 ---@param isIntro boolean
 local handleTimers = function(dt, isIntro)
 	if (isIntro) then
-		timers.fade = to0(timers.fade, dt, (window.isPortrait and 0.4) or 0.6);
 		timers.flicker.i = timers.flicker.i + dt;
-		timers.i = timers.i + dt;
-		timers.scissor.i = to1(
-			timers.scissor.i,
-			dt,
-			(window.isPortrait and 0.15) or 0.2
-		);
+		timers.i = to1(timers.i, dt, (window.isPortrait and 0.15) or 0.2);
 
 		alpha = floor(timers.flicker.i * 30) % 2;
 		alpha = ((alpha * 80) + 175) / 255;
 
 		if (timers.flicker.i >= 0.3) then alpha = 1; end
 
-		if (timers.i >= 0.5) then
+		if (timers.i >= 1) then
 			timers.title = timers.title + dt;
 			songAlpha.title = flicker(timers.title);
 
@@ -122,21 +109,15 @@ local handleTimers = function(dt, isIntro)
 			end
 		end
 
-		introDone = timers.i >= 2;
+		introDone = timers.illustrator >= 0.75;
 	else
-		local duration = (window.isPortrait and 0.2) or 0.28;
-
 		timers.flicker.o = timers.flicker.o + dt;
-		timers.o = timers.o + (dt * 2);
-		timers.scissor.o.l = to0(timers.scissor.o.l, dt, duration);
-		timers.scissor.o.r = to1(timers.scissor.o.r, dt, duration);
+		timers.o = to1(timers.o, dt, (window.isPortrait and 0.2) or 0.28);
 
 		alpha = floor(timers.flicker.o * 36) % 2;
 		alpha = ((alpha * 80) + 175) / 255;
-
-		if (timers.flicker.o >= 0.3) then alpha = timers.scissor.o.l * 0.5; end
 		
-		outroDone = timers.o >= 2;
+		outroDone = timers.o >= 1;
 	end
 end
 
@@ -166,88 +147,16 @@ local renderTransition = function(dt, isIntro);
 
 	gfx.Save();
 
-	if (isIntro) then
-		gfx.Translate(x, 0);
+	gfx.Scissor(
+		window.w * timers.o,
+		0,
+		window.w * timers.i,
+		window.h
+	);
 
-		gfx.Scissor(
-			-(x * timers.scissor.i),
-			0,
-			window.w * timers.scissor.i,
-			window.h
-		);
+	background:render({ w = window.w, h = window.h });
 
-		gfx.Translate(-x, 0);
-
-
-		if (window.isPortrait) then
-			bgPortrait:draw({
-				x = x,
-				y = window.h / 2,
-				centered = true,
-			});
-		else
-			bg:draw({
-				x = x,
-				y = window.h / 2,
-				centered = true,
-			});
-		end
-
-		drawRect({
-			w = window.w,
-			h = window.h,
-			alpha = 150 * timers.fade,
-			color = 'black',
-		});
-
-		gfx.ResetScissor();
-	else
-		gfx.Scissor(
-			0,
-			0,
-			x * timers.scissor.o.l,
-			window.h
-		);
-
-		if (window.isPortrait) then
-			bgPortrait:draw({
-				x = x,
-				y = window.h / 2,
-				centered = true,
-			});
-		else
-			bg:draw({
-				x = x,
-				y = window.h / 2,
-				centered = true,
-			});
-		end
-
-		gfx.ResetScissor();
-
-		gfx.Scissor(
-			x + (x * timers.scissor.o.r),
-			0,
-			window.w / 2,
-			window.h
-		);
-
-		if (window.isPortrait) then
-			bgPortrait:draw({
-				x = x,
-				y = window.h / 2,
-				centered = true,
-			});
-		else
-			bg:draw({
-				x = x,
-				y = window.h / 2,
-				centered = true,
-			});
-		end
-
-		gfx.ResetScissor();
-	end
+	gfx.ResetScissor();
 
 	if (window.isPortrait) then
 		x = window.padding.x * 3;
@@ -283,12 +192,12 @@ local renderTransition = function(dt, isIntro);
 
 	if (isIntro) then
 		drawRect({
-			x = x + (w / 2) - ((w / 2) * timers.scissor.i),
+			x = x + (w / 2) - ((w / 2) * timers.i),
 			y = y,
-			w = w * timers.scissor.i,
+			w = w * timers.i,
 			h = ((window.isPortrait) and (w / 2)) or (w / 2.225),
-			alpha = 150,
-			color = 'black',
+			alpha = 180,
+			color = 'dark',
 			fast = true,
 		});
 
@@ -299,7 +208,7 @@ local renderTransition = function(dt, isIntro);
 			labels[name]:draw({
 				x = x,
 				y = y,
-				alpha = 255 * timers.scissor.i,
+				alpha = 255 * timers.i,
 			});
 
 			songInfo[name]:draw({
@@ -318,6 +227,8 @@ local renderTransition = function(dt, isIntro);
 end
 
 render = function(dt)
+	reloadColors();
+	
 	renderTransition(dt, true);
 	
   return introDone;
@@ -342,14 +253,10 @@ reset = function()
 	
 	timers.artist = 0;
 	timers.effector = 0;
-	timers.fade = 1;
 	timers.flicker.i = 0;
 	timers.flicker.o = 0;
 	timers.illustrator = 0;
+	timers.title = 0;
 	timers.i = 0;
 	timers.o = 0;
-	timers.scissor.i = 0;
-	timers.scissor.o.l = 1;
-	timers.scissor.o.r = 0;
-	timers.title = 0;
 end

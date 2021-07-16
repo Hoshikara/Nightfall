@@ -13,6 +13,12 @@
 		"label": "Nautica Download Folder i.e. /songs/nautica (no slashes)",
 		"default": "nautica"
 	},
+	"separator_iqn": {},
+	"colorScheme": {
+		"label": "Color Scheme",
+		"type": "color",
+		"default": "3C6EA0FF"
+	},
 	"separator_b": {},
 	"////////// SONG SELECT //////////": {
 		"type": "label"
@@ -96,21 +102,21 @@
 	},
 	"earlateX": {
 		"type": "float",
-		"label": "Early / Late X-Position (%.2f)",
+		"label": "Early / Late X-Position: %.2f",
 		"default": 0.5,
 		"min": 0.0,
 		"max": 1.0
 	},
 	"earlateY": {
 		"type": "float",
-		"label": "Early / Late Y-Position (%.2f)",
+		"label": "Early / Late Y-Position: %.2f",
 		"default": 0.75,
 		"min": 0.0,
 		"max": 1.0
 	},
 	"earlateGap": {
 		"type": "float",
-		"label": "Early / Late Text/Delta Gap (%.2f)",
+		"label": "Early / Late Text/Delta Gap: %.2f",
 		"default": 0.4,
 		"min": 0.25,
 		"max": 1.0
@@ -123,14 +129,14 @@
 	},
 	"hispeedX": {
 		"type": "float",
-		"label": "Hi-Speed X-Position (%.2f)",
+		"label": "Hi-Speed X-Position: %.2f",
 		"default": 0.5,
 		"min": 0.0,
 		"max": 1.0
 	},
 	"hispeedY": {
 		"type": "float",
-		"label": "Hi-Speed Y-Position (%.2f)",
+		"label": "Hi-Speed Y-Position: %.2f",
 		"default": 0.5,
 		"min": 0.0,
 		"max": 1.0
@@ -166,16 +172,23 @@
 		"type": "bool",
 		"default": true
 	},
+	"scoreDiffDelay": {
+		"label": "Score Difference update delay time (in seconds): %.2f",
+		"type": "float",
+		"default": 0.05,
+		"min": 0.05,
+		"max": 1.0
+	},
 	"scoreDiffX": {
 		"type": "float",
-		"label": "Score Difference X-Position (%.2f)",
+		"label": "Score Difference X-Position: %.2f",
 		"default": 0.05,
 		"min": 0.0,
 		"max": 1.0
 	},
 	"scoreDiffY": {
 		"type": "float",
-		"label": "Score Difference Y-Position (%.2f)",
+		"label": "Score Difference Y-Position: %.2f",
 		"default": 0.50,
 		"min": 0.0,
 		"max": 1.0
@@ -194,6 +207,11 @@
 	"separator_d": {},
 	"////////// RESULTS //////////": {
 		"type": "label"
+	},
+	"showSimpleGraph": {
+		"label": "Show simple hit graph",
+		"type": "bool",
+		"default": true
 	},
 	"showHardScores": {
 		"label": "Only show High Scores with harder hit windows",

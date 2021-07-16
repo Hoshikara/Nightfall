@@ -34,9 +34,9 @@ local Grid = {
     };
 
     if (isSongSelect) then
-      t.panel = Image:new('common/panel.png');
+      t.panel = 748;
     else
-      t.panel = Image:new('common/panel_wide.png');
+      t.panel = 864;
     end
 
     setmetatable(t, this);
@@ -54,9 +54,9 @@ local Grid = {
         
         this.x = this.window.padding.x;
       else
-        this.w = this.window.w - (this.window.padding.x * 3) - this.panel.w;
+        this.w = this.window.w - (this.window.padding.x * 3) - this.panel;
 
-        this.x = (this.window.w / 10) + this.panel.w;
+        this.x = (this.window.w / 10) + this.panel;
       end
 
       this.h = this.w;
@@ -79,7 +79,8 @@ local Grid = {
 
       this.dropdown.maxWidth = (this.jacketSize * 3)
         + (this.margin * 2)
-        - (this.dropdown.padding * 2);
+        - (this.dropdown.padding * 2)
+        + 2;
       this.dropdown.start = this.dropdown.padding - 7;
       this.dropdown.x[1] = this.field.x[1];
       this.dropdown.x[2] = this.field.x[2];

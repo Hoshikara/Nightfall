@@ -193,7 +193,7 @@ render = function(dt)
 	end
 
 	if ((not gameplay.multiplayer) and (gameplay.practice_setup == nil)) then
-		userInfo:render();
+		userInfo:render(dt);
 	end
 
 	if (gameplay.multiplayer and players) then scoreboard:render(players); end

@@ -1,3 +1,20 @@
+##### 1.3.0 - July 16, 2021
+- `Results` changes
+  - Added `EX SCORE` and `VOLFORCE` fields, the latter will show increased value if applicable
+  - Added `S-CRITICAL` stats to both graphs
+  - Limited player names to 9 characters
+  - Modified layout to accomdate these changes
+  - Replaced song collection control hint
+  - Split and changed the simple (top) and detailed (bottom) graphs to be toggled between with `BT-A` (the selected view is persisted)
+- Added a skin setting to increase the delay of score difference updates
+- Added a skin setting to change the overall skin color scheme
+- Changed screen transition to reveal from the side instead of the center
+- Changed the mouse color to a neutral color
+- Fixed active laser animation persisting
+- Fixed an error occuring when opening the collection dialog with no collections
+- Fixed console front being visible for landscape orientation
+- Replaced `Song Select` and `Challenge Wheel` sort arrows with appropriate subtext
+
 ##### 1.2.7 - July 8, 2021
 - `Player Info` changes
   - Added score and total charts fields to the chart display screen; charts are now be sorted by score

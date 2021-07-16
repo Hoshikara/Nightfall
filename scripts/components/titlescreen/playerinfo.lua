@@ -23,7 +23,7 @@ local min = math.min;
 
 local dialogBox = DialogBox:new();
 
-local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
+local jacketFallback = gfx.CreateSkinImage('loading.png', 0);
 
 ---@class PlayerInfoClass
 local PlayerInfo = {
@@ -1440,7 +1440,7 @@ local PlayerInfo = {
 		drawRect({
 			w = this.window.w,
 			h = this.window.h,
-			alpha = 200,
+			alpha = 225,
 			color = 'black',
 		});
 

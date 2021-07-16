@@ -219,7 +219,6 @@ end
 local gameSettings = nil;
 local hasBlastive = nil;
 local practiceSettings = nil;
-local notMulti = nil;
 
 render = function(dt, displaying)
 	if (hasBlastive == nil) then
@@ -249,18 +248,11 @@ render = function(dt, displaying)
 
 	if (timer == 0) then return; end
 
-	if (notMulti == nil) then
-		local settings = (SettingsDiag.tabs[3] and SettingsDiag.tabs[3].settings)
-			or {};
-
-		notMulti = #settings > 2;
-	end
-
 	state:watch();
 
 	gfx.Save();
 
-	window:set(notMulti);
+	window:set(true);
 
 	if (state.isSongSelect) then
 		if (not gameSettings) then

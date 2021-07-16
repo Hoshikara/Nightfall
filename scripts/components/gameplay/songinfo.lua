@@ -12,7 +12,7 @@ local showHispeed = getSetting('showHispeed', true);
 
 local ignoreChange = getSetting('ignoreSpeedChange', false);
 
-local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
+local jacketFallback = gfx.CreateSkinImage('loading.png', 0);
 
 ---@class SongInfoClass
 local SongInfo = {

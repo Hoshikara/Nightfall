@@ -5,7 +5,7 @@ local Sizes = {
   ['ORIGINAL'] = 0,
 };
 
-local fallback = gfx.CreateSkinImage('common/loading.png', 0);
+local fallback = gfx.CreateSkinImage('loading.png', 0);
 local size = Sizes[getSetting('jacketQuality', 'NORMAL')] or Sizes['NORMAL'];
 
 -- Loads the jackets for the given diffs or charts

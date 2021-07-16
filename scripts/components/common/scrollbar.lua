@@ -99,8 +99,8 @@ local Scrollbar = {
       y = this.y.track,
       w = this.w,
       h = this.h.track,
-      alpha = 180 * (params.alphaMod or 1),
-      color = params.color or 'dark',
+      alpha = 80 * (params.alphaMod or 1),
+      color = 'med',
       fast = true,
     });
 

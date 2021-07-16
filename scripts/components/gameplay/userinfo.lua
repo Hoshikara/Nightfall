@@ -1,5 +1,6 @@
 local scoreDiffX = getSetting('scoreDiffX', 0.05);
 local scoreDiffY = getSetting('scoreDiffY', 0.50);
+local scoreDiffDelay = getSetting('scoreDiffDelay', 0.05);
 local showScoreDiff = getSetting('showScoreDiff', true);
 
 ---@type string
@@ -18,6 +19,8 @@ local UserInfo = {
     ---@field window Window
     local t = {
       cache = { w = 0, h = 0 },
+      delayTimer = 0,
+      diff = 0,
       num = {
         makeLabel('num', '0', 50),
         makeLabel('num', '0', 50),
@@ -30,7 +33,7 @@ local UserInfo = {
       },
       player = makeLabel(
         'norm',
-        (gameplay.autoplay and 'AUTOPLAY') or username:upper(),
+        (gameplay.autoplay and 'AUTOPLAY') or username:upper():sub(1, 9),
         36
       ),
       prefixes = {
@@ -88,22 +91,28 @@ local UserInfo = {
 
   -- Draw the score difference
   ---@param this UserInfo
+  ---@param dt deltaTime
   ---@param alpha number
-  drawScoreDiff = function(this, alpha)
+  drawScoreDiff = function(this, dt, alpha)
     local abs = 0;
-    local diff = 0;
     local prefix = 'plus';
     local y = this.y.diff;
 
-    if (this.isAdditive) then
-      diff = this.state.score - gameplay.scoreReplays[1].currentScore;
+    if ((this.delayTimer >= scoreDiffDelay) or (gameplay.progress == 1)) then
+      if (this.isAdditive) then
+        this.diff = this.state.score - gameplay.scoreReplays[1].currentScore;
+      else
+        this.diff = this.state.score - gameplay.scoreReplays[1].maxScore;
+      end
+
+      this.delayTimer = 0;
     else
-      diff = this.state.score - gameplay.scoreReplays[1].maxScore;
+      this.delayTimer = this.delayTimer + dt;
     end
 
-    if (diff < 0) then prefix = 'minus'; end
+    if (this.diff < 0) then prefix = 'minus'; end
 
-    abs = math.abs(diff);
+    abs = math.abs(this.diff);
 
     local diffStr = ('%08d'):format(abs);
     local numAlpha = {
@@ -113,7 +122,7 @@ local UserInfo = {
       (((abs > 1000) and 255) or 50)
     };
 
-    if (diff ~= 0) then
+    if (this.diff ~= 0) then
       this.prefixes[prefix]:draw({
         x = this.x.prefix,
         y = y + (((prefix == 'plus') and 0) or -5),
@@ -142,7 +151,8 @@ local UserInfo = {
 
   -- Renders the current component
   ---@param this UserInfo
-  render = function(this)
+  ---@param dt deltaTime
+  render = function(this, dt)
     if (this.isAdditive == nil) then
       this.isAdditive = getSetting('_scoreType', 'ADDITIVE') == 'ADDITIVE';
     end
@@ -170,7 +180,7 @@ local UserInfo = {
     });
 
     if (showScoreDiff and gameplay.scoreReplays[1]) then
-      this:drawScoreDiff(alpha);
+      this:drawScoreDiff(dt, alpha);
     end
 
     gfx.Restore();

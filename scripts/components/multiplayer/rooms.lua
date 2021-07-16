@@ -1,3 +1,4 @@
+local Button = require('components/common/button');
 local Cursor = require('components/common/cursor');
 local List = require('components/common/list');
 local Scrollbar = require('components/common/scrollbar');
@@ -21,16 +22,13 @@ local Rooms = {
     local t = {
       alpha = 0,
       alphaTimer = 0,
+      button = Button:new(258, 50),
       cache = { w = 0, h = 0 },
       cursor = Cursor:new({
         size = 16,
         stroke = 1.5,
         type = 'vertical',
       }),
-      images = {
-				btn = Image:new('buttons/normal.png'),
-        btnH = Image:new('buttons/normal_hover.png'),
-			},
       labels = {
         capacity = makeLabel('med', 'CAPACITY'),
         create = makeLabel('med', 'CREATE ROOM'),
@@ -223,33 +221,29 @@ local Rooms = {
   ---@param this Rooms
   ---@param allowClick boolean
   drawBtn = function(this, allowClick)
-    local x = (this.window.w / 2) - (this.images.btn.w / 2);
-    local y = this.window.h - (this.window.h / 20) - this.images.btn.h;
+    local x = (this.window.w / 2) - (this.button.w / 2);
+    local y = this.window.h - (this.window.h / 20) - this.button.h;
 
     if (this.window.isPortrait) then y = y - 40; end
 
     local isClickable = allowClick and this.mouse:clipped(
       x,
       y,
-      this.images.btn.w,
-      this.images.btn.h
+      this.button.w,
+      this.button.h
     );
 
-    if (isClickable) then
-      this.state.btnEvent = this.state.makeRoom;
+    if (isClickable) then this.state.btnEvent = this.state.makeRoom; end
 
-      this.images.btnH:draw({ x = x, y = y });
-    else
-      this.images.btn:draw({
-        x = x,
-        y = y,
-        alpha = 0.45,
-      });
-    end
+    this.button:render({
+      x = x,
+      y = y,
+      accentAlpha = (isClickable and 1) or 0.3,
+    });
 
     this.labels.create:draw({
-      x = x + (this.images.btn.w / 8),
-      y = y + (this.images.btn.h / 2) - 11,
+      x = x + 24,
+      y = y + (this.button.h * 0.5) - 12,
       alpha = (isClickable and 255) or 50,
       color = 'white',
     });

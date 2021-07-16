@@ -1,17 +1,19 @@
 -- This script is loaded for every screen of the game
 -- All of the functions below are available to all of the scripts of the skin
 
-SkinVersion = '1.2.7';
+SkinVersion = '1.3.0';
 
 gfx.LoadSkinFont('DFMGM.ttf');
 
+Background = require('common/background');
+Constants = require('constants/common');
 Image = require('common/image');
 Label = require('common/label');
 Window = require('common/window');
 
-local Constants = require('constants/common');
+Colors = Constants.Colors;
+
 local Alignments = Constants.Alignments;
-local Colors = Constants.Colors;
 
 local abs = math.abs;
 local cos = math.cos;
@@ -37,9 +39,25 @@ local fontMap = {
 	num = 18,
 };
 
+red = -1;
+green = -1;
+blue = -1;
+
 -- Text alignment wrapper function
 ---@param a? string # `'center'`, `'left'`, `'middle'`, `'right'`
 alignText = function(a) gfx.TextAlign(Alignments[a] or Alignments.left); end
+
+-- Clamp r/g/b value to 0, 255
+---@param v number
+---@return integer
+clampColor = function(v)
+  v = floor(v);
+
+  if (v > 255) then return 255; end
+  if (v < 0) then return 0; end
+
+  return v;
+end
 
 -- Rectangle drawing wrapper function  
 -- Draws `image` if provided
@@ -194,6 +212,44 @@ pressed = function(btn) return game.GetButton(btnMap[btn]); end
 ---@param p number # percentage, `0.0` to `1.0`
 ---@param d number # duration, in seconds 
 pulse = function(t, p, d) return abs(p * cos(t * (1 / d))) + (1 - p); end
+
+-- Reload colors when changed in skin settings
+reloadColors = function()
+	if (not Colors) then return; end
+
+	local r, g, b, _ = game.GetSkinSetting('colorScheme');
+
+	if ((r ~= red) or (g ~= green) or (b ~= blue)) then
+
+		Colors.dark = {
+			clampColor(r * 0.075),
+			clampColor(g * 0.075),
+			clampColor(b * 0.075),  
+		};
+
+		Colors.light = {
+			clampColor(r * 1.125),
+			clampColor(g * 1.125),
+			clampColor(b * 1.125),
+		};
+
+		Colors.med = {
+			clampColor(r * 0.3),
+			clampColor(g * 0.3),
+			clampColor(b * 0.3),
+		};
+
+		Colors.norm = {
+			clampColor(r),
+			clampColor(g),
+			clampColor(b),
+		};
+
+		red = r;
+		green = g;
+		blue = b;
+	end
+end
 
 -- Fill color wrapper function
 ---@param c? string | table # `'black'`, `'dark'`, `'med'`, `'light'`, `'norm'`, `'red'`, `'white'` or `{ r: intger, g: integer, b: integer }`

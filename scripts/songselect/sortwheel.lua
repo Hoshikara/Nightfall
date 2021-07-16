@@ -32,36 +32,28 @@ local setLabels = function()
 			local label = Sorts[sort];
 
 			if (not label) then
-				label = { dir = (((i % 2) == 0) and 'DOWN') or 'UP', name = sort };
+				label = { name = sort, sub = { '', '' } };
 			end
 
-			labels[i] = { dir = label.dir, name = makeLabel('norm', label.name) };
+			labels[i] = {
+				name = makeLabel('norm', label.name),
+				sub = {
+					makeLabel('med', label.sub[1], 11),
+					makeLabel('med', label.sub[2], 11),
+				},
+			};
 
-			if (labels[i].name.w > labels.w) then labels.w = labels[i].name.w; end
+			local subW = labels[i].sub[1].w;
+
+			if (labels[i].sub[2].w > subW) then subW = labels[i].sub[2].w; end
+
+			if ((labels[i].name.w + subW)  > labels.w) then
+				labels.w = labels[i].name.w + subW;
+			end
 
 			labels.h = labels.h + labels[i].name.h + grid.dropdown.padding;
 		end
 	end
-end
-
-local drawArrow = function(x, y, color, alpha, dir)
-	gfx.BeginPath();
-	setFill('dark', alpha * 0.5);
-
-	gfx.MoveTo(x + 1, y + 1);
-	gfx.LineTo(x + arrowSize + 1, y + 1);
-	gfx.LineTo(x + (arrowSize / 2) + 1, y + (((dir == 'UP') and 11) or -9));
-	gfx.LineTo(x + 1, y + 1);
-	gfx.Fill();
-
-	gfx.BeginPath();
-	setFill(color, alpha);
-
-	gfx.MoveTo(x, y);
-	gfx.LineTo(x + arrowSize, y);
-	gfx.LineTo(x + (arrowSize / 2), y + (((dir == 'UP') and 10) or -10));
-	gfx.LineTo(x, y);
-	gfx.Fill();
 end
 
 local drawCurrSort = function(isSorting)
@@ -86,17 +78,20 @@ local drawCurrSort = function(isSorting)
 		color = color,
 	});
 
-	window:scale();
+	x = x + label.name.w + 12;
+	y = y + 3;
 
-	drawArrow(
-		x + label.name.w + arrowSize,
-		y + (label.name.h / 2) + (((label.dir == 'UP') and 0) or 8),
-		color,
-		255,
-		label.dir
-	);
+	label.sub[1]:draw({
+		x = x,
+		y = y,
+		color = color,
+	});
 
-	window:unscale();
+	label.sub[2]:draw({
+		x = x,
+		y = y + label.sub[1].h - 1,
+		color = color,
+	});
 end
 
 local drawSort = function(i, y, isCurr)
@@ -126,15 +121,24 @@ local drawSort = function(i, y, isCurr)
 		color = 'white',
 	});
 
-	window:scale();
+	x = x + label.name.w + 12;
+	y = y + 3;
 
-	drawArrow(
-		x + label.name.w + arrowSize,
-		y + (label.name.h / 2) + (((label.dir == 'UP') and 0) or 8),
-		'white',
-		alpha,
-		label.dir
-	);
+	label.sub[1]:draw({
+		x = x,
+		y = y,
+		alpha = alpha,
+		color = 'white',
+	});
+
+	label.sub[2]:draw({
+		x = x,
+		y = y + label.sub[1].h - 1,
+		alpha = alpha,
+		color = 'white',
+	});
+
+	window:scale();
 
 	return label.name.h + grid.dropdown.padding;
 end

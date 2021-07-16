@@ -121,7 +121,6 @@ local DialogWindow = {
 			x = this.window.w / 2,
 			y = this.window.h / 2,
 			alpha = this.timer,
-			centered = true,
 		});
 
 		this.window:unscale();

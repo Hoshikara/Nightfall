@@ -11,10 +11,8 @@ local Rooms = require('components/multiplayer/rooms');
 local Sounds = require('components/multiplayer/sounds');
 
 local window = Window:new();
+local background = Background:new(window);
 local mouse = Mouse:new(window);
-
-local bg = Image:new('bg.png');
-local bgPortrait = Image:new('bg_p.png');
 
 ---@class Multiplayer
 local state = {
@@ -94,11 +92,6 @@ local state = {
 	toggleMirror = function(this)
 		Tcp.SendLine(JSON.encode({ topic = 'user.mirror.toggle' }));
 	end,
-
-	watch = function(this)
-		this.roomCount = #this.roomList;
-		this.lobby.userCount = #this.lobby.users;
-	end,
 };
 
 -- Multiplayer components
@@ -116,19 +109,13 @@ local sounds = Sounds:new();
 render = function(dt)
 	mouse:watch();
 
-	state:watch();
-
-	gfx.Save();
-
 	window:set();
 
 	state.btnEvent = nil;
 
-	if (window.isPortrait) then
-		bgPortrait:draw({ w = window.w, h = window.h });
-	else
-		bg:draw({ w = window.w, h = window.h });
-	end
+	gfx.Save();
+
+	background:render();
 
 	if (screenState == 'setUsername') then
 		state.loading = false;
@@ -140,6 +127,13 @@ render = function(dt)
 		end
 
 		rooms:render(dt, screenState == 'roomList');
+
+		-- TODO: this should not be needed
+		if (selected_song) then
+			selected_song = nil;
+			lobby.panel.song = nil;
+			state.lobby.jacket = nil;
+		end
 	else
 		lobby:render(dt);
 	end
@@ -223,10 +217,14 @@ init_tcp = function()
 
 	Tcp.SetTopicHandler('server.rooms',
 		function(data)
+			state.roomCount = 0;
 			state.roomList = {};
 
 			if (#data.rooms > 0) then
-				for i, room in ipairs(data.rooms) do state.roomList[i] = room; end
+				for i, room in ipairs(data.rooms) do
+					state.roomCount = state.roomCount + 1;
+					state.roomList[i] = room;
+				end
 			end
 		end
 	);
@@ -238,6 +236,7 @@ init_tcp = function()
 			local user = state.user;
 
 			lobby.users = {};
+			lobby.userCount = 0;
 			lobby.ready = true;
 			
 			if (#data.users > 0) then
@@ -247,6 +246,8 @@ init_tcp = function()
 					if (u.id == user.id) then user.ready = u.ready; end
 
 					if (not u.ready) then lobby.ready = false; end
+
+					lobby.userCount = lobby.userCount + 1;
 				end
 			end
 

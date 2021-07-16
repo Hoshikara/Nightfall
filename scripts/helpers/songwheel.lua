@@ -39,7 +39,7 @@ local calcVF = function(diff)
   -- level * (score / 10 million) * (grade rate) * (clear rate) * 2
   -- truncated after first decimal place
   -- https://bemaniwiki.com/index.php?SOUND%20VOLTEX%20EXCEED%20GEAR/VOLFORCE#calc
-  return floor(level * (score / 10000000) * gRate * cRate * 2 * 10) / 10;
+  return floor(level * (score / 10000000) * gRate * cRate * 2 * 10) / 1000;
 end
 
 -- Get the date format template string
@@ -83,7 +83,7 @@ local formatDiff = function(diff)
     level = ('%02d'):format(diff.level),
     score = diff.scores[1].score,
     title = diff.title,
-    VF = ('%.3f'):format(diff.VF / 100),
+    VF = ('%.3f'):format(diff.VF),
   };
 
   if (diff.artist) then
@@ -261,6 +261,8 @@ local getVF = function(topScores)
     return (l.VF > r.VF);
   end);
 
+  local last = math.min(#diffs, 50);
+
   for i, diff in ipairs(diffs) do
     if (diff.VF > 0) then
       if (i <= 20) then
@@ -272,10 +274,16 @@ local getVF = function(topScores)
       VF = VF + diff.VF;
     end
     
-    if (i == 50) then break; end
+    if (i == last) then
+      game.SetSkinSetting('_minVF', diff.VF);
+
+      break;
+    end
   end
 
-  return VF / 100;
+  game.SetSkinSetting('_VF', VF);
+
+  return VF;
 end
 
 -- Parses player stats
@@ -406,6 +414,7 @@ local getStats = function(folders)
 end
 
 return {
+  calcVF = calcVF,
   getStats = getStats,
-  getVF = getVF
+  getVF = getVF,
 };

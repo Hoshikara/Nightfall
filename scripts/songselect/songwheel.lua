@@ -13,9 +13,7 @@ local SongGrid = require('components/songselect/songgrid');
 local SongPanel = require('components/songselect/songpanel');
 
 local window = Window:new();
-
-local bg = Image:new('bg.png');
-local bgPortrait = Image:new('bg_p.png');
+local background = Background:new(window);
 
 local VF = 0;
 
@@ -104,11 +102,7 @@ render = function(dt)
 
 	gfx.Save();
 
-	if (window.isPortrait) then
-		bgPortrait:draw({ w = window.w, h = window.h });
-	else
-		bg:draw({ w = window.w, h = window.h });
-	end
+	background:render();
 
 	songGrid:render(dt);
 

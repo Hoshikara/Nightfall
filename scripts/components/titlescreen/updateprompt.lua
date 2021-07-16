@@ -1,3 +1,4 @@
+local Button = require('components/common/button');
 local Cursor = require('components/common/cursor');
 local DialogBox = require('components/common/dialogbox');
 
@@ -28,6 +29,7 @@ local UpdatePrompt = {
 		---@field window Window 
 		local t = {
 			btns = nil,
+			button = Button:new(198, 50),
 			cache = { w = 0, h = 0 },
 			cursor = Cursor:new({
 				size = 10,
@@ -35,10 +37,6 @@ local UpdatePrompt = {
 				type = 'horizontal',
 			}),
 			heading = makeLabel('norm', 'A NEW UPDATE IS AVAILABLE', 36),
-			images = {
-				btnH = Image:new('buttons/short_hover.png'),
-				btn = Image:new('buttons/short.png'),
-			},
 			margin = 0,
 			mouse = mouse,
 			state = state,
@@ -60,20 +58,20 @@ local UpdatePrompt = {
 		if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
 			dialogBox:setSizes(this.window.w, this.window.h, this.window.isPortrait);
 
-			this.margin = (dialogBox.w.outer - (this.images.btn.w * #this.btns))
+			this.margin = (dialogBox.w.outer - (this.button.w * #this.btns))
 				/ (#this.btns + 1);
 
-			this.x[3] = dialogBox.x.outerRight - this.images.btn.w;
-			this.x[2] = this.x[3] - (this.images.btn.w + this.margin);
-			this.x[1] = this.x[2] - (this.images.btn.w + this.margin);
-			this.y = dialogBox.y.bottom - this.images.btn.h + 8;
+			this.x[3] = dialogBox.x.outerRight - this.button.w;
+			this.x[2] = this.x[3] - (this.button.w + this.margin);
+			this.x[1] = this.x[2] - (this.button.w + this.margin);
+			this.y = dialogBox.y.bottom - this.button.h + 8;
 
 			this.cursor:setSizes({
-				x = this.x[1] + 4,
-				y = this.y + 4,
-				w = this.images.btn.w - 8,
-				h = this.images.btn.h - 8,
-				margin = this.margin + 8,
+				x = this.x[1],
+				y = this.y,
+				w = this.button.w,
+				h = this.button.h,
+				margin = this.margin,
 			});
 
 			this.cache.w = this.window.w;
@@ -120,29 +118,28 @@ local UpdatePrompt = {
 		local isHovering = this.mouse:clipped(
 			this.x[i],
 			this.y,
-			this.images.btn.w,
-			this.images.btn.h
+			this.button.w,
+			this.button.h
 		);
+		local x = this.x[i];
 
 		if (isHovering or isActive) then
 			this.state:set({
 				currBtn = i;
 				btnEvent = btn.event;
 				isClickable = isHovering;
-			})
-
-			this.images.btnH:draw({ x = this.x[i], y = this.y });
-		else
-			this.images.btn:draw({
-				x = this.x[i],
-				y = this.y,
-				alpha = 0.45,
 			});
 		end
 
+		this.button:render({
+			x = x,
+			y = this.y,
+			accentAlpha = ((isHovering or isActive) and 1) or 0.3,
+		});
+
 		btn.label:draw({
-			x = this.x[i] + (this.images.btn.w / 6),
-			y = this.y + (this.images.btn.h / 2) - 12,
+			x = x + 24,
+			y = this.y + (this.button.h * 0.5) - 12,
 			alpha = 255 * ((isActive and 1) or 0.2),
 			color = 'white',
 		});

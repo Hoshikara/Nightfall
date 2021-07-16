@@ -1,9 +1,5 @@
+local Button = require('components/common/button');
 local Cursor = require('components/common/cursor');
-
----@class Button
----@field event function
----@field label Label
-local button = {};
 
 ---@class ButtonsClass
 local Buttons = {
@@ -21,6 +17,8 @@ local Buttons = {
 		local t = {
 			alpha = 1,
 			allowAction = true,
+			btns = nil,
+			button = Button:new(258, 50),
 			cache = { w = 0, h = 0 },
 			currPage = 'mainMenu',
 			cursor = Cursor:new({
@@ -28,11 +26,6 @@ local Buttons = {
 				stroke = 1.5,
 				type = 'horizontal',
 			}),
-			btns = nil,
-			images = {
-				hover = Image:new('buttons/normal_hover.png'),
-				normal = Image:new('buttons/normal.png'),
-			},
 			margin = 0,
 			mainMenu = makeLabel(
 				'med',
@@ -61,6 +54,8 @@ local Buttons = {
 		if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
 			local x = this.window.padding.x + 6;
 			local y = this.window.h - (this.window.h / 3.5);
+			local w = this.button.w;
+			local h = this.button.h;
 
 			if (this.window.isPortrait) then
 				x = this.window.w / 11;
@@ -73,11 +68,11 @@ local Buttons = {
 			if (this.window.isPortrait) then
 				local height = (this.window.h / 2) - (this.window.padding.y * 2);
 
-				this.margin = (height - (this.images.normal.h * #this.btns.mainMenu))
+				this.margin = (height - (h * #this.btns.mainMenu))
 					/ (#this.btns.mainMenu + 1);
 
 				for i = 2, 5 do
-					y = y + this.images.normal.h + this.margin;
+					y = y + h + this.margin;
 
 					this.y[i] = y;
 				end
@@ -86,11 +81,11 @@ local Buttons = {
 			else
 				local width = this.window.w - (this.window.w / 6);
 
-				this.margin = (width - (this.images.normal.w * #this.btns.mainMenu))
+				this.margin = (width - (w * #this.btns.mainMenu))
 					/ (#this.btns.mainMenu + 1);
 
 				for i = 2, 5 do
-					x = x + this.images.normal.w + this.margin;
+					x = x + w + this.margin;
 
 					this.x[i] = x;
 				end
@@ -102,11 +97,11 @@ local Buttons = {
 			this.cursor.y.offset = 0;
 
 			this.cursor:setSizes({
-				x = this.x[1] + 4,
-				y = this.y[1] + 4,
-				w = this.images.normal.w - 8,
-				h = this.images.normal.h - 8,
-				margin = this.margin + 8,
+				x = this.x[1],
+				y = this.y[1],
+				w = w,
+				h = h,
+				margin = this.margin,
 			});
 
 			this.cache.w = this.window.w;
@@ -203,7 +198,6 @@ local Buttons = {
 			y = this.y[i];
 		end
 
-		local alpha = this.alpha;
 		local btns = this.btns[this.currPage];
 		local isNavigable = this.state.loaded
 			and (not this.state.viewingControls)
@@ -216,8 +210,8 @@ local Buttons = {
 		local isHovering = this.mouse:clipped(
 			x,
 			y,
-			this.images.normal.w,
-			this.images.normal.h
+			this.button.w,
+			this.button.h
 		);
 
 		if (isActionable and (isHovering or isActive)) then
@@ -226,24 +220,20 @@ local Buttons = {
 				btnEvent = btn.event,
 				isClickable = isHovering,
 			});
-
-			this.images.hover:draw({
-				x = x,
-				y = y,
-				alpha = alpha,
-			});
-		else
-			this.images.normal:draw({
-				x = x,
-				y = y,
-				alpha = alpha,
-			});
 		end
 
+		this.button:render({
+			x = x,
+			y = y,
+			accentAlpha = (((isActionable) and (isHovering or isActive) and 1)
+				or 0.3) * this.alpha,
+			alpha = this.alpha,
+		});
+
 		btn.label:draw({
-			x = x + (this.images.normal.w / 9),
-			y = y + (this.images.normal.h / 2) - 12,
-			alpha = 255 * ((isActionable and isActive and 1) or 0.2) * alpha,
+			x = x + 24,
+			y = y + (50 * 0.5) - 12,
+			alpha = 255 * ((isActionable and isActive and 1) or 0.2) * this.alpha,
 			color = 'white',
 		});
 	end,

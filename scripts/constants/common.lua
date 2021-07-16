@@ -1,3 +1,16 @@
+local floor = math.floor;
+
+local r, g, b, _ = game.GetSkinSetting('colorScheme');
+
+local clampColor = function(v)
+  v = floor(v);
+
+  if (v > 255) then return 255; end
+  if (v < 0) then return 0; end
+
+  return v;
+end
+
 return {
   Alignments = {
     center = gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_TOP,
@@ -10,10 +23,26 @@ return {
 
   Colors = {
     black = { 0, 0, 0 },
-    dark = { 4, 8, 12 },
-    med = { 16, 32, 48 },
-    light = { 80, 130, 180 },
-    norm = { 60, 110, 160 },
+    dark = {
+      clampColor(r * 0.075),
+      clampColor(g * 0.075),
+      clampColor(b * 0.075),  
+    },
+    light = {
+      clampColor(r * 1.125),
+      clampColor(g * 1.125),
+      clampColor(b * 1.125),
+    },
+    med = {
+      clampColor(r * 0.3),
+      clampColor(g * 0.3),
+      clampColor(b * 0.3),
+    },
+    norm = {
+      clampColor(r),
+      clampColor(g),
+      clampColor(b),
+    },
     red = { 200, 80, 80 },
     redDark = { 160, 40, 40 },
     white = { 255, 255, 255 },

@@ -8,15 +8,17 @@ local Colors = {
   [2] = { 255, 235, 100 },
   blastive = { 120, 120, 200 },
   critical = { 255, 235, 100 },
+  criticalEarly = { 255, 235, 100 },
+  criticalLate = { 255, 235, 100 },
   effFail = { 20, 120, 240 },
   effPass = { 220, 20, 140 },
   excPass = { 240, 80, 40 },
-  excWarn = { 220, 100, 20 },
   near = { 255, 105, 255 },
   early = { 255, 105, 255 },
   errorEarly = { 205, 0, 0 },
   errorLate = { 205, 0, 0 },
   late = { 105, 205, 255 },
+  sCritical = { 220, 240, 255 },
 };
 
 -- Button letters
@@ -34,11 +36,14 @@ local Orders = {
   bottom = {
     'critWindow',
     'nearWindow',
+    'sCritWindow',
   },
   top = {
     'errorEarly',
     'early',
-    'critical',
+    'criticalEarly',
+    'sCritical',
+    'criticalLate',
     'late',
     'errorLate',
   },
@@ -65,33 +70,39 @@ local Graphs = {
     ---@field window Window
     local t = {
       counts = {
-        critical = ScoreNumber:new({ digits = 5, size = 20 }),
+        criticalEarly = ScoreNumber:new({ digits = 5, size = 20 }),
+        criticalLate = ScoreNumber:new({ digits = 5, size = 20 }),
         early = ScoreNumber:new({ digits = 5, size = 20 }),
         errorEarly = ScoreNumber:new({ digits = 5, size = 20 }),
         errorLate = ScoreNumber:new({ digits = 5, size = 20 }),
         late = ScoreNumber:new({ digits = 5, size = 20 }),
+        sCritical = ScoreNumber:new({ digits = 5, size = 20 }),
       },
       buttons = {},
       data = nil,
       histSet = false,
       hitStatScale = nil,
       labels = {
-        critical = makeLabel('med', 'CRITICAL', 20),
+        criticalEarly = makeLabel('med', 'CRITICAL', 20),
+        criticalLate = makeLabel('med', 'CRITICAL', 20),
         early = makeLabel('med', 'EARLY', 20),
         errorEarly = makeLabel('med', 'ERROR', 20),
         errorLate = makeLabel('med', 'ERROR', 20),
         late = makeLabel('med', 'LATE', 20),
         mean = makeLabel('med', 'MEAN'),
         median = makeLabel('med', 'MEDIAN'),
+        sCritical = makeLabel('med', 'S-CRITICAL', 20),
       },
       mode = 0,
       mouse = Mouse:new(window),
+      pressedBTA = false,
+      showSimple = nil,
       state = state,
       window = window,
       x = 0,
-      y = { b = 0, t = 0 },
-      w = { b = 0, t = 0 },
-      h = { b = 0, t = 0 },
+      y = 0,
+      w = 0,
+      h = 0,
     };
 
     for btn, letter in pairs(Lanes) do
@@ -104,16 +115,33 @@ local Graphs = {
     return t;
   end,
 
-  -- Draws the top graph: hit counts
+  -- Draws the simple hit graph
   ---@param this Graphs
-  drawTop = function(this)
+  drawSimple = function(this)
     local counts = this.data.counts;
+    local gauge = this.data.gauge or {};
+    local gaugeColor = Colors.effFail;
+    local scale = (this.window.isPortrait and 1.5) or 1.6;
     local x = this.x;
-    local y = this.y.t - 6;
-    local w = this.w.t;
-    local wCount = this.counts.critical.w + 12;
-    local wLabel = this.labels.critical.w + 12;
+    local y = this.y - 6;
+    local w = this.w;
+    local wCount = this.counts.sCritical.w + 12;
+    local wLabel = this.labels.sCritical.w + 12;
     local wBar = w - wCount - wLabel;
+
+    if (gauge.type >= 1) then
+      if (gauge.type == 3) then
+        gaugeColor = Colors.blastive;
+      else
+        gaugeColor = Colors.excPass;
+      end
+    else
+      if (gauge.rawVal < 0.7) then
+        gaugeColor = Colors.effFail;
+      else
+        gaugeColor = Colors.effPass;
+      end
+    end
 
     for _, name in ipairs(Orders.top) do
       if (name == 'total') then return; end
@@ -152,17 +180,59 @@ local Graphs = {
         color = 'norm',
       });
 
-      y = y + (this.labels[name].h * 1.5);
+      y = y + (this.labels[name].h * scale);
     end
+
+    y = y + ((this.window.isPortrait and 12) or 20);
+
+    drawRect({
+      x = x + 3,
+      y = y,
+      w = (w - 4) * gauge.rawVal,
+      h = 18,
+      color = gaugeColor,
+    });
+
+    drawRect({
+      x = x + 3,
+      y = y,
+      w = w - 4,
+      h = 18,
+      alpha = 0,
+      stroke = { color = 'white', size = 2 },
+    });
+
+    drawRect({
+      x = x + 2 + (w * (((gauge.type == 0) and 0.7) or 0.3)),
+      y = y + 1,
+      w = 2, 
+      h = 17,
+      color = 'white',
+    });
+
+    y = y + ((this.window.isPortrait and 22) or 24);
+
+    gauge.rate:draw({
+      x = x,
+      y = y,
+      color = 'white',
+    });
+
+    gauge.unlabledVal:draw({
+      x = x + w,
+      y = y,
+      align = 'right',
+      color = 'white',
+    });
   end,
 
-  -- Draws the bottom graphs: gauge, hit stat, and hit histogram
+  -- Draws the detailed graphs: gauge, hit stat, and hit histogram
   ---@param this Graphs
-  drawBottom = function(this)
+  drawDetailed = function(this)
     local x = this.x;
-    local y = this.y.b;
-    local w = this.w.b;
-    local h = this.h.b;
+    local y = this.y;
+    local w = this.w;
+    local h = this.h;
 
     drawRect({
       x = x,
@@ -189,6 +259,7 @@ local Graphs = {
   drawLines = function(this, x, y, w, h)
     local critWindow = this.data.critWindow;
     local nearWindow = this.data.nearWindow;
+    local sCritWindow = this.data.sCritWindow;
 
     if (not this.labels.critWindow) then
       this.labels.critWindow = {
@@ -199,6 +270,11 @@ local Graphs = {
       this.labels.nearWindow = {
         neg = makeLabel('num', ('-%d'):format(nearWindow), 18),
         pos = makeLabel('num', ('+%d'):format(nearWindow), 18),
+      };
+
+      this.labels.sCritWindow = {
+        neg = makeLabel('num', ('-%d'):format(sCritWindow), 18),
+        pos = makeLabel('num', ('+%d'):format(sCritWindow), 18),
       };
     end
 
@@ -219,9 +295,13 @@ local Graphs = {
     gfx.Stroke();
 
     for _, name in ipairs(Orders.bottom) do
-      local color = ((name == 'critWindow') and Colors.critical) or Colors.early;
-      local window = (((name == 'critWindow') and critWindow) or nearWindow)
-        * this.hitStatScale;
+      local color = ((name == 'sCritWindow') and Colors.sCritical)
+        or ((name == 'critWindow') and Colors.critical)
+        or Colors.early;
+      local window = (((name == 'sCritWindow') and sCritWindow)
+        or ((name == 'critWindow') and critWindow)
+        or nearWindow
+      ) * this.hitStatScale;
 
       setStroke({
         alpha = 80,
@@ -241,7 +321,9 @@ local Graphs = {
         color = color,
       });
 
-      color = ((name == 'critWindow') and Colors.critical) or Colors.late;
+      color = ((name == 'sCritWindow') and Colors.sCritical)
+        or ((name == 'critWindow') and Colors.critical)
+        or Colors.late;
 
       setStroke({
         alpha = 80,
@@ -412,6 +494,7 @@ local Graphs = {
 
     local hitStatScale = this.hitStatScale;
     local hovering = this.mouse:clipped(x, y, w, h);
+    local sCritWindow = this.data.sCritWindow;
 
     for _, stat in ipairs(this.data.hitStats) do
       local color = Colors[stat.rating];
@@ -422,6 +505,10 @@ local Graphs = {
           color = Colors.early;
         else
           color = Colors.late;
+        end
+      elseif (stat.rating == 2) then
+        if ((stat.delta >= -sCritWindow) and (stat.delta <= sCritWindow)) then
+          color = Colors.sCritical;
         end
       end
 
@@ -446,7 +533,7 @@ local Graphs = {
           });
         else
           gfx.BeginPath();
-          setFill(color, 180);
+          setFill(color, 200);
           gfx.Circle(x + xStat - 2, y + yStat + 1, 4);
           gfx.Fill();
         end
@@ -526,7 +613,7 @@ local Graphs = {
   ---@param this Graphs
   drawDeltas = function(this)
     local x = this.x;
-    local y = this.y.b + this.h.b + 14;
+    local y = this.y + this.h + 14;
 
     if (this.data.suggestion and suggestOffset) then
       this.data.suggestion.text:draw({ x = x, y = y });
@@ -538,7 +625,7 @@ local Graphs = {
       });
     end
 
-    x = x + this.w.b;
+    x = x + this.w;
     y = y - 12;
 
     this.data.mean:draw({
@@ -570,19 +657,40 @@ local Graphs = {
     });
   end,
 
+  -- Handle graph toggle
+  ---@param this Graphs
+  handleChange = function(this)
+    if (this.showSimple == nil) then
+      this.showSimple = getSetting('showSimpleGraph', false);
+    end
+
+    if ((not this.pressedBTA) and pressed('BTA')) then
+      this.showSimple = not this.showSimple;
+
+      game.SetSkinSetting('showSimpleGraph', (this.showSimple and 1) or 0);
+    end
+
+    this.pressedBTA = pressed('BTA');
+  end,
+
   -- Renders the current component
+  ---@param this Graphs
   render = function(this)
     if (not this.state.graphData) then return; end
 
     if (not this.data) then this.data = this.state.graphData; end
 
+    this:handleChange();
+
     this.mouse:watch();
 
     gfx.Save();
 
-    this:drawTop();
-
-    this:drawBottom();
+    if (this.showSimple) then
+      this:drawSimple();
+    else
+      this:drawDetailed();
+    end
 
     this:drawDeltas();
 

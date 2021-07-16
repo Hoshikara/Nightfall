@@ -10,13 +10,11 @@ local Title = require('components/titlescreen/title');
 local UpdatePrompt = require('components/titlescreen/updateprompt');
 
 local window = Window:new();
+local background = Background:new(window);
 local mouse = Mouse:new(window);
 
 local playerData = JSONTable:new('player');
 local player = playerData:get();
-
-local bg = Image:new('bg.png');
-local bgPortrait = Image:new('bg_p.png');
 
 ---@class Titlescreen
 ---@field player Player
@@ -70,6 +68,8 @@ end
 -- Called by the game every frame
 ---@param dt deltaTime
 render = function(dt)
+	reloadColors();
+
 	mouse:watch();
 	
 	knobs:handleChange('btnCount', 'currBtn');
@@ -80,11 +80,7 @@ render = function(dt)
 
 	window:set();
 
-	if (window.isPortrait) then
-		bgPortrait:draw({ w = window.w, h = window.h });
-	else
-		bg:draw({ w = window.w, h = window.h });
-	end
+	background:render();
 
 	title:render(dt);
 

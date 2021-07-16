@@ -1,3 +1,5 @@
+local Helpers = require('helpers/songwheel');
+
 local Clears = require('constants/clears');
 local Difficulties = require('constants/difficulties');
 local Grades = require('constants/grades');
@@ -6,7 +8,7 @@ local JSONTable = require('common/jsontable');
 
 local ScoreNumber = require('components/common/scorenumber');
 
-local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
+local jacketFallback = gfx.CreateSkinImage('loading.png', 0);
 
 local minOffset = getSetting('minOffset', 1);
 
@@ -138,17 +140,20 @@ end
 
 -- Gets and formats the ending gauge value
 ---@param res result
+---@param unlabled boolean
 ---@return string
-local getGauge = function(res)
+local getGauge = function(res, unlabled)
 	local gauge = math.ceil((res.gauge or 0) * 100);
 	local gType = res.gauge_type or res.flags or 0;
 
-  if (gType == 1) then
-		return ('%d%% (EXC)'):format(gauge);
-	elseif (gType == 2) then
-		return ('%d%% (PMS)'):format(gauge);
-	elseif (gType == 3) then
-		return ('%d%% (BLS)'):format(gauge);
+	if (not unlabled) then
+		if (gType == 1) then
+			return ('%d%% (EXC)'):format(gauge);
+		elseif (gType == 2) then
+			return ('%d%% (PMS)'):format(gauge);
+		elseif (gType == 3) then
+			return ('%d%% (BLS)'):format(gauge);
+		end
 	end
 
 	return ('%d%%'):format(gauge);
@@ -193,7 +198,7 @@ end
 local getName = function(res)
 	local displayName = getSetting('displayName', 'GUEST');
 
-	return (res.name or res.playerName or displayName or 'GUEST'):upper();
+	return (res.name or res.playerName or displayName or 'GUEST'):upper():sub(1, 9);
 end
 
 -- Gets the score index for a player's own score in multiplayer
@@ -220,6 +225,46 @@ local getTitle = function(res)
 	if (res.playerName and res.realTitle) then return res.realTitle:upper(); end
 
 	return (res.title or ''):upper();
+end
+
+-- Gets player volforce and increase if any
+---@param res result
+---@return ResultVF
+local getVF = function(res)
+	local increase = '';
+	local minVF = getSetting('_minVF', 0);
+	local playVF = Helpers.calcVF({
+		jacketPath = res.jacketPath,
+		level = res.level,
+		scores = { { score = res.score } },
+		topBadge = res.badge,
+	});
+	local playerVF = getSetting('_VF', 0);
+
+	if (playVF > minVF) then
+		increase = playVF - minVF;
+
+		playerVF = playerVF + increase;
+
+		increase = makeLabel(
+			'num',
+			{
+				{ color = 'norm', text = '+' },
+				{ color = 'white', text = ('%.3f'):format(increase) },
+			},
+			20
+		);
+	else
+		increase = makeLabel('num', '', 20);
+	end
+
+	---@class ResultVF
+	local v = {
+		increase = increase,
+		val = makeLabel('num', ('%.3f'):format(playerVF), 24),
+	};
+
+	return v;
 end
 
 -- Filters high scores to only display scores with harder hit windows
@@ -281,6 +326,7 @@ local formatHighScore = function(res, i)
 		place = makeLabel('num', i, 90),
 		score = ScoreNumber:new({ size = (i and 90) or 117, val = res.score or 0 }),
 		timestamp = makeLabel('num', getTimestamp(res), 24),
+		volforce = getVF(res),
   };
 
 	return s;
@@ -321,43 +367,154 @@ local formatSong = function(res)
 		effector = makeLabel('jp', res.effector or '', 24),
 		level = makeLabel('num', ('%02d'):format(res.level or 1), 24),
 		jacket = jacket,
-		name = makeLabel('norm', getName(res)),
-		timestamp = makeLabel('num', getTimestamp(res), 24),
 		title = makeLabel('jp', getTitle(res), 32),
   };
 
 	return s;
 end
 
+-- Gets data used for gauge graphs
+---@param res result
+---@return GaugeData
+local getGaugeData = function(res)
+	local blastiveLevel = getSetting('_blastiveLevel', '');
+	local change = getSetting('_gaugeChange', '');
+	local rate;
+	local samples = (JSONTable:new('samples')):get();
+	local type = res.gauge_type or res.flags or 0;
+	local hardFail = (type == 1) and (res.badge == 1);
+
+	if (type == 1) then
+		rate = makeLabel('med', 'EXCESSIVE RATE', 20);
+	elseif (type == 2) then
+		rate = makeLabel('med', 'PERMISSIVE RATE', 20);
+	elseif (type == 3) then
+		rate = makeLabel(
+			'med',
+			('BLASTIVE RATE - %s'):format(tostring(blastiveLevel)),
+			20
+		);
+	else
+		rate = makeLabel('med', 'EFFECTIVE RATE', 20);
+	end
+
+	---@class GaugeData
+	local g = {
+		blastiveLevel = (type == 3)
+			and (blastiveLevel ~= '')
+			and makeLabel('num', blastiveLevel, 24),
+		change = (change ~= '')
+			and (not hardFail)
+			and (res.badge > 0)
+			and tonumber(change),
+		curr = makeLabel('num', '0'),
+		rate = rate,
+		rawVal = res.gauge or 0,
+		samples = ((res.badge > 0)
+			and (#samples > 0)
+			and (not hardFail)
+			and samples
+		) or res.gaugeSamples or {},
+		type = type,
+		unlabledVal = makeLabel('num', getGauge(res, true), 20),
+		val = makeLabel('num', getGauge(res), 24),
+	};
+
+	return g;
+end
+
+-- Gets simple graph hit counts
+---@param res result
+---@return HitCounts, ScoreNumber
+local getHitCounts = function(res)
+	local hitStats = res.noteHitStats or {};
+	local sCritWindow = ((res.hitWindow and res.hitWindow.perfect) or 46) * 0.5;
+	local total = res.perfects + res.goods + res.misses;
+
+	local errorEarly = 0;
+	local early = 0;
+	local criticalEarly = 0;
+	local sCritical = 0;
+	local criticalLate = 0;
+	local late = 0;
+	local errorLate = 0;
+
+	local sCritBtn = 0;
+
+	if (hitStats and (#hitStats > 0)) then
+		for _, stat in ipairs(res.noteHitStats) do
+			if (stat.rating == 2) then
+				if (stat.delta < -sCritWindow) then
+					criticalEarly = criticalEarly + 1;
+				elseif (stat.delta > sCritWindow) then
+					criticalLate = criticalLate + 1;
+				else
+					sCritBtn = sCritBtn + 1;
+				end
+			elseif (stat.rating == 1) then
+				if (stat.delta < 0) then
+					early = early + 1;
+				else
+					late = late + 1;
+				end
+			elseif (stat.rating == 0) then
+				if (stat.delta < 0) then
+					errorEarly = errorEarly + 1;
+				else
+					errorLate = errorLate + 1;
+				end
+			end
+		end
+	end
+
+	errorLate = errorLate + (res.misses - (errorEarly + errorLate));
+	sCritical = res.perfects - (criticalEarly + criticalLate);
+
+	-- https://bemaniwiki.com/index.php?SOUND%20VOLTEX%20EXCEED%20GEAR#hardware_Vm
+	local exScore = (sCritBtn * 5)
+		+ ((criticalEarly + criticalLate) * 4)
+		+ (res.goods * 2)
+		+ ((sCritical - sCritBtn) * 2);
+
+	---@class HitCounts
+	local c = {
+		errorEarly = errorEarly,
+		early = early,
+		criticalEarly = criticalEarly,
+		sCritical = sCritical,
+		criticalLate = criticalLate,
+		late = late,
+		errorLate = errorLate,
+		total = total,
+	};
+
+	return c, ScoreNumber:new({
+		digits = 5,
+		size = 24,
+		val = exScore,
+	});
+end
+
 -- Parses and formats data for graph display
 ---@param res result
 ---@return ResultGraphData
 local getGraphData = function(res)
+	local gaugeData = getGaugeData(res);
+	local hitCounts, exScore = getHitCounts(res);
+
 	local duration = res.duration;
 	local histogram = {};
 	local hoverScale = 10;
 	local suggestion = nil;
 
-	local gaugeType = res.gauge_type or res.flags or 0;
-
 	local count = 0;
 	local data = {};
 	local densities = JSONTable:new('densities');
-	local hardFail = (gaugeType == 1) and (res.badge == 1);
+	local hardFail = (gaugeData.type == 1) and (res.badge == 1);
 	local idx = 1;
 	local ms = 1000;
 	local key = getSetting('_diffKey', '');
 	local save = true;
-
-	local early = 0;
-	local errorEarly = 0;
-	local errorLate = 0;
-	local late = 0;
-	local total = res.perfects + res.goods + res.misses;
-
-	local blastiveLevel = getSetting('_blastiveLevel', '');
-	local gaugeSamples = (JSONTable:new('samples')):get();
-	local gaugeChange = getSetting('_gaugeChange', '');
 
 	if (duration) then hoverScale = math.max(duration / 10000, 5); end
 
@@ -377,20 +534,6 @@ local getGraphData = function(res)
 				if (not histogram[stat.delta]) then histogram[stat.delta] = 0; end
 
 				histogram[stat.delta] = histogram[stat.delta] + 1;
-			end
-
-			if (stat.rating == 1) then
-				if (stat.delta < 0) then
-					early = early + 1;
-				else
-					late = late + 1;
-				end
-			elseif (stat.rating == 0) then
-				if (stat.delta < 0) then
-					errorEarly = errorEarly + 1;
-				else
-					errorLate = errorLate + 1;
-				end
 			end
 
 			if (save) then
@@ -417,8 +560,6 @@ local getGraphData = function(res)
 		end
 	end
 
-	errorLate = errorLate + (res.misses - (errorEarly + errorLate));
-
 	if (res.medianHitDelta) then
 		local delta = math.floor(res.medianHitDelta);
 		local offset = tonumber(getSetting('_songOffset', '0')) + delta;
@@ -434,41 +575,20 @@ local getGraphData = function(res)
 	---@class ResultGraphData
 	local gd = {
 		critWindow = (res.hitWindow and res.hitWindow.perfect) or 46,
-		counts = {
-			critical = res.perfects,
-			early = early,
-			errorEarly = errorEarly,
-			errorLate = errorLate,
-			late = late,
-			total = total,
-		},
+		counts = hitCounts,
 		duration = {
 			label = makeLabel('num', '0', 20),
 			val = duration or 0,
 		},
-		gauge = {
-			blastiveLevel = (gaugeType == 3)
-				and (blastiveLevel ~= '')
-				and makeLabel('num', blastiveLevel, 24),
-			change = (gaugeChange ~= '')
-				and (not hardFail)
-				and ((res.badge > 0))
-				and tonumber(gaugeChange),
-			curr = makeLabel('num', '0'),
-			samples = ((res.badge > 0)
-				and (#gaugeSamples > 0)
-				and (not hardFail)
-				and gaugeSamples
-			) or res.gaugeSamples or {},
-			type = gaugeType,
-			val = makeLabel('num', getGauge(res), 24),
-		},
+		exScore = exScore,
+		gauge = gaugeData,
 		histogram = histogram,
 		hitStats = res.noteHitStats,
 		hoverScale = hoverScale,
 		mean = makeLabel('num', getMeanDelta(res));
 		median = makeLabel('num', getMedianDelta(res));
 		nearWindow = (res.hitWindow and res.hitWindow.good) or 92,
+		sCritWindow = ((res.hitWindow and res.hitWindow.perfect) or 46) * 0.5,
 		suggestion = suggestion,
 	};
 

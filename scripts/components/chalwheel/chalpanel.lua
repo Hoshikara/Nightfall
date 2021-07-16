@@ -53,7 +53,6 @@ local ChalPanel = {
         x = { double = 0, full = 0 },
         y = { double = 0, full = 0 },
       },
-      panel = Image:new('common/panel_wide.png'),
       pressedBTA = false,
       scrollbar = Scrollbar:new(),
       searchBar = SearchBar:new(),
@@ -99,7 +98,7 @@ local ChalPanel = {
       else
         this.jacketSize = this.window.w // 17.25;
 
-        this.w.panel = this.window.w / (1920 / this.panel.w);  
+        this.w.panel = this.window.w / (1920 / 864);  
         this.h = this.window.h - (this.window.h / 10);
 
         this.padding.x.full = this.w.panel / 32;
@@ -147,12 +146,13 @@ local ChalPanel = {
     local cached = this.chals:get(chalwheel.challenges[this.currChal]);
     local y = 0;
 
-    this.panel:draw({
+    drawRect({
       x = this.x,
       y = this.y,
       w = this.w.panel,
       h = this.h,
-      alpha = 0.75,
+      alpha = 180,
+      color = 'dark',
     });
 
     if (not cached) then return; end

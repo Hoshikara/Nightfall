@@ -99,7 +99,7 @@ local GaugeBar = {
 
     if (not this.gaugeType) then this.gaugeType = gaugeType; end
 
-    if ((this.gaugeType == 1) and (gaugeType == 0) and this.saveChange) then
+    if ((this.gaugeType ~= 0) and (gaugeType == 0) and this.saveChange) then
       game.SetSkinSetting(
         '_gaugeChange',
         tostring(math.max(0, this.sampleIdx - 1))

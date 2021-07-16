@@ -1,3 +1,5 @@
+local max = math.max;
+
 ---Normalizes the given text
 ---@param text string
 ---@param font string
@@ -140,9 +142,11 @@ local Label =  {
     local timer = params.timer or 0;
     local width = params.width or 0;
 
-    local labelX = this.w * 1.2;
+    timer = timer * 2;
+
+    local labelX = this.w + 80;
     local duration = (labelX / 80) * 0.75;
-    local phase = math.max((timer % (duration + 1.5)) - 1.5, 0) / duration;
+    local phase = max((timer % (duration + 1.5)) - 1.5, 0) / duration;
 
     gfx.Save();
 

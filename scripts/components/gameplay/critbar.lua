@@ -1,6 +1,8 @@
 local abs = math.abs;
 local sin = math.sin;
 
+local r, g, b, _ = game.GetSkinSetting('colorScheme');
+
 ---@class CritBarClass
 local CritBar = {
   -- CritBar constructor
@@ -11,9 +13,10 @@ local CritBar = {
     ---@class CritBar : CritBarClass
     ---@field window Window
     local t = {
-      bar = Image:new('gameplay/crit_bar.png'),
+      fill = Image:new('gameplay/crit_bar_fill.png'),
       front = Image:new('gameplay/console/console_front.png'),
       timer = 0,
+      top = Image:new('gameplay/crit_bar_top.png'),
       window = window,
     };
 
@@ -46,25 +49,35 @@ local CritBar = {
       color = 'black',
     });
 
-    this.bar:draw({
+    this.fill:draw({
       w = w,
       h = 14,
-      alpha = 0.75 + (0.25 * abs(sin(this.timer * 50))),
+      alpha = 0.8 + (0.2 * abs(sin(this.timer * 50))),
       blendOp = 8,
       centered = true,
+      tint = { r, g, b },
     });
 
-    this.bar:draw({
+    this.fill:draw({
       w = w,
       h = 14,
       alpha = 0.5,
       centered = true,
+      tint = { r, g, b },
     });
 
-    this.front:draw({
-      y = this.front.h * 0.9,
+    this.top:draw({
+      w = w,
+      h = 14,
       centered = true,
     });
+
+    if (this.window.isPortrait) then
+      this.front:draw({
+        y = this.front.h * 0.9,
+        centered = true,
+      });
+    end
 
     gfx.Restore();
   end,

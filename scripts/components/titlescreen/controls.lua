@@ -264,7 +264,7 @@ local Controls = {
 		drawRect({
 			w = this.window.w,
 			h = this.window.h,
-			alpha = 200,
+			alpha = 225,
 			color = 'black',
 			fast = true,
 		});

@@ -3,7 +3,7 @@ local Difficulties = require('constants/difficulties');
 
 local ScoreNumber = require('components/common/scorenumber');
 
-local jacketFallback = gfx.CreateSkinImage('common/loading.png', 0);
+local jacketFallback = gfx.CreateSkinImage('loading.png', 0);
 
 -- Get the date format template string
 ---@return string

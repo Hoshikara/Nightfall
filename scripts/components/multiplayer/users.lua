@@ -3,6 +3,7 @@ local JSON = require('lib/json');
 local Clears = require('constants/Clears');
 local Grades = require('constants/grades');
 
+local Button = require('components/common/button');
 local ScoreNumber = require('components/common/scorenumber');
 
 local getGrade = function(score)
@@ -31,11 +32,8 @@ local Users = {
   new = function(this, window, mouse, state, constants)
     ---@class Users : UsersClass
     local t = {
+      button = Button:new(198, 50),
       cache = { w = 0, h = 0 },
-      images = {
-        btn = Image:new('buttons/short.png'),
-        btnH = Image:new('buttons/short_hover.png'),
-      },
       labels = {},
       margin = 0,
       mouse = mouse,
@@ -95,7 +93,7 @@ local Users = {
 
       this.margin = (hMax - (this.h * 8)) / 7;
 
-      this.x.btn[1] = this.x.list + (this.w / 2) - (this.images.btn.w) - 64;
+      this.x.btn[1] = this.x.list + (this.w / 2) - (this.button.w) - 64;
       this.x.btn[2] = this.x.list + (this.w / 2) + 64;
 
       this.x.text[1] = this.x.list + 24;
@@ -169,7 +167,7 @@ local Users = {
     });
 
     if (isHost and hovering) then
-      y = y + (this.h / 2) - (this.images.btn.h / 2);
+      y = y + (this.h / 2) - (this.button.h / 2);
 
       this:drawControls(y, user);
     else  
@@ -245,45 +243,41 @@ local Users = {
   drawControls = function(this, y, user)
     local x1 = this.x.btn[1];
     local x2 = this.x.btn[2];
-    local w = this.images.btn.w;
-    local h = this.images.btn.h;
+    local w = this.button.w;
+    local h = this.button.h;
     local hostHover = this.mouse:clipped(x1, y, w, h);
     local kickHover = this.mouse:clipped(x2, y, w, h);
 
     if (hostHover) then
       this.state.btnEvent = function() makeHost(user.id) end;
-
-      this.images.btnH:draw({ x = x1, y = y });
-    else
-      this.images.btn:draw({
-        x = x1,
-        y = y,
-        alpha = 0.75,
-      });
     end
 
+    this.button:render({
+      x = x1,
+      y = y,
+      accentAlpha = (hostHover and 1) or 0.3,
+    });
+
     this.labels.makeHost:draw({
-      x = x1 + 32,
-      y = y + 19,
+      x = x1 + 24,
+      y = y + 12,
       alpha = (hostHover and 255) or 150,
       color = 'white',
     });
 
     if (kickHover) then
       this.state.btnEvent = function() kickUser(user.id) end;
-
-      this.images.btnH:draw({ x = x2, y = y });
-    else
-      this.images.btn:draw({
-        x = x2,
-        y = y,
-        alpha = 0.75,
-      });
     end
 
+    this.button:render({
+      x = x2,
+      y = y,
+      accentAlpha = (kickHover and 1) or 0.3,
+    });
+
     this.labels.kick:draw({
-      x = x2 + 32,
-      y = y + 19,
+      x = x2 + 24,
+      y = y + 12,
       alpha = (kickHover and 255) or 150,
       color = 'white',
     });
