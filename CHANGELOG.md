@@ -1,3 +1,6 @@
+##### 1.3.1 - July 17, 2021
+- Fixed miss state for holds being indistinguishable from idle state
+
 ##### 1.3.0 - July 16, 2021
 - `Results` changes
   - Added `EX SCORE` and `VOLFORCE` fields, the latter will show increased value if applicable

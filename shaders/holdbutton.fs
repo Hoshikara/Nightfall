@@ -15,7 +15,7 @@ uniform float objectGlow;
 uniform int hitState;
 
 void main() {
-	float y = 0.34 * ceil(float(hitState) / 2);
+	float y = 0.33 * ceil(float(hitState) / 2) + 0.01;
 	
 	target = texture(mainTex, vec2(fsTex.x, y));
 }
