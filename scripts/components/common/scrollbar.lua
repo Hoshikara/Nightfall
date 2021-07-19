@@ -80,7 +80,7 @@ local Scrollbar = {
   ---@param params table #
   -- ```
   -- {
-  --   color: string|{ r, g, b } = 'dark',
+  --   color: Color,
   --   curr: number = 1,
   --   total: number = 1,
   -- }

@@ -1,14 +1,25 @@
 local floor = math.floor;
+local min = math.min;
 
 local r, g, b, _ = game.GetSkinSetting('colorScheme');
 
-local clampColor = function(v)
-  v = floor(v);
+-- Make color table
+---@param r? number
+---@param g? number
+---@param b? number
+---@param pct? number
+---@return table # ```{ r, g, b }```
+local makeColor = function(r, g, b, pct)
+  r = r or 0;
+  g = g or 0;
+  b = b or 0;
+  pct = pct or 1;
 
-  if (v > 255) then return 255; end
-  if (v < 0) then return 0; end
-
-  return v;
+  return {
+    min(floor(r * pct), 255),
+    min(floor(g * pct), 255),
+    min(floor(b * pct), 255),
+  };
 end
 
 return {
@@ -23,26 +34,10 @@ return {
 
   Colors = {
     black = { 0, 0, 0 },
-    dark = {
-      clampColor(r * 0.075),
-      clampColor(g * 0.075),
-      clampColor(b * 0.075),  
-    },
-    light = {
-      clampColor(r * 1.125),
-      clampColor(g * 1.125),
-      clampColor(b * 1.125),
-    },
-    med = {
-      clampColor(r * 0.3),
-      clampColor(g * 0.3),
-      clampColor(b * 0.3),
-    },
-    norm = {
-      clampColor(r),
-      clampColor(g),
-      clampColor(b),
-    },
+    dark = makeColor(r, g, b, 0.075),
+    light = makeColor(r, g, b, 1.125),
+    med = makeColor(r, g, b, 0.3),
+    norm = makeColor(r, g, b),
     red = { 200, 80, 80 },
     redDark = { 160, 40, 40 },
     white = { 255, 255, 255 },

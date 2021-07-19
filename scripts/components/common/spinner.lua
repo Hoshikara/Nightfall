@@ -5,7 +5,7 @@ local Spinner = {
   ---@param p? table
   -- ```lua
   -- {
-  --   color: string = 'norm',
+  --   color: Color,
   --   size: number = 12,
   --   thickness: number = 3,
   -- }
@@ -30,14 +30,22 @@ local Spinner = {
 
   -- Renders the current component
   ---@param this Spinner
-  render = function(this, dt, x, y)
+  ---@param dt deltaTime
+  ---@param x number
+  ---@param y number
+  ---@param center boolean
+  render = function(this, dt, x, y, center)
     this.timer = this.timer + dt;
 
     gfx.Save();
 
-    gfx.Translate(x - this.size, y + this.size);
+    if (center) then
+      gfx.Translate(x, y);
+    else
+      gfx.Translate(x - this.size, y + this.size);
+    end
 
-    gfx.Rotate(this.timer * 3);
+    gfx.Rotate(this.timer * 8);
 
     gfx.BeginPath();
     setFill('black', 0);

@@ -78,9 +78,9 @@ local ScoreNumber = {
   -- {
   --   x: number = 0,
   --   y: number = 0,
-  --   align: string = 'left',
+  --   align: Alignment,
   --   alpha: number = 255,
-  --   color: string = 'norm',
+  --   color: Color,
   --   offset?: number,
   -- }
   -- ```

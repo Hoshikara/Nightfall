@@ -87,7 +87,6 @@ local SearchBar = {
       y = this.y - 6,
       w = (this.w - 3) * this.timers.fade,
       h = this.h + 12,
-      alpha = 180,
       color = 'dark',
       fast = true,
     });

@@ -2,8 +2,8 @@
 local Button = {
   -- Button constructor
   ---@param this ButtonClass
-  ---@param w number
-  ---@param h number
+  ---@param w number # Suggested: `198`, `258`, `355`, `415`
+  ---@param h number # Suggested: `50`
   ---@return Button
   new = function(this, w, h)
     ---@class Button : ButtonClass

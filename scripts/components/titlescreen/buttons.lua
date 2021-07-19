@@ -52,13 +52,13 @@ local Buttons = {
 	---@param this Buttons
 	setSizes = function(this)
 		if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
-			local x = this.window.padding.x + 6;
+			local x = this.window.padding.x + 12;
 			local y = this.window.h - (this.window.h / 3.5);
 			local w = this.button.w;
 			local h = this.button.h;
 
 			if (this.window.isPortrait) then
-				x = this.window.w / 11;
+				x = (this.window.w / 11) + 12;
 				y = this.window.h / 2;
 			end
 

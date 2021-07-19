@@ -13,12 +13,21 @@ local size = Sizes[getSetting('jacketQuality', 'NORMAL')] or Sizes['NORMAL'];
 local load = function(t)
   for _, curr in ipairs(t) do
     if ((not curr.jacket) or (curr.jacket == fallback)) then
-      curr.jacket = gfx.LoadImageJob(
-        curr.jacketPath,
-        fallback,
-        size,
-        size
-      );
+      if (curr.jacket_url) then
+        curr.jacket = gfx.LoadWebImageJob(
+          curr.jacket_url,
+          fallback,
+          size,
+          size
+        );
+      else
+        curr.jacket = gfx.LoadImageJob(
+          curr.jacketPath,
+          fallback,
+          size,
+          size
+        );
+      end
     end
   end
 end

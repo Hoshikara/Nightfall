@@ -2,6 +2,12 @@
 	"////////// GENERAL //////////": {
 		"type": "label"
 	},
+	"colorScheme": {
+		"label": "Color Scheme",
+		"type": "color",
+		"default": "3C6EA0FF"
+	},
+	"separator_iqn": {},
 	"displayName": {
 		"type": "text",
 		"label": "Player Name",
@@ -10,14 +16,8 @@
 	"separator_dvj": {},
 	"nauticaPath": {
 		"type": "text",
-		"label": "Nautica Download Folder i.e. /songs/nautica (no slashes)",
+		"label": "Nautica Download Folder i.e. 'nautica' (no quotes, case-sensitive)",
 		"default": "nautica"
-	},
-	"separator_iqn": {},
-	"colorScheme": {
-		"label": "Color Scheme",
-		"type": "color",
-		"default": "3C6EA0FF"
 	},
 	"separator_b": {},
 	"////////// SONG SELECT //////////": {

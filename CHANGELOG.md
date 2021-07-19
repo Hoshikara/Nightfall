@@ -1,3 +1,11 @@
+##### 1.3.2 - July 19, 2021
+- `Nautica` changes
+  - Added the ability to blacklist uploaders by pressing `BT-B` when a song is selected
+  - Redesigned screen and added control hints, uploader name, and upload date
+  - **NOTE:** `nautica.json` inside the `JSON` folder will be used instead of `nautica.json` in the root skin folder; these two files are not interchangable so treat the new file as your cache (it will hold blacklisted uploaders as well)
+- Increased speed of loading spinner
+- Removed transparency from search bar
+
 ##### 1.3.1 - July 17, 2021
 - Fixed miss state for holds being indistinguishable from idle state
 

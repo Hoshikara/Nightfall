@@ -20,8 +20,8 @@ local Label =  {
   ---@param p table #
   -- ```
   -- {
-  --   color: string = 'norm',
-  --   font: string = 'jp',
+  --   color: Color,
+  --   font: Font,
   --   size: number = 50,
   --   text: string = 'LABEL TEXT',
   -- }
@@ -77,9 +77,9 @@ local Label =  {
   -- {
   --   x: number = 0,
   --   y: number = 0,
-  --   align: string = 'left',
+  --   align: Alignment,
   --   alpha: number = 255,
-  --   color: string|{ r, g, b } = 'norm',
+  --   color: Color,
   --   maxWidth: number = -1,
   --   text?: string,
   --   update?: boolean,
@@ -126,9 +126,9 @@ local Label =  {
   -- {
   --   x: number = 0,
   --   y: number = 0,
-  --   align: string = 'left',
+  --   align: Alignment,
   --   alpha: number = 255,
-  --   color: string = 'norm',
+  --   color: Color,
   --   scale: number = 1,
   --   timer: number = 0,
   --   width: number = 0,
