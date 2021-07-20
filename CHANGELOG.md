@@ -1,3 +1,9 @@
+##### 1.3.3 - July 19, 2021
+- Added skin settings to change the color of the following:
+  - Hit stats which includes `S-CRITICAL`, `CRITICAL`, `EARLY`, `LATE`, and `ERROR`; these are reflected during the gameplay and results screens where applicable
+  - Positive and negative values (e.g. score difference, result stat comparisons, truthy/falsy settings, etc.)
+- Fixed laser miss state being too bright (again)
+
 ##### 1.3.2 - July 19, 2021
 - `Nautica` changes
   - Added the ability to blacklist uploaders by pressing `BT-B` when a song is selected

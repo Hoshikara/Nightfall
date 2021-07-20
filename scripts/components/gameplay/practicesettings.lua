@@ -170,9 +170,9 @@ return {
         value = setting.value[tostring(base.value)];
 
         if (value.text and (value.text == 'DISABLED')) then
-          params.color = 'red';
+          params.color = 'neg';
         else
-          params.color = 'norm';
+          params.color = 'pos';
         end
       end
 

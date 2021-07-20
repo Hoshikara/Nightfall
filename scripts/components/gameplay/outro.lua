@@ -91,7 +91,7 @@ local Outro = {
       y = y,
       align = 'middle',
       alpha = 255 * this.alpha,
-      color = ((clearState > 1) and 'norm') or 'red',
+      color = ((clearState > 1) and 'pos') or 'neg',
     });
 
     gfx.Restore();

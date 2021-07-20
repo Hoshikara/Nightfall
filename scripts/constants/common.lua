@@ -1,7 +1,19 @@
 local floor = math.floor;
 local min = math.min;
 
-local r, g, b, _ = game.GetSkinSetting('colorScheme');
+local R, G, B, _ = game.GetSkinSetting('colorScheme');
+
+-- Get color from skin settings
+---@param key string # Skin setting key
+local getColor = function(key)
+  local r, g, b, _ = game.GetSkinSetting(key);
+
+  return {
+    r or 0,
+    g or 0,
+    b or 0,
+  };
+end
 
 -- Make color table
 ---@param r? number
@@ -34,12 +46,24 @@ return {
 
   Colors = {
     black = { 0, 0, 0 },
-    dark = makeColor(r, g, b, 0.075),
-    light = makeColor(r, g, b, 1.125),
-    med = makeColor(r, g, b, 0.3),
-    norm = makeColor(r, g, b),
+    critical = getColor('criticalColor'),
+    criticalEarly = getColor('criticalColor'),
+    criticalLate = getColor('criticalColor'),
+    dark = makeColor(R, G, B, 0.075),
+    early = getColor('earlyColor'),
+    error = getColor('errorColor'),
+    errorEarly = getColor('errorColor'),
+    errorLate = getColor('errorColor'),
+    late = getColor('lateColor'),
+    light = makeColor(R, G, B, 1.125),
+    maxChain = getColor('criticalColor'),
+    med = makeColor(R, G, B, 0.3),
+    neg = getColor('negColor'),
+    norm = makeColor(R, G, B),
+    pos = getColor('posColor'),
     red = { 200, 80, 80 },
     redDark = { 160, 40, 40 },
+    sCritical = getColor('sCriticalColor'),
     white = { 255, 255, 255 },
   },
 

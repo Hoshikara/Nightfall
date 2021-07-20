@@ -51,7 +51,7 @@ end
 ---@param positive boolean
 ---@return Label
 local deltaLabel = function(val, positive)
-	return makeLabel('num', val, 20, (positive and 'norm') or 'red');
+	return makeLabel('num', val, 20, (positive and 'pos') or 'neg');
 end
 
 -- Gets the critical, near, and error deltas relative to the highest/lowest achieved values

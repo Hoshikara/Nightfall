@@ -2,24 +2,62 @@
 	"////////// GENERAL //////////": {
 		"type": "label"
 	},
-	"colorScheme": {
-		"label": "Color Scheme",
-		"type": "color",
-		"default": "3C6EA0FF"
-	},
-	"separator_iqn": {},
 	"displayName": {
-		"type": "text",
 		"label": "Player Name",
+		"type": "text",
 		"default": "Guest"
 	},
 	"separator_dvj": {},
 	"nauticaPath": {
-		"type": "text",
 		"label": "Nautica Download Folder i.e. 'nautica' (no quotes, case-sensitive)",
+		"type": "text",
 		"default": "nautica"
 	},
 	"separator_b": {},
+	"////////// COLORS //////////": {
+		"type": "label"
+	},
+	"colorScheme": {
+		"label": "Overall Color Scheme",
+		"type": "color",
+		"default": "3C6EA0FF"
+	},
+	"posColor": {
+		"label": "Positive color (positive score difference, result stats, truthy values, etc.)",
+		"type": "color",
+		"default": "3C6EA0FF"
+	},
+	"negColor": {
+		"label": "Negative color (negative score difference, result stats, falsy values, etc.)",
+		"type": "color",
+		"default": "C85050FF"
+	},
+	"sCriticalColor": {
+		"label": "S-Critical color",
+		"type": "color",
+		"default": "DCF0FFFF"
+	},
+	"criticalColor": {
+		"label": "Critical color",
+		"type": "color",
+		"default": "FFEB64FF"
+	},
+	"earlyColor": {
+		"label": "Early color",
+		"type": "color",
+		"default": "FF69FFFF"
+	},
+	"lateColor": {
+		"label": "Late color",
+		"type": "color",
+		"default": "69CDFFFF"
+	},
+	"errorColor": {
+		"label": "Error color",
+		"type": "color",
+		"default": "CD0000FF"
+	},
+	"separator_yui": {},
 	"////////// SONG SELECT //////////": {
 		"type": "label"
 	},
@@ -37,8 +75,8 @@
 	"separator_ejn": {},
 	"showDensity": {
 		"label": "Show note density graph if available",
-		"default": true,
-		"type": "bool"
+		"type": "bool",
+		"default": true
 	},
 	"separator_c": {},
 	"////////// GAMEPLAY //////////": {
@@ -73,7 +111,7 @@
 		"default": false
 	},
 	"useDiffColor": {
-		"label": "Use different colors for early and late critical hit delta",
+		"label": "Use early/late colors for critical hit delta",
 		"type": "bool",
 		"default": false
 	},
@@ -91,8 +129,8 @@
 		"default": true
 	},
 	"earlateType": {
-		"type": "selection",
 		"label": "Early / Late Display Type",
+		"type": "selection",
 		"default": "TEXT",
 		"values": [
 			"DELTA",
@@ -101,22 +139,22 @@
 		]
 	},
 	"earlateX": {
-		"type": "float",
 		"label": "Early / Late X-Position: %.2f",
+		"type": "float",
 		"default": 0.5,
 		"min": 0.0,
 		"max": 1.0
 	},
 	"earlateY": {
-		"type": "float",
 		"label": "Early / Late Y-Position: %.2f",
+		"type": "float",
 		"default": 0.75,
 		"min": 0.0,
 		"max": 1.0
 	},
 	"earlateGap": {
-		"type": "float",
 		"label": "Early / Late Text/Delta Gap: %.2f",
+		"type": "float",
 		"default": 0.4,
 		"min": 0.25,
 		"max": 1.0
@@ -128,40 +166,40 @@
 		"default": true
 	},
 	"hispeedX": {
-		"type": "float",
 		"label": "Hi-Speed X-Position: %.2f",
+		"type": "float",
 		"default": 0.5,
 		"min": 0.0,
 		"max": 1.0
 	},
 	"hispeedY": {
-		"type": "float",
 		"label": "Hi-Speed Y-Position: %.2f",
+		"type": "float",
 		"default": 0.5,
 		"min": 0.0,
 		"max": 1.0
 	},
 	"ignoreSpeedChange": {
-		"default": false,
+		"label": "Ignore incoming Hi-Speed changes",
 		"type": "bool",
-		"label": "Ignore incoming Hi-Speed changes"
+		"default": false
 	},
 	"separator_iuw": {},
 	"showHitDeltaBar": {
-		"default": false,
 		"label": "Show hit delta bar",
-		"type": "bool"
+		"type": "bool",
+		"default": false
 	},
 	"hitDeltaBarScale": {
-		"type": "float",
 		"label": "Hit Delta Bar Scale: %.2f",
+		"type": "float",
 		"default": 1.0,
 		"max": 2.0,
 		"min": 0.5
 	},
 	"hitDecayTime": {
-		"type": "float",
 		"label": "Hit bar decay time (in seconds): %.2f",
+		"type": "float",
 		"default": 6.0,
 		"max": 10.0,
 		"min": 2.0
@@ -180,15 +218,15 @@
 		"max": 1.0
 	},
 	"scoreDiffX": {
-		"type": "float",
 		"label": "Score Difference X-Position: %.2f",
+		"type": "float",
 		"default": 0.05,
 		"min": 0.0,
 		"max": 1.0
 	},
 	"scoreDiffY": {
-		"type": "float",
 		"label": "Score Difference Y-Position: %.2f",
+		"type": "float",
 		"default": 0.50,
 		"min": 0.0,
 		"max": 1.0
@@ -221,26 +259,26 @@
 	"separator_kqm": {},
 	"showBestDeltas": {
 		"label": "Show best critical/near/error count indicators",
-		"default": true,
-		"type": "bool"
+		"type": "bool",
+		"default": true
 	},
 	"separator_shj": {},
 	"suggestOffset": {
 		"label": "Show song offset recommendation",
-		"default": true,
-		"type": "bool"
+		"type": "bool",
+		"default": true
 	},
 	"minOffset": {
 		"label": "Minimum offset required to show recommendation",
+		"type": "int",
 		"default": 3,
 		"min": 1,
-		"max": 50,
-		"type": "int"
+		"max": 50
 	},
 	"separator_ivy": {},
 	"dateFormat": {
-		"type": "selection",
 		"label": "Date Format",
+		"type": "selection",
 		"default": "DAY-MONTH-YEAR",
 		"values": [
 			"DAY-MONTH-YEAR",
@@ -250,8 +288,8 @@
 	},
 	"separator_owf": {},
 	"screenshotRegion": {
-		"type": "selection",
 		"label": "Screenshot Capture Region",
+		"type": "selection",
 		"default": "PANEL",
 		"values": [
 			"FULLSCREEN",

@@ -2,23 +2,12 @@ local Mouse = require('common/mouse');
 
 local ScoreNumber = require('components/common/scorenumber');
 
--- Hit rating colors
-local Colors = {
-  [0] = { 205, 0, 0 },
-  [2] = { 255, 235, 100 },
+-- Gauge colors
+local GaugeColors = {
   blastive = { 120, 120, 200 },
-  critical = { 255, 235, 100 },
-  criticalEarly = { 255, 235, 100 },
-  criticalLate = { 255, 235, 100 },
   effFail = { 20, 120, 240 },
   effPass = { 220, 20, 140 },
   excPass = { 240, 80, 40 },
-  near = { 255, 105, 255 },
-  early = { 255, 105, 255 },
-  errorEarly = { 205, 0, 0 },
-  errorLate = { 205, 0, 0 },
-  late = { 105, 205, 255 },
-  sCritical = { 220, 240, 255 },
 };
 
 -- Button letters
@@ -120,7 +109,7 @@ local Graphs = {
   drawSimple = function(this)
     local counts = this.data.counts;
     local gauge = this.data.gauge or {};
-    local gaugeColor = Colors.effFail;
+    local gaugeColor = GaugeColors.effFail;
     local scale = (this.window.isPortrait and 1.5) or 1.6;
     local x = this.x;
     local y = this.y - 6;
@@ -131,15 +120,15 @@ local Graphs = {
 
     if (gauge.type >= 1) then
       if (gauge.type == 3) then
-        gaugeColor = Colors.blastive;
+        gaugeColor = GaugeColors.blastive;
       else
-        gaugeColor = Colors.excPass;
+        gaugeColor = GaugeColors.excPass;
       end
     else
       if (gauge.rawVal < 0.7) then
-        gaugeColor = Colors.effFail;
+        gaugeColor = GaugeColors.effFail;
       else
-        gaugeColor = Colors.effPass;
+        gaugeColor = GaugeColors.effPass;
       end
     end
 
@@ -497,10 +486,12 @@ local Graphs = {
     local sCritWindow = this.data.sCritWindow;
 
     for _, stat in ipairs(this.data.hitStats) do
-      local color = Colors[stat.rating];
+      local color;
       local xStat = (((stat.timeFrac * w) - focus) * scale) + focus;
 
-      if (stat.rating == 1) then
+      if (stat.rating == 0) then
+        color = Colors.error;
+      elseif (stat.rating == 1) then
         if (stat.delta < 0) then
           color = Colors.early;
         else
@@ -509,6 +500,8 @@ local Graphs = {
       elseif (stat.rating == 2) then
         if ((stat.delta >= -sCritWindow) and (stat.delta <= sCritWindow)) then
           color = Colors.sCritical;
+        else
+          color = Colors.critical;
         end
       end
 
@@ -577,15 +570,15 @@ local Graphs = {
     end
     
     if (this.data.gauge.type >= 1) then
-      local c = Colors.excPass;
+      local c = GaugeColors.excPass;
 
-      if (this.data.gauge.type == 3) then c = Colors.blastive; end
+      if (this.data.gauge.type == 3) then c = GaugeColors.blastive; end
 
       gfx.StrokeColor(c[1], c[2], c[3], a);
       gfx.Stroke();
     else
-      local c1 = Colors.effFail;
-      local c2 = Colors.effPass;
+      local c1 = GaugeColors.effFail;
+      local c2 = GaugeColors.effPass;
 
       gfx.Scissor(x, y + (h * 0.3) - 2, w, (h * 0.7) + 2);
       gfx.StrokeColor(c1[1], c1[2], c1[3], a);
@@ -598,7 +591,7 @@ local Graphs = {
       gfx.ResetScissor();
 
       if (this.data.gauge.change) then
-        local c3 = Colors.excPass;
+        local c3 = GaugeColors.excPass;
         local excessive = w * (this.data.gauge.change / 256);
 
         gfx.Scissor(x, y - 2, (excessive - focus) * scale + focus, h + 2);

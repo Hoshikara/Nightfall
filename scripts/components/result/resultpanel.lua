@@ -6,15 +6,6 @@ local ScoreNumber = require('components/common/scorenumber');
 
 local Graphs = require('components/result/graphs');
 
-local Colors = {
-  critical = { 255, 235, 100 },
-  near = { 255, 105, 255 },
-  early = { 255, 105, 255 },
-  error = { 205, 0, 0 },
-  late = { 105, 205, 255 },
-  maxChain = { 255, 235, 100 },
-};
-
 local DeltaMap = {
   critical = 'critIdx',
   error = 'errorIdx',
@@ -339,7 +330,11 @@ local ResultPanel = {
       else
         local xTemp = x - 7 + stats.score.w - this.upScore.w - 6;
 
-        this.upScore:draw({ x = xTemp, y = y + 2 });
+        this.upScore:draw({
+          x = xTemp,
+          y = y + 2,
+          color = 'pos',
+        });
 
         this.labels.plus:draw({
           x = xTemp - 24,
@@ -359,13 +354,13 @@ local ResultPanel = {
         this.downScore:draw({
           x = xTemp,
           y = y + 2,
-          color = 'red',
+          color = 'neg',
         });
 
         this.labels.minus:draw({
           x = xTemp - 20,
           y = y - 6,
-          color = 'red',
+          color = 'neg',
         });
       end
     end

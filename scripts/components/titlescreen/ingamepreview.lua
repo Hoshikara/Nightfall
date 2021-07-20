@@ -609,7 +609,7 @@ local IngamePreview = {
           y = (h * earlate.yPos) + this.offset,
           align = earlate.textAlign,
           alpha = 200 * this.timers.all,
-          color = { 255, 105, 255 },
+          color = Colors.early,
         });
       end
 
@@ -627,7 +627,7 @@ local IngamePreview = {
           y = (h * earlate.yPos) + this.offset + 4,
           align = earlate.deltaAlign,
           alpha = 200 * this.timers.all,
-          color = { 255, 105, 255 },
+          color = Colors.early,
         });
       end
     end
@@ -785,7 +785,7 @@ local IngamePreview = {
           y = yNum + (((i > 3) and 4.5) or 0),
           align = 'middle',
           alpha = (((i < 3) and 50) or 255) * this.timers.all,
-          color = (i < 4) and 'white',
+          color = ((i < 4) and 'white') or 'pos',
         });
       end
     end
@@ -852,7 +852,7 @@ local IngamePreview = {
         w = 3,
         h = hitDeltaBar.h,
         alpha = 100 * this.timers.all,
-        color = { 255, 235, 100 },
+        color = Colors.critical,
       });
   
       drawRect({
@@ -861,7 +861,7 @@ local IngamePreview = {
         w = 3,
         h = hitDeltaBar.h,
         alpha = 100 * this.timers.all,
-        color = { 255, 235, 100 },
+        color = Colors.critical,
       });
   
       drawRect({
@@ -870,7 +870,7 @@ local IngamePreview = {
         w = 3,
         h = hitDeltaBar.h,
         alpha = 100 * this.timers.all,
-        color = { 255, 105, 255 },
+        color = Colors.early,
       });
   
       drawRect({
@@ -879,7 +879,7 @@ local IngamePreview = {
         w = 3,
         h = hitDeltaBar.h,
         alpha = 100 * this.timers.all,
-        color = { 105, 205, 255 },
+        color = Colors.late,
       });
 
       this.window:unscale();

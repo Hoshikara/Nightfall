@@ -117,7 +117,7 @@ return {
         if (setting.special == 'TIME WINDOW') then
           setting.value:update({ text = ('±%d ms'):format(base.value) });
 
-          if (base.value < base.max) then params.color = 'red'; end
+          if (base.value < base.max) then params.color = 'neg'; end
         elseif ((setting.special == 'TIME')
           or (base.name:upper()):find('OFFSET')
         ) then
@@ -143,9 +143,9 @@ return {
         value = setting.value[tostring(base.value)];
 
         if (value.text and (value.text == 'DISABLED')) then
-          params.color = 'red';
+          params.color = 'neg';
         else
-          params.color = 'norm';
+          params.color = 'pos';
         end
       end
 

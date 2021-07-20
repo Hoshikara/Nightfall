@@ -165,7 +165,7 @@ local ChalPanel = {
       this.labels.missing:draw({
         x = -2,
         y = y,
-        color = 'red',
+        color = 'neg',
       });
 
       y = y + (this.labels.missing.h * 0.5) + this.padding.y.full;

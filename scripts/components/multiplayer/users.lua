@@ -178,7 +178,7 @@ local Users = {
       this.labels[status]:draw({
         x = this.x.text[1],
         y = y,
-        color = (user.missing_map and 'red')
+        color = (user.missing_map and 'neg')
           or (user.ready and { 48, 120, 48 })
           or 'norm',
       });

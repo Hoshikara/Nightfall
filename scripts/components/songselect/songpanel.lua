@@ -275,7 +275,7 @@ local SongPanel = {
       this.labels.peak:draw({
         x = x + 5,
         y = y + (size * 0.75) - 5,
-        color = 'red',
+        color = 'neg',
       });
 
       this.labels.peakVal:draw({

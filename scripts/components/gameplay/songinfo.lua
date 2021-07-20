@@ -471,9 +471,9 @@ local SongInfo = {
         if (this.hispeed.changeStr ~= '') then
           if (not ignoreChange) then
             if (this.hispeed.isLower) then
-              color = 'light';
+              color = 'pos';
             else
-              color = 'red';
+              color = 'neg';
             end
             
             str = this.hispeed.changeStr;
@@ -559,7 +559,7 @@ local SongInfo = {
       y = y,
       align = 'left',
       alpha = alpha,
-      color = (this.hispeed.isLower and 'light') or 'red',
+      color = (this.hispeed.isLower and 'pos') or 'neg',
       text = bpmChange,
       update = true,
     });
@@ -569,7 +569,7 @@ local SongInfo = {
       y = y + yOffset,
       align = 'left',
       alpha = alpha,
-      color = (this.hispeed.isLower and 'light') or 'red',
+      color = (this.hispeed.isLower and 'pos') or 'neg',
       text = hiSpeedChange,
       update = true,
     });

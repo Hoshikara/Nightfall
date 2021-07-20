@@ -128,14 +128,14 @@ local UserInfo = {
         y = y + (((prefix == 'plus') and 0) or -5),
         align = 'middle',
         alpha = alpha,
-        color = ((prefix == 'plus') and 'white') or 'red',
+        color = ((prefix == 'plus') and 'white') or 'neg',
       });
     end
 
     for i, num in ipairs(this.num) do
       local offset = ((i > 3) and 4.5) or 0;
       local color = ((i < 4) and 'white')
-        or (((prefix == 'plus') and 'norm') or 'red');
+        or (((prefix == 'plus') and 'pos') or 'neg');
 
       num:draw({
         x = this.x.num[i],

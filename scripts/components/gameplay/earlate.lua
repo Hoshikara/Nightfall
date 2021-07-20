@@ -1,11 +1,3 @@
-local Colors = {
-  crit = { 255, 235, 100 },
-  critEarly = { 205, 55, 205 },
-  critLate = { 55, 155, 205 },
-  early = { 255, 105, 255 },
-  late = { 105, 205, 255 },
-};
-
 ---@type number
 local earlateX = getSetting('earlateX', 0.5);
 local earlateY = getSetting('earlateY', 0.75);
@@ -106,12 +98,12 @@ local Earlate = {
     if (this.state.isCrit) then
       if (useDiffColor) then
         if (this.state.buttonDelta >= 0) then
-          color = Colors.critLate;
+          color = Colors.late;
         else
-          color = Colors.critEarly;
+          color = Colors.early;
         end
       else
-        color = Colors.crit;
+        color = Colors.critical;
       end
     end
 

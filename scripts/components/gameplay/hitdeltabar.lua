@@ -15,11 +15,6 @@ local HitDeltaBar = {
     local t = {
       cache = { w = 0, h = 0 },
       ---@type table<string, integer[]>
-      colors = {
-        crit = { 255, 235, 100 },
-        early = { 255, 105, 255 },
-        late = { 105, 205, 255 },
-      },
       critScale = 1,
       critWin = (gameplay.hitWindow and gameplay.hitWindow.perfect) or 46,
       nearScale = 1,
@@ -124,7 +119,7 @@ local HitDeltaBar = {
     if (rating == 2) then
       for _, state in ipairs(this.states.crit[btn + 1]) do
         if (not state.queued) then
-          state.color = this.colors.crit;
+          state.color = Colors.critical;
           state.delta = delta * this.critScale;
           state.queued = true;
 
@@ -135,11 +130,11 @@ local HitDeltaBar = {
       for _, state in ipairs(this.states.near[btn + 1]) do
         if (not state.queued) then
           if (delta < 0) then
-            state.color = this.colors.early;
+            state.color = Colors.early;
             state.delta = -this.x.near
               + ((delta + this.critWin) * this.nearScale);
           else
-            state.color = this.colors.late;
+            state.color = Colors.late;
             state.delta = this.x.near
               + ((delta - this.critWin) * this.nearScale);
           end
@@ -158,7 +153,7 @@ local HitDeltaBar = {
   render = function(this, dt)
     local alpha = 255 * this.timer;
     local crit = this.states.crit;
-    local critCol = this.colors.crit;
+    local critCol = Colors.critical;
     local near = this.states.near;
 
     if (gameplay.progress == 0) then
@@ -228,7 +223,7 @@ local HitDeltaBar = {
       w = w,
       h = h,
       alpha = 100,
-      color = this.colors.early,
+      color = Colors.early,
     });
 
     drawRect({
@@ -237,7 +232,7 @@ local HitDeltaBar = {
       w = w,
       h = h,
       alpha = 100,
-      color = this.colors.late,
+      color = Colors.late,
     });
 
     if (gameplay.progress > 0) then this.timer = to0(this.timer, dt, 1); end
@@ -272,7 +267,7 @@ local HitDeltaBar = {
         y = -16,
         align = 'middle',
         alpha = alpha,
-        color = this.colors.early,
+        color = Colors.early,
       });
 
       this.labels.nearPos:draw({
@@ -280,7 +275,7 @@ local HitDeltaBar = {
         y = -16,
         align = 'middle',
         alpha = alpha,
-        color = this.colors.late,
+        color = Colors.late,
       });
     end
 

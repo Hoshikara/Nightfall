@@ -1,6 +1,6 @@
 local JSONTable = require('common/jsontable');
 
-local Colors = {
+local GaugeColors = {
   blastPass = { 120, 120, 200 },
   blastWarn = { 100, 80, 160 },
   effFail = { 20, 120, 240 },
@@ -129,7 +129,7 @@ local GaugeBar = {
 
     local alpha = this.state.intro.alpha;
     local ars = getSetting('_arsEnabled', 'false') == 'true';
-    local color = Colors.effFail;
+    local color = GaugeColors.effFail;
     local gauge = { type = 0, val = 0 };
     local gaugeAlpha = 255;
 
@@ -146,26 +146,26 @@ local GaugeBar = {
 
     if (gauge.type == 0) then
       if (gauge.val < 0.7) then
-        color = Colors.effFail;
+        color = GaugeColors.effFail;
       else
-        color = Colors.effPass;
+        color = GaugeColors.effPass;
       end
     else
       if (gauge.val < 0.3) then
         this.timer = this.timer + dt;
         
         if (gauge.type == 3) then
-          color = Colors.blastWarn;
+          color = GaugeColors.blastWarn;
         else
-          color = Colors.excWarn;
+          color = GaugeColors.excWarn;
         end
 
         gaugeAlpha = abs(255 * cos(this.timer * 12));
       else
         if (gauge.type == 3) then
-          color = Colors.blastPass;
+          color = GaugeColors.blastPass;
         else
-          color = Colors.excPass;
+          color = GaugeColors.excPass;
         end
       end
     end
