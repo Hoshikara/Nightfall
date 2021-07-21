@@ -407,19 +407,11 @@ local ScoreList = {
       end
 
       if ((not this.pressedFXL) and pressed('FXL')) then
-        if ((this.currScore - 1) < 1) then
-          this.currScore = this.state.scoreCount;
-        else
-          this.currScore = this.currScore - 1;
-        end
+        this.currScore = advance(this.currScore, this.state.scoreCount, -1);
       end
 
       if ((not this.pressedFXR) and pressed('FXR')) then
-        if ((this.currScore + 1) > this.state.scoreCount) then
-          this.currScore = 1;
-        else
-          this.currScore = this.currScore + 1;
-        end
+        this.currScore = advance(this.currScore, this.state.scoreCount, 1);
       end
 
       this.pressedFXL = pressed('FXL');

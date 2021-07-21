@@ -73,8 +73,8 @@ local IngamePreview = {
       bgPortrait = Image:new('preview_bg_p.png'),
       btnsMade = false,
       labels = {
-        [0] = makeLabel('norm', 'DISABLED', 24),
-        [1] = makeLabel('norm', 'ENABLED', 24),
+        [0] = makeLabel('norm', 'DISABLED', 24, 'neg'),
+        [1] = makeLabel('norm', 'ENABLED', 24, 'pos'),
         exit = makeLabel(
           'med',
           {
@@ -498,7 +498,7 @@ local IngamePreview = {
       y = y,
       align = 'right',
       alpha = alpha,
-      color = 'white',
+      color = text and 'white',
       text = text,
       update = text,
     });

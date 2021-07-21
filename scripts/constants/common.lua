@@ -5,6 +5,7 @@ local R, G, B, _ = game.GetSkinSetting('colorScheme');
 
 -- Get color from skin settings
 ---@param key string # Skin setting key
+---@return { [1]: integer, [2]: integer, [3]: integer }
 local getColor = function(key)
   local r, g, b, _ = game.GetSkinSetting(key);
 
@@ -20,7 +21,7 @@ end
 ---@param g? number
 ---@param b? number
 ---@param pct? number
----@return table # ```{ r, g, b }```
+---@return { [1]: integer, [2]: integer, [3]: integer }
 local makeColor = function(r, g, b, pct)
   r = r or 0;
   g = g or 0;
@@ -34,7 +35,7 @@ local makeColor = function(r, g, b, pct)
   };
 end
 
-return {
+local CommonConstants = {
   Alignments = {
     center = gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_TOP,
     left = gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP,
@@ -44,6 +45,7 @@ return {
     rightMid = gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_MIDDLE,
   },
 
+  ---@type table<string, { [1]: integer, [2]: integer, [3]: integer }>
   Colors = {
     black = { 0, 0, 0 },
     critical = getColor('criticalColor'),
@@ -67,6 +69,7 @@ return {
     white = { 255, 255, 255 },
   },
 
+  ---@type table<string, string>
   Fonts = {
     bold = 'GothamBold.ttf',
     jp = 'DFMGM.ttf',
@@ -76,3 +79,5 @@ return {
     num = 'DigitalSerialBold.ttf',
   },
 };
+
+return CommonConstants;

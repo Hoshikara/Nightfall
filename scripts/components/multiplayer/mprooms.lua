@@ -10,15 +10,15 @@ local Order = {
   'status',
 };
 
----@class RoomsClass
-local Rooms = {
-  -- Rooms constructor
-  ---@param this Rooms
+---@class MpRoomsClass
+local MpRooms = {
+  -- MpRooms constructor
+  ---@param this MpRooms
   ---@param mouse Mouse
   ---@param state Multiplayer
-  ---@return Rooms
+  ---@return MpRooms
   new = function(this, window, mouse, state)
-    ---@class Rooms : RoomsClass
+    ---@class MpRooms : MpRoomsClass
     local t = {
       alpha = 0,
       alphaTimer = 0,
@@ -37,7 +37,7 @@ local Rooms = {
         nav = makeLabel(
 					'med',
 					{
-            { color = 'norm', text = '[KNOB-L]  /  [KNOB-R]' },
+            { color = 'norm', text = '[ARROW KEYS]  /  [KNOBS]' },
 						{ color = 'white', text = 'SELECT ROOM' },
 					},
 					20
@@ -77,7 +77,7 @@ local Rooms = {
   end,
 
   -- Sets the sizes for the current component
-  ---@param this Rooms
+  ---@param this MpRooms
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
       if (this.window.isPortrait) then
@@ -144,8 +144,8 @@ local Rooms = {
   end,
 
   -- Parse and format room data
-  ---@param this Rooms
-  makeRooms = function(this)
+  ---@param this MpRooms
+  makeMpRooms = function(this)
     if (this.roomCount ~= this.state.roomCount) then
       this.rooms = {};
 
@@ -167,7 +167,7 @@ local Rooms = {
   end,
 
   -- Draw the list of rooms
-  ---@param this Rooms
+  ---@param this MpRooms
   drawList = function(this)
     local y = 0;
 
@@ -183,7 +183,7 @@ local Rooms = {
   end,
 
   -- Draw an individual room
-  ---@param this Rooms
+  ---@param this MpRooms
   ---@param y number
   ---@param room table
   ---@param isVis boolean
@@ -218,7 +218,7 @@ local Rooms = {
   end,
 
   -- Draw the room creation button
-  ---@param this Rooms
+  ---@param this MpRooms
   ---@param allowClick boolean
   drawBtn = function(this, allowClick)
     local x = (this.window.w / 2) - (this.button.w / 2);
@@ -250,7 +250,7 @@ local Rooms = {
   end,
 
   -- Handle navigation to and away the component
-  ---@param this Rooms
+  ---@param this MpRooms
   handleChange = function(this, dt, isSelecting)
     if (isSelecting) then
       if (this.alphaTimer > 0) then
@@ -264,13 +264,13 @@ local Rooms = {
   end,
 
   -- Renders the current component
-  ---@param this Rooms
+  ---@param this MpRooms
   ---@param dt deltaTime
   ---@param isSelecting boolean # user is selecting a room
   render = function(this, dt, isSelecting)
     this:setSizes();
     
-    this:makeRooms();
+    this:makeMpRooms();
 
     this:handleChange(dt, isSelecting);
 
@@ -323,4 +323,4 @@ local Rooms = {
   end,
 };
 
-return Rooms;
+return MpRooms;

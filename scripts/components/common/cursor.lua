@@ -208,7 +208,7 @@ local Cursor =  {
 
     gfx.Save();
 
-    this:draw({ alphaMod = params.alphaMod or 1});
+    this:draw({ alphaMod = params.alphaMod or 1 });
 
     gfx.Restore();
   end,

@@ -1,9 +1,16 @@
----@param firstTab string
----@param default string
----@param tabName string
----@param settingName string
+---@param firstTab string # Name of the first tab, `SettingsDiag.tabs[1].name`
+---@param default string # Default value if setting cannot be parsed
+---@param tabName string # Name of the tab that the setting is in
+---@param settingName string # Name of the setting to be parsed
 local makeParser = function(firstTab, default, tabName, settingName)
-  return {
+  ---@class SettingsParser
+  ---@field default number|string
+  ---@field firstTab string
+  ---@field settingIdx integer
+  ---@field settingName string
+  ---@field tabIdx integer
+  ---@param tabName string
+  local s = {
     default = default or '',
     firstTab = firstTab or '',
     settingIdx = nil,
@@ -11,6 +18,8 @@ local makeParser = function(firstTab, default, tabName, settingName)
     tabIdx = nil,
     tabName = tabName or '',
 
+    ---@param this SettingsParser
+    ---@return boolean|number|string
     get = function(this)
       if (SettingsDiag.tabs[1].name ~= this.firstTab) then
         return this.default;
@@ -46,6 +55,8 @@ local makeParser = function(firstTab, default, tabName, settingName)
       return this.default;
     end,
   };
+
+  return s;
 end
 
 return makeParser;

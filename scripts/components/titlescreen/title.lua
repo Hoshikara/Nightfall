@@ -2,16 +2,28 @@ game.LoadSkinSample('intro');
 
 local Spinner = require('components/common/spinner');
 
+local ChangelogURL = 'https://github.com/Hoshikara/Nightfall/blob/main/CHANGELOG.md';
+
+local openChangelog = function()
+	if (package.config:sub(1, 1) == '\\') then
+		os.execute('start ' .. ChangelogURL);
+	else
+		os.execute('xdg-open ' .. ChangelogURL);
+	end
+end
+
 ---@class TitleClass
 local Title = {
 	-- Title constructor
 	---@param this TitleClass
 	---@param window Window
+	---@param mouse Mouse
 	---@param state Titlescreen
 	---@return Title
-	new = function(this, window, state)
+	new = function(this, window, mouse, state)
 		---@class Title : TitleClass
 		---@field labels table<string, Label>
+		---@field mouse Mouse
 		---@field state Titlescreen
 		---@field window Window
 		local t = {
@@ -19,13 +31,19 @@ local Title = {
 			cache = { w = 0, h = 0 },
 			labels = {
 				checking = makeLabel('med', 'CHECKING FOR UPDATES'),
+				click = makeLabel('med', 'CLICK TO VIEW NEW VERSION', 20),
 				game = makeLabel('med', 'UNNAMED SDVX CLONE', 31),
 				skin = makeLabel('med', 'NIGHTFALL', 120),
 				version = makeLabel('num', SkinVersion, 20),
 			},
+			mouse = mouse,
 			spinner = Spinner:new(),
 			state = state,
-			timers = { alpha = 0, fade = 1.2 },
+			timers = {
+				alpha = 0,
+				fade = 1.2,
+				version = 0,
+			},
 			window = window,
 			x = 0,
 			y = 0,
@@ -93,9 +111,70 @@ local Title = {
 			color = 'white',
 		});
 
-		this.spinner:render(dt, x - this.labels.checking.w - 12, y - 1);
+		this.spinner:render(dt, x - this.labels.checking.w - 21, y + 11);
 	
 		this.state.loaded = this.timers.fade == 0;
+	end,
+
+	-- Draw skin version number
+	---@param this Title
+	---@param dt deltaTime
+	---@param x number
+	---@param y number
+	drawVersion = function(this, dt, alpha, x, y)
+		local alphaMod;
+		local color = 'white';
+
+		if (this.state.newVersion) then
+			this.timers.version = this.timers.version + dt;
+
+			alphaMod = pulse(this.timers.version, 0.85, 0.2);
+			color = 'neg';
+		else
+			alphaMod = 1;
+		end
+
+		this.labels.version:draw({
+			x = x,
+			y = y,
+			alpha = alpha * alphaMod,
+			color = color,
+		});
+
+		if (this.mouse:clipped(
+			x,
+			y,
+			this.labels.version.w + 4,
+			this.labels.version.h + 4
+		)) then
+			this.state:set({
+				btnEvent = openChangelog,
+				hoveringVersion = true,
+				isClickable = true,
+			});
+
+			if (this.state.newVersion) then
+				drawRect({
+					x = x + this.labels.version.w,
+					y = y - 29,
+					w = -330,
+					h = 28,
+					alpha = 225,
+					color = 'dark',
+					fast = true,
+				});
+		
+				this.labels.click:draw({
+					x = x + this.labels.version.w - 6,
+					y = y - 28,
+					align = 'right',
+					alpha = alpha,
+					color = 'white',
+				});
+			end
+		else
+			this.state.hoveringVersion = false;
+		end
 	end,
 
 	-- Renders the current component
@@ -107,6 +186,9 @@ local Title = {
 		if (not this.state.loaded or this.state.promptUpdate) then return end;
 
 		this:setSizes();
+
+		local x = this.x;
+		local y = this.y;
 
 		this.timers.alpha = this.timers.alpha + dt;
 
@@ -122,30 +204,25 @@ local Title = {
 		end
 
 		this.labels.game:draw({
-			x = this.x + 8,
-			y = this.y,
+			x = x + 8,
+			y = y,
 			alpha = alpha,
 			maxWidth = (this.labels.skin.w * 0.54) - 3,
 		});
+
+		y = y + (this.labels.game.h * 0.25);
 		
 		this.labels.skin:draw({
-			x = this.x,
-			y = this.y + (this.labels.game.h * 0.25),
+			x = x,
+			y = y,
 			alpha = alpha,
 			color = 'white',
 		});
 
-		this.labels.version:draw({
-			x = this.x + this.labels.skin.w + 4,
-			y = this.y
-				+ (this.labels.game.h * 0.25)
-				+ this.labels.skin.h
-				- (this.labels.version.h * 0.5)
-				- 3,
-			align = 'left',
-			alpha = alpha,
-			color = 'white',
-		});
+		x = x + this.labels.skin.w + 4;
+		y = y + this.labels.skin.h - (this.labels.version.h * 0.5) - 3;
+
+		this:drawVersion(dt, alpha, x, y);
 	end,
 };
 

@@ -22,7 +22,7 @@ return {
 		bestPlay = 'BEST PLAY',
 		category = 'CATEGORY',
 		close = {
-			{ color = 'norm', text = '[START]  /  [ESC]' },
+			{ color = 'norm', text = '[START]  /  [BACK]' },
 			{ color = 'white', text = 'EXIT' },
 		},
 		completed = 'COMPLETED',

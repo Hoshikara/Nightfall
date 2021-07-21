@@ -9,6 +9,9 @@ local timers = {
 	o = 0,
 };
 
+-- Draws the transition
+---@param dt deltaTime
+---@param isIntro boolean
 local drawTransition = function(dt, isIntro);
 	gfx.Save();
 
@@ -38,18 +41,23 @@ local drawTransition = function(dt, isIntro);
 	gfx.Restore();
 end
 
+-- Called by the game for the intro transition
+---@param dt deltaTime
 render = function(dt)
 	drawTransition(dt, true);
 
   return introDone;
 end
 
+-- Called by the game for the outro transition
+---@param dt deltaTime
 render_out = function(dt)
 	drawTransition(dt, false);
 
 	return outroDone;
 end
 
+-- Called by the game when the transition is started
 reset = function()
 	timers.i = 0;
 	timers.o = 0;

@@ -1343,30 +1343,22 @@ local PlayerInfo = {
 				(this.charts and (#this.charts / this.chartPageMax)) or 1);
 
 			if ((not this.pressedFXL) and pressed('FXL')) then
-				this.chartPage = this.chartPage - 1;
-
-				if (this.chartPage < 1) then this.chartPage = this.chartPages; end
+				this.chartPage = advance(this.chartPage, this.chartPages, -1);
 			end
 
 			if ((not this.pressedFXR) and pressed('FXR')) then
-				this.chartPage = this.chartPage + 1;
-
-				if (this.chartPage > this.chartPages) then this.chartPage = 1; end
+				this.chartPage = advance(this.chartPage, this.chartPages, 1);
 			end
 		elseif (this.viewingTop50) then
 			this.top50Pages = ceil(
 				(this.top50 and (#this.top50 / this.top50PageMax)) or 1);
 
 			if ((not this.pressedFXL) and pressed('FXL')) then
-				this.top50Page = this.top50Page - 1;
-
-				if (this.top50Page < 1) then this.top50Page = this.top50Pages; end
+				this.top50Page = advance(this.top50Page, this.top50Pages, -1);
 			end
 
 			if ((not this.pressedFXR) and pressed('FXR')) then
-				this.top50Page = this.top50Page + 1;
-
-				if (this.top50Page > this.top50Pages) then this.top50Page = 1; end
+				this.top50Page = advance(this.top50Page, this.top50Pages, 1);
 			end
 
 			this.list:handleChange(dt, { watch = this.top50Page });

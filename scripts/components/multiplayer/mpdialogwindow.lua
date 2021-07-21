@@ -1,7 +1,7 @@
 local DialogBox = require('components/common/dialogbox');
 
----@class DialogWindowClass
-local DialogWindow = {
+---@class MPDialogWindowClass
+local MPDialogWindow = {
 	confirm = makeLabel(
 		'med',
 		{
@@ -11,13 +11,13 @@ local DialogWindow = {
 	),
 	dialogBox = DialogBox:new(),
 
-	-- DialogWindow constructor
-	---@param this DialogWindowClass
+	-- MPDialogWindow constructor
+	---@param this MPDialogWindowClass
 	---@param window Window
 	---@param dialog table
-	---@return DialogWindow
+	---@return MPDialogWindow
 	new = function(this, window, dialog)
-		---@class DialogWindow : DialogWindowClass
+		---@class MPDialogWindow : MPDialogWindowClass
 		---@field window Window
 		local t = {
 			cursor = {
@@ -39,7 +39,7 @@ local DialogWindow = {
 	end,
 
 	-- Draw the input field
-	---@param this DialogWindow
+	---@param this MPDialogWindow
 	---@param dt deltaTime
 	drawInput = function(this, dt)
 		local alpha = 255 * this.timer;
@@ -112,7 +112,7 @@ local DialogWindow = {
 	end,
 
 	-- Draw the dialog window
-	---@param this DialogWindow
+	---@param this MPDialogWindow
 	---@param dt deltaTime
 	drawWindow = function(this, dt)
 		this.window:scale();
@@ -136,7 +136,7 @@ local DialogWindow = {
 	end,
 
 	-- Handle navigation on and away from the current dialog window
-	---@param this DialogWindow
+	---@param this MPDialogWindow
 	---@param dt deltaTime
 	---@param screen string
 	handleChange = function(this, dt, screen)
@@ -151,7 +151,7 @@ local DialogWindow = {
 	end,
 
 	-- Renders the current component
-	---@param this DialogWindow
+	---@param this MPDialogWindow
 	---@param dt deltaTime
 	---@param screen string
 	render = function(this, dt, screen)
@@ -171,4 +171,4 @@ local DialogWindow = {
 	end,
 };
 
-return DialogWindow;
+return MPDialogWindow;

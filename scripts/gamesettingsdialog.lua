@@ -1,3 +1,5 @@
+-- Global `SettingsDiag` table is available for this script and its related scripts
+
 local GameSettings = require('components/songselect/gamesettings');
 local PracticeSettings = require('components/gameplay/practicesettings');
 
@@ -7,6 +9,7 @@ local window = Window:new();
 
 local timer = 0;
 
+---@class GameSettingsDialog
 local state = {
 	isSongSelect = true,
 	setting = { index = 0, name = '' },
@@ -18,6 +21,12 @@ local state = {
 		prev = '',
 	},
 
+	-- Draw directional arrows for settings
+	---@param this GameSettingsDialog
+	---@param x number
+	---@param y number
+	---@param min number
+	---@param max number
 	drawArrows = function(this, x, y, min, max)
 		local x1 = x + 28;
 		local x2 = x + 44;
@@ -91,9 +100,15 @@ local state = {
 		gfx.Restore();
 	end,
 
+	-- Remove parentheses and anything inside them
+	---@param this GameSettingsDialog
+	---@param str string
+	---@return string
 	gsub = function(this, str) return str:gsub(' %((.*)%)', ''); end,
 
-	watch = function(this)
+	-- Update the current state
+	---@param this GameSettingsDialog
+	update = function(this)
 		this.isSongSelect = SettingsDiag.tabs[1].name ~= 'Main';
 
 		this.setting.index = SettingsDiag.currentSetting;
@@ -124,7 +139,11 @@ local playbackSpeed = makeParser('Main', '1', 'Main', 'Playback speed (%)');
 local scoreType = makeParser('Offsets', 'ADDITIVE', 'Game', 'Score Display');
 local songOffset = makeParser('Offsets', '0', 'Offsets', 'Song Offset');
 
+-- Make the base table to be used in the game settings or practice mode windows
+---@param Constants table
+---@return SettingsTable
 local makeSettings = function(Constants)
+	---@class SettingsTable
 	local s = {
 		controls = {
 			fxl = makeLabel('med', '[FX-L]', 20),
@@ -220,6 +239,9 @@ local gameSettings = nil;
 local hasBlastive = nil;
 local practiceSettings = nil;
 
+-- Called by the game every frame
+---@param dt deltaTime
+---@param displaying boolean
 render = function(dt, displaying)
 	if (hasBlastive == nil) then
 		local gameTab = SettingsDiag.tabs[3] or { name = '', settings = {} };
@@ -248,7 +270,7 @@ render = function(dt, displaying)
 
 	if (timer == 0) then return; end
 
-	state:watch();
+	state:update();
 
 	gfx.Save();
 

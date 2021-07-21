@@ -43,6 +43,7 @@ local timers = {
 	o = 0,
 };
 
+-- Sets the jacket size
 local setSizes = function()
 	if (not jacket) then
 		jacket = ((song.jacket == 0) and jacketFallback) or song.jacket;
@@ -57,6 +58,7 @@ local setSizes = function()
 	end
 end
 
+-- Creates the labels used for song information
 local setSongInfo = function()
 	if (not songInfo) then
 		labels = {
@@ -77,6 +79,7 @@ local setSongInfo = function()
 	end
 end
 
+-- Handles the animation timers
 ---@param dt deltaTime
 ---@param isIntro boolean
 local handleTimers = function(dt, isIntro)
@@ -121,6 +124,7 @@ local handleTimers = function(dt, isIntro)
 	end
 end
 
+-- Renders the transition
 ---@param dt deltaTime
 ---@param isIntro boolean
 local renderTransition = function(dt, isIntro);
@@ -226,6 +230,8 @@ local renderTransition = function(dt, isIntro);
 	gfx.Restore();
 end
 
+-- Called by the game for the intro transition
+---@param dt deltaTime
 render = function(dt)
 	reloadColors();
 	
@@ -234,12 +240,15 @@ render = function(dt)
   return introDone;
 end
 
+-- Called by the game for the outro transition
+---@param dt deltaTime
 render_out = function(dt)
 	renderTransition(dt, false);
 
 	return outroDone;
 end
 
+-- Called by the game when the transition is started
 reset = function()
 	jacket = nil;
 	jacketSize = nil;

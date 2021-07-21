@@ -20,17 +20,17 @@ local makeHost = function(id)
   Tcp.SendLine(JSON.encode({ topic = 'room.host.set', host = id }));
 end
 
----@class UsersClass
-local Users = {
-  -- Users constructor
-  ---@param this UsersClass
+---@class MpUsersClass
+local MpUsers = {
+  -- MpUsers constructor
+  ---@param this MpUsersClass
   ---@param window Window
   ---@param mouse Mouse
   ---@param state Multiplayer
   ---@param constants table
-  ---@return Users
+  ---@return MpUsers
   new = function(this, window, mouse, state, constants)
-    ---@class Users : UsersClass
+    ---@class MpUsers : MpUsersClass
     local t = {
       button = Button:new(198, 50),
       cache = { w = 0, h = 0 },
@@ -62,7 +62,7 @@ local Users = {
   end,
 
   -- Sets the sizes for the current component
-  ---@param this Users
+  ---@param this MpUsers
   ---@param w number
   setSizes = function(this, w, h)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
@@ -108,7 +108,7 @@ local Users = {
   end,
 
   -- Parse and format user data
-  ---@param this Users
+  ---@param this MpUsers
   makeUsers = function(this)
     if (this.userCount ~= this.state.lobby.userCount) then
       this.users = {};
@@ -128,7 +128,7 @@ local Users = {
   end,
 
   -- Draw the list of users
-  ---@param this Users
+  ---@param this MpUsers
   drawUsers = function(this)
     local y = this.y;
 
@@ -138,7 +138,7 @@ local Users = {
   end,
 
   -- Draw a single user
-  ---@param this Users
+  ---@param this MpUsers
   ---@param y number
   ---@param user table
   ---@param text table
@@ -237,7 +237,7 @@ local Users = {
     return this.h + this.margin;
   end,
 
-  ---@param this Users
+  ---@param this MpUsers
   ---@param y number
   ---@param user table
   drawControls = function(this, y, user)
@@ -284,7 +284,7 @@ local Users = {
   end,
 
   -- Renders the current component
-  ---@param this Users
+  ---@param this MpUsers
   ---@param w number
   ---@param h number
   render = function(this, w, h)
@@ -300,4 +300,4 @@ local Users = {
   end,
 };
 
-return Users;
+return MpUsers;

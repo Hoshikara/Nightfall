@@ -1,4 +1,4 @@
-local ColorEnums = {
+local ColorEnum = {
   RED = 'r',
   GREEN = 'g',
   BLUE = 'b',
@@ -8,8 +8,8 @@ local ColorEnums = {
 local abs = math.abs;
 local sin = math.sin;
 
-local colL = ColorEnums[getSetting('leftColor', 'BLUE')];
-local colR = ColorEnums[getSetting('rightColor', 'RED')];
+local colL = ColorEnum[getSetting('leftColor', 'BLUE')];
+local colR = ColorEnum[getSetting('rightColor', 'RED')];
 
 ---@class LaserCursorsClass
 local LaserCursors = {

@@ -2,15 +2,15 @@ local Animation = require('common/animation');
 
 local RingAnimation = require('components/gameplay/ringanimation');
 
-local ColorEnums = {
+local ColorEnum = {
   RED = 'r',
   GREEN = 'g',
   BLUE = 'b',
   YELLOW = 'y',
 };
 
-local colL = ColorEnums[getSetting('leftColor', 'BLUE')];
-local colR = ColorEnums[getSetting('rightColor', 'RED')];
+local colL = ColorEnum[getSetting('leftColor', 'BLUE')];
+local colR = ColorEnum[getSetting('rightColor', 'RED')];
 
 ---@class LaserAnimationClass
 local LaserAnimation = {

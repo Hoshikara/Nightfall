@@ -76,6 +76,7 @@ local makeStats = function(levels, folder, clears)
 				t[cat].charts[#t[cat].charts + 1] = {
 					artist = makeLabel('jp', chart.artist),
 					score = ScoreNumber:new({ size = 24, val = chart.score }),
+					scoreVal = chart.score,
 					title = makeLabel('jp', chart.title),
 				};
 			end
@@ -103,6 +104,13 @@ local makeStats = function(levels, folder, clears)
 
 				total = total + diffTotal;
 			end
+		end
+
+		if (#t[cat].charts > 1) then
+			table.sort(
+				t[cat].charts,
+				function(l, r) return l.scoreVal > r.scoreVal end
+			);
 		end
 	end
 

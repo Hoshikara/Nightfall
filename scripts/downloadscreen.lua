@@ -242,12 +242,12 @@ end
 advance_selection = function(step)
   if (state.action == 'BROWSING') then
     if (state.songCount > 0) then
-      state.currSong = ((state.currSong - 1 + step) % state.songCount) + 1;
+      state.currSong = advance(state.currSong, state.songCount, step);
 
       if (state.currSong > (state.songCount - 6)) then getSongs(); end
     end
   elseif (state.action == 'FILTERING') then
-    state.currLevel = (((state.currLevel - 1) + step) % 20) + 1;
+    state.currLevel = advance(state.currLevel, 20, step);
   end
 end
 

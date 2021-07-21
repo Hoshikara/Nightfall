@@ -458,7 +458,7 @@ local NauticaList = {
     });
 
     if (status == 'DOWNLOADING') then
-      this.spinner:render(dt, xCenter, yCenter, true);
+      this.spinner:render(dt, xCenter, yCenter);
     elseif (status == 'DOWNLOADED') then
       gfx.BeginPath();
       setFill('norm');
@@ -513,7 +513,7 @@ local NauticaList = {
         color = 'white',
       });
 
-      this.loadingSpinner:render(dt, x - this.labels.fetching.w - 12, y);
+      this.loadingSpinner:render(dt, x - this.labels.fetching.w - 21, y + 13);
     else
       this.labels.nautica:draw({
         x = x,

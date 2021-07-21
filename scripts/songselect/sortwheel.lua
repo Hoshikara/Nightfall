@@ -19,6 +19,7 @@ local labels = nil;
 
 local timers = { expand = 0, highlight = 0 };
 
+-- Creates the labels from the list of sorts
 local setLabels = function()
 	if (not labels) then
 		labels = {
@@ -56,6 +57,8 @@ local setLabels = function()
 	end
 end
 
+-- Draws the currently selected sort
+---@param isSorting boolean
 local drawCurrSort = function(isSorting)
 	if (currSort > #labels) then currSort = 1; end
 
@@ -94,6 +97,10 @@ local drawCurrSort = function(isSorting)
 	});
 end
 
+-- Draws a single sort
+---@param i integer
+---@param y number
+---@param isCurr boolean
 local drawSort = function(i, y, isCurr)
 	local alpha = ((isCurr and 255) or 150) * min(timers.expand ^ 2, 1);
 	local label = labels[i];
@@ -143,6 +150,9 @@ local drawSort = function(i, y, isCurr)
 	return label.name.h + grid.dropdown.padding;
 end
 
+-- Handles user input
+---@param dt deltaTime
+---@param isSorting boolean
 local handleChange = function(dt, isSorting)
 	if (not isSorting) then
 		timers.expand = to0(timers.expand, dt, 0.15);

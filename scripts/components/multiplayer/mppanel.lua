@@ -32,17 +32,17 @@ local toggleRotate = function()
   Tcp.SendLine(JSON.encode({ topic = 'room.option.rotation.toggle' }));
 end
 
----@class PanelClass
-local Panel = {
-  -- Panel constructor
-  ---@param this PanelClass
+---@class MpPanelClass
+local MpPanel = {
+  -- MpPanel constructor
+  ---@param this MpPanelClass
   ---@param window Window
   ---@param mouse Mouse
   ---@param state Multiplayer
   ---@param constants table
-  ---@return Panel
+  ---@return MpPanel
   new = function(this, window, mouse, state, constants)
-    ---@class Panel : PanelClass
+    ---@class MpPanel : MpPanelClass
     ---@field window Window
     local t = {
       btn = { x = 0, y = {} },
@@ -109,7 +109,7 @@ local Panel = {
   end,
 
   -- Sets the sizes for the current component
-  ---@param this Panel
+  ---@param this MpPanel
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
       if (this.window.isPortrait) then
@@ -190,7 +190,7 @@ local Panel = {
   end,
 
   -- Draw the chart jacket
-  ---@param this Panel
+  ---@param this MpPanel
   drawJacket = function(this)
     local lobby = this.state.lobby;
 
@@ -214,7 +214,7 @@ local Panel = {
   end,
 
   -- Draw the chart diffs
-  ---@param this Panel
+  ---@param this MpPanel
   ---@param y number
   ---@param diff table
   ---@param isCurr boolean
@@ -259,7 +259,7 @@ local Panel = {
   end,
 
   -- Draw the chart info
-  ---@param this Panel
+  ---@param this MpPanel
   ---@param dt deltaTime
   drawInfo = function(this, dt)
     local multi = (this.window.isPortrait and 1.9) or 1;
@@ -308,7 +308,7 @@ local Panel = {
   end,
 
   -- Draw the lobby control buttons
-  ---@param this Panel
+  ---@param this MpPanel
   drawBtns = function(this)
     local event = function() end;
     local altLabel = nil;
@@ -409,7 +409,7 @@ local Panel = {
   end,
 
   -- Draw the radio button for a toggle
-  ---@param this Panel
+  ---@param this MpPanel
   ---@param x number
   ---@param y number
   ---@param a number
@@ -437,7 +437,7 @@ local Panel = {
   end,
 
   -- Draw the lobby toggles
-  ---@param this Panel
+  ---@param this MpPanel
   drawToggles = function(this)
     local lobby = this.state.lobby;
     local offset = (this.window.isPortrait and 230) or 124;
@@ -503,7 +503,7 @@ local Panel = {
   end,
 
   -- Draw the song panel
-  ---@param this Panel
+  ---@param this MpPanel
   ---@param dt deltaTime
   drawPanel = function(this, dt)
     local x = this.padding.x.double + this.jacketSize + this.padding.x.full + 15;
@@ -559,7 +559,7 @@ local Panel = {
   end,
 
   -- Reset the scroll timers
-  ---@param this Panel
+  ---@param this MpPanel
   resetTimers = function(this)
     this.timers.artist = 0;
     this.timers.effector = 0;
@@ -567,7 +567,7 @@ local Panel = {
   end,
 
   -- Handle song or difficulty changes
-  ---@param this Panel
+  ---@param this MpPanel
   handleChange = function(this)
     if (not selected_song) then return; end
 
@@ -591,7 +591,7 @@ local Panel = {
   end,
 
   -- Renders the current component
-  ---@param this Panel
+  ---@param this MpPanel
   ---@param dt deltaTime
   ---@return number w, number h
   render = function(this, dt)
@@ -615,4 +615,4 @@ local Panel = {
   end,
 };
 
-return Panel;
+return MpPanel;

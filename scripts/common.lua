@@ -1,7 +1,11 @@
 -- This script is loaded for every screen of the game
 -- All of the functions below are available to all of the scripts of the skin
 
-SkinVersion = '1.3.3';
+SkinVersion = '1.3.4';
+
+Developer = false;
+
+TagsURL = 'https://api.github.com/repos/Hoshikara/Nightfall/git/refs/tags';
 
 gfx.LoadSkinFont('DFMGM.ttf');
 
@@ -22,7 +26,7 @@ local floor = math.floor;
 local min = math.min;
 local max = math.max;
 
-local btnMap = {
+local BtnEnum = {
 	BTA = 0,
 	BTB = 1,
 	BTC = 2,
@@ -33,7 +37,7 @@ local btnMap = {
 	BCK = 11,
 };
 
-local fontMap = {
+local FontSizeEnum = {
 	jp = 24,
 	med = 18,
 	norm = 24,
@@ -43,6 +47,13 @@ local fontMap = {
 red = 0;
 green = 0;
 blue = 0;
+
+-- Advance list selection with rollover
+---@param idx integer # Current item index
+---@param total integer # Number of items in the list
+---@param step integer # `-1` = backward, `1` = forward
+---@return integer
+advance = function(idx, total, step) return (((idx - 1) + step) % total) + 1; end
 
 -- Text alignment wrapper function
 ---@param a? Alignment
@@ -206,19 +217,21 @@ makeLabel = function(font, text, size, color)
 	return Label:new({
 		color = color or 'norm',
 		font = font,
-		size = size or fontMap[font],
+		size = size or FontSizeEnum[font],
 		text = text,
 	});
 end
 
--- Check whether a button is being pressed
+-- Checks whether a button is being pressed
 ---@param btn string # `'BTA' - 'BTD'`, `'FXL' / 'FXR'`, `'STA'`, `'BCK'` 
-pressed = function(btn) return game.GetButton(btnMap[btn]); end
+---@return boolean
+pressed = function(btn) return game.GetButton(BtnEnum[btn]); end
 
 -- Pulses alpha channel
 ---@param t number # timer
 ---@param p number # percentage, `0.0` to `1.0`
 ---@param d number # duration, in seconds 
+---@return number
 pulse = function(t, p, d) return abs(p * cos(t * (1 / d))) + (1 - p); end
 
 -- Reload color scheme when changed in skin settings
@@ -272,14 +285,14 @@ end
 ---@return number
 smoothstep = function(t) return t * t * (3 - 2 * t); end
 
--- Decreases a timer to 0
+-- Decreases a timer to 0 over `d`
 ---@param t number # timer
 ---@param dt deltaTime
 ---@param d number # duration, in seconds
 ---@return number
 to0 = function(t, dt, d) return max(t - (dt * (1 / d)), 0); end
 
--- Increases a timer to 1
+-- Increases a timer to 1 over `d`
 ---@param t number # timer
 ---@param dt deltaTime
 ---@param d number # duration, in seconds

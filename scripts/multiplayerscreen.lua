@@ -5,10 +5,10 @@ local JSON = require('lib/json');
 local Knobs = require('common/knobs');
 local Mouse = require('common/mouse');
 
-local DialogWindow = require('components/multiplayer/dialogwindow');
-local Lobby = require('components/multiplayer/lobby');
-local Rooms = require('components/multiplayer/rooms');
-local Sounds = require('components/multiplayer/sounds');
+local MpDialogWindow = require('components/multiplayer/mpdialogwindow');
+local MpLobby = require('components/multiplayer/mplobby');
+local MpRooms = require('components/multiplayer/mprooms');
+local MpSounds = require('components/multiplayer/mpsounds');
 
 local window = Window:new();
 local background = Background:new(window);
@@ -42,6 +42,7 @@ local state = {
 		ready = false,
 	},
 
+	---@param this Multiplayer
 	joinRoom = function(this)
 		local room = this.roomList[this.currRoom];
 
@@ -58,6 +59,7 @@ local state = {
 		end
 	end,
 
+	---@param this Multiplayer
 	makeRoom = function(this)
 		this.lobby.host = this.user.id;
 		this.lobby.owner = this.user.id;
@@ -65,16 +67,19 @@ local state = {
 		mpScreen.NewRoomStep();
 	end,
 
+	---@param this Multiplayer
 	readyUp = function(this)
 		Tcp.SendLine(JSON.encode({ topic = 'user.ready.toggle' }));
 	end,
 
+	---@param this Multiplayer
 	selectSong = function(this)
 		this.lobby.missingSong = false;
 
 		mpScreen.SelectSong();
 	end,
 
+	---@param this Multiplayer
 	startGame = function(this)
 		selected_song.self_picked = false;
 
@@ -85,24 +90,26 @@ local state = {
 		Tcp.SendLine(JSON.encode({ topic = 'room.game.start' }));
 	end,
 
+	---@param this Multiplayer
 	toggleHard = function(this)
 		Tcp.SendLine(JSON.encode({ topic = 'user.hard.toggle' }));
 	end,
 
+	---@param this Multiplayer
 	toggleMirror = function(this)
 		Tcp.SendLine(JSON.encode({ topic = 'user.mirror.toggle' }));
 	end,
 };
 
 -- Multiplayer components
-local enterPass = DialogWindow:new(window, Constants.dialog.enterPass);
+local enterPass = MpDialogWindow:new(window, Constants.dialog.enterPass);
 local knobs = Knobs:new(state);
-local lobby = Lobby:new(window, mouse, state, Constants.lobby);
-local makePass = DialogWindow:new(window, Constants.dialog.makePass);
-local makeRoom = DialogWindow:new(window, Constants.dialog.makeRoom);
-local makeUsername = DialogWindow:new(window, Constants.dialog.makeUsername);
-local rooms = Rooms:new(window, mouse, state);
-local sounds = Sounds:new();
+local makePass = MpDialogWindow:new(window, Constants.dialog.makePass);
+local makeRoom = MpDialogWindow:new(window, Constants.dialog.makeRoom);
+local makeUsername = MpDialogWindow:new(window, Constants.dialog.makeUsername);
+local mpLobby = MpLobby:new(window, mouse, state, Constants.lobby);
+local mpRooms = MpRooms:new(window, mouse, state);
+local mpSounds = MpSounds:new();
 
 -- Called by the game every frame
 ---@param dt deltaTime
@@ -126,16 +133,16 @@ render = function(dt)
 			knobs:handleChange('roomCount', 'currRoom');
 		end
 
-		rooms:render(dt, screenState == 'roomList');
+		mpRooms:render(dt, screenState == 'roomList');
 
 		-- TODO: this should not be needed
 		if (selected_song) then
 			selected_song = nil;
-			lobby.panel.song = nil;
+			mpLobby.panel.song = nil;
 			state.lobby.jacket = nil;
 		end
 	else
-		lobby:render(dt);
+		mpLobby:render(dt);
 	end
 
 	enterPass:render(dt, screenState);
@@ -144,9 +151,11 @@ render = function(dt)
 
 	gfx.Restore();
 
-	sounds:play(dt);
+	mpSounds:play(dt);
 end
 
+-- Called by the game when a (gamepad) button is pressed
+---@param btn integer
 button_released = function(btn)
 	if (btn == game.BUTTON_STA) then
 		if (state.lobby.starting) then return; end
@@ -199,14 +208,27 @@ button_released = function(btn)
 	end
 end
 
-key_pressed = function(key) end
+-- Called by the game when a key is pressed
+---@param key integer
+key_pressed = function(key)
+	if (state.roomCount > 0) then
+		if (key == 1073741906) then -- up arrow
+			state.currRoom = advance(state.currRoom, state.roomCount, -1);
+		elseif (key == 1073741905) then -- down arrow
+			state.currRoom = advance(state.currRoom, state.roomCount, 1);
+		end
+	end
+end
 
+-- Called by the game when the mouse is pressed
+---@param btn integer
 mouse_pressed = function(btn)
 	if (state.btnEvent) then state:btnEvent(); end
 
 	return 0;
 end
 
+-- Called by the game when multiplayer screen is entered
 init_tcp = function()
 	Tcp.SetTopicHandler('server.info',
 		function(data)
@@ -217,11 +239,15 @@ init_tcp = function()
 
 	Tcp.SetTopicHandler('server.rooms',
 		function(data)
+			local dataRooms = (Developer and require('developer/rooms'))
+				or data.rooms
+				or {};
+
 			state.roomCount = 0;
 			state.roomList = {};
 
-			if (#data.rooms > 0) then
-				for i, room in ipairs(data.rooms) do
+			if (#dataRooms > 0) then
+				for i, room in ipairs(dataRooms) do
 					state.roomCount = state.roomCount + 1;
 					state.roomList[i] = room;
 				end
@@ -231,6 +257,9 @@ init_tcp = function()
 
 	Tcp.SetTopicHandler('room.update',
 		function(data)
+			local dataUsers =	(Developer and require('developer/users'))
+				or data.users
+				or {};
 			local lobby = state.lobby;
 			local ready = lobby.ready;
 			local user = state.user;
@@ -239,8 +268,8 @@ init_tcp = function()
 			lobby.userCount = 0;
 			lobby.ready = true;
 			
-			if (#data.users > 0) then
-				for i, u in ipairs(data.users) do
+			if (#dataUsers > 0) then
+				for i, u in ipairs(dataUsers) do
 					lobby.users[i] = u;
 
 					if (u.id == user.id) then user.ready = u.ready; end
@@ -252,19 +281,19 @@ init_tcp = function()
 			end
 
 			if ((user.id == lobby.host)
-				and (#data.users > 1)
+				and (#dataUsers > 1)
 				and lobby.ready
 				and (not ready)
 			) then
-				sounds:trigger(2, 3, 0.1);
+				mpSounds:trigger(2, 3, 0.1);
 			end
 
 			if ((data.host == user.id) and (lobby.host ~= user.id)) then
-				sounds:trigger(2, 3, 0.1);
+				mpSounds:trigger(2, 3, 0.1);
 			end
 
 			if ((data.song ~= nil) and (data.song ~= lobby.prevSong)) then
-				sounds:trigger(1);
+				mpSounds:trigger(1);
 
 				lobby.prevSong = data.song;
 			end
@@ -277,7 +306,7 @@ init_tcp = function()
 			lobby.rotate = data.do_rotate;
 			
 			if ((data.start_soon) and (not lobby.starting)) then
-				sounds:trigger(1, 5, 1);
+				mpSounds:trigger(1, 5, 1);
 			end
 
 			lobby.starting = data.start_soon;

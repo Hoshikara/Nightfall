@@ -33,17 +33,12 @@ local Spinner = {
   ---@param dt deltaTime
   ---@param x number
   ---@param y number
-  ---@param center boolean
-  render = function(this, dt, x, y, center)
+  render = function(this, dt, x, y)
     this.timer = this.timer + dt;
 
     gfx.Save();
 
-    if (center) then
-      gfx.Translate(x, y);
-    else
-      gfx.Translate(x - this.size, y + this.size);
-    end
+    gfx.Translate(x, y);
 
     gfx.Rotate(this.timer * 8);
 

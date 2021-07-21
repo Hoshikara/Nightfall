@@ -1,7 +1,14 @@
+---@type boolean
 local showControls = getSetting('showPracticeControls', true);
+---@type boolean
 local showSteps = getSetting('showPracticeSetup', true);
 
-return {
+---@class PracticeSettings
+local PracticeSettings = {
+  -- PracticeSettings constructor
+  ---@param this PracticeSettings
+  ---@param t SettingsTable
+  ---@return PracticeSettings
   new = function(this, t)
     local PracticeSteps = require('constants/practicesteps');
 
@@ -20,7 +27,7 @@ return {
     t.w = 0;
     t.h = 0;
 
-    t.controls.backesc = makeLabel('med', '[BACK]  /  [ESC]', 20);
+    t.controls.back = makeLabel('med', '[BACK]', 20);
     t.controls.fxlfxr = makeLabel('med', '[FX-L]  +  [FX-R]', 20);
     t.controls.fxlorfxr = makeLabel('med', '[FX-L]  /  [FX-R]', 20);
     t.controls.knobl = makeLabel('med', '[KNOB-L]', 20);
@@ -54,6 +61,8 @@ return {
     return t;
   end,
 
+  -- Sets the sizes for the current component
+  ---@param this PracticeSettings
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
       if (this.window.isPortrait) then
@@ -93,6 +102,9 @@ return {
     end
   end,
 
+  -- Draw the settings for the current tab
+  ---@param this PracticeSettings
+  ---@param timer number
   drawSettings = function(this, timer)
     local settings = this.settings[this.state.tab.name];
     local y = this.y.panel[1] + (this.tabs[this.state.tab.name].h * 1.75);
@@ -128,6 +140,12 @@ return {
     end
   end,
 
+  -- Draw the value of the given setting
+  ---@param this PracticeSettings
+  ---@param y number
+  ---@param alpha number
+  ---@param base SettingsDiagSetting
+  ---@param isCurr boolean
   drawValue = function(this, y, alpha, base, isCurr, setting)
     local min, max = false, false;
     local params = {
@@ -188,10 +206,13 @@ return {
     end
   end,
 
+  -- Draw the navigation controls
+  ---@param this PracticeSettings
+  ---@param timer number
   drawNavigation = function(this, timer)
     local alpha = 255 * timer;
     local which = (SettingsDiag.tabs[1].settings[5].value and 'fxlfxr')
-      or 'backesc';
+      or 'back';
     local x1 = this.x.left[1];
     local x2 = this.x.left[2]+ 48;
     local y = this.y.navigation - (this.controls.fxl.h * 1.875);
@@ -238,6 +259,8 @@ return {
     });
   end,
 
+  -- Draw the general controls
+  ---@param this PracticeSettings
   drawControls = function(this)
     local x = this.x.left[1];
     local y = this.y.panel[1] - 16;
@@ -272,15 +295,18 @@ return {
 
     y = y +  (this.controls.fxlorfxr.h * 1.5);
 
-    this.controls.backesc:draw({ x = x, y = y - 1 });
+    this.controls.back:draw({ x = x, y = y - 1 });
 
     this.details.open:draw({
-      x = x + this.controls.backesc.w + 8,
+      x = x + this.controls.back.w + 8,
       y = y,
       color = 'white',
     });
   end,
 
+  -- Draw the practice setup instructions
+  ---@param this PracticeSettings
+  ---@param timer number
   drawSteps = function(this, timer)
     local alpha = 255 * timer;
     local x = this.x.right;
@@ -328,6 +354,9 @@ return {
     end
   end,
 
+  -- Handle user input
+  ---@param this PracticeSettings
+  ---@param dt deltaTime
   handleChange = function(this, dt)
     if (this.currSetting ~= this.state.setting.index) then
       this.timer = 0;
@@ -338,6 +367,11 @@ return {
     this.timer = to1(this.timer, dt, 0.2);
   end,
 
+  -- Renders the current component
+  ---@param this PracticeSettings
+  ---@param dt deltaTime
+  ---@param displaying boolean
+  ---@param timer number
   render = function(this, dt, displaying, timer)
     local heading = this.tabs[this.state.tab.name];
 
@@ -373,3 +407,5 @@ return {
     gfx.Restore();
   end,
 };
+
+return PracticeSettings;

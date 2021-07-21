@@ -2,18 +2,19 @@ local Cursor = require('components/common/cursor');
 local DialogBox = require('components/common/dialogbox');
 local Scrollbar = require('components/common/scrollbar');
 
+local min = math.min;
+
 local window = Window:new();
 
 local dialogBox = DialogBox:new();
-
-local min = math.min;
 
 local artist = nil;
 local title = nil;
 
 local options = {};
-local curr = 0;
+local currOpt = 1;
 
+---@class CollectionDialogWindow
 local dialogWindow = {
 	button = {
 		margin = 36,
@@ -24,7 +25,7 @@ local dialogWindow = {
 		h = 0,
 	},
 	cache = { w = 0, h = 0 },
-	curr = 0,
+	currOpt = 1,
 	cursor = Cursor:new({
 		size = 12,
 		stroke = 1.5,
@@ -59,6 +60,8 @@ local dialogWindow = {
 		title = 0,
 	},
 
+	-- Sets the sizes for the current component
+	---@param this CollectionDialogWindow
 	setSizes = function(this)
 		if ((this.cache.w ~= window.w) or (this.cache.h ~= window.h)) then
 			dialogBox:setSizes(window.w, window.h, window.isPortrait);
@@ -93,6 +96,9 @@ local dialogWindow = {
 		end
 	end,
 
+	-- Draw the song title and artist
+	---@param this CollectionDialogWindow
+	---@param dt deltaTime
 	drawSongInfo = function(this, dt)
 		local alpha = 255 * this.timers.fade;
 		local maxWidth = dialogBox.maxWidth;
@@ -166,14 +172,17 @@ local dialogWindow = {
 		gfx.Restore();
 	end,
 
+	-- Draw the window buttons
+	---@param this CollectionDialogWindow
+	---@param dt deltaTime
 	drawButtons = function(this, dt)
 		local y = this.button.y + this.button.offset;
 
 		for i, option in ipairs(options) do
 			local isVis = true;
 
-			if ((curr + 1) > this.max) then
-				if ((i <= ((curr + 1) - this.max)) or (i > (curr + 1))) then
+			if (currOpt > this.max) then
+				if ((i <= (currOpt - this.max)) or (i > currOpt)) then
 					isVis = false;
 				end
 			else
@@ -184,11 +193,18 @@ local dialogWindow = {
 				dt,
 				option.label,
 				y,
-				(i - 1) == curr, isVis
+				i == currOpt, isVis
 			);
 		end
 	end,
 
+	-- Draw a single button
+	---@param this CollectionDialogWindow
+	---@param dt deltaTime
+	---@param label Label
+	---@param y number
+	---@param isCurr boolean
+	---@param isVis boolean
 	drawButton = function(this, dt, label, y, isCurr, isVis)
 		local alpha = ((isCurr and 255) or 50) * this.timers.fade;
 		local x = this.button.x;
@@ -235,6 +251,9 @@ local dialogWindow = {
 		return this.button.h + this.button.margin;
 	end,
 
+	-- Draw the text input field
+	---@param this CollectionDialogWindow
+	---@param dt deltaTime
 	drawInput = function(this, dt)
 		this.timers.cursor = this.timers.cursor + dt;
 		this.input.alpha = this.timers.fade * pulse(this.timers.cursor, 1, 0.2);
@@ -308,6 +327,9 @@ local dialogWindow = {
 		gfx.Restore();
 	end,
 
+	-- Handle user input
+	---@param this CollectionDialogWindow
+	---@param dt deltaTime
 	handleChange = function(this, dt)
 		if (dialog.closing) then
 			this.timers.artist = 0;
@@ -317,21 +339,24 @@ local dialogWindow = {
 			this.timers.fade = to1(this.timers.fade, dt, 0.125);
 		end
 
-		this.forceFlicker = this.curr ~= curr;
+		this.forceFlicker = this.currOpt ~= currOpt;
 
-		if (this.curr ~= curr) then this.curr = curr; end
+		this.currOpt = currOpt;
 
-		local delta = (curr - this.max) + 1;
+		local delta = currOpt - this.max;
 
 		if (delta >= 1) then
 			this.button.offset = -(delta * (this.button.h + this.button.margin));
 			this.cursorIndex = this.max;
 		else
 			this.button.offset = 0;
-			this.cursorIndex = curr + 1;
+			this.cursorIndex = currOpt;
 		end
 	end,
 
+	-- Renders the current component
+	---@param this CollectionDialogWindow
+	---@param dt deltaTime
 	render = function(this, dt)
 		this:setSizes();
 
@@ -364,7 +389,7 @@ local dialogWindow = {
 			this.scrollbar:render(dt, {
 				alphaMod = this.timers.fade,
 				color = 'med',
-				curr = curr + 1,
+				curr = currOpt,
 				total = #options,
 			});
 
@@ -373,6 +398,8 @@ local dialogWindow = {
 	end,
 };
 
+-- Called by the game every frame
+---@param dt deltaTime
 render = function(dt)
 	game.SetSkinSetting(
 		'_collections',
@@ -390,14 +417,17 @@ render = function(dt)
 	return not (dialog.closing and (dialogWindow.timers.fade <= 0));
 end
 
+-- Collection factory helper
+---@param name string
 makeCollection = function(name)
 	return function()
 		menu.Confirm(name);
 	end
 end
 
+-- Called by the game when the collection dialog is opened
 open = function()
-	curr = 0;
+	currOpt = 1;
 	options = {};
 
 	if (#dialog.collections == 0) then
@@ -435,12 +465,18 @@ open = function()
 	title = makeLabel('jp', dialog.title, 36);
 end
 
-advance_selection = function(v) curr = (curr + v) % #options; end
+-- Called by the game when knobs are turned or arrow keys are pressed
+---@param step integer # `-1` or `1`
+advance_selection = function(step)
+	currOpt = advance(currOpt, #options, step);
+end
 
-button_pressed = function(button)
-	if (button == game.BUTTON_BCK) then
+-- Called by the game when a (gamepad) button is pressed
+---@param btn integer
+button_pressed = function(btn)
+	if (btn == game.BUTTON_BCK) then
 		menu.Cancel();
-	elseif (button == game.BUTTON_STA) then
-		options[curr + 1].event();
+	elseif (btn == game.BUTTON_STA) then
+		options[currOpt].event();
 	end
 end

@@ -51,7 +51,7 @@ local SongPanel = {
       currDiff = 0,
       currSong = 0,
       cursor = Cursor:new({
-        size = 12,
+        size = 10,
         stroke = 1.5,
         type = 'vertical',
       }),
@@ -566,7 +566,7 @@ local SongPanel = {
         color = 'white',
       });
 
-      this.spinner:render(dt, x - this.labels.loading.w - 12, y - 5);
+      this.spinner:render(dt, x - this.labels.loading.w - 21, y + 7);
     end
 
     gfx.Restore();

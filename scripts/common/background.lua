@@ -59,25 +59,14 @@ local Background = {
       this.blue = b;
     end
 
-    if (this.window.isPortrait) then
-      this.bgPortrait:draw({
-        x = p.x or 0,
-        y = p.y or 0,
-        w = p.w or this.window.w,
-        h = p.h or this.window.h,
-        centered = p.centered,
-        tint = { this.r, this.g, this.b },
-      });
-    else
-      this.bg:draw({
-        x = p.x or 0,
-        y = p.y or 0,
-        w = p.w or this.window.w,
-        h = p.h or this.window.h,
-        centered = p.centered,
-        tint = { this.r, this.g, this.b },
-      });
-    end
+    ((this.window.isPortrait and this.bgPortrait) or this.bg):draw({
+      x = p.x or 0,
+      y = p.y or 0,
+      w = p.w or this.window.w,
+      h = p.h or this.window.h,
+      centered = p.centered,
+      tint = { this.r, this.g, this.b },
+    });
   end,
 };
 

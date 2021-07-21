@@ -200,6 +200,7 @@ local Buttons = {
 
 		local btns = this.btns[this.currPage];
 		local isNavigable = this.state.loaded
+			and (not this.state.hoveringVersion)
 			and (not this.state.viewingControls)
 			and (not this.state.viewingInfo)
 			and (not this.state.viewingPreview);
@@ -284,6 +285,7 @@ local Buttons = {
 		end
 
 		if (this.state.loaded
+			and (not this.state.hoveringVersion)
 			and (not this.state.promptUpdate)
 			and (not this.state.viewingControls)
 			and (not this.state.viewingInfo)

@@ -5,7 +5,12 @@ local max = math.max;
 
 local dialogBox = DialogBox:new();
 
-return {
+---@class GameSettings
+local GameSettings = {
+  -- GameSettings constructor
+  ---@param this GameSettings
+  ---@param t SettingsTable
+  ---@return GameSettings
   new = function(this, t)
     t.cache = { w = 0, h = 0 };
     t.max = 7;
@@ -18,6 +23,8 @@ return {
     return t;
   end,
 
+  -- Sets the sizes for the current component
+  ---@param this GameSettings
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
       local key = this.state:gsub(this.state.settings[1].name);
@@ -36,6 +43,10 @@ return {
     end
   end,
 
+  -- Draw the settings for the current tab
+  ---@param this GameSettings
+  ---@param dt deltaTime
+  ---@param timer number
   drawSettings = function(this, dt, timer)
     local index = this.state.setting.index;
     local settings = this.settings[this.state.tab.name];
@@ -99,6 +110,12 @@ return {
     end
   end,
 
+  -- Draw the value of the given setting
+  ---@param this GameSettings
+  ---@param y number
+  ---@param alpha number
+  ---@param base SettingsDiagSetting
+  ---@param isCurr boolean
   drawValue = function(this, y, alpha, base, isCurr, setting)
     local min, max = false, false;
     local params = {
@@ -161,6 +178,9 @@ return {
     end
   end,
 
+  -- Draw the navigation controls
+  ---@param this GameSettings
+  ---@param timer number
   drawNavigation = function(this, timer)
     local alpha = 255 * timer;
     local x1 = dialogBox.x.middleLeft;
@@ -196,6 +216,9 @@ return {
     });
   end,
 
+  -- Handle user input
+  ---@param this GameSettings
+  ---@param dt deltaTime
   handleChange = function(this, dt)
     if (this.currSetting ~= this.state.setting.index) then
       this.timer = 0;
@@ -217,6 +240,10 @@ return {
     end 
   end,
 
+  -- Renders the current component
+  ---@param this GameSettings
+  ---@param dt deltaTime
+  ---@param timer number
   render = function(this, dt, timer)
     local heading = this.tabs[this.state.tab.name];
 
@@ -250,3 +277,5 @@ return {
     this:drawNavigation(timer);
   end,
 };
+
+return GameSettings;

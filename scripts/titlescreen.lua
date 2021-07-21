@@ -1,3 +1,5 @@
+local JSON = require('lib/json');
+
 local JSONTable = require('common/jsontable');
 local Knobs = require('common/knobs');
 local Mouse = require('common/mouse');
@@ -26,8 +28,10 @@ local state = {
 	currBtn = 1,
 	currPage = 'mainMenu',
 	hasInfo = player.stats ~= nil,
+	hoveringVersion = false,
 	isClickable = false,
 	loaded = false,
+	newVersion = false,
 	player = player,
 	promptUpdate = false,
 	refreshInfo = false,
@@ -48,7 +52,7 @@ local buttons = Buttons:new(window, mouse, state);
 local knobs = Knobs:new(state);
 local ingamePreview = IngamePreview:new(window, mouse, state);
 local playerInfo = PlayerInfo:new(window, mouse, state);
-local title = Title:new(window, state);
+local title = Title:new(window, mouse, state);
 local updatePrompt = UpdatePrompt:new(window, mouse, state);
 
 local getInfo = function()
@@ -64,6 +68,21 @@ local getInfo = function()
 		end
 	end
 end
+
+---@param res HttpResponse
+local tagCallback = function(res)
+	if (res and res.status and (res.status == 200)) then
+		local body = JSON.decode(res.text or {});
+
+		if (body[1] and body[1].ref) then
+			local version = body[1].ref:gsub('refs/tags/', '');
+
+			if (SkinVersion ~= version) then state.newVersion = true; end
+		end
+	end
+end
+
+Http.GetAsync(TagsURL, { ['user-agent'] = 'unnamed_sdvx_clone' }, tagCallback);
 
 -- Called by the game every frame
 ---@param dt deltaTime
@@ -82,9 +101,9 @@ render = function(dt)
 
 	background:render();
 
-	title:render(dt);
-
 	buttons:render(dt);
+
+	title:render(dt);
 
 	if (state.loaded and state.promptUpdate) then updatePrompt:render(dt); end
 

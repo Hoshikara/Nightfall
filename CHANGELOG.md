@@ -1,10 +1,18 @@
-##### 1.3.3 - July 19, 2021
+### 1.3.4 - July 21, 2021
+- Added the ability to click the skin version number of the titlescreen to open a link to the `CHANGELOG`
+- Added the ability to navigate multiplayer room list with arrow keys
+- Changed skin version number appearance when a new version is available
+- Color-coded appropriate `In-game Preview` settings
+- Fixed `Player Info` charts for `ALL` level not being sorted by score
+- General developer chores
+
+### 1.3.3 - July 19, 2021
 - Added skin settings to change the color of the following:
   - Hit stats which includes `S-CRITICAL`, `CRITICAL`, `EARLY`, `LATE`, and `ERROR`; these are reflected during the gameplay and results screens where applicable
   - Positive and negative values (e.g. score difference, result stat comparisons, truthy/falsy settings, etc.)
 - Fixed laser miss state being too bright (again)
 
-##### 1.3.2 - July 19, 2021
+### 1.3.2 - July 19, 2021
 - `Nautica` changes
   - Added the ability to blacklist uploaders by pressing `BT-B` when a song is selected
   - Redesigned screen and added control hints, uploader name, and upload date
@@ -12,10 +20,10 @@
 - Increased speed of loading spinner
 - Removed transparency from search bar
 
-##### 1.3.1 - July 17, 2021
+### 1.3.1 - July 17, 2021
 - Fixed miss state for holds being indistinguishable from idle state
 
-##### 1.3.0 - July 16, 2021
+### 1.3.0 - July 16, 2021
 - `Results` changes
   - Added `EX SCORE` and `VOLFORCE` fields, the latter will show increased value if applicable
   - Added `S-CRITICAL` stats to both graphs
@@ -32,20 +40,20 @@
 - Fixed console front being visible for landscape orientation
 - Replaced `Song Select` and `Challenge Wheel` sort arrows with appropriate subtext
 
-##### 1.2.7 - July 8, 2021
+### 1.2.7 - July 8, 2021
 - `Player Info` changes
   - Added score and total charts fields to the chart display screen; charts are now be sorted by score
   - Changed hint to click on clear/grade totals to only appear on mouse hover
 
-##### 1.2.6 - July 3, 2021
+### 1.2.6 - July 3, 2021
 - `Develop Channel`
   - Fixed error when entering practice mode
 
-##### 1.2.5 - July 1, 2021
+### 1.2.5 - July 1, 2021
 - `Develop Channel`
   - Added blastive rate level display to gameplay and results screen
 
-##### 1.2.4 - June 29, 2021
+### 1.2.4 - June 29, 2021
 - Added a chart loading indicator to song select
 - Added an update check indicator to the main menu
 - Fixed a note density graph bug potentially
@@ -54,20 +62,20 @@
   - Added color-coding for gameplay XMOD/MMOD adjustments
   - Added support for permissive and blastive gauges
 
-##### 1.2.3 - June 27, 2021
+### 1.2.3 - June 27, 2021
 - Updated gameplay shader files
 
-##### 1.2.2 - June 20, 2021
+### 1.2.2 - June 20, 2021
 - Added a skin setting to distinguish early and late critical hit delta by different colors
 - Fixed excessive warning color being too bright
 
-##### 1.2.1 - June 16, 2021
+### 1.2.1 - June 16, 2021
 - Added the ability to mouse over the best critical/near/error counts which will cause the corresponding score in the score list to be selected
 - Fixed hit stat graph letters and circles being too high
 - Modified all gauge colors for gameplay and results screen
 - Moved the results screen hit window labels to the right side of the main panel
 
-##### 1.2.0 - June 15, 2021
+### 1.2.0 - June 15, 2021
 - Added a display for critical hit delta and skin settings to toggle and adjust the minimum value required to display
 - Added a small fade transition when entering and exiting the play options menu
 - Added the multiplayer scoreboard for portrait orientation
@@ -79,7 +87,7 @@
 - Fixed multiplayer room list control hints overlapping with the `Create Room` button for portrait orientation
 - Modified hold textures and shaders to potentially fix a visual artifact when a new hold is started while one is currently active
 
-##### 1.1.12 - June 10, 2021
+### 1.1.12 - June 10, 2021
 - Added a new gauge text to indicate if ARS is enabled
 - Added a new ring animation for holds and lasers
 - Added a new start and ending animation for holds
@@ -87,14 +95,14 @@
 - Removed optional laser animation colors as a result of the changes above
 - Removed several images used for animations as a result of the changes above
 
-##### 1.1.11 - June 9, 2021
+### 1.1.11 - June 9, 2021
 - Portrait-specific changes:
   - Added button lights to the console
   - Added knob animations to indicate active state and upcoming lasers
   - Separated console and console front textures so they respond to tilt effects properly
 - Fixed scaling issue for game settings window during multiplayer
 
-##### 1.1.10 - June 8, 2021
+### 1.1.10 - June 8, 2021
 - `Multiplayer` changes:
   - Added control hints for selecting and entering a room when viewing the room list
   - Removed the ability to toggle hard gauge and mirror with `FX-L` / `FX-R` as they conflicted with the controls to open the game settings window
@@ -102,31 +110,31 @@
 - Fixed the gap on the left side of the practice mode window
 - Potentially fixed a crash that occurred when entering and starting practice mode
 
-##### 1.1.9 - June 2, 2021
+### 1.1.9 - June 2, 2021
 - Added a display for current playback speed during practice mode; the displayed BPM will also change accordingly
 - Fixed a dip occuring at 0 for the result histogram
 - Fixed player info being loaded when search input is active
 - Increased hit delta bar and laser slam animation queues to decrease chances of either not playing
 
-##### 1.1.8 - May 30, 2021
+### 1.1.8 - May 30, 2021
 - Brightened laser textures slightly
 - Modified yellow laser textures to be less yellow
 - Reduced brightness of lasers that are missed
 
-##### 1.1.7 - May 25, 2021
+### 1.1.7 - May 25, 2021
 - Fixed `TOP 20/50` label not appearing immediately after setting a play that would fall into either category
 - Fixed the following after reloading player info
   - Folder dropdown height being increased
   - Incorrect folder stats being shown
   - Stale folder data (list of charts, clear/grade totals, etc.)
 
-##### 1.1.6 - May 23, 2021
+### 1.1.6 - May 23, 2021
 - Modified song transition to show effector and illustrator
 - Fixed a challenge wheel error occuring after completing a challenge
 - Fixed best play jacket not updating when a new best play was set
 - Fixed landscape `In-game Preview` not showing chain
 
-##### 1.1.5 - May 22, 2021
+### 1.1.5 - May 22, 2021
 - Added the `In-game Preview` screen, accessible by a button on the second menu page of the titlescreen
   - Real-time preview of specific gameplay elements
   - The following settings can be adjusted or enabled/disabled in this screen:
@@ -141,10 +149,10 @@
 - Removed the option to enable/disable `User Info`, username will now always be shown
 - Removed the `Main Menu` button on the second menu page of the titlescreen, a button prompt will be shown instead
 
-##### 1.1.4 - May 21, 2021
+### 1.1.4 - May 21, 2021
 - Fixed laser texture segments being visible
 
-##### 1.1.3 - May 21, 2021
+### 1.1.3 - May 21, 2021
 - Added a score check for song select Top 50 charts to prevent cases where charts would fall into the incorrect label breakpoint
 - Changed song select `BEST 20/50` label to `TOP 20/50`
 - Decreased lead-in time for gameplay
@@ -153,37 +161,37 @@
 - Fixed ARS gauge graph zoom portion
 - Fixed down score being displayed for scores that were tied with best
 
-##### 1.1.2 - May 17, 2021
+### 1.1.2 - May 17, 2021
 - Fixed an error occuring after clearing a chart
 
-##### 1.1.1 - May 17, 2021
+### 1.1.1 - May 17, 2021
 - Add display for down score to results screen
 - Added a check to only show up/down score if a chart has been completed
 
-##### 1.1.0 - May 17, 2021
+### 1.1.0 - May 17, 2021
 - Added support for portrait orientation
 - Added a check to automatically refresh player info when a play meeting the collection criteria is made (level >= 10 chart cleared with at least 8700000 score)
 - Fixed a results screen crash from invalid density graph data
 
-##### 1.0.4 - May 17, 2021
+### 1.0.4 - May 17, 2021
 - Fixed challenge wheel error
 
-##### 1.0.3 - May 13, 2021
+### 1.0.3 - May 13, 2021
 - Adjusted crit line texture color and size slightly
 - Fixed results screen crash from missing histogram data
 - Fixed chart length not rolling over properly at 60 seconds
 - Removed some unused files
 
-##### 1.0.2 - May 13, 2021
+### 1.0.2 - May 13, 2021
 - Fixed BPM data getting wiped on excessive fail
 - Fixed incoming BPM change not appearing when restarting a chart with `F5`
 - Fixed bars for hit delta bar persisting after restarting a chart with `F5`
 
-##### 1.0.1 - May 12, 2021
+### 1.0.1 - May 12, 2021
 - Fixed Top 50 tab for `Player Info` not scaling properly
 - Prevented player info from being loaded if any menus are open (filtering, sorting, etc.)
 
-##### 1.0.0 - May 12, 2021
+### 1.0.0 - May 12, 2021
 - Added `Player Info` screen to the main menu
   - To load player info, enter `Song Select` and press `BT-A`, doing this also ensures your player info is fully updated
   - Stats are organized by the folder they belong to, along with an additional folder for official Sound Voltex charts (converts)
@@ -233,7 +241,7 @@
   - Added a check to only allow gain from converts (chart must exist in a folder that contains `SOUND VOLTEX` or `SDVX`, case insensitive)
   - Modified display and calculation to align with Exceed Gear
 
-##### March 6, 2021
+### March 6, 2021
 - Added labels to indicate controls for the following:
   - `Song Select` and `Challenge Wheel`
     - Activating search input
@@ -244,21 +252,21 @@
     - Capturing a screenshot
 - Moved practice mode controls and instructions to `Practice Mode`, both can be disabled by newly added skin settings
 
-##### March 3, 2021
+### March 3, 2021
 - Added current hit window display during gameplay; this can be disabled in skin settings
 - Adjusted some scrolling animations
 - Changed various scrolling labels to reset when not visisble
 - Fixed a bug where some skin settings were not being consumed properly
 - Fixed a memory leak caused by excessive jacket loading
 
-##### February 24, 2021
+### February 24, 2021
 - Added line highlighting for filter and sort wheels
 - Added a skin option to only show high scores with harder hit windows for the results screen
 - Fixed a crash that occurred when opening the collection dialog
 - Moved some single use functions out of `common.lua`
 - Reduced the opacity of hit error bar dividers
 
-##### February 22, 2021
+### February 22, 2021
 - `gamesettingsdialog` changes:
   - Added highlighting to the currently selected setting
   - Added an arrow indicator for tabs that have more than 7 settings
@@ -281,21 +289,21 @@
   - Score difference is now displayed in red if player is behind the top score
 - Rewrote and replaced the usages of common functions
 
-##### February 11, 2021
+### February 11, 2021
 - `Gameplay` changes:
   - Added skin setting to change score difference position
   - Current and total track time is now displayed with the progress bar
   - Modified BT and FX chip textures for easier distinction again
 - Organized some common functions and provided warnings for missing parameters
 
-##### February 6, 2021
+### February 6, 2021
 - Completed work for `Challenge Result`
 
-##### February 2, 2021
+### February 2, 2021
 - Changes made to support backup gauge option
 - Fixed red laser end texture being slightly too short
 
-##### January 16, 2021
+### January 16, 2021
 - `Challenge Wheel` changes:
   - Changed chart display to only show chart title and difficulty to make more room
   - Changed requirements display to a vertical list, limited to 6 lines
@@ -306,66 +314,66 @@
   - Implemented a JSON loader, currently being used for value caching
   - Removed developer options from skin settings
 
-##### January 11, 2021
+### January 11, 2021
 - Added timestamp to main result panel and changed stat display orders accordingly
 - Changed difficulty level display behavior to allow for non-standard values
 
-##### January 8, 2021
+### January 8, 2021
 - Adjusted scoring threshold for determining `Average` score display
 - Carried over the following for `Challenge Wheel`:
   - Adjustable jacket quality
   - Jacket loading improvements
   - Infinite/Gravity/Heavenly/Vivid difficulty names (also fixes incorrect difficulty being displayed)
 
-##### December 15, 2020
+### December 15, 2020
 - Added Skin Setting for adjusting `Song Select` jacket quality
 
-##### December 14, 2020
+### December 14, 2020
 - Improved jacket loading time in `Song Select`
 - Fixed labels in list-like components getting cut off on resolutions higher than 1080P
 - Fixed challenge names overflowing in `Challenge Wheel`
 - Fixed challenge requirements overflowing in `Challenge Wheel`
 - Fixed Best 20/50 indicators incorrectly appearing when no scores have submitted
 
-##### December 7, 2020
+### December 7, 2020
 - Added highest grade achieved onto the jackets of the song grid in `Song Select`
 - Modified track texture for less distinction between lanes
 - Modified BT textures for easier distinction when on top of FX chips or holds
 - Fixed track cover not covering lane fully/track invisible effect not working
 correctly
 
-##### December 6, 2020
+### December 6, 2020
 - Added scrolling to collection wheel to prevent rendering off the screen
 - Fixed Best 20/50 indicator being cut off under certain conditions
 - Fixed sort wheel displaying with incorrect labels and position (hopefully)
 - Refactored `gamesettingsdialog` to prevent crashes from new/unknown settings
 
-##### December 5, 2020
+### December 5, 2020
 - Infinite/Gravity/Heavenly/Vivid difficulty names are now used if available
 - Added an indicator for Best 20/50 songs that contribute to volforce during Song Select
 - Fixed sort wheel not showing the correct labels for Song Select
 - Fixed maximum chain not resetting on chart restart (F5)
 
-##### October 29, 2020
+### October 29, 2020
 - Refactored more `Song Select` components for reusability and design consistency
 - Removed unused `easing` library
 - Fixed a crash that occurred when list-like components are empty
 
-##### October 28, 2020
+### October 28, 2020
 - Completed work for `Challenge Wheel`
   - `Challenge Result` WIP
   - only access if using beta build for USC courses (official courses not implemented at time of writing)
 - Refactored some `Song Select` components for better responsive sizing
 
-##### October 2, 2020
+### October 2, 2020
 - Minor refactoring and visual adjustments for score displays and cursors
 
-##### September 30, 2020
+### September 30, 2020
 - Modified `Gameplay` appearance slightly
 - Fixed Multiplayer results crashes (hopefully)
 - Fixed Multiplayer scoreboard during gameplay updating with incorrect names
 
-##### September 27, 2020
+### September 27, 2020
 - Completed work for Multiplayer screens, features to note:
   - If host, hover over users to display host controls (transfer host or kick user)
 - Added Username and Score Difference displays to `Gameplay`
@@ -379,7 +387,7 @@ correctly
 - Fixed scaling issues in `Song Select`
 - Fixed indexing of nil value in multiplayer `Results`
 
-##### September 22, 2020
+### September 22, 2020
 - Completed work for Practice Mode, `gameplay` and `gamesettingsdialog` scripts updated
 - Completed work for Results screen, features to note:
   - Increase hit graph scale with `[BT-A]`
@@ -389,14 +397,14 @@ correctly
 - Added new 'Controls' page for Practice Mode controls and basic setup
 - Added Skin Setting caching for active collection/level and volforce to prevent visual bugs on Song Select screen
 
-##### September 13, 2020
+### September 13, 2020
 - Re-arranged 'Sort', 'Difficulty', and 'Collection' labels in Song Select screen
 - Addressed crash caused by newline character being inserted in `skin.cfg`
 - Enabled Hit Error bar (again), set position in Skin Settings
 - Added a null check to Game Settings labels
 - Removed all backgrounds and unused textures
 
-##### September 12, 2020
+### September 12, 2020
 - Completed work for gameplay screen, including multiplayer scoreboard
 - Changed accessiblity for 'Controls' screen during Song Select: Hold `[BT-A]` to show, and press `[BT-D]` to navigate pages
   - 'General', 'Gameplay', and 'Results' pages added
@@ -405,7 +413,7 @@ correctly
 - Added volforce display to Song Select screen
 - Refactored and cleaned up various scripts
 
-##### September 8, 2020
+### September 8, 2020
 - Completed work on song select screen and related components including:
   - Filter and Sort wheels
   - Collection Dialog
@@ -413,23 +421,23 @@ correctly
 - Added 'Song Select' and 'Gameplay Settings' controls screen to song select, hover over controller icon in bottom-left corner to display
 - Combined 'Controller' and 'Keyboard' sections for controls to account for overlapping actions
 
-##### August 31, 2020
+### August 31, 2020
 - Created 'Controls' screen, controller-navigable and accessible from a new button in the main menu
 - Modified load-in behavior slightly:
   - If an update is available, title is hidden until appropriate actions taken in the prompt
   - Title fades in and the first button is highlighted when menu is fully loaded
 
-##### August 26, 2020
+### August 26, 2020
 - Replaced textures and shaders for buttons, lasers, track, and more
 - Refactored and integrated hit animation system from LucidWave; using different textures
 - Added settings for position and scale of hit error bar to 'Skin Settings'
 - Enabled hit error bar to resize and scale based on user-defined hit windows
 
-##### August 21, 2020
+### August 21, 2020
 - Created dialog box for update prompt instead of fullscreen overlay
 - Enabled update buttons to be controller-navigable
 
-##### August 20, 2020
+### August 20, 2020
 - Created main menu assets
 - Modified titlescreen script:
   - Extracted controller handling logic

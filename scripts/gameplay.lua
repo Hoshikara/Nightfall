@@ -24,7 +24,9 @@ local window = Window:new();
 
 local abs = math.abs;
 
+---@type number
 local minCritDelta = getSetting('minCritDelta', 23);
+---@type boolean
 local showCritDelta = getSetting('showCritDelta', false);
 
 local players = nil;
@@ -93,6 +95,7 @@ local initAll = function()
 	init = false;
 end
 
+-- Translates coordinates to the center of the critical line and applies any rotation from tilt effects
 local setupCritTransform = function()
 	gfx.ResetTransform();
 	gfx.Translate(gameplay.critLine.x, gameplay.critLine.y);
@@ -128,7 +131,7 @@ end
 ---@param len number # Length of the slam relative to the track, sign indicates slam direction
 ---@param startPos number # The x-coordinate of the slam start, relative to the center of the crit line
 ---@param endPos number # The x-coordinate of the slam end, relative to the center of the crit line
----@param index integer # Laser index, `0 = left`, `1 = right`
+---@param index integer # Laser index, `0` = left, `1` = right
 laser_slam_hit = function(len, startPos, endPos, index)
 	laserAnimation:trigger(endPos, index + 1);
 end
@@ -294,6 +297,7 @@ init_tcp = function()
 end
 
 -- Called by the game to update multiplayer user information
+---@param res table
 score_callback = function(res)
 	if (res.status ~= 200) then
 		error();

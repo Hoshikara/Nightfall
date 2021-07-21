@@ -37,6 +37,7 @@ local timers = {
 	scroll = 0,
 };
 
+-- Create the labels table
 local setLabels = function()
 	if (not labels) then
 		labels = {
@@ -48,12 +49,16 @@ local setLabels = function()
 	end
 end
 
+-- Remove any prefixes from collections and levels
+---@param s string
+---@return string
 local replace = function(s)
 	for _, prefix in ipairs(Prefixes) do s = s:gsub(prefix, ''); end
 
 	return s;
 end
 
+-- Get folder names to use for `Player Info` screen
 local getFolders = function()
 	if ((not folderNames) and (getSetting('_songSelect', 'TRUE') == 'TRUE')) then
 		folderNames = {};
@@ -70,6 +75,7 @@ local getFolders = function()
 	end
 end
 
+---@class FilterFolders
 local folders = {
 	cache = { w = 0, h = 0 },
 	count = 0,
@@ -82,6 +88,8 @@ local folders = {
 	w = { final = 0, max = 0 },
 	h = { offset = 0, total = 0 },
 
+	-- Sets the sizes for the current component
+	---@param this FilterFolders
 	setSizes = function(this)
 		if ((this.cache.w ~= window.w) or (this.cache.h ~= window.h)) then
 			this.scrollbar:setSizes({
@@ -95,6 +103,9 @@ local folders = {
 		end
 	end,
 
+	-- Create labels from the list of collections/folders
+	---@param this FilterFolders
+	---@param count number
 	setLabels = function(this, count)
 		if (this.count ~= count) then
 			this.count = 0;
@@ -130,6 +141,14 @@ local folders = {
 		end
 	end,
 
+	-- Draw a single folder
+	---@param this FilterFolders
+	---@param dt deltaTime
+	---@param label Label
+	---@param i integer
+	---@param k string
+	---@param y number
+	---@param isCurr boolean
 	drawFolder = function(this, dt, label, i, k, y, isCurr)
 		local isVis = true;
 
@@ -187,6 +206,9 @@ local folders = {
 		return label.h + grid.dropdown.padding;
 	end,
 
+	-- Handle user input
+	---@param this FilterFolders
+	---@param dt deltaTime
 	handleChange = function(this, dt)
 		if (this.currFolder ~= currFolder) then
 			this.timer = 0;
@@ -205,6 +227,9 @@ local folders = {
 		end
 	end,
 
+	-- Renders the current component
+	---@param this FilterFolders
+	---@param dt deltaTime
 	render = function(this, dt)
 		this:setSizes();
 
@@ -247,6 +272,7 @@ local folders = {
 	end,
 };
 
+---@class FilterLevels
 local levels = {
 	currLevel = 0,
 	labels = nil,
@@ -254,6 +280,8 @@ local levels = {
 	w = 0,
 	h = 0,
 
+	-- Creates labels from the list of levels
+	---@param this FilterLevels
 	setLabels = function(this)
 		if (not this.labels) then
 			this.labels = {};
@@ -279,6 +307,11 @@ local levels = {
 		end
 	end,
 
+	-- Draw a single level
+	---@param this FilterLevels
+	---@param label Label
+	---@param y number
+	---@param isCurr boolean
 	drawLevel = function(this, label, y, isCurr)
 		local alpha = floor(((isCurr and 255) or 155)
 			* min(timers.level ^ 2, 1));
@@ -306,6 +339,9 @@ local levels = {
 		return label.h + (grid.dropdown.padding / 2);
 	end,
 
+	-- Handle user input
+	---@param this FilterLevels
+	---@param dt deltaTime
 	handleChange = function(this, dt)
 		if (this.currLevel ~= currLevel) then
 			this.timer = 0;
@@ -316,6 +352,8 @@ local levels = {
 		this.timer = to1(this.timer, dt, 0.125);
 	end,
 
+	-- Renders the current component
+	---@param dt deltaTime
 	render = function(this, dt)
 		local y = 0;
 		
@@ -346,6 +384,8 @@ local levels = {
 	end,
 };
 
+-- Draw the control hint labels
+---@param isFiltering boolean
 local drawLabels = function(isFiltering)
 	local prefixC = labels.fxl;
 	local prefixD = labels.fxl;
@@ -376,6 +416,10 @@ local drawLabels = function(isFiltering)
 	});
 end
 
+-- Draw the currently selected folder or level
+---@param dt deltaTime
+---@param isFiltering boolean
+---@param isFolder boolean
 local drawCurrField = function(dt, isFiltering, isFolder)
 	local color = 'white';
 	local label = (isFolder and folders.labels[currFolder])
@@ -411,6 +455,9 @@ local drawCurrField = function(dt, isFiltering, isFolder)
 	end
 end
 
+-- Handle user input
+---@param dt deltaTime
+---@param isFiltering boolean
 local handleChange = function(dt, isFiltering)
 	if (not isFiltering) then
 		if (choosingFolder and (timers.folder > 0)) then

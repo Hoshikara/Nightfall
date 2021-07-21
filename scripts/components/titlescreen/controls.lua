@@ -36,7 +36,7 @@ local Controls = {
 				close = makeLabel(
 					'med',
 					{
-						{ color = 'norm', text = '[START]  /  [ESC]' },
+						{ color = 'norm', text = '[START]  /  [BACK]' },
 						{ color = 'white', text = 'EXIT' },
 					},
 					24
