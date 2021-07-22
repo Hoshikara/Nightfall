@@ -44,6 +44,7 @@ local LaserCursors = {
   ---@param dt deltaTime
   render = function(this, dt)
     local scale = this.window:getScale();
+    local cursorScale = 0.4 * scale;
     local h = this.h;
 
     this.timer = this.timer + dt;
@@ -70,7 +71,7 @@ local LaserCursors = {
         alpha = curr.alpha * (0.4 * abs(sin(this.timer * 40))),
         blendOp = 8,
         centered = true;
-        scale = 0.425 * scale,
+        scale = cursorScale,
         tint = { r, g, b },
       });
 
@@ -79,7 +80,7 @@ local LaserCursors = {
         h = h,
         alpha = curr.alpha * 0.6,
         centered = true;
-        scale = 0.425 * scale,
+        scale = cursorScale,
         tint = { r, g, b },
       });
   
@@ -88,7 +89,7 @@ local LaserCursors = {
         h = h,
         alpha = curr.alpha,
         centered = true,
-        scale = 0.425 * scale,
+        scale = cursorScale,
       });
 
       gfx.SkewX(-curr.skew);

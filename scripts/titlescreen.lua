@@ -75,7 +75,7 @@ local tagCallback = function(res)
 		local body = JSON.decode(res.text or {});
 
 		if (body[1] and body[1].ref) then
-			local version = body[1].ref:gsub('refs/tags/', '');
+			local version = body[#body].ref:gsub('refs/tags/', '');
 
 			if (SkinVersion ~= version) then state.newVersion = true; end
 		end

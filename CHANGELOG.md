@@ -1,3 +1,8 @@
+### 1.3.5 - July 22, 2021
+- Decreased size of laser cursors
+- Decreased thickness of lasers
+- Fixed update check failing
+
 ### 1.3.4 - July 21, 2021
 - Added the ability to click the skin version number of the titlescreen to open a link to the `CHANGELOG`
 - Added the ability to navigate multiplayer room list with arrow keys

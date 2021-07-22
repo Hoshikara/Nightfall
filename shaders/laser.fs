@@ -18,7 +18,7 @@ uniform int laserPart;
 // 20Hz flickering. 0 = Miss, 1 = Inactive, 2 & 3 = Active alternating.
 uniform int hitState;
 
-const float laserSize = 1.135;
+const float laserSize = 1.0675;
 
 void main() {
 	if (laserPart == 1) {
