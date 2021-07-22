@@ -34,15 +34,7 @@ local SearchBar = {
 
   -- Sets the sizes for the current component
   ---@param this SearchBar
-  ---@param params table #
-  -- ```
-  -- {
-  --   x: number = 0,
-  --   y: number = 0,
-  --   w: number = 0,
-  --   h: number = 0,
-  -- }
-  -- ```
+  ---@param params SearchBarSetSizesParams
   setSizes = function(this, params)
     this.x = params.x or 0;
     this.y = params.y or 0;
@@ -53,13 +45,7 @@ local SearchBar = {
   -- Renders the current component
   ---@param this SearchBar
   ---@param dt deltaTime
-  ---@param params table #
-  -- ```
-  -- {
-  --   input: string = '',
-  --   isActive: boolean = false,
-  -- }
-  -- ```
+  ---@param params SearchBarRenderParams
   render = function(this, dt, params)
     local input = params.input or '';
     local isActive = params.isActive or false;

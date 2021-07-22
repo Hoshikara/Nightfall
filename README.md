@@ -7,15 +7,8 @@
 ## Disclaimer
 ### As of version `1.0.0`, when downloading a new version please make a back up of the `JSON` folder and use it to overwrite the `JSON` folder of the one provided. This folder contains personalized data necessary for some features to work.
 
-## Preview Images
-![titlescreen](./preview/titlescreen.png)
-![songselect](./preview/songselect.png)
-![gameplay](./preview/gameplay.png)
-![results](./preview/results.png)
-![controls](./preview/controls.png)
-![playerinfo](./preview/playerinfo.png)
-![challenges](./preview/challenges.png)
-![practicemode](./preview/practicemode.png)
+## Preview Video
+[![Preview Video](https://i9.ytimg.com/vi/HDeC9cX2pk8/mq2.jpg?sqp=CMSs5IcG&rs=AOn4CLBzjqAalum2r3OfqO0mz5RzvlXm0g)](https://www.youtube.com/watch?v=HDeC9cX2pk8)
 
 
 ## Contact

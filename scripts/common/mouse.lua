@@ -19,7 +19,7 @@ local Mouse = {
 		return t;
   end,
 
-	-- Determine if the mouse is hovering over the specified bounds
+	-- Determines if the mouse is hovering over the specified bounds
 	---@param this Mouse
 	---@param x number
 	---@param y number
@@ -36,9 +36,9 @@ local Mouse = {
 		return (this.x > x) and (this.y > y) and (this.x < w) and (this.y < h);
   end,
 
-	-- Track the current mouse position
+	-- Updates the current mouse position
 	---@param this Mouse
-  watch = function(this) this.x, this.y = game.GetMousePos(); end,
+  update = function(this) this.x, this.y = game.GetMousePos(); end,
 };
 
 return Mouse;

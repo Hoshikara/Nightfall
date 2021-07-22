@@ -5,14 +5,7 @@ local floor = math.floor;
 local ScoreNumber = {
   -- ScoreNumber constructor
   ---@param this ScoreNumberClass
-  ---@param p table #
-  -- ```
-  -- {
-  --   digits?: number,
-  --   size: number = 100,
-  --   val: number = 0,
-  -- }
-  -- ```
+  ---@param p ScoreNumberConstructorParams
   ---@return ScoreNumber
   new = function(this, p)
     ---@class ScoreNumber : ScoreNumberClass
@@ -71,19 +64,9 @@ local ScoreNumber = {
     end
   end,
 
-  -- Draw the current ScoreNumber
+  -- Draws the current ScoreNumber
   ---@param this ScoreNumber
-  ---@param params table #
-  -- ```
-  -- {
-  --   x: number = 0,
-  --   y: number = 0,
-  --   align: Alignment,
-  --   alpha: number = 255,
-  --   color: Color,
-  --   offset?: number,
-  -- }
-  -- ```
+  ---@param params ScoreNumberDrawParams
   draw = function(this, params)
     this:setValue(params.val or this.val);
 

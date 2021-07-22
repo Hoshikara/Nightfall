@@ -2,14 +2,7 @@
 local Spinner = {
   -- Spinner constructor
   ---@param this SpinnerClass
-  ---@param p? table
-  -- ```lua
-  -- {
-  --   color: Color,
-  --   size: number = 12,
-  --   thickness: number = 3,
-  -- }
-  -- ```
+  ---@param p? SpinnerConstructorParams
   ---@return Spinner
   new = function(this, p)
     p = p or {};

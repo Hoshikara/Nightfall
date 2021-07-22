@@ -257,11 +257,10 @@ local GameSettings = {
 
     this.window:scale();
 
-    dialogBox:draw({
+    dialogBox:render({
       x = this.window.w / 2,
       y = this.window.h / 2,
       alpha = timer,
-      centered = true,
     });
 
     gfx.Restore();

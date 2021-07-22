@@ -25,22 +25,7 @@ local Image = {
 
 	-- Draw the current image
 	---@param this Image
-	---@param params table #
-	-- ```
-	-- {
-	-- 	x: number = 0,
-	-- 	y: number = 0,
-	-- 	w: number = 500,
-	-- 	h: number = 500,
-	-- 	alpha: number = 1,
-	-- 	blendOp?: integer,
-	-- 	tint?: { r, g, b },
-	-- 	stroke?: {
-	-- 		color?: string
-	-- 		size?: number
-	-- 	}
-	-- }
-	-- ```
+	---@param params ImageDrawParams
 	draw = function(this, params)
 		local scale = params.scale or 1;
 		local x = params.x or 0;

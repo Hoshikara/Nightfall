@@ -17,15 +17,7 @@ end
 local Label =  {
   -- Label constructor
   ---@param this LabelClass
-  ---@param p table #
-  -- ```
-  -- {
-  --   color: Color,
-  --   font: Font,
-  --   size: number = 50,
-  --   text: string = 'LABEL TEXT',
-  -- }
-  -- ```
+  ---@param p LabelConstructorParams
   ---@return Label
   new = function(this, p)
     ---@class Label : LabelClass
@@ -72,19 +64,7 @@ local Label =  {
 
   -- Draws the current label
   ---@param this Label
-  ---@param params table #
-  -- ```
-  -- {
-  --   x: number = 0,
-  --   y: number = 0,
-  --   align: Alignment,
-  --   alpha: number = 255,
-  --   color: Color,
-  --   maxWidth: number = -1,
-  --   text?: string,
-  --   update?: boolean,
-  -- }
-  -- ```
+  ---@param params LabelDrawParams
   draw = function(this, params)
     local x = params.x or 0;
     local y = params.y or 0;
@@ -121,19 +101,7 @@ local Label =  {
 
   -- Draws a scrolling version of the current label, bound to the specified width
   ---@param this Label
-  ---@param params table #
-  -- ```
-  -- {
-  --   x: number = 0,
-  --   y: number = 0,
-  --   align: Alignment,
-  --   alpha: number = 255,
-  --   color: Color,
-  --   scale: number = 1,
-  --   timer: number = 0,
-  --   width: number = 0,
-  -- }
-  -- ```
+  ---@param params LabelDrawScrollingParams
   drawScrolling = function(this, params)
     local x = params.x or 0;
     local y = params.y or 0;
@@ -169,16 +137,9 @@ local Label =  {
     gfx.Restore();
   end,
 
-  -- Updates the text/size/font of the current label
+  -- Updates the font/size/text of the current label
   ---@param this Label
-  ---@param params table #
-  -- ```
-  -- {
-  --   font?: string,
-  --   size?: number,
-  --   text?: string
-  -- }
-  -- ```
+  ---@param params LabelUpdateParams
   update = function(this, params)
     loadFont(params.font or this.font);
 

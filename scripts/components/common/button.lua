@@ -20,14 +20,7 @@ local Button = {
 
   -- Renders the current component
   ---@param this Button
-  ---@param p table
-  -- ```
-  -- {
-  --   x: number = 0,
-  --   y: number = 0,
-  --   alpha: number = 1,
-  -- }
-  -- ```
+  ---@param p ButtonRenderParams
   render = function(this, p)
     drawRect({
       x = p.x,

@@ -31,19 +31,12 @@ local Scrollbar = {
 
   -- Sets the sizes for the current component
   ---@param this Scrollbar
-  ---@param params table #
-  -- ```
-  -- {
-  --   x: number,
-  --   y: number,
-  --   h: number, 
-  -- }
-  -- ```
+  ---@param params ScrollbarSetSizesParams
   setSizes = function(this, params)
-    this.x = params.x;
-    this.y.track = params.y;
+    this.x = params.x or this.x;
+    this.y.track = params.y or this.y.track;
 
-    this.h.track = params.h;
+    this.h.track = params.h or this.h.track;
     this.h.remaining = this.h.track - this.h.bar;
   end,
 
@@ -77,14 +70,7 @@ local Scrollbar = {
   -- Renders the current component
   ---@param this Scrollbar
   ---@param dt deltaTime
-  ---@param params table #
-  -- ```
-  -- {
-  --   color: Color,
-  --   curr: number = 1,
-  --   total: number = 1,
-  -- }
-  -- ```
+  ---@param params ScrollbarRenderParams
   render = function(this, dt, params)
     this:handleChange(
       dt,

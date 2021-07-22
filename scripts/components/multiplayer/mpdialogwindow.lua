@@ -117,7 +117,7 @@ local MPDialogWindow = {
 	drawWindow = function(this, dt)
 		this.window:scale();
 
-		this.dialogBox:draw({
+		this.dialogBox:render({
 			x = this.window.w / 2,
 			y = this.window.h / 2,
 			alpha = this.timer,

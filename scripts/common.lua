@@ -61,24 +61,7 @@ alignText = function(a) gfx.TextAlign(Alignments[a] or Alignments.left); end
 
 -- Rectangle drawing wrapper function  
 -- Draws `image` if provided
----@param params table #
--- ```
--- {
--- 	x: number = 0,
--- 	y: number = 0,
--- 	w: number = 1000,
--- 	h: number = 1000,
--- 	alpha?: number
--- 	blendOp?: integer,
--- 	centered?: boolean,
--- 	color?: Color,
--- 	fast?: boolean,
--- 	image?: any,
--- 	scale: number = 1,
--- 	stroke?: table,
--- 	tint?: table
--- }
--- ```
+---@param params DrawRectParams
 drawRect = function(params)
 	local scale = params.scale or 1;
 	local x = params.x or 0;
@@ -190,7 +173,7 @@ end
 ---@param g? number
 ---@param b? number
 ---@param pct? number
----@return table # ```{ r, g, b }```
+---@return RGB
 makeColor = function(r, g, b, pct)
   r = r or 0;
   g = g or 0;
@@ -206,10 +189,7 @@ end
 
 -- Label wrapper function
 ---@param font Font
----@param text string | table # string |
--- ```
--- { color: Color, text: string }
--- ```
+---@param text string|LabelMulticolorText
 ---@param size? integer
 ---@param color? Color
 ---@return Label
@@ -253,7 +233,7 @@ reloadColors = function()
 end
 
 -- Fill color wrapper function
----@param c? Color
+---@param c? Color # Default `'norm'`
 ---@param a? number # Default `255`
 setFill = function(c, a)
 	a = (a and floor(a)) or 255;
@@ -263,14 +243,7 @@ setFill = function(c, a)
 end
 
 -- Stroke style wrapper function
----@param params table #
--- ```
--- {
--- 	alpha: integer = 255,
--- 	color: Color,
--- 	size: integer = 1,
--- }
--- ```
+---@param params SetStrokeParams
 setStroke = function(params)
 	local a = (params.alpha and floor(params.alpha)) or 255;
 	local c = Colors[params.color] or params.color or Colors.norm;

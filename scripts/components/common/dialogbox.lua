@@ -89,17 +89,10 @@ local DialogBox = {
 		end
 	end,
 
-	-- Draw the DialogBox
+	-- Renders the current component
 	---@param this DialogBox
-	---@param p table #
-	-- ```
-	-- {
-	-- 	x: number = 0,
-	-- 	y: number = 0,
-	-- 	alpha: number = 1,
-	-- }
-	-- ```
-	draw = function(this, p)
+	---@param p DialogBoxRenderParams
+	render = function(this, p)
 		local x = p.x or 0;
 		local y = p.y or 0;
 		local w = (this.w.box * 0.5);

@@ -362,7 +362,7 @@ local dialogWindow = {
 
 		this:handleChange(dt);
 
-		dialogBox:draw({
+		dialogBox:render({
 			x = window.w / 2,
 			y = window.h / 2,
 			alpha = this.timers.fade,

@@ -5,7 +5,7 @@ local R, G, B, _ = game.GetSkinSetting('colorScheme');
 
 -- Get color from skin settings
 ---@param key string # Skin setting key
----@return { [1]: integer, [2]: integer, [3]: integer }
+---@return RGB
 local getColor = function(key)
   local r, g, b, _ = game.GetSkinSetting(key);
 
@@ -21,7 +21,7 @@ end
 ---@param g? number
 ---@param b? number
 ---@param pct? number
----@return { [1]: integer, [2]: integer, [3]: integer }
+---@return RGB
 local makeColor = function(r, g, b, pct)
   r = r or 0;
   g = g or 0;

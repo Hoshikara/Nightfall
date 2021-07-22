@@ -89,7 +89,7 @@ Http.GetAsync(TagsURL, { ['user-agent'] = 'unnamed_sdvx_clone' }, tagCallback);
 render = function(dt)
 	reloadColors();
 
-	mouse:watch();
+	mouse:update();
 	
 	knobs:handleChange('btnCount', 'currBtn');
 

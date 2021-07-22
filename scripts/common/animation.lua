@@ -9,30 +9,11 @@ local loadFrames = function(path, count)
   return f;
 end
 
----@class AnimationState
----@field frame integer # Current frame of the animation
----@field queued boolean # Whether or not the animation is queued up to be played
----@field timer number # Timer to determine when the next frame should be played
-local AnimationState = {};
-
 ---@class AnimationClass
 local Animation = {
   -- Animation constructor
   ---@param this AnimationClass
-  ---@param p table #
-  -- ```
-  -- {
-  --   alpha: number = 1,
-  --   blendOp: integer = 0,,
-  --   centered: boolean = false,
-  --   fps: number = 30,
-  --   frameCount: integer = 1,
-  --   path: string,
-  --   loop: boolean = false,
-  --   loopPoint: integer = 1,
-  --   scale: number = 1,
-  -- }
-  -- ```
+  ---@param p AnimationConstructorParams
   ---@return Animation
   new = function(this, p)
     ---@class Animation : AnimationClass

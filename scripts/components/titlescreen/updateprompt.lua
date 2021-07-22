@@ -162,11 +162,10 @@ local UpdatePrompt = {
 			color = 'black',
 		});
 
-		dialogBox:draw({
+		dialogBox:render({
 			x = this.window.w / 2,
 			y = this.window.h / 2,
 			alpha = this.timer,
-			centered = true,
 		});
 
 		this.heading:draw({

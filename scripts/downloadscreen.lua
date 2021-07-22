@@ -65,7 +65,7 @@ do
 end
 
 -- Nautica response callback
----@param res NauticaResponse
+---@param res HttpResponse
 local songsCallback = function(res)
   if (res.status ~= 200) then
     error(('Error accessing %s: status %d'):format(NextURL, res.status));

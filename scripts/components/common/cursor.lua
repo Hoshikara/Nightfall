@@ -11,14 +11,7 @@ end
 local Cursor =  {
   -- Cursor constructor
   ---@param this CursorClass
-  ---@param p table #
-  -- ```
-  -- {
-  --   size: number = 6
-  --   stroke: number = 1
-  --   type: string = 'vertical'
-  -- }
-  -- ```
+  ---@param p CursorConstructorParams
   ---@param simple? boolean # `true` if cursor is not animated
   ---@return Cursor
   new = function(this, p, simple)
@@ -63,16 +56,7 @@ local Cursor =  {
 
   -- Sets the sizes for the current component
   ---@param this Cursor
-  ---@param params table #
-  -- ```
-  -- {
-  --   x?: number,
-  --   y?: number,
-  --   w?: number,
-  --   h?: number,
-  --   margin?: number
-  -- }
-  -- ```
+  ---@param params CursorSetSizesParams
   setSizes = function(this, params)
     this.x.base = params.x or this.x.base;
     this.y.base = params.y or this.y.base;
@@ -81,19 +65,9 @@ local Cursor =  {
     this.margin = params.margin or this.margin;
   end,
 
-  -- Draw the current cursor
+  -- Draws the current cursor
   ---@param this Cursor
-  ---@param params table #
-  -- ```
-  -- {
-  --   x?: number,
-  --   y?: number,
-  --   w?: number,
-  --   h?: number,
-  --   alpha?: number,
-  --   alphaMod?: number
-  -- }
-  -- ```
+  ---@param params CursorDrawParams
   draw = function(this, params)
     local x = params.x or (this.x.base + this.x.offset);
     local y = params.y or (this.y.base + this.y.offset);
@@ -188,15 +162,7 @@ local Cursor =  {
   -- Renders the current component
   ---@param this Cursor
   ---@param dt deltaTime
-  ---@param params table #
-  -- ```
-  -- {
-  --   h?: number
-  --   curr: number = 1,
-  --   forceFlicker?: boolean,
-  --   total: number = 1,
-  -- }
-  -- ```
+  ---@param params CursorRenderParams
   render = function(this, dt, params)
     this:handleChange(
       dt,

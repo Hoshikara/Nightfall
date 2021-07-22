@@ -1441,10 +1441,9 @@ local PlayerInfo = {
 		if (not this.state.hasInfo) then
 			this.window:scale();
 
-			dialogBox:draw({
+			dialogBox:render({
 				x = this.window.w / 2,
 				y = this.window.h / 2,
-				centered = true,
 			});
 
 			this.window:unscale();

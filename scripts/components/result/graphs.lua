@@ -675,7 +675,7 @@ local Graphs = {
 
     this:handleChange();
 
-    this.mouse:watch();
+    this.mouse:update();
 
     gfx.Save();
 

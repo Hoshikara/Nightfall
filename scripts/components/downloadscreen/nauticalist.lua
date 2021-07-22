@@ -485,7 +485,10 @@ local NauticaList = {
   ---@param this NauticaList
   ---@param dt deltaTime
   handleChange = function(this, dt)
-    this.list:handleChange(dt, { watch = this.state.currSong });
+    this.list:handleChange(dt, {
+      isPortrait = this.window.isPortrait,
+      watch = this.state.currSong
+    });
   end,
 
   -- Renders the current component

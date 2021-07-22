@@ -28,7 +28,7 @@ local state = {
 	songCount = 0,
 
 	---@param this SongWheel
-	watch = function(this)
+	update = function(this)
 		local song = songwheel.songs[this.currSong];
 		local diff = song and song.difficulties[this.currDiff];
 
@@ -96,7 +96,7 @@ render = function(dt)
 		game.SetSkinSetting('_reloadInfo', 'FALSE');
 	end
 
-	state:watch();
+	state:update();
 
 	window:set();
 

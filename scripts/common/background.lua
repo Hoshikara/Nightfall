@@ -34,16 +34,7 @@ local Background = {
 
   -- Renders the current component
   ---@param this Background
-  ---@param p table
-  -- ```
-  -- {
-  --   x: number = 0,
-  --   y: number = 0,
-  --   w?: number,
-  --   h?: number,
-  --   centered: boolean = false,
-  -- }
-  -- ```
+  ---@param p BackgroundRenderParams
   render = function(this, p)
     p = p or {};
 

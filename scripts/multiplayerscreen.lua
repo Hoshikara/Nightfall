@@ -114,7 +114,7 @@ local mpSounds = MpSounds:new();
 -- Called by the game every frame
 ---@param dt deltaTime
 render = function(dt)
-	mouse:watch();
+	mouse:update();
 
 	window:set();
 

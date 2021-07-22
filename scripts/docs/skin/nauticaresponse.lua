@@ -68,13 +68,3 @@ NauticaUser = {};
 ---@field meta NauticaMeta # Nautica metadata
 ---@field data NauticaSong[]
 NauticaResponseBody = {};
-
----@class NauticaResponse
----@field cookies string
----@field elapsed number # Response time
----@field error string # Error message
----@field header table
----@field status integer # Response status
----@field text NauticaResponseBody # Response body 
----@field url string # Endpoint URL
-NauticaResponse = {};

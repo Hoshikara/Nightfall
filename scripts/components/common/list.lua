@@ -24,25 +24,19 @@ local List = {
 
   -- Sets the sizes for the current component
   ---@param this List
-  ---@param params table #
-  -- ```
-  -- {
-  --   max: number = 0, // number of items on a page
-  --   shift: number = 0, // width or height of a page, in pixels
-  -- }
-  -- ```
+  ---@param params ListSetSizesParams
   setSizes = function(this, params)
     this.max = params.max or 0;
     this.shift = params.shift or 0;
   end,
 
-  -- Get the page of the list that the given item is on
+  -- Gets the page of the list that the given item is on
   ---@param this List
   ---@param i number # current item index
   ---@return number
   getPage = function(this, i) return math.floor((i - 1) / this.max) + 1; end,
 
-  -- Determine if the given item is on the current page
+  -- Determines if the given item is on the current page
   ---@param this List
   ---@param i number # current item index
   onPage = function(this, i)
@@ -53,13 +47,7 @@ local List = {
   -- Sets the offset for the current list
   ---@param this List
   ---@param dt deltaTime
-  ---@param params table #
-  -- ```
-  -- {
-  --   watch: integer,
-  --   duration?: number,
-  -- }
-  -- ```
+  ---@param params ListHandleChangeParams
   handleChange = function(this, dt, params)
     local duration = params.duration or 0.25;
 

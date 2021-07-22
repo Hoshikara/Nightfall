@@ -484,7 +484,7 @@ local ResultPanel = {
   ---@param dt deltaTime
   ---@return number w, number h
   render = function(this, dt)
-    this.mouse:watch();
+    this.mouse:update();
 
     this:setSizes();
 
