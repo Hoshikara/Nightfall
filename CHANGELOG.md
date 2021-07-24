@@ -1,3 +1,8 @@
+### 1.3.6 - July 23, 2021
+- Added a number to `Song Select` jackets to indicate the chart's ranking within a player's top 50 charts
+- Changed ring animation appearance (slightly) and behavior (attempt to prevent the animation from locking up)
+- Changed skin version hover hint to show even when there is no update available
+
 ### 1.3.5 - July 22, 2021
 - Decreased size of laser cursors
 - Decreased thickness of lasers

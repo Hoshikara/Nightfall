@@ -69,20 +69,27 @@ local getInfo = function()
 	end
 end
 
+-- Checks if there is a new skin version based on tags
 ---@param res HttpResponse
-local tagCallback = function(res)
+local tagsCallback = function(res)
 	if (res and res.status and (res.status == 200)) then
 		local body = JSON.decode(res.text or {});
 
-		if (body[1] and body[1].ref) then
-			local version = body[#body].ref:gsub('refs/tags/', '');
+		if (not body.message) then
+			local ref = body[#body] and body[#body].ref or '';
+			local version = ref:gsub('refs/tags/', '');
 
 			if (SkinVersion ~= version) then state.newVersion = true; end
 		end
 	end
 end
 
-Http.GetAsync(TagsURL, { ['user-agent'] = 'unnamed_sdvx_clone' }, tagCallback);
+-- Gets list of tags for Nightfall repo
+Http.GetAsync(
+	'https://api.github.com/repos/Hoshikara/Nightfall/git/refs/tags',
+	{ ['user-agent'] = 'unnamed-sdvx-clone' },
+	tagsCallback
+);
 
 -- Called by the game every frame
 ---@param dt deltaTime

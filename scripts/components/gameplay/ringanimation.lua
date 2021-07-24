@@ -52,11 +52,58 @@ local RingAnimation = {
     return t;
   end,
 
+  -- Plays the intro/outro effect for holds
+  ---@param this RingAnimation
+  ---@param dt deltaTime
+  ---@param holdActive boolean
+  ---@param state RingAnimationEffectState
+  playEffect = function(this, dt, holdActive, state)
+    if ((not holdActive) and (not state.playOut)) then return; end
+
+    if (holdActive) then
+      if (state.playIn and (state.alpha == 0)) then
+        state.alpha = 1;
+        state.playIn = false;
+        state.playOut = true;
+        state.timer = 0;
+      end
+    elseif (not holdActive) then
+      if (state.playIn) then -- intro effect did not finish
+        state.alpha = 1;
+        state.playIn = false;
+        state.playOut = true;
+        state.timer = 0;
+      elseif (state.playOut and (state.alpha == 0)) then -- reset
+        state.alpha = 1;
+        state.playIn = true;
+        state.playOut = false;
+        state.timer = 0;
+      end
+    end
+
+    if (state.playIn or ((not holdActive) and (state.playOut))) then
+      state.timer = to1(state.timer, dt, 0.125);
+
+      if (state.timer >= 0.5) then state.alpha = to0(state.alpha, dt, 0.125); end
+
+      this.effect:draw({
+        w = w,
+        h = w,
+        alpha = 1.75 * state.alpha,
+        blendOp = 8,
+        centered = true,
+        scale = state.timer * 1.35,
+      });
+    end
+  end,
+
   -- Start the ring animation
   ---@param this RingAnimation
   ---@param dt deltaTime
   ---@param state AnimationState
   start = function(this, dt, state)
+    if (state.effect) then this:playEffect(dt, state.active, state.effect); end
+
     if (state.active) then
       if (this.isHold) then
         state.alpha = to1(state.alpha, dt, 0.1);
@@ -64,29 +111,10 @@ local RingAnimation = {
         state.alpha = 1;
       end
     else
-      if (state.effect) then
-        if (state.effect.playIn) then
-          state.effect.alpha = 1;
-          state.effect.timer = 0;
-          
-          state.inner.frame = 1;
-          state.inner.timer = 0;
-
-          state.timer = 0;
-
-          return;
-        else
-          if (not state.effect.playOut) then state.effect.playOut = true; end
-        end
-      elseif (state.alpha == 0) then return; end
-
-      if (this.isHold) then
-        state.alpha = to0(state.alpha, dt, 0.1);
-      else
-        state.alpha = 0;
-      end
-      
+      state.alpha = 0;
       state.timer = 0;
+
+      return;
     end
 
     state.timer = state.timer + (dt * 2);
@@ -99,35 +127,6 @@ local RingAnimation = {
 
     if (isHold) then
       if (state.timer <= 0.5) then speed = 4; end
-
-      if (state.effect.playIn or state.effect.playOut) then
-        state.effect.timer = to1(state.effect.timer, dt, 0.125);
-
-        if (state.effect.timer >= 0.8) then
-          state.effect.alpha = to0(state.effect.alpha, dt, 0.125);
-        end
-
-        this.effect:draw({
-          w = w,
-          h = w,
-          alpha = 1.5 * state.effect.alpha,
-          blendOp = 8,
-          centered = true,
-          scale = state.effect.timer,
-        });
-
-        if (state.effect.alpha == 0) then
-          state.effect.alpha = 1;
-          state.effect.timer = 0;
-
-          if (state.effect.playIn) then
-            state.effect.playIn = false;
-          elseif (state.effect.playOut) then
-            state.effect.playIn = true;
-            state.effect.playOut = false;
-          end
-        end
-      end
     end
 
     local t = state.timer * speed;

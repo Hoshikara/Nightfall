@@ -31,7 +31,8 @@ local Title = {
 			cache = { w = 0, h = 0 },
 			labels = {
 				checking = makeLabel('med', 'CHECKING FOR UPDATES'),
-				click = makeLabel('med', 'CLICK TO VIEW NEW VERSION', 20),
+				clickChangelog = makeLabel('med', 'CLICK TO VIEW CHANGELOG', 20),
+				clickVersion = makeLabel('med', 'CLICK TO VIEW NEW VERSION', 20),
 				game = makeLabel('med', 'UNNAMED SDVX CLONE', 31),
 				skin = makeLabel('med', 'NIGHTFALL', 120),
 				version = makeLabel('num', SkinVersion, 20),
@@ -124,12 +125,14 @@ local Title = {
 	drawVersion = function(this, dt, alpha, x, y)
 		local alphaMod;
 		local color = 'white';
+		local w = -315;
 
 		if (this.state.newVersion) then
 			this.timers.version = this.timers.version + dt;
 
 			alphaMod = pulse(this.timers.version, 0.85, 0.2);
 			color = 'neg';
+			w = -330;
 		else
 			alphaMod = 1;
 		end
@@ -153,25 +156,24 @@ local Title = {
 				isClickable = true,
 			});
 
-			if (this.state.newVersion) then
-				drawRect({
-					x = x + this.labels.version.w,
-					y = y - 29,
-					w = -330,
-					h = 28,
-					alpha = 225,
-					color = 'dark',
-					fast = true,
-				});
-		
-				this.labels.click:draw({
-					x = x + this.labels.version.w - 6,
-					y = y - 28,
-					align = 'right',
-					alpha = alpha,
-					color = 'white',
-				});
-			end
+			drawRect({
+				x = x + this.labels.version.w,
+				y = y - 29,
+				w = w,
+				h = 28,
+				alpha = 225,
+				color = 'dark',
+				fast = true,
+			});
+
+			((this.state.newVersion and this.labels.clickVersion)
+				or this.labels.clickChangelog):draw({
+				x = x + this.labels.version.w - 6,
+				y = y - 28,
+				align = 'right',
+				alpha = alpha,
+				color = 'white',
+			});
 		else
 			this.state.hoveringVersion = false;
 		end

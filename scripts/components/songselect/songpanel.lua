@@ -232,9 +232,24 @@ local SongPanel = {
           color = 'white',
         });
   
-        labels[diff.top.place]:draw({
+        labels[diff.top.breakpoint]:draw({
           x = x + 16 + labels.top.w + 8,
           y = y + 12,
+        });
+
+        drawRect({
+          x = x + size - 8,
+          y = y + 8,
+          w = -40,
+          h = 32,
+          color = 'dark',
+        });
+
+        diff.top.rank.small:draw({
+          x = x + size - 16,
+          y = y + 12,
+          align = 'right',
+          color = 'white',
         });
       else
         drawRect({
@@ -251,9 +266,24 @@ local SongPanel = {
           color = 'white',
         });
   
-        labels[diff.top.place]:draw({
+        labels[diff.top.breakpoint]:draw({
           x = x + 20 + labels.top.w + 12,
           y = y + 15,
+        });
+
+        drawRect({
+          x = x + size - 12,
+          y = y + 12,
+          w = -58,
+          h = 42,
+          color = 'dark',
+        });
+
+        diff.top.rank.large:draw({
+          x = x + size - 24,
+          y = y + 15,
+          align = 'right',
+          color = 'white',
         });
       end
     end

@@ -995,7 +995,7 @@ local PlayerInfo = {
 				y = y + 8,
 				w = 64,
 				h = 52,
-				alpha = 180,
+				alpha = 200,
 				color = 'dark',
 			});
 

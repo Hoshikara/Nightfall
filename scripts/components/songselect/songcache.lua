@@ -71,7 +71,14 @@ local SongCache = {
   ---@param this SongCache
   getTop = function(this, id)
     if (this.top[id]) then
-      return { labels = this.labels.top, place = this.top[id] };
+      return {
+        breakpoint = this.top[id].breakpoint,
+        labels = this.labels.top,
+        rank = {
+          large = makeLabel('num', ('%02d'):format(this.top[id].rank), 28),
+          small = makeLabel('num', ('%02d'):format(this.top[id].rank)),
+        },
+      };
     end
   end,
   

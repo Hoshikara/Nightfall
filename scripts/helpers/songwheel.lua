@@ -266,9 +266,9 @@ local getVF = function(topScores)
   for i, diff in ipairs(diffs) do
     if (diff.VF > 0) then
       if (i <= 20) then
-        topScores[diff.id] = '20';
+        topScores[diff.id] = { breakpoint = '20', rank = i };
       else
-        topScores[diff.id] = '50';
+        topScores[diff.id] = { breakpoint = '50', rank = i };
       end
 
       VF = VF + diff.VF;

@@ -1,11 +1,9 @@
 -- This script is loaded for every screen of the game
 -- All of the functions below are available to all of the scripts of the skin
 
-SkinVersion = '1.3.5';
+SkinVersion = '1.3.6';
 
 Developer = false;
-
-TagsURL = 'https://api.github.com/repos/Hoshikara/Nightfall/git/refs/tags';
 
 gfx.LoadSkinFont('DFMGM.ttf');
 

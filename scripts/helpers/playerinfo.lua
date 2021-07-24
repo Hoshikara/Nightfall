@@ -181,7 +181,7 @@ local makeTopPlay = function(i, play, best)
 		grade = makeLabel('norm', play.grade, (best and 24) or 36),
 		jacketPath = play.jacketPath,
 		level = makeLabel('num', play.level, 24),
-		place = makeLabel('num', i, 36),
+		place = makeLabel('num', ('%02d'):format(i), 36),
 		score = ScoreNumber:new({ size = (best and 110) or 84, val = play.score }),
 		title = makeLabel('jp', play.title, (best and 24) or 30),
 		VF = makeLabel('num', play.VF, 24),

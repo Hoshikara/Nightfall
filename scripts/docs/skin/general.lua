@@ -194,6 +194,13 @@ ListSetSizesParams = {};
 ---@field watch integer # Current item index to watch for changes
 ListHandleChangeParams = {};
 
+---@class RingAnimationEffectState
+---@field alpha integer
+---@field playIn boolean
+---@field playOut boolean
+---@field timer number
+RingAnimationEffectState = {};
+
 -- `ScoreNumber:new` params
 ---@class ScoreNumberConstructorParams
 ---@field digits? integer # Default `4`
