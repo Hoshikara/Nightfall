@@ -74,7 +74,7 @@ local PlayerInfo = {
 						'norm',
 						{
 							{ color = 'white', text = 'PRESS' },
-							{ color = 'norm', text = '[BT-A]' },
+							{ color = 'norm', text = '[BT-D]' },
 							{ color = 'white', text = 'DURING SONG SELECT TO' },
 						},
 						32

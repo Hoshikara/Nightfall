@@ -1,3 +1,26 @@
+### 1.3.7 - July 26, 2021
+- `In-game Preview` changes
+  - New skin settings added/now adjustable from this screen:
+    - `Early / Late` flicker speed
+    - `Early / Late` opacity
+    - `Hi-Speed` ignore change hint
+    - `Hit Delta Bar` decay time
+    - `Score Difference` update delay time
+  - Modified the appearance of the components above to better reflect effects of their corresponding settings
+  - Modified the appearance of the settings window:
+    - Now opens from outside of the screen
+    - Open tabs auto-collapse when a new tab is expanded
+    - Radio buttons to toggle the various settings
+- `Results` changes
+  - Added ARS text to simple view gauge display
+  - Fixed VF increase text showing when the truncated value is `0.000`
+  - Fixed incorrect VF increase text if VF has been gained from the chart previously (it is your top 50 plays)
+  - Fixed a crash that occurred after completing a chart
+- Added `EX SCORE` display for gameplay (thanks to t3s for collection logic)
+- Added a preview video and a link to FAQ to the `README`
+- Added an additional check for new skin versions
+- Changed button to load player info from `BT-A` to `BT-D`
+
 ### 1.3.6 - July 23, 2021
 - Added a number to `Song Select` jackets to indicate the chart's ranking within a player's top 50 charts
 - Changed ring animation appearance (slightly) and behavior (attempt to prevent the animation from locking up)

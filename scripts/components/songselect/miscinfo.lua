@@ -21,7 +21,7 @@ local MiscInfo = {
         loadInfo = makeLabel(
           'med',
           {
-            { color = 'norm', text = '[BT-A]' },
+            { color = 'norm', text = '[BT-D]' },
             { color = 'white', text = 'LOAD PLAYER INFO' },
           },
           20

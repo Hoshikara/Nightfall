@@ -1,8 +1,3 @@
----@type number
-local hitDeltaBarScale = getSetting('hitDeltaBarScale', 1.0);
----@type number
-local hitDecayTime = getSetting('hitDecayTime', 6.0);
-
 ---@class HitDeltaBarClass
 local HitDeltaBar = {
   -- HitDeltaBar constructor
@@ -16,9 +11,10 @@ local HitDeltaBar = {
       cache = { w = 0, h = 0 },
       ---@type table<string, integer[]>
       critScale = 1,
-      critWin = (gameplay.hitWindow and gameplay.hitWindow.perfect) or 46,
+      critWin = (gameplay and gameplay.hitWindow and gameplay.hitWindow.perfect) or 46,
+      decayTime = getSetting('hitDecayTime', 6.0),
       nearScale = 1,
-      nearWin = (gameplay.hitWindow and gameplay.hitWindow.good) or 92,
+      nearWin = (gameplay and gameplay.hitWindow and gameplay.hitWindow.good) or 92,
       ---@type table<string, AnimationState[]>
       states = { crit = {}, near = {} },
       timer = 1,
@@ -61,8 +57,14 @@ local HitDeltaBar = {
 
   -- Sets the sizes for the current component
   ---@param this HitDeltaBar
-  setSizes = function(this)
-    if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
+  ---@param isPreview boolean
+  setSizes = function(this, isPreview)
+    if ((this.cache.w ~= this.window.w)
+      or (this.cache.h ~= this.window.h)
+      or isPreview
+    ) then
+      local hitDeltaBarScale = getSetting('hitDeltaBarScale', 1.0);
+
       if (this.window.isPortrait) then
         this.w = this.window.w * 0.495 * hitDeltaBarScale;
         this.y = this.window.h / 6;
@@ -91,7 +93,7 @@ local HitDeltaBar = {
   ---@param dt deltaTime
   ---@param state AnimationState
   drawHit = function(this, dt, state)
-    state.timer = to0(state.timer, dt, hitDecayTime);
+    state.timer = to0(state.timer, dt, this.decayTime);
 
     drawRect({
       x = state.delta - (this.wBar[2] / 2),
@@ -150,28 +152,33 @@ local HitDeltaBar = {
   -- Renders the current component
   ---@param this HitDeltaBar
   ---@param dt deltaTime
-  render = function(this, dt)
+  ---@param isPreview boolean
+  render = function(this, dt, isPreview)
     local alpha = 255 * this.timer;
     local crit = this.states.crit;
     local critCol = Colors.critical;
     local near = this.states.near;
 
-    if (gameplay.progress == 0) then
-      for _, rating in pairs(this.states) do
-        for btn = 1, 6 do
-          if (not rating[btn]) then break; end
+    if (isPreview) then
+      this.decayTime = getSetting('hitDecayTime', 6.0);
+    else
+      if (gameplay.progress == 0) then
+        for _, rating in pairs(this.states) do
+          for btn = 1, 6 do
+            if (not rating[btn]) then break; end
 
-          for i = 1, 30 do
-            rating[btn][i].color = 'white';
-            rating[btn][i].delta = 0;
-            rating[btn][i].queued = false;
-            rating[btn][i].timer = 1;
+            for i = 1, 30 do
+              rating[btn][i].color = 'white';
+              rating[btn][i].delta = 0;
+              rating[btn][i].queued = false;
+              rating[btn][i].timer = 1;
+            end
           end
         end
       end
     end
 
-    this:setSizes();
+    this:setSizes(isPreview);
 
     local w = this.wBar[1];
     local h = this.h;
@@ -235,48 +242,50 @@ local HitDeltaBar = {
       color = Colors.late,
     });
 
-    if (gameplay.progress > 0) then this.timer = to0(this.timer, dt, 1); end
+    if (not isPreview) then
+      if (gameplay.progress > 0) then this.timer = to0(this.timer, dt, 1); end
 
-    if (this.timer > 0) then
-      this.labels.zero:draw({
-        x = 0,
-        y = -16,
-        align = 'middle',
-        alpha = alpha,
-        color = 'white',
-      });
+      if (this.timer > 0) then
+        this.labels.zero:draw({
+          x = 0,
+          y = -16,
+          align = 'middle',
+          alpha = alpha,
+          color = 'white',
+        });
 
-      this.labels.critNeg:draw({
-        x = -this.x.near - 1,
-        y = -16,
-        align = 'middle',
-        alpha = alpha,
-        color = critCol,
-      });
+        this.labels.critNeg:draw({
+          x = -this.x.near - 1,
+          y = -16,
+          align = 'middle',
+          alpha = alpha,
+          color = critCol,
+        });
 
-      this.labels.critPos:draw({
-        x = this.x.near,
-        y = -16,
-        align = 'middle',
-        alpha = alpha,
-        color = critCol,
-      });
+        this.labels.critPos:draw({
+          x = this.x.near,
+          y = -16,
+          align = 'middle',
+          alpha = alpha,
+          color = critCol,
+        });
 
-      this.labels.nearNeg:draw({
-        x = -(this.w / 2) - 1,
-        y = -16,
-        align = 'middle',
-        alpha = alpha,
-        color = Colors.early,
-      });
+        this.labels.nearNeg:draw({
+          x = -(this.w / 2) - 1,
+          y = -16,
+          align = 'middle',
+          alpha = alpha,
+          color = Colors.early,
+        });
 
-      this.labels.nearPos:draw({
-        x = this.w / 2,
-        y = -16,
-        align = 'middle',
-        alpha = alpha,
-        color = Colors.late,
-      });
+        this.labels.nearPos:draw({
+          x = this.w / 2,
+          y = -16,
+          align = 'middle',
+          alpha = alpha,
+          color = Colors.late,
+        });
+      end
     end
 
     gfx.Restore();

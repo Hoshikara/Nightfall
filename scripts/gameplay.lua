@@ -29,6 +29,8 @@ local minCritDelta = getSetting('minCritDelta', 23);
 ---@type boolean
 local showCritDelta = getSetting('showCritDelta', false);
 
+local sCritWindow = nil;
+
 local players = nil;
 
 ---@type boolean
@@ -39,8 +41,10 @@ local state = {
 	bpms = nil,
 	buttonDelta = 0,
 	chain = 0,
+	exScore = 0,
 	intro = { alpha = 255, offset = 0 },
 	isCrit = false,
+	isButton = false,
 	isLate = false,
 	maxChain = 0,
 	score = 0,
@@ -107,16 +111,34 @@ end
 ---@param rating integer # `0 = Miss`, `1 = Near`, `2 = Crit`, `3 = Idle`
 ---@param delta integer # delta from 0 of the hit, in milliseconds
 button_hit = function(btn, rating, delta)
+	if (not sCritWindow) then
+		sCritWindow = math.floor(
+			(gameplay.hitWindow and gameplay.hitWindow.perfect or 46) * 0.5
+		);
+	end
+
+	if (rating ~= 3) then state.isButton = true; end
+
 	if (rating == 1) then
 		state.isCrit = false;
 		state.buttonDelta = delta;
+
+		state.exScore = state.exScore + 2;
 	elseif (rating == 2) then
+		local d = abs(delta);
+
 		if (showCritDelta) then
-			if (abs(delta) >= minCritDelta) then
+			if (d >= minCritDelta) then
 				state.isCrit = true;
 				state.buttonDelta = delta;
 				state.timers.earlate = 0.75;
 			end
+		end
+
+		if (d <= sCritWindow) then
+			state.exScore = state.exScore + 5;
+		else
+			state.exScore = state.exScore + 4;
 		end
 	end
 
@@ -177,7 +199,11 @@ render = function(dt)
 
 	if (init) then initAll(); end
 
-	if (gameplay.progress == 0) then state.maxChain = 0; end
+	if (gameplay.progress == 0) then
+		state.isButton = false;
+		state.exScore = 0;
+		state.maxChain = 0;
+	end
 
 	if (state.chain > 0) then chain:render(dt); end
 
@@ -270,11 +296,17 @@ end
 -- Called by the game to update the current chain
 ---@param newChain integer
 update_combo = function(newChain)
+	if ((newChain > state.chain) and (not state.isButton)) then
+		state.exScore = state.exScore + 2;
+	end
+
 	state.chain = newChain;
 
 	if (state.chain > state.maxChain) then state.maxChain = state.chain; end
 
 	state.timers.chain = 0.75;
+
+	state.isButton = false;
 end
 
 -- Called by the game to update the current score

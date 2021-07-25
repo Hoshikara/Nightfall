@@ -116,10 +116,10 @@ local UserInfo = {
 
     local diffStr = ('%08d'):format(abs);
     local numAlpha = {
-      (((abs > 1000000) and 255) or 50),
-      (((abs > 100000) and 255) or 50),
-      (((abs > 10000) and 255) or 50),
-      (((abs > 1000) and 255) or 50)
+      (((abs >= 1000000) and 255) or 50),
+      (((abs >= 100000) and 255) or 50),
+      (((abs >= 10000) and 255) or 50),
+      (((abs >= 1000) and 255) or 50)
     };
 
     if (this.diff ~= 0) then

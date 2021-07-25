@@ -15,6 +15,8 @@ local SongPanel = require('components/songselect/songpanel');
 local window = Window:new();
 local background = Background:new(window);
 
+local top = {};
+
 local VF = 0;
 
 local init = true;
@@ -36,6 +38,7 @@ local state = {
 			local key = diff.hash or ('%s_%d'):format(song.title, diff.level);
 
 			game.SetSkinSetting('_diffKey', key);
+			game.SetSkinSetting('_diffVF', (top[diff.id] and top[diff.id].VF) or 0);
 		end
 
 		this.songCount = #songwheel.songs;
@@ -86,7 +89,7 @@ render = function(dt)
 		init = false;
 	end
 
-	if ((not state.infoLoaded) and pressed('BTA') and menusClosed()) then
+	if ((not state.infoLoaded) and pressed('BTD') and menusClosed()) then
 		makeStats(true);
 	end
 
@@ -142,4 +145,6 @@ songs_changed = function(withAll)
 	songCache.top = {};
 
 	VF = Helpers.getVF(songCache.top);
+
+	top = songCache.top;
 end

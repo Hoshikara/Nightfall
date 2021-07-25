@@ -231,6 +231,7 @@ end
 ---@param res result
 ---@return ResultVF
 local getVF = function(res)
+	local diffVF = getSetting('_diffVF', 0);
 	local increase = '';
 	local minVF = getSetting('_minVF', 0);
 	local playVF = Helpers.calcVF({
@@ -240,6 +241,11 @@ local getVF = function(res)
 		topBadge = res.badge,
 	});
 	local playerVF = getSetting('_VF', 0);
+
+	if (diffVF ~= 0) then minVF = diffVF; end
+
+	minVF = math.floor(minVF * 1000) / 1000;
+	playVF = math.floor(playVF * 1000) / 1000;
 
 	if (playVF > minVF) then
 		increase = playVF - minVF;
@@ -379,24 +385,26 @@ end
 local getGaugeData = function(res)
 	local blastiveLevel = getSetting('_blastiveLevel', '');
 	local change = getSetting('_gaugeChange', '');
-	local rate;
+	local rate = '';
 	local samples = (JSONTable:new('samples')):get();
 	local type = res.gauge_type or res.flags or 0;
 	local hardFail = (type == 1) and (res.badge == 1);
 
 	if (type == 1) then
-		rate = makeLabel('med', 'EXCESSIVE RATE', 20);
+		rate = 'EXCESSIVE RATE';
 	elseif (type == 2) then
-		rate = makeLabel('med', 'PERMISSIVE RATE', 20);
+		rate = 'PERMISSIVE RATE';
 	elseif (type == 3) then
-		rate = makeLabel(
-			'med',
-			('BLASTIVE RATE - %s'):format(tostring(blastiveLevel)),
-			20
-		);
+		rate = ('BLASTIVE RATE (%s)'):format(tostring(blastiveLevel));
 	else
-		rate = makeLabel('med', 'EFFECTIVE RATE', 20);
+		rate = 'EFFECTIVE RATE';
 	end
+
+	if ((type ~= 0) and (getSetting('_arsEnabled', 'false') == 'true')) then
+		rate = rate .. ' + ARS';
+	end
+
+	rate = makeLabel('med', rate, 20);
 
 	---@class GaugeData
 	local g = {
@@ -428,7 +436,9 @@ end
 ---@return HitCounts, ScoreNumber
 local getHitCounts = function(res)
 	local hitStats = res.noteHitStats or {};
-	local sCritWindow = ((res.hitWindow and res.hitWindow.perfect) or 46) * 0.5;
+	local sCritWindow = math.floor(
+		((res.hitWindow and res.hitWindow.perfect) or 46) * 0.5
+	);
 	local total = res.perfects + res.goods + res.misses;
 
 	local errorEarly = 0;
@@ -588,7 +598,9 @@ local getGraphData = function(res)
 		mean = makeLabel('num', getMeanDelta(res));
 		median = makeLabel('num', getMedianDelta(res));
 		nearWindow = (res.hitWindow and res.hitWindow.good) or 92,
-		sCritWindow = ((res.hitWindow and res.hitWindow.perfect) or 46) * 0.5,
+		sCritWindow = math.floor(
+			((res.hitWindow and res.hitWindow.perfect) or 46) * 0.5
+		),
 		suggestion = suggestion,
 	};
 

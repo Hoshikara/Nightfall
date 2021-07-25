@@ -1,4 +1,4 @@
-The files in this folder are not loaded/used by the skin but instead are used for development purposes.
+The files in `scripts/docs` are not loaded/used by the skin but instead are used for development purposes.
 
 Specifically, they help with things such as autocompletion, go-to definitions, hover hints, etc. only when using this [Visual Studio Code extension.](https://marketplace.visualstudio.com/items?itemName=sumneko.lua)
 

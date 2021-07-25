@@ -122,115 +122,6 @@
 		"max": 46,
 		"type": "int"
 	},
-	"separator_mcv": {},
-	"showEarlate": {
-		"label": "Show Early / Late Display",
-		"type": "bool",
-		"default": true
-	},
-	"earlateType": {
-		"label": "Early / Late Display Type",
-		"type": "selection",
-		"default": "TEXT",
-		"values": [
-			"DELTA",
-			"TEXT",
-			"TEXT + DELTA"
-		]
-	},
-	"earlateX": {
-		"label": "Early / Late X-Position: %.2f",
-		"type": "float",
-		"default": 0.5,
-		"min": 0.0,
-		"max": 1.0
-	},
-	"earlateY": {
-		"label": "Early / Late Y-Position: %.2f",
-		"type": "float",
-		"default": 0.75,
-		"min": 0.0,
-		"max": 1.0
-	},
-	"earlateGap": {
-		"label": "Early / Late Text/Delta Gap: %.2f",
-		"type": "float",
-		"default": 0.4,
-		"min": 0.25,
-		"max": 1.0
-	},
-	"separator_mdu": {},
-	"showHispeed": {
-		"label": "Show Hi-Speed Display",
-		"type": "bool",
-		"default": true
-	},
-	"hispeedX": {
-		"label": "Hi-Speed X-Position: %.2f",
-		"type": "float",
-		"default": 0.5,
-		"min": 0.0,
-		"max": 1.0
-	},
-	"hispeedY": {
-		"label": "Hi-Speed Y-Position: %.2f",
-		"type": "float",
-		"default": 0.5,
-		"min": 0.0,
-		"max": 1.0
-	},
-	"ignoreSpeedChange": {
-		"label": "Ignore incoming Hi-Speed changes",
-		"type": "bool",
-		"default": false
-	},
-	"separator_iuw": {},
-	"showHitDeltaBar": {
-		"label": "Show hit delta bar",
-		"type": "bool",
-		"default": false
-	},
-	"hitDeltaBarScale": {
-		"label": "Hit Delta Bar Scale: %.2f",
-		"type": "float",
-		"default": 1.0,
-		"max": 2.0,
-		"min": 0.5
-	},
-	"hitDecayTime": {
-		"label": "Hit bar decay time (in seconds): %.2f",
-		"type": "float",
-		"default": 6.0,
-		"max": 10.0,
-		"min": 2.0
-	},
-	"separator_wei": {},
-	"showScoreDiff": {
-		"label": "Show Score Difference",
-		"type": "bool",
-		"default": true
-	},
-	"scoreDiffDelay": {
-		"label": "Score Difference update delay time (in seconds): %.2f",
-		"type": "float",
-		"default": 0.05,
-		"min": 0.05,
-		"max": 1.0
-	},
-	"scoreDiffX": {
-		"label": "Score Difference X-Position: %.2f",
-		"type": "float",
-		"default": 0.05,
-		"min": 0.0,
-		"max": 1.0
-	},
-	"scoreDiffY": {
-		"label": "Score Difference Y-Position: %.2f",
-		"type": "float",
-		"default": 0.50,
-		"min": 0.0,
-		"max": 1.0
-	},
 	"separator_dofn": {},
 	"showPracticeControls": {
 		"label": "Show Controls for Practice Mode",
@@ -295,5 +186,135 @@
 			"FULLSCREEN",
 			"PANEL"
 		]
+	},
+	"separator_e": {},
+	"////////// DEVELOPER //////////": {
+		"type": "label"
+	},
+	"Do not modify here, use the In-game Preview screen on the main menu instead": {
+		"type": "label"
+	},
+	"separator_mrx": {},
+	"showEarlate": {
+		"label": "Show Early / Late Display",
+		"type": "bool",
+		"default": true
+	},
+	"earlateType": {
+		"label": "Early / Late Display Type",
+		"type": "selection",
+		"default": "TEXT",
+		"values": [
+			"DELTA",
+			"TEXT",
+			"TEXT + DELTA"
+		]
+	},
+	"earlateHz": {
+		"label": "Early / Late Flicker Speed",
+		"type": "int",
+		"default": 18,
+		"min": 1,
+		"max": 24
+	},
+	"earlateOpacity": {
+		"label": "Early / Late Opacity: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"earlateX": {
+		"label": "Early / Late X-Position: %.2f",
+		"type": "float",
+		"default": 0.5,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"earlateY": {
+		"label": "Early / Late Y-Position: %.2f",
+		"type": "float",
+		"default": 0.75,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"earlateGap": {
+		"label": "Early / Late Text/Delta Gap: %.2f",
+		"type": "float",
+		"default": 0.4,
+		"min": 0.25,
+		"max": 1.0
+	},
+	"separator_mdu": {},
+	"showHispeed": {
+		"label": "Show Hi-Speed Display",
+		"type": "bool",
+		"default": true
+	},
+	"ignoreSpeedChange": {
+		"label": "Ignore incoming Hi-Speed changes",
+		"type": "bool",
+		"default": false
+	},
+	"hispeedX": {
+		"label": "Hi-Speed X-Position: %.2f",
+		"type": "float",
+		"default": 0.5,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"hispeedY": {
+		"label": "Hi-Speed Y-Position: %.2f",
+		"type": "float",
+		"default": 0.5,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"separator_iuw": {},
+	"showHitDeltaBar": {
+		"label": "Show hit delta bar",
+		"type": "bool",
+		"default": false
+	},
+	"hitDecayTime": {
+		"label": "Hit delta bar hit decay time (in seconds): %.2f",
+		"type": "float",
+		"default": 6.0,
+		"max": 10.0,
+		"min": 2.0
+	},
+	"hitDeltaBarScale": {
+		"label": "Hit Delta Bar Scale: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"max": 2.0,
+		"min": 0.5
+	},
+	"separator_wei": {},
+	"showScoreDiff": {
+		"label": "Show Score Difference",
+		"type": "bool",
+		"default": true
+	},
+	"scoreDiffDelay": {
+		"label": "Score Difference update delay time (in seconds): %.2f",
+		"type": "float",
+		"default": 0.05,
+		"min": 0.05,
+		"max": 1.0
+	},
+	"scoreDiffX": {
+		"label": "Score Difference X-Position: %.2f",
+		"type": "float",
+		"default": 0.05,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"scoreDiffY": {
+		"label": "Score Difference Y-Position: %.2f",
+		"type": "float",
+		"default": 0.50,
+		"min": 0.0,
+		"max": 1.0
 	}
 }

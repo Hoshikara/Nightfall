@@ -137,6 +137,28 @@ DrawRectParams = {};
 ---@field stroke? SetStrokeParams # Default `nil`
 ImageDrawParams = {};
 
+---@class IngamePreviewTab
+---@field component? table
+---@field h number
+---@field heading Label
+---@field render? function
+---@field status IngamePreviewSetting
+---@field settings IngamePreviewSetting[]
+---@field text? Label[]
+IngamePreviewTab = {};
+
+-- Table returned by `makeSetting`
+---@class IngamePreviewSetting
+---@field color Color
+---@field event function
+---@field idx? integer
+---@field label Label
+---@field multi? number
+---@field options? string[]
+---@field value number|string
+---@field valueLabel Label
+IngamePreviewSetting = {};
+
 -- `Label:new` params
 ---@class LabelConstructorParams
 ---@field color? Color # Default `'norm'`
@@ -193,6 +215,19 @@ ListSetSizesParams = {};
 ---@field isPortrait? boolean # Default `nil`, used for prevent unexpected behavior when switching game window orientation
 ---@field watch integer # Current item index to watch for changes
 ListHandleChangeParams = {};
+
+-- `makeSetting` params
+---@class MakeSettingParams
+---@field default any
+---@field format? string
+---@field key string
+---@field label string
+---@field max? number
+---@field min? number
+---@field multi? number
+---@field options? string[]
+---@field step? number
+MakeSettingParams = {};
 
 ---@class RingAnimationEffectState
 ---@field alpha integer

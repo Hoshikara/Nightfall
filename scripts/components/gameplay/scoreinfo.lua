@@ -13,7 +13,9 @@ local ScoreInfo = {
     ---@field window Window
     local t = {
       cache = { w = 0, h = 0 },
+      exScore = ScoreNumber:new({ digits = 5, size = 24 }),
       labels = {
+        exScore = makeLabel('norm', 'EX'),
         maxChain = makeLabel('norm', 'MAXIMUM CHAIN'),
         score = makeLabel('norm', 'SCORE', 48),
       },
@@ -60,15 +62,7 @@ local ScoreInfo = {
     this:setSizes();
 
     local alpha = this.state.intro.alpha;
-    local xChain = -((this.labels.maxChain.w * 1.25) + 4);
-    local xLabel = -(this.labels.score.w * 1.675) + 2;
-    local xMax = 0;
-
-    if (this.window.isPortrait) then
-      xLabel = -(this.labels.score.w * 1.1);
-      xMax = (this.labels.maxChain.w * 0.45) + 2;
-      xChain = xMax - this.labels.maxChain.w - 56;
-    end
+    local isPortrait = this.window.isPortrait;
     
     gfx.Save();
 
@@ -78,33 +72,49 @@ local ScoreInfo = {
     );
 
     this.labels.score:draw({
-      x = xLabel,
-      y = -(this.val.h * 0.35) + 4,
+      x = (isPortrait and -144) or -289,
+      y = (isPortrait and -29) or -37,
       align = 'right',
       alpha = alpha,
     });
 
     this.val:draw({
-      x = -(this.window.w / 4.75) + 1,
+      x = (isPortrait and -226) or -403,
       align = 'right',
       alpha = alpha,
       offset = 0,
       val = this.state.score,
     });
 
-    gfx.Translate(-3, this.val.h - 6);
+    this.labels.exScore:draw({
+      x = (isPortrait and 5) or -93,
+      y = y,
+      align = 'right',
+      alpha = alpha,
+    });
 
-    this.labels.maxChain:draw({
-      x = xMax,
+    this.exScore:draw({
+      x = (isPortrait and 31) or -67,
+      y = y,
       align = 'right',
       alpha = alpha,
       color = 'white',
+      val = this.state.exScore,
+    });
+
+    gfx.Translate(-3, this.val.h - 6);
+
+    this.labels.maxChain:draw({
+      x = (isPortrait and 98) or 0,
+      align = 'right',
+      alpha = alpha,
     });
 
     this.maxChain:draw({
-      x = xChain,
+      x = (isPortrait and -171) or -269,
       align = 'right',
       alpha = alpha,
+      color = 'white',
       val = this.state.maxChain,
     });
 

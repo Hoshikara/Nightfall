@@ -295,13 +295,21 @@ button_pressed = function(btn)
 
       if (not song) then return; end
 
-      dlScreen.PlayPreview(encodeURI(song.preview_url), Header, song.id);
+      -- TODO: uncomment when StopPreview makes it into master
 
-      song.status = 'PREVIEWING';
+      -- if (state.playingSong and (state.playingSong.id == song.id)) then
+      --   dlScreen.StopPreview();
+      --   state.playingSong.status = nil;
+      --   state.playingSong = nil;
+      -- else
+        dlScreen.PlayPreview(encodeURI(song.preview_url), Header, song.id);
 
-      if (state.playingSong) then state.playingSong.status = nil; end
+        song.status = 'PREVIEWING';
 
-      state.playingSong = song;
+        if (state.playingSong) then state.playingSong.status = nil; end
+
+        state.playingSong = song;
+      -- end
     end
   elseif (btn == game.BUTTON_BTB) then
     if (action == 'BROWSING') then

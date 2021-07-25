@@ -1,12 +1,5 @@
 ---@type number
-local earlateX = getSetting('earlateX', 0.5);
-local earlateY = getSetting('earlateY', 0.75);
-local earlateGap = getSetting('earlateGap', 0.25);
-local showEarlate = getSetting('showEarlate', true);
 local useDiffColor = getSetting('useDiffColor', false);
-
----@type string
-local earlateType = getSetting('earlateType', 'TEXT');
 
 ---@class EarlateClass
 local Earlate = {
@@ -24,17 +17,22 @@ local Earlate = {
       alpha = 0,
       cache = { w = 0, h = 0 },
       deltaAlign = 'middle',
+      gap = getSetting('earlateGap', 0.25),
+      hz = getSetting('earlateHz', 18),
       labels = {
         delta = makeLabel('num', '0.0 ms', 30),
         early = makeLabel('med', 'EARLY', 30),
         late = makeLabel('med', 'LATE', 30),
       },
       offset = 0,
+      opacity = getSetting('earlateOpacity', 1),
       x = 0,
       y = 0,
+      show = getSetting('showEarlate', true),
       state = state,
       textAlign = 'middle',
       timer = 0,
+      type = getSetting('earlateType', 'TEXT'),
       window = window,
     };
 
@@ -46,8 +44,15 @@ local Earlate = {
 
   -- Sets the sizes for the current component
   ---@param this Earlate
-  setSizes = function(this)
-    if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
+  ---@param isPreview boolean
+  setSizes = function(this, isPreview)
+    if ((this.cache.w ~= this.window.w)
+      or (this.cache.h ~= this.window.h)
+      or isPreview
+    ) then
+      local earlateX = getSetting('earlateX', 0.5);
+      local earlateY = getSetting('earlateY', 0.75);
+
       this.offset = 0;
 
       this.x = this.window.w * earlateX;
@@ -58,15 +63,18 @@ local Earlate = {
         this.y = this.window.h * earlateY;
       end
 
-      if (earlateType == 'TEXT + DELTA') then
+      if (this.type == 'TEXT + DELTA') then
         this.deltaAlign = 'rightMid';
         this.textAlign = 'leftMid';
 
         if (this.window.isPortrait) then
-          this.offset = this.window.w * (earlateGap * 0.4);
+          this.offset = this.window.w * (this.gap * 0.4);
         else
-          this.offset = this.window.w * (earlateGap * 0.25);
+          this.offset = this.window.w * (this.gap * 0.25);
         end
+      else
+        this.deltaAlign = 'middle';
+        this.textAlign = 'middle';
       end
 
       this.cache.w = this.window.w;
@@ -74,21 +82,36 @@ local Earlate = {
     end
   end,
 
+  -- Updates skin settings
+  ---@param this Earlate
+  update = function(this)
+    this.gap = getSetting('earlateGap', 0.25);
+    this.hz = getSetting('earlateHz', 18);
+    this.opacity = getSetting('earlateOpacity', 1);
+    this.show = getSetting('showEarlate', true);
+    this.type = getSetting('earlateType', 'TEXT');
+  end,
+
   -- Renders the current component
   ---@param this Earlate
   ---@param dt deltaTime
-  render = function(this, dt)
-    if (not showEarlate) then return; end
+  ---@param isPreview boolean
+  render = function(this, dt, isPreview)
+    if (isPreview) then this:update(); end
 
-    this.state.timers.earlate = to0(this.state.timers.earlate, dt, 1);
+    if (not this.show) then return; end
+
+    if (not isPreview) then
+      this.state.timers.earlate = to0(this.state.timers.earlate, dt, 1);
+    end
 
     if (this.state.timers.earlate == 0) then return; end
 
-    this:setSizes();
+    this:setSizes(isPreview);
 
     this.timer = this.timer + dt;
 
-    this.alpha = (this.timer * 18) % 1;
+    this.alpha = ((this.timer * this.hz) % 1) * this.opacity;
 
     local color = (this.state.isLate and Colors.late) or Colors.early;
     ---@type Label
@@ -115,7 +138,7 @@ local Earlate = {
 
     gfx.Translate(this.x, this.y);
 
-    if ((earlateType ~= 'DELTA') and (not this.state.isCrit)) then
+    if ((this.type ~= 'DELTA') and (not this.state.isCrit)) then
       label:draw({
         x = -this.offset;
         y = 2,
@@ -133,7 +156,7 @@ local Earlate = {
 			});
     end
 
-    if (earlateType ~= 'TEXT') then
+    if (this.type ~= 'TEXT') then
       this.labels.delta:draw({
         x = this.offset,
         y = 6,

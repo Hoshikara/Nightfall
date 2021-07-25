@@ -18,6 +18,8 @@ local mouse = Mouse:new(window);
 local playerData = JSONTable:new('player');
 local player = playerData:get();
 
+local checkTags = true;
+
 ---@class Titlescreen
 ---@field player Player
 local state = {
@@ -112,6 +114,16 @@ render = function(dt)
 
 	title:render(dt);
 
+	if (state.loaded and checkTags) then
+		Http.GetAsync(
+		'https://api.github.com/repos/Hoshikara/Nightfall/git/refs/tags',
+		{ ['user-agent'] = 'unnamed-sdvx-clone' },
+		tagsCallback
+		);
+
+		checkTags = false;
+	end
+
 	if (state.loaded and state.promptUpdate) then updatePrompt:render(dt); end
 
 	if (state.viewingControls) then controls:render(dt); end
@@ -124,7 +136,7 @@ render = function(dt)
 		playerInfo:render(dt);
 	end
 
-	ingamePreview:render(dt);
+	if (state.viewingPreview) then ingamePreview:render(dt); end
 
 	gfx.Restore();
 end
