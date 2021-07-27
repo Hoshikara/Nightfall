@@ -276,6 +276,11 @@
 		"type": "bool",
 		"default": false
 	},
+	"sCritBreakpoint": {
+		"label": "Enable S-Critical breakpoint for hit delta bar",
+		"type": "bool",
+		"default": true
+	},
 	"hitDecayTime": {
 		"label": "Hit delta bar hit decay time (in seconds): %.2f",
 		"type": "float",

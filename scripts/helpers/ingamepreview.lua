@@ -232,6 +232,11 @@ local getHitDeltaBar = function()
     }),
     settings = {
       makeSetting({
+        default = 0,
+        key = 'sCritBreakpoint',
+        label = 'S-CRITICAL BREAKPOINT',
+      }),
+      makeSetting({
         default = 6.0,
         key = 'hitDecayTime',
         format = '%.2f s',

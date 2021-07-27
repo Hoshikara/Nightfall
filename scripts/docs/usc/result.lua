@@ -19,10 +19,10 @@ HitWindow = {};
 
 ---@class Score
 ---@field auto_flags integer # Autoplay flag
----@field badge integer # `0 = Manual Exit`, `1 = Played`, `2 = Cleared`, `3 = Hard Cleared`, `4 = Full Chain`, `5 = Perfect Chain`
+---@field badge integer # `0` = Manual Exit, `1` = Played, `2` = Cleared, `3` = Hard Cleared, `4` = Full Chain, `5` = Perfect Chain
 ---@field gauge number # Ending gauge percentage, `0.0` to `1.0`
 ---@field gauge_option integer # Gauge option e.g. ARS
----@field gauge_type integer # `0 = Normal`, `1 = Hard`
+---@field gauge_type integer # `0` = Normal, `1` = Hard, `2` = Permissive, `3` = Blastive
 ---@field goods integer # Total near hits
 ---@field hitWindow HitWindow|nil # Hit windows of the score, only for singleplayer results screen
 ---@field mirror integer # Mirror mode flag
@@ -50,7 +50,7 @@ ChartResult = {};
 ---@field avgNears integer # Only for challenge results, average number of near hits of the charts
 ---@field avgPercentage integer # Only for challenge results, average completion percentage across the charts
 ---@field avgScore integer # Only for challenge results, average score across the charts
----@field badge integer # `0 = Manual Exit`, `1 = Played`, `2 = Cleared`, `3 = Hard Cleared`, `4 = Full Chain`, `5 = Perfect Chain`
+---@field badge integer # `0` = Manual Exit, `1` = Played, `2` = Cleared, `3` = Hard Cleared, `4` = Full Chain, `5` = Perfect Chain
 ---@field bpm number # Chart BPM
 ---@field charts ChartResult[] # Only for challenge results, array of chart results
 ---@field chartHash string # Chart hash
@@ -63,7 +63,7 @@ ChartResult = {};
 ---@field flags integer # Gameplay option flags e.g. gauge type, mirror/random mode
 ---@field gauge number # Ending gauge percentage, `0.0` to `1.0`
 ---@field gauge_option integer # Gauge option e.g. ARS
----@field gauge_type integer # `0 = Normal`, `1 = Hard`
+---@field gauge_type integer # `0` = Normal, `1` = Hard, `2` = Permissive, `3` = Blastive
 ---@field gaugeSamples number[] # Gauge values sampled (256 total) throughout the play
 ---@field goods integer # Total near hits
 ---@field grade string # Result grade
@@ -96,7 +96,7 @@ ChartResult = {};
 ---@field requirement_text string # Only for challenge results, the challenge requirements separated by newline character `"\n"`
 ---@field retryCount integer # Only for practice mode
 ---@field score integer # Result score
----@field speedModType integer # Only for singleplayer, `0 = XMOD`, `1 = MMOD`, `2 = CMOD`
+---@field speedModType integer # Only for singleplayer, `0` = XMOD, `1` = MMOD, `2` = CMOD
 ---@field speedModValue number # Only for singleplayer, `HiSpeed` for `XMOD`, `ModSpeed` otherwise
 ---@field title string # Chart (with player name in multiplayer) or challenge title
 ---@field uid nil|string # Only for multiplayer, UID of the player

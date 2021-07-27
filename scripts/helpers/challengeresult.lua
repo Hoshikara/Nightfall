@@ -32,7 +32,7 @@ local getClear = function(res)
 	local gauge = (res.gauge or 0) * 100;
 	local gType = res.gauge_type or res.flags or 0;
 
-  if ((gType ~= 1) and (gauge < 70)) then return 'CRASH'; end
+  if ((gType == 0) and (gauge < 70)) then return 'CRASH'; end
 
   return Clears[badge].clear;
 end

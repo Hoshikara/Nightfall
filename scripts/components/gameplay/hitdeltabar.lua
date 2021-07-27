@@ -1,3 +1,5 @@
+local abs = math.abs;
+
 ---@class HitDeltaBarClass
 local HitDeltaBar = {
   -- HitDeltaBar constructor
@@ -15,6 +17,7 @@ local HitDeltaBar = {
       decayTime = getSetting('hitDecayTime', 6.0),
       nearScale = 1,
       nearWin = (gameplay and gameplay.hitWindow and gameplay.hitWindow.good) or 92,
+      sCritEnabled = getSetting('sCritBreakpoint', true),
       ---@type table<string, AnimationState[]>
       states = { crit = {}, near = {} },
       timer = 1,
@@ -23,14 +26,18 @@ local HitDeltaBar = {
       y = 40,
       w = 0,
       wBar = { 3, 2 },
-      h = 30,
+      h = 36,
     };
+
+    t.sCritWin = math.floor(t.critWin * 0.5);
 
     t.labels = {
       critNeg = makeLabel('num', ('-%d'):format(t.critWin), 20),
       critPos = makeLabel('num', ('+%d'):format(t.critWin), 20),
       nearNeg = makeLabel('num', ('-%d'):format(t.nearWin), 20),
       nearPos = makeLabel('num', ('+%d'):format(t.nearWin), 20),
+      sCritNeg = makeLabel('num', ('-%d'):format(t.sCritWin), 20),
+      sCritPos = makeLabel('num', ('+%d'):format(t.sCritWin), 20),
       zero = makeLabel('num', '0', 20),
     };
 
@@ -97,10 +104,10 @@ local HitDeltaBar = {
 
     drawRect({
       x = state.delta - (this.wBar[2] / 2),
-      y = 4,
+      y = this.h * 0.667 * 0.25,
       w = this.wBar[2],
-      h = this.h - 8,
-      alpha = 255 * (state.timer ^ 2),
+      h = this.h * 0.667,
+      alpha = 255 * (state.timer ^ 3),
       blendOp = gfx.BLEND_OP_LIGHTER,
       color = state.color,
     });
@@ -121,7 +128,12 @@ local HitDeltaBar = {
     if (rating == 2) then
       for _, state in ipairs(this.states.crit[btn + 1]) do
         if (not state.queued) then
-          state.color = Colors.critical;
+          if (this.sCritEnabled and (abs(delta) <= this.sCritWin)) then
+            state.color = Colors.sCritical;
+          else
+            state.color = Colors.critical;
+          end
+
           state.delta = delta * this.critScale;
           state.queued = true;
 
@@ -158,8 +170,10 @@ local HitDeltaBar = {
     local crit = this.states.crit;
     local critCol = Colors.critical;
     local near = this.states.near;
+    local sCritCol = Colors.sCritical;
 
     if (isPreview) then
+      this.sCritEnabled = getSetting('sCritBreakpoint', true);
       this.decayTime = getSetting('hitDecayTime', 6.0);
     else
       if (gameplay.progress == 0) then
@@ -206,12 +220,32 @@ local HitDeltaBar = {
       color = 'white',
     });
 
+    if (this.sCritEnabled) then
+      drawRect({
+        x = -this.x.near * 0.5,
+        y = 0,
+        w = w,
+        h = h,
+        alpha = 125,
+        color = sCritCol,
+      });
+
+      drawRect({
+        x = this.x.near * 0.5,
+        y = 0,
+        w = w,
+        h = h,
+        alpha = 125,
+        color = sCritCol,
+      });
+    end
+
     drawRect({
       x = -this.x.near - (w / 2),
       y = 0,
       w = w,
       h = h,
-      alpha = 100,
+      alpha = 125,
       color = critCol,
     });
 
@@ -220,7 +254,7 @@ local HitDeltaBar = {
       y = 0,
       w = w,
       h = h,
-      alpha = 100,
+      alpha = 125,
       color = critCol,
     });
 
@@ -229,7 +263,7 @@ local HitDeltaBar = {
       y = 0,
       w = w,
       h = h,
-      alpha = 100,
+      alpha = 125,
       color = Colors.early,
     });
 
@@ -238,7 +272,7 @@ local HitDeltaBar = {
       y = 0,
       w = w,
       h = h,
-      alpha = 100,
+      alpha = 125,
       color = Colors.late,
     });
 
@@ -253,6 +287,24 @@ local HitDeltaBar = {
           alpha = alpha,
           color = 'white',
         });
+
+        if (this.sCritEnabled) then
+          this.labels.sCritNeg:draw({
+            x = (-this.x.near * 0.5) - 1,
+            y = -16,
+            align = 'middle',
+            alpha = alpha,
+            color = sCritCol,
+          });
+
+          this.labels.sCritPos:draw({
+            x = this.x.near * 0.5,
+            y = -16,
+            align = 'middle',
+            alpha = alpha,
+            color = sCritCol,
+          });
+        end
 
         this.labels.critNeg:draw({
           x = -this.x.near - 1,

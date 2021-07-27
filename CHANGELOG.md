@@ -1,3 +1,8 @@
+### 1.3.8 - July 27, 2021
+- Added an `S-CRITICAL` breakpoint to the hit delta bar along with a skin setting to toggle it
+- `Develop Channel`
+  - Fixed permissive/blastive clears showing as `CRASH` on the results screen
+
 ### 1.3.7 - July 26, 2021
 - `In-game Preview` changes
   - New skin settings added/now adjustable from this screen:
