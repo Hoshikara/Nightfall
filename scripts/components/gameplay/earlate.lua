@@ -1,5 +1,4 @@
----@type number
-local useDiffColor = getSetting('useDiffColor', false);
+local Gray = { 150, 150, 150 };
 
 ---@class EarlateClass
 local Earlate = {
@@ -113,26 +112,12 @@ local Earlate = {
 
     this.alpha = ((this.timer * this.hz) % 1) * this.opacity;
 
-    local color = (this.state.isLate and Colors.late) or Colors.early;
+    local isLate = this.state.buttonDelta > 0;
+    local color = (isLate and Colors.late) or Colors.early;
     ---@type Label
-    local label = (this.state.isLate and this.labels.late) or this.labels.early;
-    local deltaStr = ('%.1f ms'):format(this.state.buttonDelta);
-
-    if (this.state.isCrit) then
-      if (useDiffColor) then
-        if (this.state.buttonDelta >= 0) then
-          color = Colors.late;
-        else
-          color = Colors.early;
-        end
-      else
-        color = Colors.critical;
-      end
-    end
-
-    if (this.state.buttonDelta > 0) then
-      deltaStr = ('+%.1f ms'):format(this.state.buttonDelta);
-    end
+    local label = (isLate and this.labels.late) or this.labels.early;
+    local deltaStr =
+      ((isLate and ('+%.1f ms')) or ('%.1f ms')):format(this.state.buttonDelta);
 
     gfx.Save();
 
@@ -144,7 +129,7 @@ local Earlate = {
         y = 2,
         align = this.textAlign,
         alpha = 100 * this.alpha,
-        color = { 150, 150, 150 },
+        color = Gray,
       });
 
       label:draw({
@@ -162,7 +147,7 @@ local Earlate = {
         y = 6,
         align = this.deltaAlign,
         alpha = 100 * this.alpha,
-        color = { 150, 150, 150 },
+        color = Gray,
         text = deltaStr,
         update = true,
       });

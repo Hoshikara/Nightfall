@@ -196,7 +196,7 @@ local MpRooms = {
         y = y,
         w = this.w,
         h = this.h.item,
-        alpha = 180,
+        alpha = 200,
         color = 'dark',
       });
 

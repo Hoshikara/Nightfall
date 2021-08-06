@@ -359,7 +359,7 @@ local NauticaList = {
         y = yTemp,
         w = this.w,
         h = this.h.card,
-        alpha = 180,
+        alpha = 200,
         color = 'dark',
       });
 

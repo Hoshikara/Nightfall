@@ -1267,8 +1267,18 @@ local PlayerInfo = {
 					color = 'white',
 				});
 			else
+				local xFolder = x;
+
+				if (isPortrait) then
+					if (this.state.viewingCharts) then
+						xFolder = xLeft;
+					else
+						xFolder = xLeft + this.labels.fxl.w + 8;
+					end
+				end
+				
 				this.labels.folder:draw({
-					x = (isPortrait and (xLeft + this.labels.fxl.w + 8)) or x,
+					x = xFolder,
 					y = yTop,
 					align = (isPortrait and 'left') or 'right',
 					color = 'white',

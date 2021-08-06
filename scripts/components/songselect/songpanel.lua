@@ -479,7 +479,7 @@ local SongPanel = {
       y = this.y,
       w = this.w,
       h = this.h,
-      alpha = 180,
+      alpha = 200,
       color = 'dark',
     });  
 

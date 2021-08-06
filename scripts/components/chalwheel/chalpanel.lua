@@ -151,7 +151,7 @@ local ChalPanel = {
       y = this.y,
       w = this.w.panel,
       h = this.h,
-      alpha = 180,
+      alpha = 200,
       color = 'dark',
     });
 

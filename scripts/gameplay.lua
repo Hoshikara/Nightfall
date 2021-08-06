@@ -107,8 +107,8 @@ local setupCritTransform = function()
 end
 
 -- Called by the game when a button is pressed
----@param btn integer # `0 = BTA`, `1 = BTB`, `2 = BTC`, `3 = BTD`, `4 = FXL`, `5 = FXR`
----@param rating integer # `0 = Miss`, `1 = Near`, `2 = Crit`, `3 = Idle`
+---@param btn integer # `0` = BTA, `1` = BTB, `2` = BTC, `3` = BTD, `4` = FXL, `5` = FXR
+---@param rating integer # `0` = Miss, `1` = Near, `2` = Crit, `3` = Idle
 ---@param delta integer # delta from 0 of the hit, in milliseconds
 button_hit = function(btn, rating, delta)
 	if (not sCritWindow) then
@@ -258,7 +258,7 @@ end
 
 -- Called by the game every frame until it returns `true`
 ---@param dt deltaTime
----@param clearState integer # `0 = Manual exit`, `1 = Failed`, `2 = Cleared`, `3 = Hard Cleared`, `4 = Ultimate Chain`, `5 = Perfect Chain`
+---@param clearState integer # `0` = Exit, `1` = Fail, `2` = Clear, `3` = Hard Clear, `4` = UC, `5` = PUC
 ---@return boolean, number # The second return value is playback speed during the outro
 render_outro = function(dt, clearState)
 	if (clearState == 0) then return true; end

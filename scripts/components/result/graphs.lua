@@ -228,7 +228,7 @@ local Graphs = {
       y = y,
       w = w,
       h = h,
-      alpha = 180,
+      alpha = 200,
       color = 'dark',
     });
 

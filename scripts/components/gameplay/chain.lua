@@ -1,4 +1,20 @@
+local ChainColors = {
+  [0] = { 235, 235, 235 },
+  [1] = { 255, 235, 100 },
+  [2] = { 255, 235, 100 },
+};
+
 local floor = math.floor;
+
+-- Gets alpha for chain digits
+---@param chain integer
+---@param i integer
+---@return integer
+local getAlpha = function(chain, i)
+  if (chain >= (10 ^ (4 - i))) then return 255; end
+
+  return 50;
+end
 
 ---@class ChainClass
 local Chain = {
@@ -73,14 +89,7 @@ local Chain = {
     this:setSizes();
 
     local chain = this.state.chain;
-    local color = ((gameplay.comboState > 0) and { 255, 235, 100 })
-      or { 235, 235, 235 };
-    local alpha = {
-      ((chain >= 1000) and 255) or 50,
-      ((chain >= 100) and 255) or 50,
-      ((chain >= 10) and 255) or 50,
-      255,
-    };
+    local color = ChainColors[gameplay.comboState];
 
     this.labels.chain:draw({
       x = this.window.w / 2,
@@ -94,7 +103,7 @@ local Chain = {
         x = this.x[i],
         y = this.y,
         align = 'middle',
-        alpha = alpha[i],
+        alpha = getAlpha(chain, i),
         color = color,
         text = floor(chain / (10 ^ (4 - i)) % 10),
         update = true,
@@ -121,14 +130,18 @@ local Chain = {
         this.scale = 1;
       end
 
+      local alpha = 255 * this.alpha;
+      local scale = this.scale * 20;
+      local size = floor(64 * this.scale);
+
       for i = 1, 4 do
         this.labels.burst[i]:draw({
-          x = this.x[i],
+          x = this.x[i] - ((2.5 - i) * scale),
           y = this.y,
           align = 'middle',
-          alpha = 255 * this.alpha,
+          alpha = alpha,
           color = color,
-          size = floor(64 * this.scale),
+          size = size,
           text = floor(chain / (10 ^ (4 - i)) % 10),
           update = true,
         });

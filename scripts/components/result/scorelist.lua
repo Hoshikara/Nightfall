@@ -202,7 +202,7 @@ local ScoreList = {
         y = yTemp,
         w = this.w,
         h = h,
-        alpha = 180,
+        alpha = 200,
         color = 'dark',
       });
 

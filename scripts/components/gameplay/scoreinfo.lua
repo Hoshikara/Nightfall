@@ -108,13 +108,13 @@ local ScoreInfo = {
       x = (isPortrait and 98) or 0,
       align = 'right',
       alpha = alpha,
+      color = 'white',
     });
 
     this.maxChain:draw({
       x = (isPortrait and -171) or -269,
       align = 'right',
       alpha = alpha,
-      color = 'white',
       val = this.state.maxChain,
     });
 

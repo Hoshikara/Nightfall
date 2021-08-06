@@ -1,3 +1,9 @@
+### 1.4.0 - August 4, 2021
+- Changed default skin background
+- Decreased brightness of lasers slightly
+- Modified chain burst animation to expand more
+- Removed skin setting to use critical color for critical delta display; now uses early/late colors by default
+
 ### 1.3.8 - July 27, 2021
 - Added an `S-CRITICAL` breakpoint to the hit delta bar along with a skin setting to toggle it
 - `Develop Channel`

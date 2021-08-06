@@ -261,12 +261,12 @@ local folders = {
 
 		gfx.Restore();
 
-		if (#this.labels > this.max) then
+		if (this.count > this.max) then
 			this.scrollbar:render(dt, {
 				alphaMod = min(timers.folder ^ 2, 1),
 				color = 'med',
 				curr = currFolder,
-				total = #this.labels,
+				total = this.count,
 			});
 		end
 	end,
