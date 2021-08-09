@@ -190,6 +190,17 @@
 		"type": "label"
 	},
 	"separator_mrx": {},
+	"showHitAnims": {
+		"label": "Show Hit Animations",
+		"type": "bool",
+		"default": true
+	},
+	"sdvxHitAnims": {
+		"label": "Use SDVX hit animations",
+		"type": "bool",
+		"default": false
+	},
+	"separator_ert": {},
 	"showEarlate": {
 		"label": "Show Early / Late Display",
 		"type": "bool",

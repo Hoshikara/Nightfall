@@ -19,6 +19,8 @@ local RingAnimation = {
       speed = (color and 2) or 1,
     };
 
+    local useSDVX = getSetting('sdvxHitAnims', false);
+
     if (color) then
       t.ring = Image:new(('gameplay/hit_animation/ring/ring_%s.png'):format(color));
       t.inner = Animation:new({
@@ -32,17 +34,23 @@ local RingAnimation = {
         scale = 1,
       });
     else
-      t.effect = Image:new('gameplay/hit_animation/ring/effect.png');
-      t.ring = Image:new('gameplay/hit_animation/ring/ring.png');
+      t.effect = Image:new(('gameplay/hit_animation/ring/effect_%s.png'):format(
+        (useSDVX and 'g') or 'b'
+      ));
+      t.ring = Image:new(('gameplay/hit_animation/ring/ring_%d.png'):format(
+        (useSDVX and 2) or 1
+      ));
       t.inner = Animation:new({
-        alpha = 1.5,
+        alpha = (useSDVX and 2) or 1.5,
         blendOp = 8,
         centered = true,
-        fps = 40,
-        frameCount = 4,
+        fps = (useSDVX and 60) or 40,
+        frameCount = (useSDVX and 7) or 4,
         loop = true,
-        path = 'gameplay/hit_animation/ring/inner/hold',
-        scale = 0.725,
+        path = ('gameplay/hit_animation/ring/inner/hold/%s'):format(
+          (useSDVX and 'g') or 'b'
+        ),
+        scale = (useSDVX and 0.65) or 0.725,
       });
     end
 

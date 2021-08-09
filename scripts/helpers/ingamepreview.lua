@@ -179,6 +179,28 @@ local getEarlate = function()
 end
 
 ---@return IngamePreviewTab
+local getHitAnim = function()
+  local s = {
+    heading = makeLabel('norm', 'HIT ANIMATIONS', 30),
+    status = makeSetting({
+      default = 1,
+      key = 'showHitAnims',
+    }),
+    settings = {
+      makeSetting({
+        default = 0,
+        key = 'sdvxHitAnims',
+        label = 'SDVX HIT ANIMATIONS',
+      }),
+    },
+  };
+
+  s.h = getHeight(s.settings);
+
+  return s;
+end
+
+---@return IngamePreviewTab
 local getHispeed = function()
   local s = {
     heading = makeLabel('norm', 'HI-SPEED', 30),
@@ -320,6 +342,7 @@ end
 return {
   getEarlate = getEarlate,
   getHispeed = getHispeed,
+  getHitAnim = getHitAnim,
   getHitDeltaBar = getHitDeltaBar,
   getScoreDiff = getScoreDiff,
 };

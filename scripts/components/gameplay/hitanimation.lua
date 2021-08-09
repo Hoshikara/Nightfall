@@ -12,6 +12,32 @@ local Lanes = {
   2 / 3,
 };
 
+local makeCrit = function(useSDVX) 
+  return Animation:new({
+    alpha = (useSDVX and 1.5) or 1.2,
+    centered = true,
+    fps = 60,
+    frameCount = (useSDVX and 19) or 17,
+    path = ('gameplay/hit_animation/critical/%s'):format(
+      (useSDVX and 'y') or 'b'
+    ),
+    scale = (useSDVX and 0.525) or 0.65,
+  });
+end
+
+local makeNear = function(useSDVX)
+  return Animation:new({
+    alpha = (useSDVX and 1.25) or 1,
+    centered = true,
+    fps = (useSDVX and 72) or 74,
+    frameCount = (useSDVX and 22) or 17,
+    path = ('gameplay/hit_animation/near/%s'):format(
+      (useSDVX and 'p') or 'b'
+    ),
+    scale = (useSDVX and 0.8) or 0.975,
+  });
+end
+
 ---@class HitAnimationClass
 local HitAnimation = {
   -- HitAnimation constructor
@@ -19,32 +45,30 @@ local HitAnimation = {
   ---@param window Window
   ---@return HitAnimation
   new = function(this, window)
+    local useSDVX = getSetting('sdvxHitAnims', false);
+
     ---@class HitAnimation : HitAnimationClass
     ---@field window Window
     local t = {
-      crit = Animation:new({
-        alpha = 1.2,
-        centered = true,
-        fps = 58,
-        frameCount = 17,
-        path = 'gameplay/hit_animation/critical',
-        scale = 0.65,
-      }),
+      crit = makeCrit(useSDVX),
       hold = RingAnimation:new(),
-      near = Animation:new({
-        alpha = 1,
-        centered = true,
-        fps = 74,
-        frameCount = 17,
-        path = 'gameplay/hit_animation/near',
-        scale = 0.975,
-      }),
+      near = makeNear(useSDVX),
+      preview = {
+        rotation = 0,
+        line = {
+          x1 = 0,
+          x2 = 0,
+          y1 = 0,
+          y2 = 0,
+        },
+      },
       ---@type table<string, AnimationState[]>
       states = {
         crit = {},
         hold = {},
         near = {},
       },
+      useSDVX = useSDVX,
       window = window,
     };
 
@@ -88,8 +112,8 @@ local HitAnimation = {
 
   -- Queues a hit animation to be played
   ---@param this HitAnimation
-  ---@param btn integer # `0 = BTA`, `1 = BTB`, `2 = BTC`, `3 = BTD`, `4 = FXL`, `5 = FXR`
-  ---@param rating integer # `0 = Miss`, `1 = Near`, `2 = Crit`, `3 = Idle`
+  ---@param btn integer # `0` = BTA, `1` = BTB, `2` = BTC, `3` = BTD, `4` = FXL, `5` = FXR
+  ---@param rating integer # `0` = Miss, `1` = Near, `2` = Crit, `3` = Idle
   trigger = function(this, btn, rating)
     if (rating == 2) then
       for _, state in ipairs(this.states.crit[btn + 1]) do
@@ -105,16 +129,15 @@ local HitAnimation = {
   -- Transformation helper function
   ---@param this HitAnimation
   ---@param lane number # From `Lanes` map
-  transform = function(this, lane)
+  ---@param isPreview boolean
+  transform = function(this, lane, isPreview)
+    local t = (isPreview and this.preview) or gameplay.critLine;
+
     gfx.Translate(
-      gameplay.critLine.line.x1
-        + (gameplay.critLine.line.x2 - gameplay.critLine.line.x1)
-        * lane,
-      gameplay.critLine.line.y1
-        + (gameplay.critLine.line.y2 - gameplay.critLine.line.y1)
-        * lane
+      t.line.x1 + (t.line.x2 - t.line.x1) * lane,
+      t.line.y1 + (t.line.y2 - t.line.y1) * lane
     );
-    gfx.Rotate(-gameplay.critLine.rotation);
+    gfx.Rotate(-t.rotation);
     this.window:scale();
   end,
 
@@ -124,42 +147,89 @@ local HitAnimation = {
   ---@param animation Animation
   ---@param lane number # From `Lanes` map
   ---@param state AnimationState
-  play = function(this, dt, animation, lane, state)
+  ---@param isPreview boolean
+  play = function(this, dt, animation, lane, state, isPreview)
     gfx.Save();
 
-    this:transform(lane);
+    this:transform(lane, isPreview);
 
     animation:start(dt, state);
 
     gfx.Restore();
   end,
 
+  -- Updates skin settings
+  ---@param this HitAnimation
+  update = function(this)
+    local resX, resY = game.GetResolution();
+    local isPortrait = resY > resX;
+    local useSDVX = getSetting('sdvxHitAnims', false);
+
+    this.preview.line.x1 = resX * ((isPortrait and 0.095) or 0.282);
+    this.preview.line.x2 = resX * ((isPortrait and 0.905) or 0.718);
+    this.preview.line.y1 = resY * ((isPortrait and 0.707) or 0.941);
+    this.preview.line.y2 = resY * ((isPortrait and 0.707) or 0.941);
+    this.preview.rotation = 0;
+
+    if (useSDVX ~= this.useSDVX) then
+      this.crit = makeCrit(useSDVX);
+      this.near = makeNear(useSDVX);
+      this.hold = RingAnimation:new();
+
+      this.states.near[1].frame = 1;
+      this.states.near[1].queued = false;
+      this.states.near[1].timer = 0;
+
+      this.states.crit[1].frame = 1;
+      this.states.crit[1].queued = false;
+      this.states.crit[1].timer = 0;
+
+      this.states.hold[6].active = false;
+      this.states.hold[6].timer = 0;
+      this.states.hold[6].inner.frame = 1;
+      this.states.hold[6].inner.timer = 0;
+
+      this.useSDVX = useSDVX;
+    end
+  end,
+
   -- Renders the current component
   ---@param this HitAnimation
   ---@param dt deltaTime
-  render = function(this, dt)
+  ---@param isPreview boolean
+  render = function(this, dt, isPreview)
     local crit = this.states.crit;
     local hold = this.states.hold;
     local near = this.states.near;
+
+    if (isPreview) then
+      this:update();
+      
+      hold[6].active = true;
+
+      this:play(dt, this.hold, Lanes[6], hold[6], isPreview);
+    end
 
     for btn = 1, 6 do
       ---@param state AnimationState
       for _, state in ipairs(crit[btn]) do
         if (state.queued) then
-          this:play(dt, this.crit, Lanes[btn], state);
+          this:play(dt, this.crit, Lanes[btn], state, isPreview);
         end
       end
 
       ---@param state AnimationState
       for _, state in ipairs(near[btn]) do
         if (state.queued) then
-          this:play(dt, this.near, Lanes[btn], state);
+          this:play(dt, this.near, Lanes[btn], state, isPreview);
         end
       end
 
-      hold[btn].active = gameplay.noteHeld[btn];
+      if (not isPreview) then
+        hold[btn].active = gameplay.noteHeld[btn];
 
-      this:play(dt, this.hold, Lanes[btn], hold[btn]);
+        this:play(dt, this.hold, Lanes[btn], hold[btn]);
+      end
     end
   end,
 };

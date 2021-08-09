@@ -34,6 +34,8 @@ local sCritWindow = nil;
 local players = nil;
 
 ---@type boolean
+local showHitAnims = getSetting('showHitAnims', true);
+---@type boolean
 local showHitDeltaBar = getSetting('showHitDeltaBar', true);
 
 ---@class Gameplay
@@ -65,10 +67,10 @@ local console = Console:new(window, state);
 local critBar = CritBar:new(window);
 local earlate = nil;
 local gaugeBar = nil;
-local hitAnimation = HitAnimation:new(window);
+local hitAnimation = showHitAnims and HitAnimation:new(window);
 local hitDeltaBar = nil;
 local laserAlerts = nil;
-local laserAnimation = LaserAnimation:new(window);
+local laserAnimation = showHitAnims and LaserAnimation:new(window);
 local laserCursors = LaserCursors:new(window);
 local outro = nil;
 local practiceInfo = nil;
@@ -146,7 +148,7 @@ button_hit = function(btn, rating, delta)
 		hitDeltaBar:trigger(btn, rating, delta);
 	end
 
-	hitAnimation:trigger(btn, rating);
+	if (showHitAnims) then hitAnimation:trigger(btn, rating); end
 end
 
 -- Called by the game when a laser slam is hit
@@ -155,7 +157,7 @@ end
 ---@param endPos number # The x-coordinate of the slam end, relative to the center of the crit line
 ---@param index integer # Laser index, `0` = left, `1` = right
 laser_slam_hit = function(len, startPos, endPos, index)
-	laserAnimation:trigger(endPos, index + 1);
+	if (showHitAnims) then laserAnimation:trigger(endPos, index + 1); end
 end
 
 -- Called by the game after rendering the track and playable objects (buttons and lasers)  
@@ -175,9 +177,11 @@ end
 -- Drawn above built-in particle effects but before the main `render` function
 ---@param dt deltaTime
 render_crit_overlay = function(dt)
-	hitAnimation:render(dt);
+	if (showHitAnims) then
+		hitAnimation:render(dt);
 
-	laserAnimation:render(dt);
+		laserAnimation:render(dt);
+	end
 
 	setupCritTransform();
 

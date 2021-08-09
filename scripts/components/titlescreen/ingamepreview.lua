@@ -1,6 +1,7 @@
 local Tabs = require('helpers/ingamepreview');
 
 local Earlate = require('components/gameplay/earlate');
+local HitAnimation = require('components/gameplay/hitanimation');
 local HitDeltaBar = require('components/gameplay/hitdeltabar');
 
 local EnabledColor = { 255, 205, 0 };
@@ -8,6 +9,7 @@ local EnabledColor = { 255, 205, 0 };
 local TabNames = {
   'earlate',
   'hispeed',
+  'hitAnim',
   'hitDeltaBar',
   'scoreDiff',
 };
@@ -52,14 +54,10 @@ local IngamePreview = {
       state = state,
       timers = {
         hit = 0,
+        hitAnim = 0,
         numbers = 0,
         side = 1,
-        tabs = {
-          earlate = 0,
-          hispeed = 0,
-          hitDeltaBar = 0,
-          scoreDiff = 0,
-        },
+        tabs = {},
       };
       window = window,
       x = {},
@@ -67,6 +65,8 @@ local IngamePreview = {
       w = 0,
       h = {},
     };
+
+    for _, name in ipairs(TabNames) do t.timers.tabs[name] = 0; end
 
     setmetatable(t, this);
     this.__index = this;
@@ -121,6 +121,7 @@ local IngamePreview = {
     if (not this.tabs) then
       local earlate = Tabs.getEarlate();
       local hispeed = Tabs.getHispeed();
+      local hitAnim = Tabs.getHitAnim();
       local hitDeltaBar = Tabs.getHitDeltaBar();
       local scoreDiff = Tabs.getScoreDiff();
 
@@ -142,6 +143,25 @@ local IngamePreview = {
           align = 'middle',
           alpha = 255 * 0.65,
         });
+      end
+
+      hitAnim.component = HitAnimation:new(this.window);
+
+      hitAnim.render = function(dt)
+        this.timers.hitAnim = this.timers.hitAnim + dt;
+
+        if (this.timers.hitAnim >= 0.5) then
+          hitAnim.component:trigger(0, 1);
+          hitAnim.component:trigger(1, 2);
+        
+          this.timers.hitAnim = 0;
+        end
+
+        gfx.Save();
+
+        hitAnim.component:render(dt, true);
+
+        gfx.Restore();
       end
 
       hitDeltaBar.component = HitDeltaBar:new(this.window);
@@ -201,6 +221,7 @@ local IngamePreview = {
       this.tabs = {
         earlate = earlate,
         hispeed = hispeed,
+        hitAnim = hitAnim,
         hitDeltaBar = hitDeltaBar,
         scoreDiff = scoreDiff,
       };
@@ -543,7 +564,8 @@ local IngamePreview = {
         this.timers.tabs[name],
         currTab == name,
         name,
-        y);
+        y
+      );
     end
 
     this:drawHamburger();

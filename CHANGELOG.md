@@ -1,3 +1,13 @@
+### 1.4.1 - August 9, 2021
+- Added the following skin settings (adjustable via `In-game Preview`):
+  - `Hit Animations` enable / disable
+  - `Hit Animations` use SDVX hit animations
+- Increased brightness of skin background
+- Modified the appearance of the following textures:
+  - FX chip
+  - FX hold
+  - Error hit
+
 ### 1.4.0 - August 4, 2021
 - Changed default skin background
 - Decreased brightness of lasers slightly

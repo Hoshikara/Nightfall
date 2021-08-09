@@ -49,12 +49,14 @@ local Animation = {
       state.timer = 0;
     end
 
-    this.frames[state.frame]:draw({
-      alpha = state.alpha or this.alpha,
-      blendOp = this.blendOp,
-      centered = this.centered,
-      scale = this.scale,
-    });
+    if (this.frames[state.frame]) then
+      this.frames[state.frame]:draw({
+        alpha = state.alpha or this.alpha,
+        blendOp = this.blendOp,
+        centered = this.centered,
+        scale = this.scale,
+      });
+    end
 
     if (state.frame == this.frameCount) then
       if (this.loop) then
