@@ -31,7 +31,10 @@ local JSONTable = {
 
 			data:close();
 		else
-			error(('Error loading JSON: File does not exist: %s'):format(path));
+			local f = io.open(path, 'w');
+
+			f:write(JSON.encode(decoded));
+			f:close();
 		end
 
 		t.data = decoded;
