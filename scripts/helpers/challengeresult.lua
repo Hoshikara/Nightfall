@@ -48,18 +48,18 @@ end
 ---@param chart Chart
 ---@return string
 local getGauge = function(chart)
-	local gauge = math.ceil((chart.gauge or 0) * 100);
+	local gauge = (chart.gauge or 0) * 100;
 	local gType = chart.gauge_type or chart.flags or 0;
 
   if (gType == 1) then
-		return ('%d%% (EXC)'):format(gauge);
+		return ('%.1f%% (EXC)'):format(gauge);
 	elseif (gType == 2) then
-		return ('%d%% (PMS)'):format(gauge);
+		return ('%.1f%% (PMS)'):format(gauge);
 	elseif (gType == 3) then
-		return ('%d%% (BLS)'):format(gauge);
+		return ('%.1f%% (BLS)'):format(gauge);
 	end
 
-	return ('%d%%'):format(gauge);
+	return ('%.1f%%'):format(gauge);
 end
 
 -- Formats the requirements

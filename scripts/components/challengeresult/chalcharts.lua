@@ -16,9 +16,9 @@ local Orders = {
     'clear',
   },
   top = {
-    'gauge',
     'grade',
     'clear',
+    'gauge',
   },
 };
 
@@ -318,7 +318,7 @@ local ChalCharts = {
         y = y + (chart.difficulty.h * 2);
 
         for j, name in ipairs(Orders.top) do
-          local xTop = x + (((j - 1) * 2.75) * this.padding.x);
+          local xTop = x + (((j - 1) * 2.825) * this.padding.x);
 
           this.labels[name]:draw({
             x = xTop,

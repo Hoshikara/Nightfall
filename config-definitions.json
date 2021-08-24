@@ -195,10 +195,14 @@
 		"type": "bool",
 		"default": true
 	},
-	"sdvxHitAnims": {
-		"label": "Use SDVX hit animations",
-		"type": "bool",
-		"default": false
+	"hitAnimType": {
+		"label": "Hit Animation Type",
+		"type": "selection",
+		"default": "STANDARD",
+		"values": [
+			"SDVX",
+			"STANDARD"
+		]
 	},
 	"separator_ert": {},
 	"showEarlate": {

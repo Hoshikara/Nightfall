@@ -42,7 +42,6 @@ local LaserAnimation = {
         blendOp = 8,
         centered = true,
         fps = 52,
-        frameCount = 12,
         path = ('gameplay/hit_animation/slam/%s'):format(color),
         scale = 0.625,
       });

@@ -143,20 +143,20 @@ end
 ---@param unlabled boolean
 ---@return string
 local getGauge = function(res, unlabled)
-	local gauge = math.ceil((res.gauge or 0) * 100);
+	local gauge = (res.gauge or 0) * 100;
 	local gType = res.gauge_type or res.flags or 0;
 
 	if (not unlabled) then
 		if (gType == 1) then
-			return ('%d%% (EXC)'):format(gauge);
+			return ('%.1f%% (EXC)'):format(gauge);
 		elseif (gType == 2) then
-			return ('%d%% (PMS)'):format(gauge);
+			return ('%.1f%% (PMS)'):format(gauge);
 		elseif (gType == 3) then
-			return ('%d%% (BLS)'):format(gauge);
+			return ('%.1f%% (BLS)'):format(gauge);
 		end
 	end
 
-	return ('%d%%'):format(gauge);
+	return ('%.1f%%'):format(gauge);
 end
 
 -- Gets and formats the grade
@@ -244,9 +244,6 @@ local getVF = function(res)
 
 	if (diffVF ~= 0) then minVF = diffVF; end
 
-	minVF = math.floor(minVF * 1000) / 1000;
-	playVF = math.floor(playVF * 1000) / 1000;
-
 	if (playVF > minVF) then
 		increase = playVF - minVF;
 
@@ -256,7 +253,7 @@ local getVF = function(res)
 			'num',
 			{
 				{ color = 'norm', text = '+' },
-				{ color = 'white', text = ('%.3f'):format(increase) },
+				{ color = 'white', text = ('%.3f'):format(increase * 0.001) },
 			},
 			20
 		);
@@ -267,7 +264,7 @@ local getVF = function(res)
 	---@class ResultVF
 	local v = {
 		increase = increase,
-		val = makeLabel('num', ('%.3f'):format(playerVF), 24),
+		val = makeLabel('num', ('%.3f'):format(playerVF * 0.001), 24),
 	};
 
 	return v;
@@ -425,7 +422,7 @@ local getGaugeData = function(res)
 		) or res.gaugeSamples or {},
 		type = type,
 		unlabledVal = makeLabel('num', getGauge(res, true), 20),
-		val = makeLabel('num', getGauge(res), 24),
+		val = makeLabel('num', getGauge(res), 20),
 	};
 
 	return g;

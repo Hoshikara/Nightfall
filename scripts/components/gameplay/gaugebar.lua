@@ -218,7 +218,7 @@ local GaugeBar = {
       align = 'right',
       alpha = alpha,
       color = 'white',
-      text = ('%d%%'):format(floor(gauge.val * 100)),
+      text = ('%.1f%%'):format(gauge.val * 100),
       update = true,
     });
 

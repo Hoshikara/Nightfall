@@ -1,12 +1,26 @@
 ---Create frames from images in the specified folder
 ---@param path string
----@param count integer
-local loadFrames = function(path, count)
+---@return Image[], number frameCount
+local loadFrames = function(path)
   local f = {};
+  local i = 1;
+  local loaded = false;
 
-  for i = 1, count do f[i] = Image:new(('%s/%04d.png'):format(path, i)); end
+  while (not loaded) do
+    local frame = Image:new(('%s/%04d.png'):format(path, i), true);
 
-  return f;
+    if (not frame) then
+      loaded = true;
+
+      break;
+    end
+
+    f[i] = frame;
+
+    i = i + 1;
+  end
+
+  return f, i;
 end
 
 ---@class AnimationClass
@@ -21,14 +35,14 @@ local Animation = {
       alpha = p.alpha or 1,
       blendOp = p.blendOp or 0,
       centered = p.centered or false,
-      frameCount = p.frameCount or 1,
+      frameCount = 1,
       frameTime = 1 / (p.fps or 30),
       loop = p.loop or false,
       loopPoint = p.loopPoint or 1,
       scale = p.scale or 1,
     };
 
-    t.frames = loadFrames(p.path, t.frameCount);
+    t.frames, t.frameCount = loadFrames(p.path);
 
     setmetatable(t, this);
     this.__index = this;

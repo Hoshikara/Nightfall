@@ -1,5 +1,7 @@
 local Animation = require('common/animation');
 
+local HitAnimations = require('constants/hitanimation');
+
 local RingAnimation = require('components/gameplay/ringanimation');
 
 -- Lane position map
@@ -12,29 +14,16 @@ local Lanes = {
   2 / 3,
 };
 
-local makeCrit = function(useSDVX) 
+-- Makes an animation from the given properties
+---@param props HitAnimationProps
+---@return Animation
+local makeAnimation = function(props)
   return Animation:new({
-    alpha = (useSDVX and 1.5) or 1.2,
+    alpha = props.alpha,
     centered = true,
-    fps = 60,
-    frameCount = (useSDVX and 19) or 17,
-    path = ('gameplay/hit_animation/critical/%s'):format(
-      (useSDVX and 'y') or 'b'
-    ),
-    scale = (useSDVX and 0.525) or 0.65,
-  });
-end
-
-local makeNear = function(useSDVX)
-  return Animation:new({
-    alpha = (useSDVX and 1.25) or 1,
-    centered = true,
-    fps = (useSDVX and 72) or 74,
-    frameCount = (useSDVX and 22) or 17,
-    path = ('gameplay/hit_animation/near/%s'):format(
-      (useSDVX and 'p') or 'b'
-    ),
-    scale = (useSDVX and 0.8) or 0.975,
+    fps = props.fps,
+    path = props.path,
+    scale = props.scale,
   });
 end
 
@@ -45,14 +34,15 @@ local HitAnimation = {
   ---@param window Window
   ---@return HitAnimation
   new = function(this, window)
-    local useSDVX = getSetting('sdvxHitAnims', false);
+    local animType = getSetting('hitAnimType', 'STANDARD');
 
     ---@class HitAnimation : HitAnimationClass
     ---@field window Window
     local t = {
-      crit = makeCrit(useSDVX),
+      animType = animType,
+      crit = makeAnimation(HitAnimations.Critical[animType]),
       hold = RingAnimation:new(),
-      near = makeNear(useSDVX),
+      near = makeAnimation(HitAnimations.Near[animType]),
       preview = {
         rotation = 0,
         line = {
@@ -68,7 +58,6 @@ local HitAnimation = {
         hold = {},
         near = {},
       },
-      useSDVX = useSDVX,
       window = window,
     };
 
@@ -116,11 +105,15 @@ local HitAnimation = {
   ---@param rating integer # `0` = Miss, `1` = Near, `2` = Crit, `3` = Idle
   trigger = function(this, btn, rating)
     if (rating == 2) then
-      for _, state in ipairs(this.states.crit[btn + 1]) do
+      local critStates = this.states.crit;
+
+      for _, state in ipairs(critStates[btn + 1]) do
         if (not state.queued) then state.queued = true; break; end
       end
     elseif (rating == 1) then
-      for _, state in ipairs(this.states.near[btn + 1]) do
+      local nearStates = this.states.near;
+
+      for _, state in ipairs(nearStates[btn + 1]) do
         if (not state.queued) then state.queued = true; break; end
       end
     end
@@ -161,9 +154,9 @@ local HitAnimation = {
   -- Updates skin settings
   ---@param this HitAnimation
   update = function(this)
+    local animType = getSetting('hitAnimType', 'STANDARD');
     local resX, resY = game.GetResolution();
     local isPortrait = resY > resX;
-    local useSDVX = getSetting('sdvxHitAnims', false);
 
     this.preview.line.x1 = resX * ((isPortrait and 0.095) or 0.282);
     this.preview.line.x2 = resX * ((isPortrait and 0.905) or 0.718);
@@ -171,9 +164,9 @@ local HitAnimation = {
     this.preview.line.y2 = resY * ((isPortrait and 0.707) or 0.941);
     this.preview.rotation = 0;
 
-    if (useSDVX ~= this.useSDVX) then
-      this.crit = makeCrit(useSDVX);
-      this.near = makeNear(useSDVX);
+    if (animType ~= this.animType) then
+      this.crit = makeAnimation(HitAnimations.Critical[animType]);
+      this.near = makeAnimation(HitAnimations.Near[animType]);
       this.hold = RingAnimation:new();
 
       this.states.near[1].frame = 1;
@@ -189,7 +182,7 @@ local HitAnimation = {
       this.states.hold[6].inner.frame = 1;
       this.states.hold[6].inner.timer = 0;
 
-      this.useSDVX = useSDVX;
+      this.animType = animType;
     end
   end,
 

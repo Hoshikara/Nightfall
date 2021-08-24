@@ -358,16 +358,16 @@ local SongInfo = {
   ---@param alpha number
   drawBPM = function(this, x, y, alpha)
     local bpm = gameplay.bpm;
-    local playbackSpeed = tonumber(getSetting('_playbackSpeed', '1'));
+    local playbackSpeed = gameplay.playbackSpeed or 1;
     local playbackText = '';
     local xOffset = -72;
     local yOffset = this.bpm.label.h * 1.375;
   
     y = y + (this.labels.artist.h * 1.425);
 
-    if (playbackSpeed ~= 1) then
-      bpm = floor(bpm * (playbackSpeed / 100));
-      playbackText = ('- %d%%'):format(playbackSpeed);
+    if (playbackSpeed < 1) then
+      bpm = floor(bpm * playbackSpeed);
+      playbackText = ('- %d%%'):format(floor((playbackSpeed * 100) + 0.5));
     end
 
     this.playbackSpeed:draw({

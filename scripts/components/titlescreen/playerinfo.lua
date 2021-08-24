@@ -242,7 +242,7 @@ local PlayerInfo = {
 
 		t.volforce = {
 			label = makeLabel('med', 'VOLFORCE'),
-			val = makeLabel('num', ('%.3f'):format(t.state.player.VF), 30),
+			val = makeLabel('num', ('%.3f'):format(t.state.player.VF * 0.001), 30),
 		};
 
 		t.folders = {};

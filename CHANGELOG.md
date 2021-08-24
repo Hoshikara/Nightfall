@@ -1,3 +1,9 @@
+### 1.4.2 - August 23, 2021
+- Changed various gauges to display one decimal place
+- Fixed an error that occured when starting the game with `player.json` carried over from an older version
+- Fixed volforce rounding errors
+- General developer chores and improvements (no user experience changes)
+
 ### 1.4.1 - August 9, 2021
 - Added the following skin settings (adjustable via `In-game Preview`):
   - `Hit Animations` enable / disable

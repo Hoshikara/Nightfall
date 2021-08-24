@@ -1,5 +1,7 @@
 local Animation = require('common/animation');
 
+local RingAnimations = require('constants/ringanimation');
+
 local asin = math.asin;
 local sin = math.sin;
 
@@ -19,38 +21,30 @@ local RingAnimation = {
       speed = (color and 2) or 1,
     };
 
-    local useSDVX = getSetting('sdvxHitAnims', false);
-
     if (color) then
-      t.ring = Image:new(('gameplay/hit_animation/ring/ring_%s.png'):format(color));
+      t.ring = Image:new(('gameplay/hit_animation/laser/%s/ring.png'):format(color));
       t.inner = Animation:new({
         alpha = 1.25,
         blendOp = 8,
         centered = true,
         fps = 42,
-        frameCount = 5,
         loop = true,
-        path = ('gameplay/hit_animation/ring/inner/%s'):format(color),
+        path = ('gameplay/hit_animation/laser/%s/inner'):format(color),
         scale = 1,
       });
     else
-      t.effect = Image:new(('gameplay/hit_animation/ring/effect_%s.png'):format(
-        (useSDVX and 'g') or 'b'
-      ));
-      t.ring = Image:new(('gameplay/hit_animation/ring/ring_%d.png'):format(
-        (useSDVX and 2) or 1
-      ));
+      local props = RingAnimations[getSetting('hitAnimType', 'STANDARD')];
+
+      t.effect = Image:new(props.effect);
+      t.ring = Image:new(props.ring);
       t.inner = Animation:new({
-        alpha = (useSDVX and 2) or 1.5,
+        alpha = props.alpha,
         blendOp = 8,
         centered = true,
-        fps = (useSDVX and 60) or 40,
-        frameCount = (useSDVX and 7) or 4,
+        fps = props.fps,
         loop = true,
-        path = ('gameplay/hit_animation/ring/inner/hold/%s'):format(
-          (useSDVX and 'g') or 'b'
-        ),
-        scale = (useSDVX and 0.65) or 0.725,
+        path = props.inner,
+        scale = props.scale,
       });
     end
 

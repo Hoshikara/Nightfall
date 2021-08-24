@@ -83,7 +83,7 @@ local MiscInfo = {
         x = -(this.labels.vf.w + 4),
         align = 'right',
         color = 'white',
-        text = ('%.3f'):format(VF),
+        text = ('%.3f'):format(VF * 0.001),
         update = true,
       });
 
@@ -116,7 +116,7 @@ local MiscInfo = {
         x = -(this.labels.vf.w + 4),
         align = 'right',
         color = 'white',
-        text = ('%.3f'):format(VF),
+        text = ('%.3f'):format(VF * 0.001),
         update = true,
       });
   

@@ -20,6 +20,9 @@ local isOfficial = function(path)
   return path:find(SDVX) or path:find(SoundVoltex);
 end
 
+-- Calculates the VF for the given difficulty
+---@param diff Difficulty
+---@return number
 local calcVF = function(diff)
   if (not isOfficial(diff.jacketPath)) then return 0; end
 
@@ -37,9 +40,9 @@ local calcVF = function(diff)
   end
 
   -- level * (score / 10 million) * (grade rate) * (clear rate) * 2
-  -- truncated after first decimal place
+  -- truncated after third decimal place
   -- https://bemaniwiki.com/index.php?SOUND%20VOLTEX%20EXCEED%20GEAR/VOLFORCE#calc
-  return floor(level * (score / 10000000) * gRate * cRate * 2 * 10) / 1000;
+  return floor(level * (score / 10000000) * gRate * cRate * 2 * 10);
 end
 
 -- Get the date format template string
@@ -83,7 +86,7 @@ local formatDiff = function(diff)
     level = ('%02d'):format(diff.level),
     score = diff.scores[1].score,
     title = diff.title,
-    VF = ('%.3f'):format(diff.VF),
+    VF = diff.VF,
   };
 
   if (diff.artist) then

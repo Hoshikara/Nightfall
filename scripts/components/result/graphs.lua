@@ -392,7 +392,7 @@ local Graphs = {
           x = xMouse + 8,
           y = y + yGauge - 12,
           color = 'white',
-          text = ('%d%%'):format(floor(samples[i] * 100)),
+          text = ('%.1f%%'):format(samples[i] * 100),
           update = true,
         });
       end

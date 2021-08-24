@@ -188,9 +188,13 @@ local getHitAnim = function()
     }),
     settings = {
       makeSetting({
-        default = 0,
-        key = 'sdvxHitAnims',
-        label = 'SDVX HIT ANIMATIONS',
+        default = 'STANDARD',
+        key = 'hitAnimType',
+        label = 'DISPLAY TYPE',
+        options = {
+          'SDVX',
+          'STANDARD',
+        },
       }),
     },
   };

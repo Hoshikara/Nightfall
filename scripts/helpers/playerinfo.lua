@@ -106,7 +106,7 @@ local makeStats = function(levels, folder, clears)
 			end
 		end
 
-		if (#t[cat].charts > 1) then
+		if ((#t[cat].charts > 1) and t[cat].charts[1].scoreVal) then
 			table.sort(
 				t[cat].charts,
 				function(l, r) return l.scoreVal > r.scoreVal end
@@ -184,7 +184,7 @@ local makeTopPlay = function(i, play, best)
 		place = makeLabel('num', ('%02d'):format(i), 36),
 		score = ScoreNumber:new({ size = (best and 110) or 84, val = play.score }),
 		title = makeLabel('jp', play.title, (best and 24) or 30),
-		VF = makeLabel('num', play.VF, 24),
+		VF = makeLabel('num', ('%.3f'):format(play.VF * 0.001), 24),
 	};
 
 	if (best) then

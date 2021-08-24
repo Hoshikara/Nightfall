@@ -33,7 +33,6 @@
 ---@field blendOp? integer # Default `0`, refer to `gfx` table for values
 ---@field centered? boolean # Default `false`
 ---@field fps? number # Default `30`
----@field frameCount? integer # Default `1`
 ---@field path string # Path to the folder containing the animation frames
 ---@field loop? boolean # Default `false`
 ---@field loopPoint? integer # Default `1` # Frame number to loop the animation from
@@ -122,6 +121,14 @@ DialogBoxRenderParams = {};
 ---@field stroke? SetStrokeParams # Default `nil`
 ---@field tint? RGB # Default `nil`
 DrawRectParams = {};
+
+-- HitAnimation properties
+---@class HitAnimationProps
+---@field alpha number
+---@field fps number
+---@field path string
+---@field scale number
+HitAnimationProps = {};
 
 -- `Image:draw` params
 ---@class ImageDrawParams
@@ -235,6 +242,16 @@ MakeSettingParams = {};
 ---@field playOut boolean
 ---@field timer number
 RingAnimationEffectState = {};
+
+-- RingAnimation properties
+---@class RingAnimationProps
+---@field alpha number
+---@field effect string
+---@field fps number
+---@field inner string
+---@field ring string
+---@field scale number
+RingAnimationProps = {};
 
 -- `ScoreNumber:new` params
 ---@class ScoreNumberConstructorParams

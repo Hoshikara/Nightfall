@@ -3,17 +3,21 @@ local Image = {
 	-- Image constructor
 	---@param this ImageClass
 	---@param path string
+	---@param noFallback boolean
 	---@return Image
-	new = function(this, path)
-		path = path or 'image_warning.png';
-
+	new = function(this, path, noFallback)
 		---@class Image : ImageClass
 		local t = {
-			image = gfx.CreateSkinImage(path, 0)
-				or gfx.CreateSkinImage('image_warning.png', 0),
+			image = gfx.CreateSkinImage(path or '', 0),
 			w = 500,
 			h = 500,
 		};
+
+		if (not t.image) then
+			if (noFallback) then return; end
+		
+			t.image = gfx.CreateSkinImage('image_warning.png', 0);
+		end
 
 		t.w, t.h = gfx.ImageSize(t.image);
 		
