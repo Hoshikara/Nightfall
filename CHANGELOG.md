@@ -1,3 +1,11 @@
+### 1.4.3 - August 25, 2021
+- `Results` changes
+  - Added button/hold/laser breakdown chart
+  - Removed best stat delta display and skin setting
+- Added a skin setting to enable assist tick
+- Enabled stop preview functionality for `Nautica` screen
+- Increased display name cutoff from 9 characters to 12
+
 ### 1.4.2 - August 23, 2021
 - Changed various gauges to display one decimal place
 - Fixed an error that occured when starting the game with `player.json` carried over from an older version

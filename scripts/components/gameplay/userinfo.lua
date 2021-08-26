@@ -33,7 +33,7 @@ local UserInfo = {
       },
       player = makeLabel(
         'norm',
-        (gameplay.autoplay and 'AUTOPLAY') or username:upper():sub(1, 9),
+        (gameplay.autoplay and 'AUTOPLAY') or username:upper():sub(1, 12),
         36
       ),
       prefixes = {

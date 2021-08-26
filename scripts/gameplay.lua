@@ -1,5 +1,8 @@
 -- Global `gameplay` table is available for this script and its related scripts
 
+game.LoadSkinSample('tick_bt');
+game.LoadSkinSample('tick_fx');
+
 local JSON = require('lib/json');
 
 local BPMS = require('components/gameplay/bpms');
@@ -23,6 +26,8 @@ local UserInfo = require('components/gameplay/userinfo');
 local window = Window:new();
 
 local abs = math.abs;
+
+local assistTick = getSetting('assistTick', false);
 
 ---@type number
 local minCritDelta = getSetting('minCritDelta', 23);
@@ -119,7 +124,17 @@ button_hit = function(btn, rating, delta)
 		);
 	end
 
-	if (rating ~= 3) then state.isButton = true; end
+	if (rating ~= 3) then
+		state.isButton = true;
+
+		if (assistTick) then
+			if (btn < 4) then
+				game.PlaySample('tick_bt');
+			else
+				game.PlaySample('tick_fx');
+			end
+		end
+	end
 
 	if (rating == 1) then
 		state.isCrit = false;

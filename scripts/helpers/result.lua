@@ -8,9 +8,22 @@ local JSONTable = require('common/jsontable');
 
 local ScoreNumber = require('components/common/scorenumber');
 
+local abs = math.abs;
+
 local jacketFallback = gfx.CreateSkinImage('loading.png', 0);
 
 local minOffset = getSetting('minOffset', 1);
+
+-- ScoreNumber wrapper function
+---@param v number
+---@return ScoreNumber
+local numLabel = function(v)
+	return ScoreNumber:new({
+		digits = 5,
+		size = 20,
+		val = v,
+	});
+end
 
 -- Get the clear name
 ---@param res result
@@ -44,76 +57,6 @@ local getDateFormat = function()
   else
     return '%d-%m-%y';
   end
-end
-
--- Delta value label wrapper function
----@param val number
----@param positive boolean
----@return Label
-local deltaLabel = function(val, positive)
-	return makeLabel('num', val, 20, (positive and 'pos') or 'neg');
-end
-
--- Gets the critical, near, and error deltas relative to the highest/lowest achieved values
----@param res result
----@return table
-local getDeltas = function(res)
-	if (#res.highScores == 0) then return {}; end
-
-	local crits = nil;
-	local critIdx = nil;
-	local errors = nil;
-	local errorIdx = nil;
-	local nears = nil;
-	local nearIdx = nil;
-
-	for i, score in ipairs(res.highScores) do
-		local hardFail = ((score.gauge_type or score.flags or 0) == 1)
-			and (score.badge == 1);
-
-		if (not hardFail) then
-			if (not crits) then
-				crits = score.perfects;
-				critIdx = i;
-			end
-
-			if (not errors) then
-				errors = score.misses;
-				errorIdx = i;
-			end
-
-			if (not nears) then
-				nears = score.goods;
-				nearIdx = i;
-			end
-
-			if (score.perfects > crits) then
-				crits = score.perfects;
-				critIdx = i;
-			end
-
-			if (score.misses < errors) then
-				errors = score.misses;
-				errorIdx = i;
-			end
-
-			if (score.goods < nears) then
-				nears = score.goods;
-				nearIdx = i;
-			end
-		end
-	end
-
-	if ((not crits) or (not errors) or (not nears)) then return {}; end
-
-	return {
-		critical = deltaLabel(crits, res.perfects >= crits),
-		critIdx = critIdx,
-		error = deltaLabel(errors, res.misses <= errors),
-		errorIdx = errorIdx,
-		near = deltaLabel(nears, res.goods <= nears),
-		nearIdx = nearIdx,
-	};
 end
 
 -- Gets the difficulty name
@@ -198,7 +141,7 @@ end
 local getName = function(res)
 	local displayName = getSetting('displayName', 'GUEST');
 
-	return (res.name or res.playerName or displayName or 'GUEST'):upper():sub(1, 9);
+	return (res.name or res.playerName or displayName or 'GUEST'):upper():sub(1, 12);
 end
 
 -- Gets the score index for a player's own score in multiplayer
@@ -327,7 +270,7 @@ local formatHighScore = function(res, i)
 			val = res.goods or 0,
 		}),
 		place = makeLabel('num', i, 90),
-		score = ScoreNumber:new({ size = (i and 90) or 117, val = res.score or 0 }),
+		score = ScoreNumber:new({ size = (i and 90) or 81, val = res.score or 0 }),
 		timestamp = makeLabel('num', getTimestamp(res), 24),
 		volforce = getVF(res),
   };
@@ -338,13 +281,7 @@ end
 -- Formats a score
 ---@param res result
 ---@return ResultScore
-local formatScore = function(res)
-  local base = formatHighScore(res);
-
-	base.deltas = getDeltas(res);
-
-  return base;
-end
+local formatScore = function(res) return formatHighScore(res); end
 
 -- Formats song information
 ---@param res result
@@ -370,10 +307,85 @@ local formatSong = function(res)
 		effector = makeLabel('jp', res.effector or '', 24),
 		level = makeLabel('num', ('%02d'):format(res.level or 1), 24),
 		jacket = jacket,
+		timestamp = makeLabel('num', getTimestamp(res), 24),
 		title = makeLabel('jp', getTitle(res), 32),
   };
 
 	return s;
+end
+
+-- Gets hit stat breakdown
+---@param res result
+local getBreakdown = function(res)
+	local btnStats = res.noteHitStats or {};
+	local holdStats = res.holdHitStats or {};
+	local laserStats = res.laserHitStats or {};
+	local sCritWindow = math.floor(
+		((res.hitWindow and res.hitWindow.perfect) or 46) * 0.5
+	);
+
+	local sCrit = 0;
+	local crit = 0;
+	local near = res.goods or 0;
+	local error = 0;
+
+	local holdSCrit = 0;
+	local holdError = 0;
+
+	local laserSCrit = 0;
+	local laserError = 0;
+
+	for _, stat in ipairs(btnStats) do
+		if (stat.rating == 2) then
+			if (abs(stat.delta) <= sCritWindow) then
+				sCrit = sCrit + 1;
+			else
+				crit = crit + 1;
+			end
+		elseif (stat.rating == 0) then
+			error = error + 1;
+		end
+	end
+
+	for _, stat in ipairs(holdStats) do
+		if (stat.rating == 0) then
+			holdError = holdError + 1;
+		else
+			holdSCrit = holdSCrit + 1;
+		end
+	end
+
+	for _, stat in ipairs(laserStats) do
+		if (stat.rating == 0) then
+			laserError = laserError + 1;
+		else
+			laserSCrit = laserSCrit + 1;
+		end
+	end
+
+	---@class StatBreakdown
+	local b = {
+		button = {
+			sCritical = numLabel(sCrit),
+			critical = numLabel(crit),
+			near = numLabel(near),
+			error = numLabel(error),
+		},
+		hold = {
+			sCritical = numLabel(holdSCrit),
+			critical = makeLabel('num', '-', 20),
+			near = makeLabel('num', '-', 20),
+			error = numLabel(holdError)
+		},
+		laser = {
+			sCritical = numLabel(laserSCrit),
+			critical = makeLabel('num', '-', 20),
+			near = makeLabel('num', '-', 20),
+			error = numLabel(laserError)
+		},
+	};
+
+	return b;
 end
 
 -- Gets data used for gauge graphs
@@ -506,6 +518,8 @@ end
 ---@param res result
 ---@return ResultGraphData
 local getGraphData = function(res)
+	local breakdown = getBreakdown(res);
+
 	local gaugeData = getGaugeData(res);
 	local hitCounts, exScore = getHitCounts(res);
 
@@ -581,6 +595,7 @@ local getGraphData = function(res)
 
 	---@class ResultGraphData
 	local gd = {
+		breakdown = breakdown,
 		critWindow = (res.hitWindow and res.hitWindow.perfect) or 46,
 		counts = hitCounts,
 		duration = {
@@ -592,6 +607,11 @@ local getGraphData = function(res)
 		histogram = histogram,
 		hitStats = res.noteHitStats,
 		hoverScale = hoverScale,
+		maxChain = (res.maxCombo and ScoreNumber:new({
+			digits = 5,
+			size = 24,
+			val = res.maxCombo or 0,
+		})) or makeLabel('num', '-', 24),
 		mean = makeLabel('num', getMeanDelta(res));
 		median = makeLabel('num', getMedianDelta(res));
 		nearWindow = (res.hitWindow and res.hitWindow.good) or 92,

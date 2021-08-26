@@ -104,6 +104,12 @@
 			"YELLOW"
 		]
 	},
+	"separator_cdf": {},
+	"assistTick": {
+		"label": "Enable Assist Tick",
+		"type": "bool",
+		"default": false
+	},
 	"separator_lbr": {},
 	"showCritDelta": {
 		"label": "Show Critical hit delta (Early / Late Display must be enabled)",
@@ -143,11 +149,6 @@
 		"default": false
 	},
 	"separator_kqm": {},
-	"showBestDeltas": {
-		"label": "Show best critical/near/error count indicators",
-		"type": "bool",
-		"default": true
-	},
 	"separator_shj": {},
 	"suggestOffset": {
 		"label": "Show song offset recommendation",

@@ -402,10 +402,6 @@ local ScoreList = {
   ---@param dt deltaTime
   handleChange = function(this, dt)
     if (this.state.scoreCount > 1) then
-      if (this.currScore ~= this.state.currScore) then
-        this.currScore = this.state.currScore;
-      end
-
       if ((not this.pressedFXL) and pressed('FXL')) then
         this.currScore = advance(this.currScore, this.state.scoreCount, -1);
       end
@@ -416,8 +412,6 @@ local ScoreList = {
 
       this.pressedFXL = pressed('FXL');
       this.pressedFXR = pressed('FXR');
-
-      this.state.currScore = this.currScore;
     end
 
     this.list:handleChange(dt, { watch = this.currScore });

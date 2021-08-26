@@ -2,9 +2,10 @@
 
 ---@class HitStat
 ---@field timeFrac number -- Fraction of when in the chart the note was hit, `0.0` to `1.0`
----@field lane integer -- `0 = A`, `1 = B`, `2 = C`, `3 = D`, `4 = L`, `5 = R`
+---@field lane integer -- `0` = A, `1` = B, `2` = C, `3` = D, `4` = L, `5` = R, `6` = Left Laser, `7` = Right Laser
 ---@field time integer -- When in the chart the note was hit, in milliseconds
 ---@field delta integer -- Delta value of the hit from 0
+---@field hold integer -- `0` for chip/laser, otherwise `# Ticks` of hold
 ---@field rating integer -- `0 = Miss`, `1 = Near`, `2 = Crit`
 HitStat = {};
 
@@ -69,10 +70,12 @@ ChartResult = {};
 ---@field grade string # Result grade
 ---@field highScores Score[] # All scores
 ---@field hitWindow HitWindow # Result hit windows
+---@field holdHitStats HitStat[]|nil # Hit stats for every hold object, only available for singleplayer if `isSelf = true`
 ---@field illustrator string # Chart jacket illustrator
 ---@field irState integer # Internet ranking flag
 ---@field isSelf boolean # Only for multiplayer, `false` if score is of another player
 ---@field jacketPath string # Full filepath to the jacket image on the disk
+---@field laserHitStats HitStat[]|nil # Hit stats for every laser object, only available for singleplayer if `isSelf = true`
 ---@field lates integer # Total late hits
 ---@field level integer # Chart or challenge level
 ---@field maxCombo integer # Result max chain
@@ -83,7 +86,7 @@ ChartResult = {};
 ---@field mirror boolean # Mirror mode bool
 ---@field misses integer # Total errors
 ---@field mission string # Only for practice mode
----@field noteHitStats HitStat[]|nil # Stats on every note hit, only available for singleplayer if `isSelf = true`
+---@field noteHitStats HitStat[]|nil # Hit stats for every chip hit, only available for singleplayer if `isSelf = true`
 ---@field overallCrits integer # Only for challenge results, total number of critical hits across the charts
 ---@field overallErrors integer # Only for challenge results, total number of error hits across the charts
 ---@field overallNears integer # Only for challenge results, total number of near hits across the charts

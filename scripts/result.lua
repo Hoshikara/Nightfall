@@ -15,7 +15,6 @@ local showHardScores = getSetting('showHardScores', false);
 ---@class Result
 ---@field scores ResultScore[]
 local state = {
-	currScore = 1,
 	downScore = nil,
 	graphData = nil,
 	jacket = nil,

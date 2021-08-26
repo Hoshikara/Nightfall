@@ -22,12 +22,17 @@ local Lanes = {
 
 -- Graph drawing orders
 local Orders = {
-  bottom = {
+  detailed = {
     'critWindow',
     'nearWindow',
     'sCritWindow',
   },
-  top = {
+  kind = {
+    'button',
+    'hold',
+    'laser',
+  },
+  simple = {
     'errorEarly',
     'early',
     'criticalEarly',
@@ -35,6 +40,12 @@ local Orders = {
     'criticalLate',
     'late',
     'errorLate',
+  },
+  stat = {
+    'sCritical',
+    'critical',
+    'near',
+    'error',
   },
 };
 
@@ -72,15 +83,19 @@ local Graphs = {
       histSet = false,
       hitStatScale = nil,
       labels = {
-        criticalEarly = makeLabel('med', 'CRITICAL', 20),
-        criticalLate = makeLabel('med', 'CRITICAL', 20),
+        button = makeLabel('med', 'BUTTON'),
+        critical = makeLabel('med', 'CRIT', 20),
         early = makeLabel('med', 'EARLY', 20),
-        errorEarly = makeLabel('med', 'ERROR', 20),
-        errorLate = makeLabel('med', 'ERROR', 20),
+        error = makeLabel('med', 'ERROR', 20),
+        exScore = makeLabel('med', 'EX SCORE'),
+        hold = makeLabel('med', 'HOLD'),
+        laser = makeLabel('med', 'LASER'),
         late = makeLabel('med', 'LATE', 20),
+        maxChain = makeLabel('med', 'MAX CHAIN'),
         mean = makeLabel('med', 'MEAN'),
         median = makeLabel('med', 'MEDIAN'),
-        sCritical = makeLabel('med', 'S-CRITICAL', 20),
+        near = makeLabel('med', 'NEAR', 20),
+        sCritical = makeLabel('med', 'S-CRIT', 20),
       },
       mode = 0,
       mouse = Mouse:new(window),
@@ -89,10 +104,17 @@ local Graphs = {
       state = state,
       window = window,
       x = 0,
-      y = 0,
-      w = 0,
+      y = { 0, 0 },
+      w = { 0, 0 },
       h = 0,
     };
+
+    local labels = t.labels;
+
+    labels.criticalEarly = labels.critical;
+    labels.criticalLate = labels.critical;
+    labels.errorEarly = labels.error;
+    labels.errorLate = labels.error;
 
     for btn, letter in pairs(Lanes) do
       t.buttons[btn] = makeLabel('med', letter, 18);
@@ -104,18 +126,104 @@ local Graphs = {
     return t;
   end,
 
+  -- Draws the stats breakdown
+  ---@param this Graphs
+  drawBreakdown = function(this)
+    local breakdown = this.data.breakdown;
+    local x = this.x - 2;
+    local y = this.y[1] - 12;
+    local w = this.w[1];
+    local h = 34;
+
+    for i, name in ipairs(Orders.stat) do
+      if (name == 'near') then
+        drawRect({
+          x = x - 8,
+          y = y + (h * i) + 6.5,
+          w = 3,
+          h = 14,
+          color = Colors.early,
+        });
+
+        drawRect({
+          x = x - 8,
+          y = y + (h * i) + 13.5,
+          w = 3,
+          h = 7,
+          color = Colors.late,
+        });
+      else
+        drawRect({
+          x = x - 8,
+          y = y + (h * i) + 6.5,
+          w = 3,
+          h = 14,
+          color = Colors[name],
+        });
+      end
+
+      this.labels[name]:draw({
+        x = x,
+        y = y + (h * i),
+      });
+
+      drawRect({
+        x = x + 1,
+        y = y + (h * (i + 1)) - 5,
+        w = w + 1,
+        h = 2,
+        alpha = 200,
+        color = 'med',
+      });
+    end
+
+    x = x + this.labels.error.w + 18;
+
+    for _, kind in pairs(Orders.kind) do
+      this.labels[kind]:draw({ x = x, y = y + 6 });
+
+      for i, name in ipairs(Orders.stat) do
+        breakdown[kind][name]:draw({
+          x = x,
+          y = y + (h * i),
+          color = 'white',
+        });
+      end
+
+      x = x + 104;
+    end
+
+    x = this.x - 2;
+    y = y + ((this.window.isPortrait and 184) or 193);
+
+    this.labels.maxChain:draw({ x = x, y = y });
+    this.labels.exScore:draw({ x = x + 194, y = y });
+
+    this.data.maxChain:draw({
+      x = x,
+      y = y + (this.labels.maxChain.h * 1.35),
+      color = 'white',
+    });
+
+    this.data.exScore:draw({
+      x = x + 194,
+      y = y + (this.labels.exScore.h * 1.35),
+      color = 'white',
+    });
+  end,
+
   -- Draws the simple hit graph
   ---@param this Graphs
   drawSimple = function(this)
     local counts = this.data.counts;
     local gauge = this.data.gauge or {};
     local gaugeColor = GaugeColors.effFail;
-    local scale = (this.window.isPortrait and 1.5) or 1.6;
+    local scale = (this.window.isPortrait and 1.45) or 1.3;
     local x = this.x;
-    local y = this.y - 6;
-    local w = this.w;
-    local wCount = this.counts.sCritical.w + 12;
-    local wLabel = this.labels.sCritical.w + 12;
+    local y = this.y[2] - 6;
+    local w = this.w[2];
+    local wCount = this.counts.sCritical.w + 16;
+    local wLabel = this.labels.error.w + 16;
     local wBar = w - wCount - wLabel;
 
     if (gauge.type >= 1) then
@@ -132,13 +240,13 @@ local Graphs = {
       end
     end
 
-    for _, name in ipairs(Orders.top) do
+    for _, name in ipairs(Orders.simple) do
       if (name == 'total') then return; end
 
       drawRect({
         x = x - 8,
         y = y + 7,
-        w = 4,
+        w = 3,
         h = 14,
         color = Colors[name],
       });
@@ -172,13 +280,13 @@ local Graphs = {
       y = y + (this.labels[name].h * scale);
     end
 
-    y = y + ((this.window.isPortrait and 12) or 20);
+    y = y + ((this.window.isPortrait and 12) or 19);
 
     drawRect({
       x = x + 3,
       y = y,
       w = (w - 4) * gauge.rawVal,
-      h = 18,
+      h = 14,
       color = gaugeColor,
     });
 
@@ -186,7 +294,7 @@ local Graphs = {
       x = x + 3,
       y = y,
       w = w - 4,
-      h = 18,
+      h = 14,
       alpha = 0,
       stroke = { color = 'white', size = 2 },
     });
@@ -195,11 +303,11 @@ local Graphs = {
       x = x + 2 + (w * (((gauge.type == 0) and 0.7) or 0.3)),
       y = y + 1,
       w = 2, 
-      h = 17,
+      h = 13,
       color = 'white',
     });
 
-    y = y + ((this.window.isPortrait and 22) or 24);
+    y = y + ((this.window.isPortrait and 22) or 20);
 
     gauge.rate:draw({
       x = x,
@@ -219,8 +327,8 @@ local Graphs = {
   ---@param this Graphs
   drawDetailed = function(this)
     local x = this.x;
-    local y = this.y;
-    local w = this.w;
+    local y = this.y[2];
+    local w = this.w[2];
     local h = this.h;
 
     drawRect({
@@ -283,7 +391,7 @@ local Graphs = {
     gfx.LineTo(x + w, y);
     gfx.Stroke();
 
-    for _, name in ipairs(Orders.bottom) do
+    for _, name in ipairs(Orders.detailed) do
       local color = ((name == 'sCritWindow') and Colors.sCritical)
         or ((name == 'critWindow') and Colors.critical)
         or Colors.early;
@@ -606,7 +714,7 @@ local Graphs = {
   ---@param this Graphs
   drawDeltas = function(this)
     local x = this.x;
-    local y = this.y + this.h + 14;
+    local y = this.y[2] + this.h + 13;
 
     if (this.data.suggestion and suggestOffset) then
       this.data.suggestion.text:draw({ x = x, y = y });
@@ -618,7 +726,7 @@ local Graphs = {
       });
     end
 
-    x = x + this.w;
+    x = x + this.w[2];
     y = y - 12;
 
     this.data.mean:draw({
@@ -678,6 +786,8 @@ local Graphs = {
     this.mouse:update();
 
     gfx.Save();
+
+    this:drawBreakdown();
 
     if (this.showSimple) then
       this:drawSimple();

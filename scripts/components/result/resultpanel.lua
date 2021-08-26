@@ -1,52 +1,27 @@
 local Constants = require('constants/result');
 
-local Mouse = require('common/mouse');
-
 local ScoreNumber = require('components/common/scorenumber');
 
 local Graphs = require('components/result/graphs');
 
-local DeltaMap = {
-  critical = 'critIdx',
-  error = 'errorIdx',
-  near = 'nearIdx',
-};
-
 -- Drawing orders
 local Orders = {
-  player = {
-    'volforce',
+  left = {
+    'clear',
     'name',
-    'timestamp',
+  },
+  right = {
+    'grade',
+    'volforce',
   },
   song = {
     'title',
     'artist',
     'effector',
     'difficulty',
-  },
-  stat = {
-    'critical',
-    'near',
-    'error',
-    'maxChain',
+    'bpm',
   },
 };
-
--- Get equal amount of space between labels
----@param order table
----@param labels table
----@param max number
----@return number
-local getSpacing = function(order, labels, max)
-  local w = 0;
-
-  for _, name in ipairs(order) do w = w + labels[name].w; end
-
-  return (max - w) / (#order - 1);
-end
-
-local showBestDeltas = getSetting('showBestDeltas', true);
 
 ---@class ResultPanelClass
 local ResultPanel = {
@@ -62,7 +37,7 @@ local ResultPanel = {
     ---@field state Result
     local t = {
       cache = { w = 0, h = 0 },
-      jacketSize = 0,
+      jacketSize = 360,
       graphs = Graphs:new(window, state),
       labels = {
         minus = makeLabel('num', '-', 38);
@@ -93,7 +68,6 @@ local ResultPanel = {
         ),
       },
       maxWidth = 0,
-      mouse = Mouse:new(window),
       padding = { x = 0, y = 0 },
       setGraph = false,
       state = state,
@@ -135,10 +109,8 @@ local ResultPanel = {
   setSizes = function(this)
     if ((this.cache.w ~= this.window.w) or (this.cache.h ~= this.window.h)) then
       if (this.window.isPortrait) then
-        this.jacketSize = (this.window.w / 4) - 12;
-
         this.w = this.window.w - (this.window.padding.x * 2);
-        this.h = (this.window.h / 1.75) - (this.window.padding.y * 3);
+        this.h = (this.window.h / 1.75) - (this.window.padding.y * 2);
 
         this.x.panel = this.window.padding.x;
         this.y.panel = this.window.padding.y;
@@ -155,8 +127,6 @@ local ResultPanel = {
             (this.h * this.window:getScale());
         end
       else
-        this.jacketSize = (this.window.w / 7.5) + 2;
-
         this.w = this.window.w / (1920 / 864);
         this.h = this.window.h - (this.window.padding.y * 2);
 
@@ -167,8 +137,8 @@ local ResultPanel = {
           this.x.panel = this.window.padding.x;
         end
 
-        this.padding.x = this.w / 30;
-        this.padding.y = this.h / 24;
+        this.padding.x = this.w / 36;
+        this.padding.y = this.h / 30;
 
         this.state.getRegion = function()
           return (this.x.panel * this.window:getScale()),
@@ -178,11 +148,13 @@ local ResultPanel = {
         end
       end
 
-      this.maxWidth = this.w - (this.padding.x * 2) - (this.padding.x * 1.75) - 4;
+      this.maxWidth = this.w - (this.padding.x * 4);
 
-      this.x.text[1] = (this.padding.x * 3) + this.jacketSize;
+      this.x.text[1] = (this.padding.x * 3.5) + this.jacketSize;
       this.x.text[2] = this.padding.x * 2;
-      this.y.text = (this.padding.y * 1.5) + this.jacketSize;
+      this.y.text = (this.padding.y * 1.75) + this.jacketSize;
+
+      if (this.window.isPortrait) then this.y.text = this.y.text - 16; end
 
       this.graphs.hitStatScale = nil;
       this.graphs.histSet = false;
@@ -200,9 +172,11 @@ local ResultPanel = {
     if (not this.setGraph) then return; end
 
     this.graphs.x = this.x.panel + (this.padding.x * 2);
-    this.graphs.y = y;
-    this.graphs.w = this.maxWidth;
-    this.graphs.h = this.h - y;
+    this.graphs.y[1] = this.y.panel + this.y.text + 6;
+    this.graphs.y[2] = this.y.panel + y;
+    this.graphs.w[1] = this.jacketSize;
+    this.graphs.w[2] = this.maxWidth;
+    this.graphs.h = this.h - y - this.y.panel;
 
     this.setGraph = false;
   end,
@@ -215,7 +189,7 @@ local ResultPanel = {
     local padY = this.padding.y;
     local size = this.jacketSize;
     local song = this.state.song;
-    local maxWidth = this.maxWidth - (size + padX);
+    local maxWidth = this.maxWidth - (size + (padX * 1.5));
     local x = this.x.text[1];
     local y = this.padding.y - 5;
 
@@ -235,8 +209,8 @@ local ResultPanel = {
     for _, name in ipairs(Orders.song) do
       this.labels[name]:draw({ x = x, y = y });
 
-      if (name == 'difficulty') then
-        this.labels.bpm:draw({ x = x + this.labels.difficulty.w * 2, y = y });
+      if (name == 'bpm') then
+        this.labels.timestamp:draw({ x = x + 212, y = y });
       end
 
       y = y + (this.labels[name].h * 1.35);
@@ -266,15 +240,15 @@ local ResultPanel = {
           y = y,
           color = 'white',
         });
-
-        song.bpm:draw({
-          x = x + this.labels.difficulty.w * 2,
+      elseif (name == 'bpm') then
+        song.timestamp:draw({
+          x = x + 212,
           y = y,
           color = 'white',
         });
       end
 
-      y = y + (song[name].h * 1.725) + 1;
+      y = y + (song[name].h * 2.075) + 1.25;
     end
 
     gfx.Restore();
@@ -283,62 +257,38 @@ local ResultPanel = {
   -- Draw the result stats
   ---@param this ResultPanel
   drawStats = function(this)
-    local graphData = this.state.graphData or {};
-    local scale = (this.window.isPortrait and 2) or 2.5;
     local stats = this.state.myScore;
-    local x = this.x.text[2];
+    local h1 = this.labels.grade.h * 1.35;
+    local h2 = stats.grade.h * ((this.window.isPortrait and 1.875) or 2.25);
+    local x1 = this.x.text[1];
+    local x2 = x1 + 212;
     local y = this.y.text;
-    local yTemp = 0;
+    local yLeft = 0;
+    local yRight = 0;
 
     gfx.Save();
 
     gfx.Translate(this.x.panel, this.y.panel);
 
-    this.labels.clear:draw({ x = x, y = y });
+    this.labels.score:draw({ x = x1, y = y });
 
-    y = y + (this.labels.clear.h * 1.35);
-
-    stats.clear:draw({
-      x = x,
-      y = y,
-      color = 'white',
-    });
-
-    y = y + (stats.clear.h * 2);
-
-    this.labels.grade:draw({ x = x, y = y });
-
-    y = y + (this.labels.grade.h * 1.35);
-
-    stats.grade:draw({
-      x = x,
-      y = y,
-      color = 'white',
-    });
-
-    x = x + this.labels.grade.w * 2.25;
-    yTemp = y;
-    y = this.y.text;
-
-    this.labels.score:draw({ x = x, y = y });
-
-    stats.score:draw({ x = x - 7, y = y - 1 });
+    stats.score:draw({ x = x1 - 3, y = y + 11 });
 
     if (this.state.upScore) then
       if (not this.upScore) then
         this.upScore = ScoreNumber:new({ size = 30, val = this.state.upScore });
       else
-        local xTemp = x - 7 + stats.score.w - this.upScore.w - 6;
+        local xTemp = x1 + stats.score.w - this.upScore.w - 7;
 
         this.upScore:draw({
           x = xTemp,
-          y = y + 2,
+          y = y - 3,
           color = 'pos',
         });
 
         this.labels.plus:draw({
-          x = xTemp - 24,
-          y = y + 2,
+          x = xTemp - 22,
+          y = y - 2,
           color = 'white',
         });
       end
@@ -349,132 +299,67 @@ local ResultPanel = {
           val = this.state.downScore,
         });
       else
-        local xTemp = x - 7 + stats.score.w - this.downScore.w - 6;
+        local xTemp = x1 + stats.score.w - this.downScore.w - 7;
 
         this.downScore:draw({
           x = xTemp,
-          y = y + 2,
+          y = y - 3,
           color = 'neg',
         });
 
         this.labels.minus:draw({
-          x = xTemp - 20,
-          y = y - 6,
+          x = xTemp - 18,
+          y = y - 10,
           color = 'neg',
         });
       end
     end
 
-    x = this.x.text[2];
-    y = yTemp + (stats.clear.h * scale);
+    yLeft = y + stats.score.h + 17;
+    yRight = yLeft;
 
-    if (graphData.exScore) then
-      this.labels.exScore:draw({ x = this.x.exScore, y = y });
+    for _, name in ipairs(Orders.left) do
+      this.labels[name]:draw({ x = x1, y = yLeft });
 
-      graphData.exScore:draw({
-        x = this.x.exScore,
-        y = y + (this.labels.exScore.h * 1.35),
+      yLeft = yLeft + h1;
+
+      stats[name]:draw({
+        x = x1,
+        y = yLeft,
         color = 'white',
       });
+
+      yLeft = yLeft + h2;
     end
 
-    for _, name in ipairs(Orders.player) do
-      this.labels[name]:draw({ x = this.x[name], y = y });
+    for _, name in ipairs(Orders.right) do
+      this.labels[name]:draw({ x = x2, y = yRight });
+
+      yRight = yRight + h1;
 
       if (name == 'volforce') then
         stats.volforce.val:draw({
-          x = this.x.volforce,
-          y = y + (this.labels.volforce.h * 1.35),
+          x = x2,
+          y = yRight,
           color = 'white',
         });
 
         stats.volforce.increase:draw({
-          x = this.x.volforce + stats.volforce.val.w + 8,
-          y = y + (this.labels.volforce.h * 1.35) + 4;
+          x = x2 + stats.volforce.val.w + 8,
+          y = yRight + 4;
         });
       else
         stats[name]:draw({
-          x = this.x[name],
-          y = y + (this.labels[name].h * 1.35),
+          x = x2,
+          y = yRight,
           color = 'white',
         });
       end
+
+      yRight = yRight + h2;
     end
 
-    local spacing = getSpacing(Orders.song, this.labels, this.maxWidth);
-
-    x = this.x.text[2];
-    y = y + (this.labels.clear.h * 1.35) + (stats.clear.h * scale);
-
-    for _, name in ipairs(Orders.stat) do
-      if (name == 'critical') then
-        this.x.exScore = x;
-      elseif (name == 'near') then
-        this.x.volforce = x;
-      elseif (name == 'error') then
-        this.x.name = x;
-      else
-        this.x.timestamp = x;
-      end
-
-      this.labels[name]:draw({ x = x, y = y });
-
-      stats[name]:draw({
-        x = x,
-        y = y + (this.labels[name].h * 1.35),
-        color = 'white',
-      });
-
-      if (stats.deltas[name] and showBestDeltas) then
-        local allowAction = this.state.sp and (this.state.scoreCount > 0);
-        local idx = stats.deltas[DeltaMap[name]];
-        local xD = x + 1 + stats[name].w + 8;
-        local yD = y + (this.labels[name].h * 1.35) + 4;
-
-        stats.deltas[name]:draw({ x = xD, y = yD });
-
-        if (allowAction and idx and this.mouse:clipped(
-          this.x.panel + xD - 4,
-          this.y.panel + yD - 2,
-          stats.deltas[name].w + 8,
-          stats.deltas[name].h + 8
-        )) then
-          this.state.currScore = idx;
-        end
-      end
-
-      if (name ~= 'near') then
-        drawRect({
-          x = x - 8,
-          y = y + 5,
-          w = 4,
-          h = 13,
-          color = Colors[name],
-        });
-      else
-        drawRect({
-          x = x - 8,
-          y = y + 5,
-          w = 4,
-          h = 13,
-          color = Colors.late,
-        });
-
-        drawRect({
-          x = x - 8,
-          y = y + 5,
-          w = 4,
-          h = 6.5,
-          color = Colors.early,
-        });
-      end
-
-      x = x + this.labels[name].w + spacing;
-    end
-
-    y = y + (this.labels.critical.h * 1.35) + (stats.critical.h * 4);
-
-    this:setGraphSizes(y);
+    this:setGraphSizes(yLeft);
 
     gfx.Restore();
   end,
@@ -484,8 +369,6 @@ local ResultPanel = {
   ---@param dt deltaTime
   ---@return number w, number h
   render = function(this, dt)
-    this.mouse:update();
-
     this:setSizes();
 
     gfx.Save();
