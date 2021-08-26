@@ -8,9 +8,9 @@ local EnabledColor = { 255, 205, 0 };
 
 local TabNames = {
   'earlate',
-  'hispeed',
   'hitAnim',
   'hitDeltaBar',
+  'laneSpeed',
   'scoreDiff',
 };
 
@@ -120,9 +120,9 @@ local IngamePreview = {
   loadSettings = function(this)
     if (not this.tabs) then
       local earlate = Tabs.getEarlate();
-      local hispeed = Tabs.getHispeed();
       local hitAnim = Tabs.getHitAnim();
       local hitDeltaBar = Tabs.getHitDeltaBar();
+      local laneSpeed = Tabs.getLaneSpeed();
       local scoreDiff = Tabs.getScoreDiff();
 
       earlate.component = Earlate:new(this.window, {
@@ -131,19 +131,6 @@ local IngamePreview = {
       });
 
       earlate.render = function(dt) earlate.component:render(dt, true); end
-
-      hispeed.render = function(dt)
-        local ignore = hispeed.settings[1].value == 1;
-        local w = this.window.w;
-        local h = this.h.screen;
-  
-        hispeed.text[(ignore and 1) or 2]:draw({
-          x = w * hispeed.settings[2].value,
-          y = (h * hispeed.settings[3].value) + this.offset,
-          align = 'middle',
-          alpha = 255 * 0.65,
-        });
-      end
 
       hitAnim.component = HitAnimation:new(this.window);
 
@@ -184,6 +171,19 @@ local IngamePreview = {
         gfx.Restore();
       end
 
+      laneSpeed.render = function(dt)
+        local ignore = laneSpeed.settings[1].value == 1;
+        local w = this.window.w;
+        local h = this.h.screen;
+  
+        laneSpeed.text[(ignore and 1) or 2]:draw({
+          x = w * laneSpeed.settings[2].value,
+          y = (h * laneSpeed.settings[3].value) + this.offset,
+          align = 'middle',
+          alpha = 255 * 0.65,
+        });
+      end
+
       scoreDiff.render = function(dt)
         local delay = scoreDiff.settings[1].value;
         local x = this.window.w * scoreDiff.settings[2].value;
@@ -220,9 +220,9 @@ local IngamePreview = {
 
       this.tabs = {
         earlate = earlate,
-        hispeed = hispeed,
         hitAnim = hitAnim,
         hitDeltaBar = hitDeltaBar,
+        laneSpeed = laneSpeed,
         scoreDiff = scoreDiff,
       };
     end

@@ -2,7 +2,7 @@ return {
   ['Offsets'] = {
     name = 'OFFSETS',
     ['Global Offset'] = {
-      name = 'GLOBAL  OFFSET',
+      name = 'VISUAL OFFSET',
       special = 'TIME',
     },
     ['Button Input Offset'] = {
@@ -20,7 +20,7 @@ return {
     ['Compute Song Offset'] = { name = 'AUTO-COMPUTE SONG OFFSET' },
   },
   ['HiSpeed'] = {
-    name = 'HI-SPEED',
+    name = 'LANE-SPEED',
     ['Speed Mod'] = {
       name = 'MODE',
       options = {
@@ -29,8 +29,11 @@ return {
         'CMOD',
       },
     },
-    ['HiSpeed'] = { name = 'MULTIPLIER  (XMOD)' },
-    ['ModSpeed'] = { name = 'VALUE  (MMOD)' },
+    ['HiSpeed'] = { name = 'STATIC MULTIPLIER  (XMOD)' },
+    ['ModSpeed'] = {
+      name = 'TARGET VALUE  (MMOD)',
+      special = 'LANE-SPEED',
+    },
   },
   ['Game'] = {
     name = 'GAMEPLAY',

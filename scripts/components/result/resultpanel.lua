@@ -206,6 +206,25 @@ local ResultPanel = {
       stroke = { color = 'norm', size = 1.5 },
     });
 
+    if (song.cmod) then
+      drawRect({
+        x = padX * 2,
+        y = padY,
+        w = size,
+        h = size,
+        alpha = 200,
+        color = 'black',
+        stroke = { color = 'norm', size = 1.5 },
+      });
+
+      song.cmod:draw({
+        x = (padX * 2) + (size * 0.5),
+        y = padY + (size * 0.5) - (song.cmod.h * 0.175),
+        align = 'middle',
+        color = 'neg',
+      });
+    end
+
     for _, name in ipairs(Orders.song) do
       this.labels[name]:draw({ x = x, y = y });
 

@@ -311,6 +311,10 @@ local formatSong = function(res)
 		title = makeLabel('jp', getTitle(res), 32),
   };
 
+	if (res.bpm:find('-') and (res.speedModType == 2)) then
+		s.cmod = makeLabel('norm', 'CMOD PLAY', 48);
+	end
+
 	return s;
 end
 

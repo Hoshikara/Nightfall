@@ -149,7 +149,11 @@ local GameSettings = {
         if (base.max <= 1) then
           setting.value:update({ text = ('%.f%%'):format(base.value * 100) });
         else
-          setting.value:update({ text = ('%.2f'):format(base.value) });
+          local val = base.value;
+
+          if (setting.special == 'LANE-SPEED') then val = val * 0.01; end
+
+          setting.value:update({ text = ('%.2f'):format(val) });
         end
 
         min = base.value == base.min;

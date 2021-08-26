@@ -205,50 +205,6 @@ local getHitAnim = function()
 end
 
 ---@return IngamePreviewTab
-local getHispeed = function()
-  local s = {
-    heading = makeLabel('norm', 'HI-SPEED', 30),
-    status = makeSetting({
-      default = 1,
-      key = 'showHispeed',
-    }),
-    settings = {
-      makeSetting({
-        default = 0,
-        key = 'ignoreSpeedChange',
-        label = 'IGNORE CHANGE HINT',
-      }),
-      makeSetting({
-        default = 0.5,
-        format = '%.0f%%',
-        key = 'hispeedX',
-        label = 'X-POSITION',
-        min = 0.0,
-        max = 1.0,
-        step = 0.05,
-      }),
-      makeSetting({
-        default = 0.5,
-        key = 'hispeedY',
-        format = '%.0f%%',
-        label = 'Y-POSITION',
-        min = 0.0,
-        max = 1.0,
-        step = 0.05,
-      }),
-    },
-    text = {
-      makeLabel('num', '800  (8.0)', 30, 'white'),
-      makeLabel('num', '>>  900  (9.0)', 30, 'neg')
-    },
-  };
-
-  s.h = getHeight(s.settings);
-
-  return s;
-end
-
----@return IngamePreviewTab
 local getHitDeltaBar = function()
   local s = {
     heading = makeLabel('norm', 'HIT DELTA BAR', 30),
@@ -281,6 +237,50 @@ local getHitDeltaBar = function()
         max = 2.0,
         step = 0.1,
       }),
+    },
+  };
+
+  s.h = getHeight(s.settings);
+
+  return s;
+end
+
+---@return IngamePreviewTab
+local getLaneSpeed = function()
+  local s = {
+    heading = makeLabel('norm', 'LANE-SPEED', 30),
+    status = makeSetting({
+      default = 1,
+      key = 'showLaneSpeed',
+    }),
+    settings = {
+      makeSetting({
+        default = 0,
+        key = 'ignoreSpeedChange',
+        label = 'IGNORE CHANGE HINT',
+      }),
+      makeSetting({
+        default = 0.5,
+        format = '%.0f%%',
+        key = 'laneSpeedX',
+        label = 'X-POSITION',
+        min = 0.0,
+        max = 1.0,
+        step = 0.05,
+      }),
+      makeSetting({
+        default = 0.5,
+        key = 'laneSpeedY',
+        format = '%.0f%%',
+        label = 'Y-POSITION',
+        min = 0.0,
+        max = 1.0,
+        step = 0.05,
+      }),
+    },
+    text = {
+      makeLabel('num', '800  (8.0)', 30, 'white'),
+      makeLabel('num', '>>  900  (9.0)', 30, 'neg')
     },
   };
 
@@ -345,8 +345,8 @@ end
 
 return {
   getEarlate = getEarlate,
-  getHispeed = getHispeed,
   getHitAnim = getHitAnim,
   getHitDeltaBar = getHitDeltaBar,
+  getLaneSpeed = getLaneSpeed,
   getScoreDiff = getScoreDiff,
 };

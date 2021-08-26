@@ -137,7 +137,7 @@ return {
   },
   ['GAMEPLAY'] = {
     {
-      action = 'ADJUST HISPEED',
+      action = 'ADJUST LANE-SPEED',
       controller = '[START] *',
       keyboard = '',
     },

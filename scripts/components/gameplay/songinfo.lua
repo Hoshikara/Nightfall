@@ -6,9 +6,9 @@ local Green = { 120, 240, 80 };
 
 local floor = math.floor;
 
-local hispeedX = getSetting('hispeedX', 0.5);
-local hispeedY = getSetting('hispeedY', 0.5);
-local showHispeed = getSetting('showHispeed', true);
+local laneSpeedX = getSetting('laneSpeedX', 0.5);
+local laneSpeedY = getSetting('laneSpeedY', 0.5);
+local showLaneSpeed = getSetting('showLaneSpeed', true);
 
 local ignoreChange = getSetting('ignoreSpeedChange', false);
 
@@ -44,7 +44,7 @@ local SongInfo = {
           val = makeLabel('num', '0', 24),
         },
       },
-      hispeed = {
+      laneSpeed = {
         adjust = {
           bpm = makeLabel('num', '0', 24),
           equals = makeLabel('num', '=', 24),
@@ -54,7 +54,7 @@ local SongInfo = {
         change = makeLabel('num', '0', 24),
         changeStr = '',
         isLower = false,
-        label = makeLabel('norm', 'HI-SPEED', 24),
+        label = makeLabel('norm', 'LANE-SPEED', 24),
         val = makeLabel('num', '0', 24),
         valMiddle = makeLabel('num', '0', 30),
         y = 0,
@@ -122,7 +122,7 @@ local SongInfo = {
 
         this.y = this.window.h / 14;
 
-        this.hispeed.y = ((this.window.h * 0.625) * hispeedY)
+        this.laneSpeed.y = ((this.window.h * 0.625) * laneSpeedY)
           + (this.window.h * 0.125)
           - this.y;
       else
@@ -131,10 +131,10 @@ local SongInfo = {
 
         this.y = this.window.h / 20;
 
-        this.hispeed.y = (this.window.h * hispeedY) - this.y;
+        this.laneSpeed.y = (this.window.h * laneSpeedY) - this.y;
       end
 
-      this.hispeed.x = (this.window.w * hispeedX) - this.x;
+      this.laneSpeed.x = (this.window.w * laneSpeedX) - this.x;
 
       this.cache.w = this.window.w;
       this.cache.h = this.window.h;
@@ -398,24 +398,24 @@ local SongInfo = {
     });
 
     if (pressed('STA') and this.state.showAdjustments) then
-      local adjust = this.hispeed.adjust;
-      local hispeedColor = Green;
+      local adjust = this.laneSpeed.adjust;
+      local laneSpeedColor = Green;
       local multiColor = 'white';
       local xTemp = x + xOffset;
       local yTemp = y + yOffset;
 
       if (gameplay.hispeedAdjust and (gameplay.hispeedAdjust == 1)) then
-        hispeedColor = 'white';
+        laneSpeedColor = 'white';
         multiColor = Green;
       end
 
-      this.hispeed.val:draw({
+      this.laneSpeed.val:draw({
         x = x,
         y = y + yOffset,
         align = 'right',
         alpha = alpha,
-        color = hispeedColor,
-        text = ('%.0f'):format(gameplay.bpm * gameplay.hispeed),
+        color = laneSpeedColor,
+        text = ('%.2f'):format(gameplay.bpm * gameplay.hispeed * 0.01),
         update = true,
       });
 
@@ -461,28 +461,28 @@ local SongInfo = {
         update = true,
       });
 
-      if (showHispeed) then
+      if (showLaneSpeed) then
         local color = 'white';
-        local str = ('%.0f  (%.1f)'):format(
-          gameplay.bpm * gameplay.hispeed,
+        local str = ('%.2f  (%.1f)'):format(
+          gameplay.bpm * gameplay.hispeed * 0.01,
           gameplay.hispeed
         );
 
-        if (this.hispeed.changeStr ~= '') then
+        if (this.laneSpeed.changeStr ~= '') then
           if (not ignoreChange) then
-            if (this.hispeed.isLower) then
+            if (this.laneSpeed.isLower) then
               color = 'pos';
             else
               color = 'neg';
             end
             
-            str = this.hispeed.changeStr;
+            str = this.laneSpeed.changeStr;
           end
         end
       
-        this.hispeed.valMiddle:draw({
-          x = this.hispeed.x,
-          y = this.hispeed.y,
+        this.laneSpeed.valMiddle:draw({
+          x = this.laneSpeed.x,
+          y = this.laneSpeed.y,
           alpha = alpha * (((color == 'white') and 0.65) or 0.9),
           align = 'middle',
           color = color,
@@ -491,17 +491,17 @@ local SongInfo = {
         });
       end
     else
-      this.hispeed.val:draw({
+      this.laneSpeed.val:draw({
         x = x,
         y = y + yOffset,
         align = 'right',
         alpha = alpha,
         color = 'white',
-        text = ('%.0f'):format(gameplay.bpm * gameplay.hispeed),
+        text = ('%.2f'):format(gameplay.bpm * gameplay.hispeed * 0.01),
         update = true,
       });
 
-      this.hispeed.label:draw({
+      this.laneSpeed.label:draw({
         x = x + xOffset,
         y = y + yOffset,
         align = 'right',
@@ -512,7 +512,7 @@ local SongInfo = {
     if (this.state.bpms) then this:drawChange(x, y, yOffset); end
   end,
 
-  -- Draw BPM and Hi-Speed change indicators
+  -- Draw BPM and Lane-Speed change indicators
   ---@param this SongInfo
   ---@param x number
   ---@param y number
@@ -528,11 +528,11 @@ local SongInfo = {
     end
 
     local bpmChange = '';
-    local hiSpeedChange = '';
+    local laneSpeedChange = '';
     local next = this.state.bpms[this.bpm.idx + 1];
 
-    this.hispeed.changeStr = '';
-    this.hispeed.isLower = false;
+    this.laneSpeed.changeStr = '';
+    this.laneSpeed.isLower = false;
     
     if (next) then
       this.time.next = math.min(curr.time + 2.5, next.time);
@@ -541,11 +541,11 @@ local SongInfo = {
     end
 
     if (this.timers.curr >= curr.time) then
-      this.hispeed.isLower = curr.bpm < gameplay.bpm;
+      this.laneSpeed.isLower = curr.bpm < gameplay.bpm;
       bpmChange = ('>>  %.0f'):format(curr.bpm);
-      hiSpeedChange = ('>>  %.0f'):format(curr.bpm * gameplay.hispeed);
-      this.hispeed.changeStr = ('>>  %.0f  (%.1f)'):format(
-        curr.bpm * gameplay.hispeed,
+      laneSpeedChange = ('>>  %.2f'):format(curr.bpm * gameplay.hispeed * 0.01);
+      this.laneSpeed.changeStr = ('>>  %.2f  (%.1f)'):format(
+        curr.bpm * gameplay.hispeed * 0.01,
         gameplay.hispeed
       );
 
@@ -559,18 +559,18 @@ local SongInfo = {
       y = y,
       align = 'left',
       alpha = alpha,
-      color = (this.hispeed.isLower and 'pos') or 'neg',
+      color = (this.laneSpeed.isLower and 'pos') or 'neg',
       text = bpmChange,
       update = true,
     });
 
-    this.hispeed.change:draw({
+    this.laneSpeed.change:draw({
       x = x + 16,
       y = y + yOffset,
       align = 'left',
       alpha = alpha,
-      color = (this.hispeed.isLower and 'pos') or 'neg',
-      text = hiSpeedChange,
+      color = (this.laneSpeed.isLower and 'pos') or 'neg',
+      text = laneSpeedChange,
       update = true,
     });
   end,

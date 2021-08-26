@@ -128,12 +128,14 @@ local ChalCharts = {
   drawCharts = function(this, dt)
     local charts = this.state.charts;
     local isPortrait = this.window.isPortrait;
+    local size = this.jacketSize;
     local x = this.x + this.padding.x;
     local yTemp = this.y + this.padding.y;
     
     for i = 1, math.min(3, #charts) do
+      ---@type ChalChart
       local chart = charts[i];
-      local xTemp = x + this.jacketSize + (this.padding.x / 2);
+      local xTemp = x + size + (this.padding.x / 2);
       local y = this.y + this.padding.y;
 
       if (isPortrait) then
@@ -144,14 +146,33 @@ local ChalCharts = {
       drawRect({
         x = x,
         y = y,
-        w = this.jacketSize,
-        h = this.jacketSize,
+        w = size,
+        h = size,
         image = chart.jacket,
         stroke = { color = 'norm', size = 1 },
       });
 
+      if (chart.cmod) then
+        drawRect({
+          x = x,
+          y = y,
+          w = size,
+          h = size,
+          alpha = 200,
+          color = 'black',
+          stroke = { color = 'norm', size = 1 },
+        });
+
+        chart.cmod:draw({
+          x = x + (size * 0.5),
+          y = y + (size * 0.5) - (chart.cmod.h * 0.175),
+          align = 'middle',
+          color = 'neg',
+        });
+      end
+
       if (isPortrait) then
-        local maxWidth = this.w.col.max - this.jacketSize - (this.padding.x * 3);
+        local maxWidth = this.w.col.max - size - (this.padding.x * 3);
 
         this.labels.title:draw({ x = xTemp, y = y - 5 });
 
@@ -238,9 +259,9 @@ local ChalCharts = {
       chart.score:draw({ x = xTemp - 3, y = y });
 
       if (isPortrait) then
-        y = yTemp + this.jacketSize + (this.padding.y * 0.25);
+        y = yTemp + size + (this.padding.y * 0.25);
       else
-        y = this.y + this.padding.y + this.jacketSize + (this.padding.y / 2);
+        y = this.y + this.padding.y + size + (this.padding.y / 2);
       end
 
       if (isPortrait) then

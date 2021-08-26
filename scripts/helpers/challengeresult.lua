@@ -98,6 +98,7 @@ end
 local formatCharts = function(res)
   local charts = {};
 
+  ---@param chart ChartResult
   for i, chart in ipairs(res.charts) do
     ---@class ChalChart
     local c = {
@@ -139,6 +140,10 @@ local formatCharts = function(res)
       timer = 0,
       title = makeLabel('jp', chart.title, 36),
     };
+
+    if (chart.bpm:find('-') and (chart.speedModType == 2)) then
+      c.cmod = makeLabel('med', 'CMOD PLAY');
+    end
 
     charts[i] = c;
   end

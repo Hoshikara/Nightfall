@@ -2,9 +2,9 @@ local Clears = require('constants/clears');
 local Difficulties = require('constants/difficulties');
 local Grades = require('constants/grades');
 
-local Official = "OFFICIAL SOUND VOLTEX CHARTS";
-local SDVX = "SDVX";
-local SoundVoltex = "SOUND VOLTEX";
+local Official = 'OFFICIAL SOUND VOLTEX CHARTS';
+local SDVX = 'SDVX';
+local SoundVoltex = 'SOUND VOLTEX';
 
 local ceil = math.ceil;
 local floor = math.floor;
@@ -15,7 +15,9 @@ local floor = math.floor;
 local isOfficial = function(path)
   if (not path) then return false; end
 
-  path = path:upper();
+  local _, startIdx = path:find('songs');
+
+  path = path:sub(startIdx or 1):upper();
 
   return path:find(SDVX) or path:find(SoundVoltex);
 end

@@ -1,3 +1,8 @@
+### 1.4.4 - August 26, 2021
+- Added a `CMOD` indicator for results/challenge results if it is used on charts containing BPM changes
+- Added an additional check to ignore the user's USC folder name when verifying converts' folder paths
+- Changed various `HI-SPEED` usages to `LANE-SPEED`; displayed value has been changed accordingly
+
 ### 1.4.3 - August 25, 2021
 - `Results` changes
   - Added button/hold/laser breakdown chart
