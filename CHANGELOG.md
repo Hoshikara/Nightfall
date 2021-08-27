@@ -1,3 +1,6 @@
+### 1.4.5 - August 26, 2021
+- Added an additional window for settings descriptions to the `Game Settings` window
+
 ### 1.4.4 - August 26, 2021
 - Added a `CMOD` indicator for results/challenge results if it is used on charts containing BPM changes
 - Added an additional check to ignore the user's USC folder name when verifying converts' folder paths

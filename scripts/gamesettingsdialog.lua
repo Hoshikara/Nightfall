@@ -150,6 +150,8 @@ local makeSettings = function(Constants)
 			start = makeLabel('med', '[START]', 20),
 		},
 		currSetting = 0,
+		desc = {},
+		descTimer = 0,
 		pages = {},
 		settings = {},
 		state = state,
@@ -191,6 +193,21 @@ local makeSettings = function(Constants)
 				special = sConstants.special or '',
 				type = sType,
 			};
+
+			if (sConstants.desc) then
+				local desc = {};
+
+				for i, text in ipairs(sConstants.desc) do
+					desc[i] = makeLabel(
+						'med',
+						text,
+						16,
+						(type(text) == 'string') and 'white'
+					);
+				end
+
+				temp.desc = desc;
+			end
 		
 			if (sType == 'INT') then
 				temp.value = makeLabel('num', '0', 24);

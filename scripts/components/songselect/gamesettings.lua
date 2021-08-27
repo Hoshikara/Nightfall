@@ -91,6 +91,8 @@ local GameSettings = {
         });
 
         gfx.Restore();
+
+        this.desc = setting.desc;
       end
 
       if (setting) then
@@ -220,16 +222,53 @@ local GameSettings = {
     });
   end,
 
+  -- Draw the setting description
+  ---@param this GameSettings
+  ---@param timer number
+  drawDesc = function(this, timer)
+    local x = dialogBox.x.middleLeft - 20; 
+    local y = (this.window.h * 0.5) + (dialogBox.h.box * 0.5) + 16;
+    local w = dialogBox.w.box - (dialogBox.w.corner * 1.175);
+    local h = (#this.desc * 30) + 24;
+
+    if (this.window.isPortrait) then w = w - (dialogBox.w.corner * 0.125); end
+
+    gfx.Save();
+
+    this.window:scale();
+
+    drawRect({
+      x = x,
+      y = y,
+      w = w,
+      h = h,
+      alpha = 250 * timer,
+      color = 'dark',
+    });
+
+    gfx.Restore();
+
+    for i, line in ipairs(this.desc) do
+      line:draw({
+        x = x + 20,
+        y = y + 16 + (30 * (i - 1)),
+        alpha = 255 * timer * this.descTimer,
+      });
+    end
+  end,
+
   -- Handle user input
   ---@param this GameSettings
   ---@param dt deltaTime
   handleChange = function(this, dt)
     if (this.currSetting ~= this.state.setting.index) then
+      this.descTimer = 0;
       this.timer = 0;
 
       this.currSetting = this.state.setting.index;
     end
 
+    this.descTimer = to1(this.descTimer, dt, 0.2);
     this.timer = to1(this.timer, dt, 0.2);
     
     if (this.state.setting.index > this.max) then
@@ -278,6 +317,8 @@ local GameSettings = {
     this:drawSettings(dt, timer);
 
     this:drawNavigation(timer);
+
+    if (this.desc) then this:drawDesc(timer) end;
   end,
 };
 
