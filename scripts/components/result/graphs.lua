@@ -31,6 +31,8 @@ local Orders = {
     'button',
     'hold',
     'laser',
+    'total',
+    'best',
   },
   simple = {
     'errorEarly',
@@ -83,19 +85,21 @@ local Graphs = {
       histSet = false,
       hitStatScale = nil,
       labels = {
-        button = makeLabel('med', 'BUTTON'),
+        best = makeLabel('med', 'BEST', 16),
+        button = makeLabel('med', 'BUTTON', 16),
         critical = makeLabel('med', 'CRIT', 20),
         early = makeLabel('med', 'EARLY', 20),
         error = makeLabel('med', 'ERROR', 20),
         exScore = makeLabel('med', 'EX SCORE'),
-        hold = makeLabel('med', 'HOLD'),
-        laser = makeLabel('med', 'LASER'),
+        hold = makeLabel('med', 'HOLD', 16),
+        laser = makeLabel('med', 'LASER', 16),
         late = makeLabel('med', 'LATE', 20),
         maxChain = makeLabel('med', 'MAX CHAIN'),
         mean = makeLabel('med', 'MEAN'),
         median = makeLabel('med', 'MEDIAN'),
         near = makeLabel('med', 'NEAR', 20),
         sCritical = makeLabel('med', 'S-CRIT', 20),
+        total = makeLabel('med', 'TOTAL', 16),
       },
       mode = 0,
       mouse = Mouse:new(window),
@@ -130,9 +134,10 @@ local Graphs = {
   ---@param this Graphs
   drawBreakdown = function(this)
     local breakdown = this.data.breakdown;
-    local x = this.x - 2;
+    local spacing = (this.window.isPortrait and 135.5) or 111.5;
+    local x = this.x + 169;
     local y = this.y[1] - 12;
-    local w = this.w[1];
+    local w = (this.window.isPortrait and 693) or 597;
     local h = 34;
 
     for i, name in ipairs(Orders.stat) do
@@ -167,47 +172,48 @@ local Graphs = {
         y = y + (h * i),
       });
 
-      drawRect({
-        x = x + 1,
-        y = y + (h * (i + 1)) - 5,
-        w = w + 1,
-        h = 2,
-        alpha = 200,
-        color = 'med',
-      });
+      if (i ~= 4) then
+        drawRect({
+          x = x + 1,
+          y = y + (h * (i + 1)) - 5,
+          w = w + 1,
+          h = 2,
+          alpha = 225,
+          color = 'med',
+        });
+      end
     end
 
     x = x + this.labels.error.w + 18;
 
     for _, kind in pairs(Orders.kind) do
-      this.labels[kind]:draw({ x = x, y = y + 6 });
+      this.labels[kind]:draw({ x = x, y = y + 10 });
 
       for i, name in ipairs(Orders.stat) do
-        breakdown[kind][name]:draw({
-          x = x,
-          y = y + (h * i),
-          color = 'white',
-        });
+        breakdown[kind][name]:draw({ x = x, y = y + (h * i) });
       end
 
-      x = x + 104;
+      x = x + spacing;
     end
 
-    x = this.x - 2;
-    y = y + ((this.window.isPortrait and 184) or 193);
+    x = this.x;
+    y = y + h + 1;
+
+    this.labels.exScore:draw({ x = x, y = y });
+
+    this.data.exScore:draw({
+      x = x,
+      y = y + (this.labels.exScore.h * 1.35),
+      color = 'white',
+    });
+
+    y = y + 75;
 
     this.labels.maxChain:draw({ x = x, y = y });
-    this.labels.exScore:draw({ x = x + 194, y = y });
 
     this.data.maxChain:draw({
       x = x,
       y = y + (this.labels.maxChain.h * 1.35),
-      color = 'white',
-    });
-
-    this.data.exScore:draw({
-      x = x + 194,
-      y = y + (this.labels.exScore.h * 1.35),
       color = 'white',
     });
   end,
@@ -218,10 +224,10 @@ local Graphs = {
     local counts = this.data.counts;
     local gauge = this.data.gauge or {};
     local gaugeColor = GaugeColors.effFail;
-    local scale = (this.window.isPortrait and 1.45) or 1.3;
     local x = this.x;
     local y = this.y[2] - 6;
-    local w = this.w[2];
+    local w = this.w;
+    local h = this.labels.sCritical.h * 1.4;
     local wCount = this.counts.sCritical.w + 16;
     local wLabel = this.labels.error.w + 16;
     local wBar = w - wCount - wLabel;
@@ -277,10 +283,10 @@ local Graphs = {
         color = 'norm',
       });
 
-      y = y + (this.labels[name].h * scale);
+      y = y + h;
     end
 
-    y = y + ((this.window.isPortrait and 12) or 19);
+    y = y + ((this.window.isPortrait and 14) or 16);
 
     drawRect({
       x = x + 3,
@@ -312,7 +318,7 @@ local Graphs = {
     gauge.rate:draw({
       x = x,
       y = y,
-      color = 'white',
+      color = 'white', 
     });
 
     gauge.unlabledVal:draw({
@@ -328,7 +334,7 @@ local Graphs = {
   drawDetailed = function(this)
     local x = this.x;
     local y = this.y[2];
-    local w = this.w[2];
+    local w = this.w;
     local h = this.h;
 
     drawRect({
@@ -726,7 +732,7 @@ local Graphs = {
       });
     end
 
-    x = x + this.w[2];
+    x = x + this.w;
     y = y - 12;
 
     this.data.mean:draw({

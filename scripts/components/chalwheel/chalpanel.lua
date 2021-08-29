@@ -11,10 +11,10 @@ local Order = {
   'clear',
 };
 
+local floor = math.floor;
+
 -- Get the current page of the charts
-local getPage = function(curr, limit)
-  return math.floor((curr - 1) / limit) + 1;
-end
+local getPage = function(curr, limit) return floor((curr - 1) / limit) + 1; end
 
 ---@class ChalPanelClass
 local ChalPanel = {
@@ -288,6 +288,9 @@ local ChalPanel = {
   ---@param y number
   ---@param chal CachedChal
   drawInfo = function(this, dt, y, chal)
+    local scale = this.window:getScale();
+    local h = (chal.reqs[1] and (chal.reqs[1].text.h * 1.75)) or 36;
+
     this.labels.challenge:draw({ y = y });
 
     y = y + (this.labels.challenge.h * 1.25);
@@ -299,7 +302,7 @@ local ChalPanel = {
         x = 0,
         y = y,
         color = 'white',
-        scale = this.window:getScale(),
+        scale = scale,
         timer = this.timers.title,
         width = this.w.inner,
       });
@@ -314,9 +317,22 @@ local ChalPanel = {
     y = y + (this.labels.reqs.h * 1.35);
 
     for i, req in ipairs(chal.reqs) do
-      req:draw({ y = y, color = 'white' });
+      if (req.text.w >= this.w.inner) then
+        req.timer = req.timer + dt;
 
-      y = y + (req.h * 1.75);
+        req.text:drawScrolling({
+          x = 0,
+          y = y,
+          color = 'white',
+          scale = scale,
+          timer = req.timer,
+          width = this.w.inner,
+        });
+      else
+        req.text:draw({ y = y, color = 'white' });
+      end
+
+      y = y + h;
 
       if (i == 6) then break; end
     end

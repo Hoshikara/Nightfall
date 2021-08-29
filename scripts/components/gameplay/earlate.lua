@@ -16,8 +16,8 @@ local Earlate = {
       alpha = 0,
       cache = { w = 0, h = 0 },
       deltaAlign = 'middle',
+      flicker = getSetting('earlateFlicker', false),
       gap = getSetting('earlateGap', 0.25),
-      hz = getSetting('earlateHz', 18),
       labels = {
         delta = makeLabel('num', '0.0 ms', 30),
         early = makeLabel('med', 'EARLY', 30),
@@ -84,8 +84,8 @@ local Earlate = {
   -- Updates skin settings
   ---@param this Earlate
   update = function(this)
+    this.flicker = getSetting('earlateFlicker', true);
     this.gap = getSetting('earlateGap', 0.25);
-    this.hz = getSetting('earlateHz', 18);
     this.opacity = getSetting('earlateOpacity', 1);
     this.show = getSetting('showEarlate', true);
     this.type = getSetting('earlateType', 'TEXT');
@@ -110,7 +110,11 @@ local Earlate = {
 
     this.timer = this.timer + dt;
 
-    this.alpha = ((this.timer * this.hz) % 1) * this.opacity;
+    if (this.flicker) then
+      this.alpha = ((this.timer * 18) % 1) * this.opacity;
+    else
+      this.alpha = this.opacity;
+    end
 
     local isLate = this.state.buttonDelta > 0;
     local color = (isLate and Colors.late) or Colors.early;

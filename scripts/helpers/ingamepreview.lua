@@ -134,6 +134,11 @@ local getEarlate = function()
         step = 0.05,
       }),
       makeSetting({
+        default = 1,
+        key = 'earlateFlicker',
+        label = 'FLICKER',
+      }),
+      makeSetting({
         default = 1.0,
         key = 'earlateOpacity',
         format = '%.0f%%',
@@ -141,16 +146,6 @@ local getEarlate = function()
         min = 0.0,
         max = 1.0,
         step = 0.05,
-      }),
-      makeSetting({
-        default = 18,
-        key = 'earlateHz',
-        format = '%d Hz',
-        label = 'FLICKER SPEED',
-        min = 1,
-        max = 24,
-        multi = 1,
-        step = 1,
       }),
       makeSetting({
         default = 0.5,

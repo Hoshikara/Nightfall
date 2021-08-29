@@ -19,10 +19,63 @@ local minOffset = getSetting('minOffset', 1);
 ---@return ScoreNumber
 local numLabel = function(v)
 	return ScoreNumber:new({
+		color = 'white',
 		digits = 5,
 		size = 20,
 		val = v,
 	});
+end
+
+-- Best value score number wrapper function
+---@param val number
+---@param positive boolean
+---@return Label
+local bestLabel = function(val, positive)
+	return ScoreNumber:new({
+		color = (positive and 'pos') or 'neg',
+		digits = 5,
+		size = 20,
+		val = val,
+	});
+end
+
+-- Gets the best near and error deltas relative to the highest/lowest achieved values
+---@param res result
+---@return table
+local getBest = function(res)
+	local best = {
+		sCritical = makeLabel('num', '-', 20, 'white'),
+		critical = makeLabel('num', '-', 20, 'white'),
+		error = makeLabel('num', '-', 20, 'white'),
+		near = makeLabel('num', '-', 20, 'white'),
+	};
+
+	if (#res.highScores == 0) then return best; end
+
+	local errors = nil;
+	local nears = nil;
+
+	for _, score in ipairs(res.highScores) do
+		local hardFail = ((score.gauge_type or score.flags or 0) == 1)
+			and (score.badge == 1);
+
+		if (not hardFail) then
+			if (not errors) then errors = score.misses; end
+
+			if (not nears) then nears = score.goods; end
+
+			if (score.misses < errors) then errors = score.misses; end
+
+			if (score.goods < nears) then nears = score.goods; end
+		end
+	end
+
+	if ((not errors) or (not nears)) then return best; end
+
+	best.error = bestLabel(errors, res.misses <= errors);
+	best.near = bestLabel(nears, res.goods <= nears);
+
+	return best;
 end
 
 -- Get the clear name
@@ -300,15 +353,17 @@ local formatSong = function(res)
 
 	---@class ResultSong
   local s = {
-		artist = makeLabel('jp', res.artist or '', 28),
+		artist = makeLabel('jp', res.artist or '', 24),
 		bpm = makeLabel('num', res.bpm or '', 24),
-		difficulty = makeLabel('norm', getDiff(res)),
+		difficulty = makeLabel('norm', {
+			{ font = 'norm', text = getDiff(res) },
+			{ font = 'num', text = res.level or 1 },
+		}),
 		duration = makeLabel('num', getDuration(res), 24),
 		effector = makeLabel('jp', res.effector or '', 24),
-		level = makeLabel('num', ('%02d'):format(res.level or 1), 24),
 		jacket = jacket,
 		timestamp = makeLabel('num', getTimestamp(res), 24),
-		title = makeLabel('jp', getTitle(res), 32),
+		title = makeLabel('jp', getTitle(res), 30),
   };
 
 	if (res.bpm:find('-') and (res.speedModType == 2)) then
@@ -369,6 +424,7 @@ local getBreakdown = function(res)
 
 	---@class StatBreakdown
 	local b = {
+		best = getBest(res),
 		button = {
 			sCritical = numLabel(sCrit),
 			critical = numLabel(crit),
@@ -377,15 +433,21 @@ local getBreakdown = function(res)
 		},
 		hold = {
 			sCritical = numLabel(holdSCrit),
-			critical = makeLabel('num', '-', 20),
-			near = makeLabel('num', '-', 20),
+			critical = makeLabel('num', '-', 20, 'white'),
+			near = makeLabel('num', '-', 20, 'white'),
 			error = numLabel(holdError)
 		},
 		laser = {
 			sCritical = numLabel(laserSCrit),
-			critical = makeLabel('num', '-', 20),
-			near = makeLabel('num', '-', 20),
+			critical = makeLabel('num', '-', 20, 'white'),
+			near = makeLabel('num', '-', 20, 'white'),
 			error = numLabel(laserError)
+		},
+		total = {
+			sCritical = numLabel(sCrit + holdSCrit + laserSCrit),
+			critical = numLabel(crit),
+			near = numLabel(near),
+			error = numLabel(error + holdError + laserError),
 		},
 	};
 
@@ -423,7 +485,7 @@ local getGaugeData = function(res)
 	local g = {
 		blastiveLevel = (type == 3)
 			and (blastiveLevel ~= '')
-			and makeLabel('num', blastiveLevel, 24),
+			and makeLabel('num', blastiveLevel, 20),
 		change = (change ~= '')
 			and (not hardFail)
 			and (res.badge > 0)

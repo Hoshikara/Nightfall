@@ -1,3 +1,10 @@
+### 1.4.6 - August 29, 2021
+- Added a skin setting to toggle `Early / Late` flicker
+- Added `BEST` and `TOTAL` columns to the `Results` screen breakdown chart
+- Fixed lane-speed display not changing after the last BPM change (if any)
+- Fixed overflowing challenge requirement lines
+- Removed skin setting to adjust `Early / Late` flicker speed
+
 ### 1.4.5 - August 26, 2021
 - Added an additional window for settings descriptions to the `Game Settings` window
 

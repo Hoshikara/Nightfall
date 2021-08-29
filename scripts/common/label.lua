@@ -36,7 +36,7 @@ local Label =  {
       for i, curr in ipairs(t.text) do
         t.label[i] = this:new({
           color = curr.color,
-          font = t.font,
+          font = curr.font or t.font,
           size = t.size,
           text = curr.text,
         });

@@ -11,6 +11,7 @@ local ScoreNumber = {
     ---@class ScoreNumber : ScoreNumberClass
     local t = {
       alpha = {},
+      color = p.color or 'norm',
       digits = {},
       isScore = not p.digits,
       labels = {},
@@ -72,7 +73,7 @@ local ScoreNumber = {
 
     local align = params.align or 'left';
     local alpha = params.alpha or 255;
-    local color = params.color or 'norm';
+    local color = params.color or this.color;
     local x = params.x or 0;
     local y = params.y or 0;
 

@@ -5,15 +5,21 @@ local Jackets = require('helpers/jackets');
 
 -- Formats the requirements of the provided chal
 ---@param chal Challenge
----@return Label[]
+---@return CachedChalReq[]
 local getReqs = function(chal)
-  local r = {};
+  local reqs = {};
   
   for req in chal.requirement_text:gmatch('[^\n]+') do
-    r[#r + 1] = makeLabel('norm', req);
+    ---@class CachedChalReq
+    local r = {
+      text = makeLabel('norm', req),
+      timer = 0,
+    };
+
+    reqs[#reqs + 1] = r;
   end
 
-  return r;
+  return reqs;
 end
 
 ---@class ChalCacheClass

@@ -5,6 +5,7 @@ local Cursor = require('components/common/cursor');
 local Green = { 120, 240, 80 };
 
 local floor = math.floor;
+local min = math.min;
 
 local laneSpeedX = getSetting('laneSpeedX', 0.5);
 local laneSpeedY = getSetting('laneSpeedY', 0.5);
@@ -520,22 +521,22 @@ local SongInfo = {
   drawChange = function(this, x, y, yOffset)
     local curr = this.state.bpms[this.bpm.idx];
 
-    if (not curr) then return; end
+    this.laneSpeed.changeStr = '';
+    this.laneSpeed.isLower = false;
 
     if (gameplay.progress == 0) then
       this.bpm.idx = 1;
       this.time.next = 0;
     end
 
+    if (not curr) then return; end
+
     local bpmChange = '';
     local laneSpeedChange = '';
     local next = this.state.bpms[this.bpm.idx + 1];
-
-    this.laneSpeed.changeStr = '';
-    this.laneSpeed.isLower = false;
     
     if (next) then
-      this.time.next = math.min(curr.time + 2.5, next.time);
+      this.time.next = min(curr.time + 2.5, next.time);
     else
       this.time.next = curr.time + 2.5;
     end

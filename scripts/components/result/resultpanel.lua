@@ -6,21 +6,18 @@ local Graphs = require('components/result/graphs');
 
 -- Drawing orders
 local Orders = {
-  left = {
-    'clear',
-    'name',
-  },
-  right = {
-    'grade',
-    'volforce',
-  },
   song = {
     'title',
     'artist',
     'effector',
     'difficulty',
-    'bpm',
   },
+  top = {
+    'name',
+    'volforce',
+    'clear',
+    'grade',
+  };
 };
 
 ---@class ResultPanelClass
@@ -78,11 +75,9 @@ local ResultPanel = {
       },
       window = window,
       x = {
-        exScore = 0,
         name = 0,
         panel = 0,
         text = { 0, 0 },
-        timestamp = 0,
         volforce = 0,
       },
       y = { panel = 0, text = 0 },
@@ -152,6 +147,10 @@ local ResultPanel = {
 
       this.x.text[1] = (this.padding.x * 3.5) + this.jacketSize;
       this.x.text[2] = this.padding.x * 2;
+      this.x.name = this.padding.x * 2;
+      this.x.volforce = this.x.name + 207;
+      this.x.clear = this.x.text[1];
+      this.x.grade = this.x.clear + 212;
       this.y.text = (this.padding.y * 1.75) + this.jacketSize;
 
       if (this.window.isPortrait) then this.y.text = this.y.text - 16; end
@@ -172,11 +171,10 @@ local ResultPanel = {
     if (not this.setGraph) then return; end
 
     this.graphs.x = this.x.panel + (this.padding.x * 2);
-    this.graphs.y[1] = this.y.panel + this.y.text + 6;
-    this.graphs.y[2] = this.y.panel + y;
-    this.graphs.w[1] = this.jacketSize;
-    this.graphs.w[2] = this.maxWidth;
-    this.graphs.h = this.h - y - this.y.panel;
+    this.graphs.y[1] = this.y.panel + this.y.text + 72;
+    this.graphs.y[2] = this.y.panel + 669;
+    this.graphs.w = this.maxWidth;
+    this.graphs.h = this.h - 669 - this.y.panel;
 
     this.setGraph = false;
   end,
@@ -228,8 +226,8 @@ local ResultPanel = {
     for _, name in ipairs(Orders.song) do
       this.labels[name]:draw({ x = x, y = y });
 
-      if (name == 'bpm') then
-        this.labels.timestamp:draw({ x = x + 212, y = y });
+      if (name == 'difficulty') then
+        this.labels.bpm:draw({ x = x + 212, y = y });
       end
 
       y = y + (this.labels[name].h * 1.35);
@@ -254,20 +252,14 @@ local ResultPanel = {
       end
 
       if (name == 'difficulty') then
-        song.level:draw({
-          x = x + song.difficulty.w + 12,
-          y = y,
-          color = 'white',
-        });
-      elseif (name == 'bpm') then
-        song.timestamp:draw({
+        song.bpm:draw({
           x = x + 212,
           y = y,
           color = 'white',
         });
       end
 
-      y = y + (song[name].h * 2.075) + 1.25;
+      y = y + (song[name].h * 1.75);
     end
 
     gfx.Restore();
@@ -277,27 +269,24 @@ local ResultPanel = {
   ---@param this ResultPanel
   drawStats = function(this)
     local stats = this.state.myScore;
-    local h1 = this.labels.grade.h * 1.35;
-    local h2 = stats.grade.h * ((this.window.isPortrait and 1.875) or 2.25);
-    local x1 = this.x.text[1];
-    local x2 = x1 + 212;
-    local y = this.y.text;
+    local h = this.labels.grade.h * 1.35;
+    local x = this.x.text[1];
+    local y = this.y.text - ((this.window.isPortrait and 106) or 115);
     local yLeft = 0;
-    local yRight = 0;
 
     gfx.Save();
 
     gfx.Translate(this.x.panel, this.y.panel);
 
-    this.labels.score:draw({ x = x1, y = y });
+    this.labels.score:draw({ x = x, y = y });
 
-    stats.score:draw({ x = x1 - 3, y = y + 11 });
+    stats.score:draw({ x = x - 3, y = y + 11 });
 
     if (this.state.upScore) then
       if (not this.upScore) then
         this.upScore = ScoreNumber:new({ size = 30, val = this.state.upScore });
       else
-        local xTemp = x1 + stats.score.w - this.upScore.w - 7;
+        local xTemp = x + stats.score.w - this.upScore.w - 7;
 
         this.upScore:draw({
           x = xTemp,
@@ -318,7 +307,7 @@ local ResultPanel = {
           val = this.state.downScore,
         });
       else
-        local xTemp = x1 + stats.score.w - this.downScore.w - 7;
+        local xTemp = x + stats.score.w - this.downScore.w - 7;
 
         this.downScore:draw({
           x = xTemp,
@@ -334,51 +323,33 @@ local ResultPanel = {
       end
     end
 
-    yLeft = y + stats.score.h + 17;
+    y = this.y.text;
     yRight = yLeft;
 
-    for _, name in ipairs(Orders.left) do
-      this.labels[name]:draw({ x = x1, y = yLeft });
-
-      yLeft = yLeft + h1;
-
-      stats[name]:draw({
-        x = x1,
-        y = yLeft,
-        color = 'white',
-      });
-
-      yLeft = yLeft + h2;
-    end
-
-    for _, name in ipairs(Orders.right) do
-      this.labels[name]:draw({ x = x2, y = yRight });
-
-      yRight = yRight + h1;
+    for _, name in ipairs(Orders.top) do
+      this.labels[name]:draw({ x = this.x[name], y = y });
 
       if (name == 'volforce') then
         stats.volforce.val:draw({
-          x = x2,
-          y = yRight,
+          x = this.x[name],
+          y = y + h,
           color = 'white',
         });
 
         stats.volforce.increase:draw({
-          x = x2 + stats.volforce.val.w + 8,
-          y = yRight + 4;
+          x = this.x[name] + stats.volforce.val.w + 8,
+          y = y + h + 4;
         });
       else
         stats[name]:draw({
-          x = x2,
-          y = yRight,
+          x = this.x[name],
+          y = y + h,
           color = 'white',
         });
       end
-
-      yRight = yRight + h2;
     end
 
-    this:setGraphSizes(yLeft);
+    this:setGraphSizes();
 
     gfx.Restore();
   end,
