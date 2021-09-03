@@ -57,6 +57,21 @@
 		"type": "color",
 		"default": "CD0000FF"
 	},
+	"PUCChainColor": {
+		"label": "PUC chain state color",
+		"type": "color",
+		"default": "FFEB64FF"
+	},
+	"UCChainColor": {
+		"label": "UC chain state color",
+		"type": "color",
+		"default": "FFEB64FF"
+	},
+	"normChainColor": {
+		"label": "Normal chain state color",
+		"type": "color",
+		"default": "EBEBEBFF"
+	},
 	"separator_yui": {},
 	"////////// SONG SELECT //////////": {
 		"type": "label"

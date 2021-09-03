@@ -1,10 +1,20 @@
-local ChainColors = {
-  [0] = { 235, 235, 235 },
-  [1] = { 255, 235, 100 },
-  [2] = { 255, 235, 100 },
-};
+local ChainColors = {};
 
 local floor = math.floor;
+
+local getColor = function(key)
+  local r, g, b, _ = game.GetSkinSetting(key);
+
+  return {
+    r or 0,
+    g or 0,
+    b or 0,
+  };
+end
+
+ChainColors[0] = getColor('normChainColor');
+ChainColors[1] = getColor('UCChainColor');
+ChainColors[2] = getColor('PUCChainColor');
 
 -- Gets alpha for chain digits
 ---@param chain integer

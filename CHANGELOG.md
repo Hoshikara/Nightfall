@@ -1,3 +1,6 @@
+### 1.4.7 - September 3, 2021
+- Added skin settings to change the gameplay chain state colors
+
 ### 1.4.6 - August 29, 2021
 - Added a skin setting to toggle `Early / Late` flicker
 - Added `BEST` and `TOTAL` columns to the `Results` screen breakdown chart
