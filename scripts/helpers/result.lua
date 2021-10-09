@@ -458,7 +458,7 @@ end
 ---@param res result
 ---@return GaugeData
 local getGaugeData = function(res)
-	local blastiveLevel = getSetting('_blastiveLevel', '');
+	local blastiveLevel = (res.gauge_option or 0) * 0.5;
 	local change = getSetting('_gaugeChange', '');
 	local rate = '';
 	local samples = (JSONTable:new('samples')):get();

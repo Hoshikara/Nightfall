@@ -1,3 +1,6 @@
+### 1.4.8 - October 9, 2021
+- Changed Blastive Level display to pull from appropriate sources; effectively fixes challenges with forced Blastive Rate displaying the incorrect level
+
 ### 1.4.7 - September 3, 2021
 - Added skin settings to change the gameplay chain state colors
 

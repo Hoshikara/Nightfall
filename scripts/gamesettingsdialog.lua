@@ -134,7 +134,6 @@ local state = {
 };
 
 local arsEnabled = makeParser('Offsets', 'false', 'Game', 'Backup Gauge');
-local blastiveLevel = makeParser('Offsets', 0.5, 'Game', 'Blastive Rate Level');
 local scoreType = makeParser('Offsets', 'ADDITIVE', 'Game', 'Score Display');
 local songOffset = makeParser('Offsets', '0', 'Offsets', 'Song Offset');
 
@@ -252,26 +251,12 @@ local makeSettings = function(Constants)
 end
 
 local gameSettings = nil;
-local hasBlastive = nil;
 local practiceSettings = nil;
 
 -- Called by the game every frame
 ---@param dt deltaTime
 ---@param displaying boolean
 render = function(dt, displaying)
-	if (hasBlastive == nil) then
-		local gameTab = SettingsDiag.tabs[3] or { name = '', settings = {} };
-
-		hasBlastive = (gameTab.name == 'Game')
-			and gameTab.settings[1]
-			and gameTab.settings[1].options
-			and (#gameTab.settings[1].options > 2);
-	end
-
-	if (hasBlastive) then
-		game.SetSkinSetting('_blastiveLevel', blastiveLevel:get());
-	end
-
 	game.SetSkinSetting('_arsEnabled', tostring(arsEnabled:get()));
 	game.SetSkinSetting('_gameSettings', (displaying and 'TRUE') or 'FALSE');
 	game.SetSkinSetting('_scoreType', scoreType:get():upper());

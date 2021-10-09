@@ -223,12 +223,18 @@ local GaugeBar = {
     });
 
     if (gauge.type == 3) then
+      local blastiveLevel = 0;
+
+      if (not gameplay.gaugeType) then
+        blastiveLevel = gameplay.gauge.options * 0.5;
+      end
+
       this.labels.blastiveLevel:draw({
         x = this.w + 6,
         y = this.h - this.labels.blastiveLevel.h + 5,
         alpha = alpha,
         color = 'white',
-        text = getSetting('_blastiveLevel', ''),
+        text = ('%.1f'):format(blastiveLevel),
         update = true,
       });
     end
