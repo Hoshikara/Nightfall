@@ -56,9 +56,9 @@ end
 function SongInfo:setProps()
   if self.windowResized ~= self.window.resized then
     if self.window.isPortrait then
-      self.x = 32
+      self.x = 24
       self.y = 176
-      self.maxWidth = 804
+      self.maxWidth = 820
     else
       self.x = self.window.paddingX / 2
       self.y = self.window.paddingY * 0.75

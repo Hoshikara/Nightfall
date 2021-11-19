@@ -59,7 +59,7 @@ function GaugeBar:setProps()
   if self.windowResized ~= self.window.resized then
     if self.window.isPortrait then
       self.x = 963
-      self.y = 598
+      self.y = 592
     else
       self.x = 1592
       self.y = 332

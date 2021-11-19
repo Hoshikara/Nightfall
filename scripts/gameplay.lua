@@ -164,7 +164,7 @@ function render(dt)
 	if isAutoplaying then
 		autoplayText:draw({
 			x = window.w / 2,
-			y = (window.isPortrait and 278) or 0,
+			y = (window.isPortrait and 290) or 0,
 			align = "CenterTop",
 			alpha = context.introAlpha,
 			color = "White",

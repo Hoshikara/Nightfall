@@ -45,12 +45,12 @@ end
 function ScoreInfo:setProps()
   if self.windowResized ~= self.window.resized then
     if self.window.isPortrait then
-      self.x = 673
-      self.y = 351
-      self.exScore = DimmedNumber.new({ digits = 5, size = 18 })
-      self.exScoreLabel = makeLabel("Medium", "EX SCORE", 20)
-      self.maxChain = DimmedNumber.new({ digits = 5, size = 18 })
-      self.maxChainLabel = makeLabel("Medium", "MAX CHAIN", 20)
+      self.x = 681
+      self.y = 375
+      self.exScore = DimmedNumber.new({ digits = 5, size = 21 })
+      self.exScoreLabel = makeLabel("Medium", "EX SCORE", 24)
+      self.maxChain = DimmedNumber.new({ digits = 5, size = 21 })
+      self.maxChainLabel = makeLabel("Medium", "MAX CHAIN", 24)
       self.score = DimmedNumber.new({ size = 85 })
       self.scoreLabel = makeLabel("Medium", "SCORE", 46)
     else
@@ -89,14 +89,14 @@ end
 ---@param isPortrait boolean
 function ScoreInfo:drawExScore(introAlpha, isPortrait)
   self.exScoreLabel:draw({
-    x = (isPortrait and 211) or 325,
-    y = (isPortrait and 5) or 31,
+    x = (isPortrait and 73) or 100,
+    y = (isPortrait and 96) or 163,
     alpha = introAlpha,
     color = "Standard",
-  })
+  }) 
   self.exScore:draw({
-    x = (isPortrait and 321) or 493,
-    y = (isPortrait and 7) or 34,
+    x = (isPortrait and -4) or -3,
+    y = (isPortrait and 99) or 166,
     alpha = introAlpha,
     color = "White",
     value = self.ctx.exScore,
@@ -107,14 +107,14 @@ end
 ---@param isPortrait boolean
 function ScoreInfo:drawMaxChain(introAlpha, isPortrait)
   self.maxChainLabel:draw({
-    x = (isPortrait and 211) or 325,
-    y = (isPortrait and 98) or 163,
+    x = (isPortrait and 269) or 446,
+    y = (isPortrait and 96) or 163,
     alpha = introAlpha,
     color = "Standard",
   })
   self.maxChain:draw({
-    x = (isPortrait and 321) or 493,
-    y = (isPortrait and 100) or 166,
+    x = (isPortrait and 192) or 344,
+    y = (isPortrait and 99) or 166,
     alpha = introAlpha,
     color = "White",
     value = self.ctx.maxChain,

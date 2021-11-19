@@ -160,7 +160,7 @@ function TrackInfo:drawBpm(x, w, introAlpha, isPortrait)
 
   if isPortrait then
     x = x + 7
-    y = 171
+    y = 187
   else
     x = x + w + 1
   end
@@ -209,7 +209,7 @@ function TrackInfo:drawLaneSpeed(x, w, introAlpha, isPortrait)
 
   if isPortrait then
     x = x + 7
-    y = 171
+    y = 187
   else
     x = x + w + 1
   end
@@ -284,7 +284,7 @@ function TrackInfo:drawHints(x, w, isPortrait)
 
   if isPortrait then
     x = x + 7
-    y = 171
+    y = 187
   else
     x = x + w + 1
   end

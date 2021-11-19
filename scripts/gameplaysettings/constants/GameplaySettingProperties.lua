@@ -236,17 +236,6 @@ local GameplaySettingProperties = {
         "∞",
       },
     },
-    {
-      default = "NONE",
-      key = "wingsType",
-      name = "WINGS TYPE",
-      options = {
-        "NONE",
-        "SILVER",
-        "GOLD",
-        "HALO",
-      },
-    },
   },
   ScoreDifference = {
     {

@@ -1,4 +1,4 @@
-local RatingColors = require("common/constants/RatingColors")
+ local RatingColors = require("common/constants/RatingColors")
 local Easing = require("common/Easing")
 
 local abs = math.abs
@@ -98,7 +98,7 @@ function HitDeltaBar:setProps()
     self.x = self.window.w * getSetting("hitDeltaBarX", 0.5)
     
     if self.window.isPortrait then
-      self.y = 294 + ((self.window.h * 0.625) * getSetting("hitDeltaBarY", 0.0))
+      self.y = 306 + ((self.window.h * 0.625) * getSetting("hitDeltaBarY", 0.0))
       self.w = 512
     else
       self.y = 12 + self.window.h * getSetting("hitDeltaBarY", 0.0)

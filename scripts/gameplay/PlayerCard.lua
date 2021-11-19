@@ -1,4 +1,3 @@
-local VolforceRanks = require("common/constants/VolforceRanks")
 local Image = require("common/Image")
 
 ---@class PlayerCard
@@ -26,14 +25,8 @@ function PlayerCard.new(ctx, window, isGameplaySettings)
       ("%.3f"):format(getSetting("_volforce", 0) * 0.001),
       19
     ),
-    volforceRank = makeLabel(
-      "SemiBold",
-      VolforceRanks:get(getSetting("_volforce", 0) * 0.001)
-    ),
     window = window,
     windowResized = nil,
-    wingsText = makeLabel("SemiBold", ""),
-    wingsType = getSetting("wingsType", "NONE"),
     x = 0,
     y = 0,
   }
@@ -59,11 +52,11 @@ end
 function PlayerCard:setProps()
   if self.windowResized ~= self.window.resized then
     if self.window.isPortrait then
-      self.x = 32
-      self.y = (self.window.h / 2) - 165
+      self.x = 24
+      self.y = (self.window.h / 2) - 213
     else
       self.x = self.window.paddingX / 2
-      self.y = self.window.h / 2
+      self.y = (self.window.h / 2) - 18
     end
 
     self.windowResized = self.window.resized
@@ -129,12 +122,6 @@ function PlayerCard:drawVolforce(x, introAlpha)
     alpha = introAlpha,
     color = "Standard",
   })
-  self.volforceRank:draw({
-    x = x + self.volforce.w + 36,
-    y = 27,
-    alpha = introAlpha,
-    color = "Standard"
-  })
 end
 
 ---@param x number
@@ -153,26 +140,14 @@ function PlayerCard:drawDan(x, introAlpha)
       x = x + self.danLevelText.w + 6,
       y = 52,
       alpha = introAlpha,
-      color = "White",
+      color = "Standard",
     })
-
-    if self.wingsType ~= "NONE" then
-      self.wingsText:draw({
-        x = x + self.danLevelText.w + self.danText.w + 16,
-        y = 52,
-        alpha = introAlpha,
-        color = "Standard",
-        text = ("[ %s ]"):format(self.wingsType),
-        update = true,
-      })
-    end
   end
 end
 
 function PlayerCard:updateProps()
   self.avatarEnabled = getSetting("showPlayerAvatar", true)
   self.danLevel = getSetting("danLevel", "NONE")
-  self.wingsType = getSetting("wingsType", "NONE")
 end
 
 return PlayerCard

@@ -7,8 +7,8 @@
   - Added a player card component which displays:
     - Avatar (image file is `/textures/gameplay/avatar.png`)
     - Player name
-    - Volforce value and rank
-    - Dan level and wings type (user configurable)
+    - Volforce value
+    - Dan level (user configurable)
   - Added new textures for buttons and fx buttons; including holds
   - Added new laser textures; they are now configurable via the USC laser color setting
   - Added a new track texture which matches the configured laser colors

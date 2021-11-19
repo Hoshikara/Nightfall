@@ -439,16 +439,6 @@
 			"∞"
 		]
 	},
-	"wingsType": {
-		"type": "selection",
-		"default": "NONE",
-		"values": [
-			"NONE",
-			"SILVER",
-			"GOLD",
-			"HALO"
-		]
-	},
 	"separator_erq": {},
 	"showScoreDifference": {
 		"label": "Show Score Difference",
