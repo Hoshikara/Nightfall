@@ -65,7 +65,6 @@ local function getTotalVolforce(diffs)
   for i, diff in ipairs(diffs) do
     if diff.volforce > 0 then
       topPlays[diff.id] = {
-        breakpoint = ((i <= 20) and "20") or "50",
         rank = i,
         volforce = diff.volforce,
       }
@@ -103,6 +102,5 @@ return getVolforce
 ---@alias TopPlays table<integer, TopPlay>
 
 ---@class TopPlay
----@field breakpoint string # `"20"` or `"50"`
 ---@field rank integer
 ---@field volforce number

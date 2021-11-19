@@ -28,7 +28,6 @@ SongGrid.__index = SongGrid
 function SongGrid.new(ctx, songCache, window)
   ---@type SongGrid
   local self = {
-    breakpointText = makeLabel("Number", "", 20),
     ctx = ctx,
     gradeText = makeLabel("Medium", "", 40),
     grid = Grid.new(window),
@@ -40,10 +39,11 @@ function SongGrid.new(ctx, songCache, window)
     }),
     list = List.new(),
     noSongsText = makeLabel("Medium", "NO SONGS FOUND", 80),
+    rankText = makeLabel("Number", "", 20),
     scrollbar = Scrollbar.new(),
     songCache = songCache,
     songCount = ItemCount.new(),
-    topText = makeLabel("Medium", "TOP"),
+    star = makeLabel("Number", "★", 20),
     window = window,
     windowResized = nil,
   }
@@ -168,8 +168,8 @@ function SongGrid:drawJacket(x, y, cachedDiff, isCurrent, jacketSize)
       stroke = { color = "Medium", size = 2 },
     })
 
-    if cachedDiff.breakpoint then
-      self:drawTopPlayBreakpoint(x, y, alpha, cachedDiff.breakpoint)
+    if cachedDiff.rank then
+      self:drawRank(x, y, alpha, cachedDiff.rank)
     end
 
     if cachedDiff.grade then
@@ -181,28 +181,28 @@ end
 ---@param x number
 ---@param y number
 ---@param alpha number
----@param breakpoint? string
-function SongGrid:drawTopPlayBreakpoint(x, y, alpha, breakpoint)
+---@param rank string
+function SongGrid:drawRank(x, y, alpha, rank)
   drawRect({
     x = x + 9,
     y = y + 9,
-    w = 81,
+    w = 63,
     h = 31,
     alpha = min(alpha * 1.5, 1),
     color = "Black",
   })
-  self.topText:draw({
-    x = x + 17,
-    y = y + 8,
-    alpha = alpha,
-    color = "White",
-  })
-  self.breakpointText:draw({
-    x = x + 58,
+  self.star:draw({
+    x = x + 15,
     y = y + 12,
     alpha = alpha,
     color = "Standard",
-    text = breakpoint,
+  })
+  self.rankText:draw({
+    x = x + 40,
+    y = y + 12,
+    alpha = alpha,
+    color = "White",
+    text = rank,
     update = true,
   })
 end

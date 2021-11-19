@@ -81,7 +81,6 @@ function SongPanel.new(ctx, songCache, window)
     songCache = songCache,
     titleText = makeLabel("JP", "", 42),
     titleTimer = 0,
-    vfRankText = makeLabel("Number", "", 29),
     window = window,
     windowResized = nil,
     x = 0,
@@ -544,19 +543,6 @@ function SongPanel:drawScoreInfo(x, y, cachedDiff, labels, isPortrait)
     align = "RightTop",
     color = "White",
     text = cachedDiff.grade,
-    update = true,
-  })
-  labels.vfRank:draw({
-    x = x + offset + margin,
-    y = y + 52,
-    color = "Standard"
-  })
-  self.vfRankText:draw({
-    x = x + (offset * 2) + margin + 2,
-    y = y + 55,
-    align = "RightTop",
-    color = "White",
-    text = cachedDiff.vfRank,
     update = true,
   })
   self.score:draw({

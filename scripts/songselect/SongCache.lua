@@ -110,10 +110,10 @@ function SongCache:updateDiff(cachedDiff, diff, song, isInitialCache)
   if diff.topBadge > 0 then
     local topScore = diff.scores[1]
     
-    cachedDiff.breakpoint, cachedDiff.vfRank = self:getTopPlayInfo(diff.id)
     cachedDiff.clear = Clears:get(diff.topBadge)
     cachedDiff.date = date(getDateTemplate(), topScore.timestamp)
     cachedDiff.grade = Grades:get(topScore.score)
+    cachedDiff.rank = self:getRank(diff.id)
     cachedDiff.score = topScore.score
   end
 
@@ -150,24 +150,18 @@ function SongCache:getDensityData(cachedDiff, diff, song, isInitialCache)
 end
 
 ---@param diffId integer
----@return string|nil, string
-function SongCache:getTopPlayInfo(diffId)
-  local breakpoint = nil
-  local rank = "-"
+---@return string|nil
+function SongCache:getRank(diffId)
   local topPlay = self.ctx.topPlays[diffId]
 
   if topPlay then
-    breakpoint = topPlay.breakpoint
-    rank = ("%02d / 50"):format(topPlay.rank)
+    return ("%02d"):format(topPlay.rank)
   end
-
-  return breakpoint, rank
 end
 
 return SongCache
 
 ---@class CachedDiff
----@field breakpoint? string
 ---@field clear string
 ---@field date string
 ---@field density? DensityData
@@ -178,8 +172,8 @@ return SongCache
 ---@field jacket any
 ---@field jacketPath string
 ---@field level string
+---@field rank? string
 ---@field score integer
----@field vfRank string
 
 ---@class CachedSong
 ---@field artist string

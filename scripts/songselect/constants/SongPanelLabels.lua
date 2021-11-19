@@ -5,7 +5,6 @@ local SongPanelLabels = {
   date = "DATE",
   effector = "EFFECTED BY",
   grade = "GRADE",
-  vfRank = "VF RANK",
 }
 
 return SongPanelLabels
