@@ -155,7 +155,7 @@ function SongCache:getRank(diffId)
   local topPlay = self.ctx.topPlays[diffId]
 
   if topPlay then
-    return ("%02d"):format(topPlay.rank)
+    return ("%02d / 50"):format(topPlay.rank)
   end
 end
 

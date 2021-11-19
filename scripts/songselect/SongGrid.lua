@@ -186,7 +186,7 @@ function SongGrid:drawRank(x, y, alpha, rank)
   drawRect({
     x = x + 9,
     y = y + 9,
-    w = 63,
+    w = 112,
     h = 31,
     alpha = min(alpha * 1.5, 1),
     color = "Black",
