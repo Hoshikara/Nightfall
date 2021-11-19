@@ -1,0 +1,21 @@
+---@meta
+
+---
+---`response` object.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/http.html#response)
+---
+---@class response
+---
+---@field cookies string
+---
+---@field elapsed number
+---
+---@field error string
+---
+---@field header header
+---
+---@field status integer
+---
+---@field text string
+---
+---@field url string

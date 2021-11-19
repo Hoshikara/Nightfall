@@ -1,0 +1,11 @@
+---@meta
+
+---
+---`Collection` object.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/collectiondialog.html)
+---
+---@class Collection
+---
+---@field exists boolean # If `true`, collection contains the current song.
+---
+---@field name string # The collection's name.

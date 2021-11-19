@@ -1,0 +1,42 @@
+---@meta
+
+---
+---The global `result` table.  
+---Only available for `/scripts/challengeresult.lua`.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/challengeresult.html)
+---
+---@class challengeresult : result
+---
+---@field avgCrits integer # The average of the charts' total critical counts.
+---
+---@field avgErrors integer # The average of the charts' total error counts.
+---
+---@field avgGauge number # The average of the charts' ending gauge percentages in range `[0, 1]`.
+---
+---@field avgNears integer # The average of the charts' total near counts.
+---
+---@field avgPercentage integer # The average of the charts' completion percentages.
+---
+---@field avgScore integer # The average of the charts' scores.
+---
+---@field charts ChartResult[] # An array of results information for each chart in the challenge.
+---
+---@field overallCrits integer # The sum of the chart's total critical counts.
+---
+---@field overallErrors integer # The sum of the chart's total error counts.
+---
+---@field overallNears integer # The sum of the chart's total near counts.
+---
+---@field passed boolean # If `true`, the challenge was passed.
+---
+---@field failReason string # The reason why the challenge was not passed.
+---
+---@field requirement_text string # The challenge's requirements which contains newline characters.
+result = {}
+
+---
+---@class ChartResult : result
+---
+---@field passed boolean # If `true`, the challenge was passed.
+---
+---@field failReason string # The reason why the challenge was not passed.

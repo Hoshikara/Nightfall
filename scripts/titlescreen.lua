@@ -1,192 +1,79 @@
-local JSON = require('lib/json');
+--#region Require
 
-local JSONTable = require('common/jsontable');
-local Knobs = require('common/knobs');
-local Mouse = require('common/mouse');
+local ControlLabel = require("common/ControlLabel")
+local Mouse = require("common/Mouse")
+local Buttons = require("titlescreen/Buttons")
+local TitlescreenContext = require("titlescreen/TitlescreenContext")
+local Title = require("titlescreen/Title")
+local UpdatePrompt = require("titlescreen/UpdatePrompt")
+local GameplaySettings = require("gameplaysettings/GameplaySettings")
+local PlayerInfo = require("playerinfo/PlayerInfo")
 
-local Buttons = require('components/titlescreen/buttons');
-local Controls = require('components/titlescreen/controls');
-local IngamePreview = require('components/titlescreen/ingamepreview');
-local PlayerInfo = require('components/titlescreen/playerinfo');
-local Title = require('components/titlescreen/title');
-local UpdatePrompt = require('components/titlescreen/updateprompt');
+--#endregion
 
-local window = Window:new();
-local background = Background:new(window);
-local mouse = Mouse:new(window);
+local window = Window.new()
+local background = Background.new()
+local mouse = Mouse.new(window)
 
-local playerData = JSONTable:new('player');
-local player = playerData:get();
+--#region Components
 
-local checkTags = true;
+local context = TitlescreenContext.new(window)
+local buttons = Buttons.new(context, mouse, window)
+local gameplaySettings = GameplaySettings.new(context, mouse, window)
+local playerInfo = PlayerInfo.new(context, mouse, window)
+local title = Title.new(context, mouse, window)
+local updatePrompt = UpdatePrompt.new(context, mouse, window)
 
----@class Titlescreen
----@field player Player
-local state = {
-	btnCount = 0,
-	btnEvent = nil,
-	checkedUpdate = false,
-	choosingFolder = false,
-	currBtn = 1,
-	currPage = 'mainMenu',
-	hasInfo = player.stats ~= nil,
-	hoveringVersion = false,
-	isClickable = false,
-	loaded = false,
-	newVersion = false,
-	player = player,
-	promptUpdate = false,
-	refreshInfo = false,
-	samplePlayed = false,
-	viewingControls = false,
-	viewingCharts = false,
-	viewingInfo = false,
-	viewingPreview = false,
+local mainMenuControl = ControlLabel.new("BACK", "MAIN MENU")
+local mainMenuControlY = 0
 
-	set = function(this, newState)
-		for k, v in pairs(newState) do this[k] = v; end
-	end,
-};
+--#endregion
 
--- Titlescreen components
-local controls = Controls:new(window, mouse, state);
-local buttons = Buttons:new(window, mouse, state);
-local knobs = Knobs:new(state);
-local ingamePreview = IngamePreview:new(window, mouse, state);
-local playerInfo = PlayerInfo:new(window, mouse, state);
-local title = Title:new(window, mouse, state);
-local updatePrompt = UpdatePrompt:new(window, mouse, state);
-
-local getInfo = function()
-	if (getSetting('_loadInfo', 'FALSE') == 'TRUE') then
-		player = playerData:get(true);
-
-		if (player.stats) then
-			state.hasInfo = true;
-			state.player = player;
-			state.refreshInfo = true;
-
-			game.SetSkinSetting('_loadInfo', 'FALSE');
-		end
-	end
-end
-
--- Checks if there is a new skin version based on tags
----@param res HttpResponse
-local tagsCallback = function(res)
-	if (res and res.status and (res.status == 200)) then
-		local body = JSON.decode(res.text or {});
-
-		if (not body.message) then
-			local ref = body[#body] and body[#body].ref or '';
-			local version = ref:gsub('refs/tags/', '');
-
-			if (SkinVersion ~= version) then state.newVersion = true; end
-		end
-	end
-end
-
--- Gets list of tags for Nightfall repo
-Http.GetAsync(
-	'https://api.github.com/repos/Hoshikara/Nightfall/git/refs/tags',
-	{ ['user-agent'] = 'unnamed-sdvx-clone' },
-	tagsCallback
-);
-
--- Called by the game every frame
 ---@param dt deltaTime
-render = function(dt)
-	reloadColors();
+function render(dt)
+	context:update()
+	mouse:update()
 
-	mouse:update();
-	
-	knobs:handleChange('btnCount', 'currBtn');
+	gfx.Save()
+	background:draw()
+	window:update()
+	buttons:draw(dt)
+	title:draw(dt)
 
-	state.btnEvent = nil;
+	mainMenuControlY = window.footerY
 
-	gfx.Save();
+	if context.currentView == "UpdatePrompt" then
+		updatePrompt:draw(dt)
+	elseif context.currentView == "GameplaySettings" then
+		gameplaySettings:draw(dt)
 
-	window:set();
-
-	background:render();
-
-	buttons:render(dt);
-
-	title:render(dt);
-
-	if (state.loaded and checkTags) then
-		Http.GetAsync(
-		'https://api.github.com/repos/Hoshikara/Nightfall/git/refs/tags',
-		{ ['user-agent'] = 'unnamed-sdvx-clone' },
-		tagsCallback
-		);
-
-		checkTags = false;
+		if window.isPortrait then
+			mainMenuControlY = window.headerY
+		end
+	elseif (context.currentView == "PlayerInfo")
+		or (context.currentView == "Charts")
+		or (context.currentView == "Top50")
+	then
+		playerInfo:draw(dt)
 	end
 
-	if (state.loaded and state.promptUpdate) then updatePrompt:render(dt); end
+	if (context.currentView ~= "UpdatePrompt")
+		and (context.currentPage ~= "MainMenu")
+	then
+    mainMenuControl:draw(window.paddingX, mainMenuControlY)
+  end
 
-	if (state.viewingControls) then controls:render(dt); end
-
-	if (state.viewingInfo) then
-		getInfo();
-
-		gfx.ForceRender();
-
-		playerInfo:render(dt);
-	end
-
-	if (state.viewingPreview) then ingamePreview:render(dt); end
-
-	gfx.Restore();
+	gfx.Restore()
 end
 
--- Called by the game when the mouse is pressed
 ---@param btn integer
-mouse_pressed = function(btn)
-	if (state.isClickable and state.btnEvent) then state.btnEvent(); end
+function mouse_pressed(btn)
+	context:handleClick()
 
-	return 0;
+	return 0
 end
 
--- Called by the game when a (gamepad) button is pressed
 ---@param btn integer
-button_pressed = function(btn)
-	if (btn == game.BUTTON_STA) then 
-		if (state.viewingControls) then
-			state:set({ currBtn = 1, viewingControls = false });
-		elseif (state.choosingFolder) then
-			state.choosingFolder = false;
-
-			playerInfo:toggleSelection();
-		elseif (state.viewingCharts) then
-			state.viewingCharts = false;
-		elseif (state.viewingInfo) then
-			state:set({ currBtn = 1, viewingInfo = false });
-		elseif (state.viewingPreview) then
-			state:set({ currBtn = 1, viewingPreview = false });
-		elseif (state.btnEvent) then
-			state.btnEvent();
-		end
-	elseif (btn == game.BUTTON_BCK) then
-		if (state.choosingFolder) then
-			state.choosingFolder = false;
-
-			playerInfo:toggleSelection();
-		elseif (state.viewingCharts) then
-			state.viewingCharts = false;
-		elseif (state.viewingControls) then
-			state:set({ currBtn = 1, viewingControls = false });
-		elseif (state.viewingInfo) then
-			state:set({ currBtn = 1, viewingInfo = false });
-		elseif (state.viewingPreview) then
-			state:set({ currBtn = 1, viewingPreview = false });
-		elseif (state.promptUpdate) then
-			state:set({ currBtn = 1, promptUpdate = false });
-		elseif (state.currPage == 'playOptions') then
-			state:set({ currBtn = 1, currPage = 'mainMenu' });
-		else
-			Menu.Exit();
-		end
-	end
+function button_pressed(btn)
+	context:handleInput(btn)
 end

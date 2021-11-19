@@ -1,0 +1,33 @@
+---@meta
+
+---
+---`HitWindow` object.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/gameplay.html#hitwindow)
+---
+---@class HitWindow
+---
+---The near timing window in milliseconds.  
+---Default: `150`
+---@field good integer
+---
+---The hold timing window in milliseconds.  
+---Default: `150`
+---@field hold integer
+---
+---The miss timing window in milliseconds.  
+---Default: `250`
+---@field miss integer
+---
+---The critical timing window in milliseconds.  
+---Default: `46`
+---@field perfect integer
+---
+---The slam timing window in milliseconds.  
+---Default: `84`
+---@field slam integer
+---
+---The hit window type.
+---* `0` = Expanded
+---* `1` = Normal (default)
+---* `2` = Hard (halved)
+---@field type integer

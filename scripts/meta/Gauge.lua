@@ -1,0 +1,15 @@
+---@meta
+
+---
+---`Gauge` object.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/gameplay.html#gauge)
+---
+---@class Gauge
+---
+---@field name string # The gauge name.
+---
+---@field options gaugeOption
+---
+---@field type gaugeType
+---
+---@field value gaugeValue

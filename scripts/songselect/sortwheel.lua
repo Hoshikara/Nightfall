@@ -1,220 +1,77 @@
--- Global `sorts` table is available for this script
+--#region Require
 
-local Sorts = require('constants/sorts');
+local Grid = require("common/Grid")
+local DropdownMenu = require("songselect/DropdownMenu")
+local SortItem = require("songselect/SortItem")
 
-local Grid = require('components/common/grid');
+--#endregion
 
-local min = math.min;
+local window = Window.new()
+local grid = Grid.new(window)
 
-local window = Window:new();
+local currentSort = 1
 
-local grid = nil;
+local sortMenu = DropdownMenu.new(window, { control = "FX-R", name = "SORTING MODE" })
 
-local arrowSize = 12;
+---@param items string[]
+function DropdownMenu:makeItems(items)
+  if self.totalItems ~= #items then
+    local maxItems = self.pageItemCount
+    local totalItems = 0
+    local w = 0
+    local h = 0
 
-local currSort = 1;
-local prevSort = 0;
+    self:resetProps()
 
-local labels = nil;
+    for i, item in ipairs(items) do
+      self.items[i] = SortItem.new(item)
 
-local timers = { expand = 0, highlight = 0 };
+      if self.items[i].w > w then
+        w = self.items[i].w
+      end
 
--- Creates the labels from the list of sorts
-local setLabels = function()
-	if (not labels) then
-		labels = {
-			fxr = makeLabel('med', '[FX-R]'),
-			sort = makeLabel('med', 'SORT'),
-			w = 0,
-			h = 0,
-		};
+      if i <= maxItems then
+        h = h + 44
+      end
 
-		for i, sort in ipairs(sorts) do
-			local label = Sorts[sort];
+      totalItems = totalItems + 1
+    end
 
-			if (not label) then
-				label = { name = sort, sub = { '', '' } };
-			end
-
-			labels[i] = {
-				name = makeLabel('norm', label.name),
-				sub = {
-					makeLabel('med', label.sub[1], 11),
-					makeLabel('med', label.sub[2], 11),
-				},
-			};
-
-			local subW = labels[i].sub[1].w;
-
-			if (labels[i].sub[2].w > subW) then subW = labels[i].sub[2].w; end
-
-			if ((labels[i].name.w + subW)  > labels.w) then
-				labels.w = labels[i].name.w + subW;
-			end
-
-			labels.h = labels.h + labels[i].name.h + grid.dropdown.padding;
-		end
-	end
+    self.totalItems = totalItems
+    self.w = w + 28
+    self.h = h
+  end
 end
 
--- Draws the currently selected sort
----@param isSorting boolean
-local drawCurrSort = function(isSorting)
-	if (currSort > #labels) then currSort = 1; end
-
-	local color = (isSorting and 'norm') or 'white';
-	local label = labels[currSort];
-	local x = grid.field.x[3];
-	local y = grid.field.y;
-
-	labels.fxr:draw({ x = x, y = grid.label.y });
-
-	labels.sort:draw({
-		x = x + labels.fxr.w + 8,
-		y = grid.label.y,
-		color = 'white',
-	});
-
-	label.name:draw({
-		x = x,
-		y = y,
-		color = color,
-	});
-
-	x = x + label.name.w + 12;
-	y = y + 3;
-
-	label.sub[1]:draw({
-		x = x,
-		y = y,
-		color = color,
-	});
-
-	label.sub[2]:draw({
-		x = x,
-		y = y + label.sub[1].h - 1,
-		color = color,
-	});
-end
-
--- Draws a single sort
----@param i integer
----@param y number
----@param isCurr boolean
-local drawSort = function(i, y, isCurr)
-	local alpha = ((isCurr and 255) or 150) * min(timers.expand ^ 2, 1);
-	local label = labels[i];
-	local x = grid.dropdown.x[3] + grid.dropdown.padding;
-	local w = (labels.w + (arrowSize * 2) + 16) * smoothstep(timers.highlight);
-
-	window:unscale();
-
-	if (isCurr) then
-		drawRect({
-			x = x - 8,
-			y = y,
-			w = w,
-			h = 30,
-			alpha = alpha * 0.4,
-			color = 'norm',
-			fast = true,
-		});
-	end
-
-	label.name:draw({
-		x = x,
-		y = y,
-		alpha = alpha,
-		color = 'white',
-	});
-
-	x = x + label.name.w + 12;
-	y = y + 3;
-
-	label.sub[1]:draw({
-		x = x,
-		y = y,
-		alpha = alpha,
-		color = 'white',
-	});
-
-	label.sub[2]:draw({
-		x = x,
-		y = y + label.sub[1].h - 1,
-		alpha = alpha,
-		color = 'white',
-	});
-
-	window:scale();
-
-	return label.name.h + grid.dropdown.padding;
-end
-
--- Handles user input
 ---@param dt deltaTime
 ---@param isSorting boolean
-local handleChange = function(dt, isSorting)
-	if (not isSorting) then
-		timers.expand = to0(timers.expand, dt, 0.15);
+function render(dt, isSorting)
+  local y = 0
+
+  game.SetSkinSetting("_isSorting", 1)
+  grid:setProps()
+
+	gfx.Save()
+	window:update()
+
+  if window.isPortrait then
+		y = grid.y - 94
 	else
-		timers.expand = to1(timers.expand, dt, 0.125);
-
-		if (prevSort ~= currSort) then
-			timers.highlight = 0;
-
-			prevSort = currSort;
-		end
-
-		timers.highlight = to1(timers.highlight, dt, 0.25);
-	end
-end
-
--- Called by the game every frame
----@param dt deltaTime
----@param isSorting boolean
-render = function(dt, isSorting)
-	game.SetSkinSetting('_sorting', (isSorting and 'TRUE') or 'FALSE');
-
-	handleChange(dt, isSorting);
-
-	if (not grid) then
-		grid = Grid:new(window, getSetting('_songSelect', 'TRUE') == 'TRUE');
+		y = window.headerY
 	end
 
-	setLabels();
-
-	gfx.ForceRender();
-
-	gfx.Save();
-
-	window:set(true);
-
-	grid:setSizes();
-
-	drawCurrSort(isSorting);
-
-	if (timers.expand == 0) then return; end
-
-	window:scale();
-
-	drawRect({
-		x = grid.dropdown.x[3],
-		y = grid.dropdown.y,
-		w = (grid.dropdown.padding * 2) + labels.w + (arrowSize * 2),
-		h = (labels.h + grid.dropdown.padding) * timers.expand,
-		alpha = 240,
-		color = 'dark',
-	});
-
-	local y = grid.dropdown.y + grid.dropdown.start;
-
-	for i, _ in ipairs(sorts) do y = y + drawSort(i, y, i == currSort); end
-
-	window:unscale();
-
-	gfx.Restore();
+	sortMenu:draw(dt, {
+		x = grid.x + ((grid.jacketSize + grid.margin) * 2),
+		y = y,
+		currentItem = currentSort,
+		currentItemOffset = -12,
+		isOpen = isSorting,
+		items = sorts,
+	})
+	gfx.Restore()
 end
 
--- Called by the game when selecting a filter
 ---@param newSort integer
-set_selection = function(newSort) currSort = newSort; end
+function set_selection(newSort)
+  currentSort = newSort
+end

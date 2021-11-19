@@ -1,89 +1,121 @@
----Create frames from images in the specified folder
----@param path string
----@return Image[], number frameCount
-local loadFrames = function(path)
-  local f = {};
-  local i = 1;
-  local loaded = false;
+local Image = require("common/Image")
 
-  while (not loaded) do
-    local frame = Image:new(('%s/%04d.png'):format(path, i), true);
+---@param folderPath string
+---@param hueSettingKey? string
+---@param updateMeshHue? boolean
+---@return Image[], integer
+local function loadFrames(folderPath, hueSettingKey, updateMeshHue)
+  local frames = {}
+  local i = 1
 
-    if (not frame) then
-      loaded = true;
+  while true do
+    local image = Image.new({
+      disableFallbackImage = true,
+      meshBlendMode = 1,
+      hueSettingKey = hueSettingKey,
+      isCentered = true,
+      isMesh = true,
+      path = ("%s/%04d.png"):format(folderPath, i),
+      updateMeshHue = updateMeshHue,
+    })
 
-      break;
+    if not image then
+      i = i - 1
+      
+      break
     end
 
-    f[i] = frame;
-
-    i = i + 1;
+    frames[i] = image
+    i = i + 1
   end
 
-  return f, i;
+  return frames, i
 end
 
----@class AnimationClass
-local Animation = {
-  -- Animation constructor
-  ---@param this AnimationClass
-  ---@param p AnimationConstructorParams
-  ---@return Animation
-  new = function(this, p)
-    ---@class Animation : AnimationClass
-    local t = {
-      alpha = p.alpha or 1,
-      blendOp = p.blendOp or 0,
-      centered = p.centered or false,
-      frameCount = 1,
-      frameTime = 1 / (p.fps or 30),
-      loop = p.loop or false,
-      loopPoint = p.loopPoint or 1,
-      scale = p.scale or 1,
-    };
+---@class Animation
+---@field frameTime number
+local Animation = {}
+Animation.__index = Animation
 
-    t.frames, t.frameCount = loadFrames(p.path);
+---@param params Animation.new.params
+---@return Animation
+function Animation.new(params)
+  ---@type Animation
+  local self = {
+    alpha = params.alpha or 1,
+    frameTime = 1 / (params.fps or 60),
+    isCentered = params.isCentered or false,
+    loop = params.loop or false,
+    loopPoint = params.loopPoint or 1,
+    scale = params.scale or 1,
+    updateData = params.updateData,
+  }
 
-    setmetatable(t, this);
-    this.__index = this;
+  self.frames, self.frameCount = loadFrames(
+    params.folderPath,
+    params.hueSettingKey,
+    params.updateMeshHue
+  )
 
-    return t;
-  end,
+  return setmetatable(self, Animation)
+end
 
-  -- Start the current animation  
-  ---@param this Animation
-  ---@param dt deltaTime
-  ---@param state AnimationState
-  ---@param effect? function
-  start = function(this, dt, state, effect)
-    state.timer = state.timer + dt;
+---@param dt deltaTime
+---@param state AnimationState
+---@param effect? function
+function Animation:play(dt, state, effect)
+  state.timer = state.timer + dt
 
-    if (state.timer >= this.frameTime) then
-      state.frame = state.frame + 1;
-      state.timer = 0;
-    end
+  if state.timer >= self.frameTime then
+    state.frame = state.frame + 1
+    state.timer = 0
+  end
 
-    if (this.frames[state.frame]) then
-      this.frames[state.frame]:draw({
-        alpha = state.alpha or this.alpha,
-        blendOp = this.blendOp,
-        centered = this.centered,
-        scale = this.scale,
-      });
-    end
+  if self.frames[state.frame] then
+    self.frames[state.frame]:draw({
+      alpha = state.alpha or self.alpha,
+      isCentered = self.isCentered,
+      scale = self.scale,
+      updateData = self.updateData,
+    })
+  end
 
-    if (state.frame == this.frameCount) then
-      if (this.loop) then
-        state.frame = this.loopPoint;
-      else
-        state.frame = 1;
-        state.queued = false;
-        state.timer = 0;
+  if state.frame == self.frameCount then
+    if self.loop then
+      state.frame = self.loopPoint
+    else
+      state.frame = 1
+      state.queued = false
+      state.timer = 0
 
-        if (effect) then effect(); end
+      if effect then
+        effect()
       end
     end
-  end,
-};
+  end
+end
 
-return Animation;
+return Animation
+
+--#region Interfaces
+
+---@class Animation.new.params
+---@field alpha? number
+---@field folderPath string
+---@field fps? number
+---@field hueSettingKey? string
+---@field isCentered? boolean
+---@field loop? boolean
+---@field loopPoint? integer
+---@field scale? number
+---@field tint? Color
+---@field updateData? boolean
+---@field updateMeshHue? boolean
+
+---@class AnimationState
+---@field alpha? number
+---@field frame number
+---@field queued boolean
+---@field timer number
+
+--#endregion

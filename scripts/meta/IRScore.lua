@@ -1,0 +1,23 @@
+---@meta
+
+---
+---`IRScore` object.  
+---[Official Documentation](https://uscir.readthedocs.io/en/latest/endpoints/score-submit.html#score-object)
+---
+---@class IRScore
+---
+---@field crit integer # The total critical count.
+---
+---@field error integer # The total error count.
+---
+---@field gauge gaugeValue
+---
+---@field near integer # The total near count.
+---
+---@field options IROptions # The options used.
+---
+---@field score score
+---
+---@field timestamp timestamp
+---
+---@field windows HitWindow

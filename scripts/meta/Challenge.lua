@@ -1,0 +1,23 @@
+---@meta
+
+---
+---`Challenge` object.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/chalwheel.html#challenge)
+---
+---@class Challenge
+---
+---@field bestScore integer # The challenge's highest score.
+---
+---@field charts Chart[] # An array of the challenge's charts.
+---
+---@field grade string # The challenge's best grade.
+---
+---@field id integer # The challenge's unique static identifier.
+---
+---@field missing_chart boolean # If `true`, one or more of the challenge's charts are missing.
+---
+---@field requirement_text string # The challenge's requirements which contains newline characters.
+---
+---@field title string # The challenge's title.
+---
+---@field topBadge badge

@@ -1,0 +1,17 @@
+---@meta
+
+---
+---`CritLine` object.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/gameplay.html#critline)
+---
+---@class CritLine
+---
+---@field cursors cursors
+---
+---@field line Line # A `Line` for the left and right corners of the track.
+---
+---@field rotation number # The current rotation in radians.
+---
+---@field x integer # The center x-coordinate in pixels.
+---
+---@field y integer # The center y-coordinate in pixels.

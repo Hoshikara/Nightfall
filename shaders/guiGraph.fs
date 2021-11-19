@@ -30,5 +30,5 @@ void main()
     
 
     target.xyz = vec3(col);
-    target.a = smoothstep(abs(next.y - current.y) + 0.010, abs(next.y - current.y),dist);
+    target.a = easeOutSine(abs(next.y - current.y) + 0.010, abs(next.y - current.y),dist);
 }

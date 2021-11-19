@@ -1,71 +1,89 @@
-local getSign = function(val)
-  return ((val > 0) and 1) or ((val < 0) and -1) or 0;
+local abs = math.abs
+local ceil = math.ceil
+local floor = math.floor
+local pi = math.pi
+
+--#region Helpers
+
+---@param val number
+---@return integer
+local function getSign(val)
+  return (val > 0 and 1) or (val < 0 and -1) or 0
 end
-
-local getDelta = function(delta)
-  if (math.abs(delta) > (1.5 * math.pi)) then
-    return delta + 2 * (math.pi * getSign(delta) * -1);
-  end
-
-  return delta;
-end
-
-local roundToZero = function(val)
-	if (val < 0) then
-		return math.ceil(val);
-	elseif (val > 0) then 
-		return math.floor(val);
-	else 
-		return 0;
+  
+---@param delta number
+---@return number
+local function getDelta(delta)
+	if abs(delta) > (1.5 * pi) then
+		return delta + (2 * (pi * getSign(delta) * -1))
 	end
+
+	return delta
+end
+  
+---@param val number
+---@return integer
+local function roundToZero(val)
+	if val < 0 then
+		return ceil(val)
+	elseif val > 0 then
+		return floor(val)
+	end
+
+	return 0
 end
 
----@class KnobsClass
-local Knobs = {
-  -- Knobs constructor
-  ---@param this KnobsClass
-  ---@param state table
-  ---@return Knobs
-  new = function(this, state)
-    ---@class Knobs : KnobsClass
-    local t = {
-      knobs = nil,
-      progress = 0,
-      state = state,
-    };
+--#endregion
 
-    setmetatable(t, this);
-    this.__index = this;
+---@class Knobs
+local Knobs = {}
+Knobs.__index = Knobs
 
-    return t;
-  end,
+---@return Knobs
+function Knobs.new()
+	---@type Knobs
+	local self = {
+		knobs = nil,
+		oldProgress = { 0, 0 },
+		progress = { 0, 0 },
+	}
 
-  -- Handle knob input
-  ---@param this Knobs
-  ---@param count integer # Item count
-  ---@param curr integer # Current item
-  handleChange = function(this, count, curr)
-    if (not this.knobs) then
-      this.knobs = { game.GetKnob(0), game.GetKnob(1) };
-    else
-      local knobs = { game.GetKnob(0), game.GetKnob(1) };
-      local next = this.state[curr];
+	return setmetatable(self, Knobs)
+end
 
-      this.progress = this.progress - (getDelta(this.knobs[1] - knobs[1]) * 1.2);
-      this.progress = this.progress - (getDelta(this.knobs[2] - knobs[2]) * 1.2);
+---@param itemIndex integer
+---@param itemCount integer
+function Knobs:handleLeft(itemIndex, itemCount)
+	return self:advanceSelection(1, itemIndex, itemCount)
+end
 
-      this.knobs = knobs;
+---@param itemIndex integer
+---@param itemCount integer
+function Knobs:handleRight(itemIndex, itemCount)
+	return self:advanceSelection(2, itemIndex, itemCount)
+end
 
-      if (math.abs(this.progress) > 1) then
-        next = (next - 1) + roundToZero(this.progress);
-        next = (next % this.state[count]) + 1;
+---@param index integer
+---@param itemIndex integer
+---@param itemCount integer
+function Knobs:advanceSelection(index, itemIndex, itemCount)
+	if not self.knobs then
+		self.knobs = { game.GetKnob(0), game.GetKnob(1) }
+	elseif itemCount > 0 then
+		local knob = game.GetKnob(index - 1)
+		local progress = self.progress
 
-        this.progress = this.progress - roundToZero(this.progress);
-      end
+		progress[index] = progress[index] - (getDelta(self.knobs[index] - knob) * 1.2)
+		self.knobs[index] = knob
 
-      this.state[curr] = next;
-    end
-  end,
-};
+		if abs(progress[index]) > 1 then
+			itemIndex = (itemIndex - 1) + roundToZero(progress[index])
+			itemIndex = (itemIndex % itemCount) + 1
+			progress[index] = progress[index] - roundToZero(progress[index])
+		end
+	end
 
-return Knobs;
+	return itemIndex
+end
+
+return Knobs

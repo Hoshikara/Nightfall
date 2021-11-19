@@ -1,0 +1,15 @@
+---@meta
+
+---
+---`Line` object.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/gameplay.html#line)
+---
+---@class Line
+---
+---@field x1 number # The starting x-coordinate in pixels.
+---
+---@field y1 number # The starting y-coordinate in pixels.
+---
+---@field x2 number # The ending x-coordinate in pixels.
+---
+---@field y2 number # The ending y-coordinate in pixels.

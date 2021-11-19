@@ -1,0 +1,27 @@
+---@meta
+
+---
+---`Difficulty` object.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/songwheel.html#difficulty)
+---
+---@class Difficulty
+---
+---@field difficulty difficultyIndex
+---
+---@field hash difficultyHash
+---
+---@field effector effector
+---
+---@field id integer # The chart difficulty's unique static identifier.
+---
+---@field illustrator illustrator
+---
+---@field jacketPath jacketPath
+---
+---@field jacket_url? string # The web URL to the chart's jacket image.
+---
+---@field level level
+---
+---@field scores scores
+---
+---@field topBadge badge

@@ -1,0 +1,28 @@
+---@meta
+
+---
+---`HitStat` object.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/scorescreen.html#hitstat)
+---
+---@class HitStat
+---
+---@field timeFrac number # The time fraction that the hit occurred in range `[0, 1]`.
+---
+---The lane the hit occurred in.
+---* `0` = A
+---* `1` = B
+---* `2` = C
+---* `3` = D
+---* `4` = L
+---* `5` = R
+---* `6` = Left Laser
+---* `7` = Right Laser
+---@field lane integer
+---
+---@field time integer # The time that hit occurred in milliseconds.
+---
+---@field delta delta
+---
+---@field hold integer # For notes/lasers this value is `0`, otherwise it is the number of ticks in the hold.
+---
+---@field rating rating

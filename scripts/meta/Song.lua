@@ -1,0 +1,19 @@
+---@meta
+
+---
+---`Song` object.
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/songwheel.html#song)
+---
+---@class Song
+---
+---@field artist artist
+---
+---@field difficulties Difficulty[] # Array of the chart's difficulties.
+---
+---@field bpm BPM
+---
+---@field id integer # The chart's unique static identifier.
+---
+---@field path string # The file path to the chart's folder.
+---
+---@field title title

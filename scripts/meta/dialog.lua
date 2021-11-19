@@ -1,0 +1,23 @@
+---@meta
+
+---
+---The global `dialog` table.  
+---Only available for `/scripts/collectiondialog.lua`.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/collectiondialog.html)
+---
+---@class dialog
+---
+---@field artist artist
+---
+---@field closing boolean # If `true`, the `Collection Dialog` window should be playing its closing animation.
+---
+---@field collections Collection[] # An array of the existing collections.
+---
+---@field isTextEntry boolean # If `true`, the collection creation process has started.
+---
+---@field jacket jacketPath
+---
+---@field newName string # The name of the new collection.
+---
+---@field title title
+dialog = {}

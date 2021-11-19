@@ -1,0 +1,13 @@
+---@meta
+
+---
+---`Cursor` object.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/gameplay.html#cursor)
+---
+---@class Cursor
+---
+---@field alpha number # The current alpha value in range `[0, 1]`.
+---
+---@field pos number # The current x-coordinate along the critical line.
+---
+---@field skew number # The current skew amount in radians.

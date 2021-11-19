@@ -1,0 +1,15 @@
+---@meta
+
+---
+---`HidSud` object.
+---
+---@class HidSud
+---
+---@field hiddenCutoff number # The current hidden cutoff value in range `[0, 1]`.
+---
+---@field hiddenFade number # The current hidden fade value in range `[0, 1]`.
+---
+---@field suddenCutoff number # The current sudden cutoff value in range `[0, 1]`.
+---
+---@field suddenFade number # The current sudden fade value in range `[0, 1]`.
+---

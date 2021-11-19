@@ -1,0 +1,86 @@
+---@meta
+
+---
+---The global `gameplay` table.  
+---Only available for `/scripts/gameplay.lua`.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/gameplay.html)
+---
+---@class gameplay
+---
+---@field artist artist
+---
+---@field autoplay autoplay
+---
+---@field bpm BPM
+---
+-- The current combo state.
+--* `0` = Normal
+--* `1` = UC
+--* `2` = PUC
+---@field comboState integer
+---
+---@field critLine CritLine
+---
+---@field demoMode boolean # If `true`, demo mode is enabled.
+---
+---@field difficulty difficultyIndex
+---
+---@field gauge Gauge
+---
+---@field hiddenCutoff number # The hidden cutoff value in range `[0, 1]`.
+---
+---@field hiddenFade number # The hidden fade value in range `[0, 1]`.
+---
+---@field hispeed number # The Lane-Speed multiplier.
+---
+---The Lane-Speed adjustment mode.  
+---* `1` = Multiplier (coarse adjustment)
+---* `2` = Lane-Speed (fine adjustment)
+---@field hispeedAdjust integer
+---
+---@field hitWindow HitWindow
+---
+---@field jacketPath jacketPath
+---
+---An array of the lasers' active states.  
+---If `true`, the indexed laser is active.
+---* `1` = Left Laser
+---* `2` = Right Laser
+---@field laserActive boolean[]
+---
+---@field level level
+---
+---@field multiplayer boolean # If `true`, `Multiplayer` is in progress.
+---
+---An array of the hold notes' active states.  
+---If `true`, the indexed note is being held.
+---* `1` = BT-A
+---* `2` = BT-B
+---* `3` = BT-C
+---* `4` = BT-D
+---* `5` = FX-L
+---* `6` = FX-R
+---@field noteHeld boolean[]
+---
+---The chart's playback speed.  
+---Only available for `Practice Mode`.
+---@field playbackSpeed number
+---
+---The current `Practice Mode` status.  
+---If `true`, the practice settings are being adjusted.  
+---If `false`, practice is in progress.  
+---If `nil`, the game is not in `Practice Mode`.  
+---@field practice_setup boolean|nil
+---
+---@field progress number # The chart's progress in range `[0, 1]`.
+---
+---@field scoreReplays ScoreReplay[] # An array of the chart difficulty's score replays.
+---
+---@field suddenCutoff number # The sudden cutoff value in range `[0, 1]`.
+---
+---@field suddenFade number # The sudden fade value in range `[0, 1]`.
+---
+---@field title title
+---
+---@field user_id userId # The player's ID. Only available for `Multiplayer`.
+gameplay = {}

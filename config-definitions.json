@@ -2,7 +2,7 @@
 	"////////// GENERAL //////////": {
 		"type": "label"
 	},
-	"displayName": {
+	"playerName": {
 		"label": "Player Name",
 		"type": "text",
 		"default": "Guest"
@@ -13,6 +13,12 @@
 		"type": "text",
 		"default": "nautica"
 	},
+	"separator_hjb": {},
+	"tintBackground": {
+		"label": "Tint background image",
+		"type": "bool",
+		"default": true
+	},
 	"separator_b": {},
 	"////////// COLORS //////////": {
 		"type": "label"
@@ -20,19 +26,19 @@
 	"colorScheme": {
 		"label": "Overall Color Scheme",
 		"type": "color",
-		"default": "3C6EA0FF"
+		"default": "78A0F0FF"
 	},
-	"posColor": {
+	"positiveColor": {
 		"label": "Positive color (positive score difference, result stats, truthy values, etc.)",
 		"type": "color",
-		"default": "3C6EA0FF"
+		"default": "78A0F0FF"
 	},
-	"negColor": {
+	"negativeColor": {
 		"label": "Negative color (negative score difference, result stats, falsy values, etc.)",
 		"type": "color",
 		"default": "C85050FF"
 	},
-	"sCriticalColor": {
+	"SCriticalColor": {
 		"label": "S-Critical color",
 		"type": "color",
 		"default": "DCF0FFFF"
@@ -55,19 +61,19 @@
 	"errorColor": {
 		"label": "Error color",
 		"type": "color",
-		"default": "CD0000FF"
+		"default": "F02814FF"
 	},
-	"PUCChainColor": {
+	"PucChainColor": {
 		"label": "PUC chain state color",
 		"type": "color",
 		"default": "FFEB64FF"
 	},
-	"UCChainColor": {
+	"UcChainColor": {
 		"label": "UC chain state color",
 		"type": "color",
 		"default": "FFEB64FF"
 	},
-	"normChainColor": {
+	"normalChainColor": {
 		"label": "Normal chain state color",
 		"type": "color",
 		"default": "EBEBEBFF"
@@ -77,7 +83,7 @@
 		"type": "label"
 	},
 	"jacketQuality": {
-		"label": "Jacket Image Quality (lower = faster loading)",
+		"label": "Jacket Image Quality (decrease for faster loading and less RAM usage)",
 		"type": "selection",
 		"default": "NORMAL",
 		"values": [
@@ -88,7 +94,7 @@
 		]
 	},
 	"separator_ejn": {},
-	"showDensity": {
+	"showNoteDensity": {
 		"label": "Show note density graph if available",
 		"type": "bool",
 		"default": true
@@ -97,7 +103,7 @@
 	"////////// GAMEPLAY //////////": {
 		"type": "label"
 	},
-	"leftColor": {
+	"leftLaserColor": {
 		"label": "Left Laser Animation Color",
 		"type": "selection",
 		"default": "BLUE",
@@ -108,7 +114,7 @@
 			"YELLOW"
 		]
 	},
-	"rightColor": {
+	"rightLaserColor": {
 		"label": "Right Laser Animation Color",
 		"type": "selection",
 		"default": "RED",
@@ -126,12 +132,12 @@
 		"default": false
 	},
 	"separator_lbr": {},
-	"showCritDelta": {
+	"showCriticalDelta": {
 		"label": "Show Critical hit delta (Early / Late Display must be enabled)",
 		"type": "bool",
 		"default": false
 	},
-	"minCritDelta": {
+	"minCriticalDelta": {
 		"label": "Minimum value to show critical hit delta",
 		"default": 23,
 		"min": 0,
@@ -153,6 +159,11 @@
 	"////////// RESULTS //////////": {
 		"type": "label"
 	},
+	"colorCodeRatings": {
+		"label": "Color code rating texts",
+		"type": "bool",
+		"default": false
+	},
 	"showSimpleGraph": {
 		"label": "Show simple hit graph",
 		"type": "bool",
@@ -165,12 +176,12 @@
 	},
 	"separator_kqm": {},
 	"separator_shj": {},
-	"suggestOffset": {
+	"suggestSongOffset": {
 		"label": "Show song offset recommendation",
 		"type": "bool",
 		"default": true
 	},
-	"minOffset": {
+	"songOffsetMin": {
 		"label": "Minimum offset required to show recommendation",
 		"type": "int",
 		"default": 3,
@@ -206,12 +217,12 @@
 		"type": "label"
 	},
 	"separator_mrx": {},
-	"showHitAnims": {
+	"showHitAnimations": {
 		"label": "Show Hit Animations",
 		"type": "bool",
 		"default": true
 	},
-	"hitAnimType": {
+	"hitAnimationType": {
 		"label": "Hit Animation Type",
 		"type": "selection",
 		"default": "STANDARD",
@@ -219,6 +230,55 @@
 			"SDVX",
 			"STANDARD"
 		]
+	},
+	"leftLaserHue": {
+		"label": "Left Laser Animation Hue: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"rightLaserHue": {
+		"label": "Right Laser Animation Hue: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"sCriticalHue": {
+		"label": "S-Critical Hit Animation Hue: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"criticalHue": {
+		"label": "Critical Hit Animation Hue: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"nearHue": {
+		"label": "Near Hit Animation Hue: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"holdHue": {
+		"label": "Hold Animation Hue: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"hitAnimationScale": {
+		"label": "Hit Animation Scale: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"min": 0.10,
+		"max": 4.00
 	},
 	"separator_ert": {},
 	"showEarlate": {
@@ -235,6 +295,13 @@
 			"TEXT",
 			"TEXT + DELTA"
 		]
+	},
+	"earlateScale": {
+		"label": "Early / Late Scale",
+		"type": "float",
+		"default": 1.0,
+		"min": 0.5,
+		"max": 5.0
 	},
 	"earlateFlicker": {
 		"label": "Early / Late Flicker",
@@ -265,8 +332,8 @@
 	"earlateGap": {
 		"label": "Early / Late Text/Delta Gap: %.2f",
 		"type": "float",
-		"default": 0.4,
-		"min": 0.25,
+		"default": 0.25,
+		"min": 0,
 		"max": 1.0
 	},
 	"separator_mdu": {},
@@ -279,6 +346,20 @@
 		"label": "Ignore incoming Lane-Speed changes",
 		"type": "bool",
 		"default": false
+	},
+	"laneSpeedScale": {
+		"label": "Lane-Speed Scale: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"max": 5.0,
+		"min": 0.5
+	},
+	"laneSpeedOpacity": {
+		"label": "Lane-Speed Opacity: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"max": 1.0,
+		"min": 0.2
 	},
 	"laneSpeedX": {
 		"label": "Lane-Speed X-Position: %.2f",
@@ -300,11 +381,6 @@
 		"type": "bool",
 		"default": false
 	},
-	"sCritBreakpoint": {
-		"label": "Enable S-Critical breakpoint for hit delta bar",
-		"type": "bool",
-		"default": true
-	},
 	"hitDecayTime": {
 		"label": "Hit delta bar hit decay time (in seconds): %.2f",
 		"type": "float",
@@ -319,27 +395,58 @@
 		"max": 2.0,
 		"min": 0.5
 	},
+	"hitDeltaBarX": {
+		"label": "Hit Delta Bar X-Position: %.2f",
+		"type": "float",
+		"default": 0.5,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"hitDeltaBarY": {
+		"label": "Hit Delta Bar Y-Position: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
 	"separator_wei": {},
-	"showScoreDiff": {
+	"showPlayerCard": {
+		"label": "Show Player Card",
+		"type": "bool",
+		"default": true
+	},
+	"showPlayerAvatar": {
+		"label": "Show Player Avatar",
+		"type": "bool",
+		"default": true
+	},
+	"showScoreDifference": {
 		"label": "Show Score Difference",
 		"type": "bool",
 		"default": true
 	},
-	"scoreDiffDelay": {
+	"scoreDifferenceDelay": {
 		"label": "Score Difference update delay time (in seconds): %.2f",
 		"type": "float",
 		"default": 0.05,
 		"min": 0.05,
 		"max": 1.0
 	},
-	"scoreDiffX": {
+	"scoreDifferenceScale": {
+		"label": "Score Difference Scale: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"min": 0.50,
+		"max": 5.0
+	},
+	"scoreDifferenceX": {
 		"label": "Score Difference X-Position: %.2f",
 		"type": "float",
-		"default": 0.05,
+		"default": 0.10,
 		"min": 0.0,
 		"max": 1.0
 	},
-	"scoreDiffY": {
+	"scoreDifferenceY": {
 		"label": "Score Difference Y-Position: %.2f",
 		"type": "float",
 		"default": 0.50,

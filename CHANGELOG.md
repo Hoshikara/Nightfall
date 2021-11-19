@@ -1,3 +1,26 @@
+### 1.5.0 - Upcoming, 2021 (?)
+- Moderate design update which includes changes of varying degree to animations, fonts, UI elements, screen layouts, and more
+- Added a skin setting to disable tinting of the common background image
+- Modified layout logic to support more aspect ratios; elements will no longer be cut off but instead be scaled to fit within the horizontal/vertical edges
+- Standardized knob behavior to be left knob for horizontal navigation and right knob for vertical navigation
+- `Gameplay` changes:
+  - Added new textures for buttons and fx buttons; including holds
+  - Added new laser textures; they are now configurable via the USC laser color setting
+  - Added a new track texture which matches the configured laser colors
+  - Removed the chain burst animation due to large memory consumption
+- `Gameplay Settings` changes:
+  - Renamed from `In-game Preview`
+  - Added a setting to change the position of the hit delta bar
+  - Added settings to change the scale of all elements
+  - Added settings to change the hue of hit/hold/laser animations
+- `Player Info` changes:
+  - Added a `PLAYED` category to the clear stats page
+  - Changed chart page navigation from `FX-L` / `FX-R` to `KNOB-R`
+  - Removed ability to select a chart folder by clicking
+- `Results` changes:
+  - Added a skin setting to disable the color coding of rating texts
+  - Added absolute mean delta and standard deviation information
+
 ### 1.4.8 - October 9, 2021
 - Changed Blastive Level display to pull from appropriate sources; effectively fixes challenges with forced Blastive Rate displaying the incorrect level
 

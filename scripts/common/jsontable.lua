@@ -1,109 +1,97 @@
-local JSON = require('lib/json');
+local json = require("lib/json")
 
--- Gets the path to the JSON file
 ---@param fileName string
 ---@return string
-local getPath = function(fileName)
-	return path.Absolute(('skins/%s/JSON/%s.json'):format(game.GetSkin(), fileName));
+local function getFilePath(fileName)
+  ---@diagnostic disable-next-line
+  return path.Absolute(("skins/%s/JSON/%s.json"):format(game.GetSkin(), fileName))
 end
 
----@class JSONTableClass
-local JSONTable = {
-	-- JSONTable constructor
-	---@param this JSONTableClass
-	---@param fileName string
-	---@return JSONTable
-	new = function(this, fileName)
-		---@class JSONTable : JSONTableClass
-		local t = {};
-		local path = getPath(fileName);
-		local data = io.open(path, 'r');
-		local decoded = {};
+---@class JsonTable
+local JsonTable = {}
+JsonTable.__index = JsonTable
 
-		if (data) then
-			local raw = data:read('*all');
+---@param fileName string
+---@return JsonTable
+function JsonTable.new(fileName)
+  local contents = {}
+  local filePath = getFilePath(fileName)
+  local file = io.open(filePath, "r")
 
-			if (raw == '') then
-				data:write(JSON.encode(decoded));
-			else
-				decoded = JSON.decode(raw);
-			end
+  if file then
+    contents = JsonTable:fetchContents(file)
+  else
+    local newFile = io.open(filePath, "w")
 
-			data:close();
-		else
-			local f = io.open(path, 'w');
+    newFile:write(json.encode({}))
+    newFile:close()
+  end
 
-			f:write(JSON.encode(decoded));
-			f:close();
-		end
+  ---@type JsonTable
+  local self = { contents = contents, filePath = filePath }
 
-		t.data = decoded;
-		t.path = path;
+  return setmetatable(self, JsonTable)
+end
 
-		setmetatable(t, this);
-		this.__index = this;
+---@param file file*|nil
+---@return table
+function JsonTable:fetchContents(file)
+  local contents = {}
+  local isInitialFetch = file ~= nil
 
-		return t;
-	end,
+  file = file or io.open(self.filePath, "r")
 
-	-- Refetch JSON data to reflect any new changes
-	---@param this JSONTable
-	refetch = function(this)
-		local data = io.open(this.path, 'r');
-		local decoded = {};
+  if file then
+    local rawContents = file:read("*all")
 
-		if (data) then
-			local raw = data:read('*all');
+    if rawContents == "" then
+      file:write(json.encode(contents))
+    else
+      contents = json.decode(rawContents)
+    end
 
-			if (raw == '') then
-				data:write(JSON.encode(decoded));
-			else
-				decoded = JSON.decode(raw);
-			end
+    file:close()
+  end
 
-			data:close();
-		end
+  if isInitialFetch then
+    return contents
+  end
+  
+  self.contents = contents
+end
 
-		this.data = decoded;
-	end,
+---@param newContents table
+function JsonTable:overwriteContents(newContents)
+  local file = io.open(self.filePath, "w")
 
-	-- Overwrite all contents of the table
-	---@param this JSONTable
-	---@param t table
-	overwrite = function(this, t)
-		local data = io.open(this.path, 'w');
+  file:write(json.encode(newContents))
+  file:close()
+end
 
-		data:write(JSON.encode(t));
+---@param key string
+---@param value any
+function JsonTable:set(key, value)
+  local file = io.open(self.filePath, "w")
 
-		data:close();
-	end,
+  self.contents[key] = value
 
-	-- Assign a new item to the table by key/value pair
-	---@param this JSONTable
-	---@param k string
-	---@param v any
-	set = function(this, k, v)
-		local data = io.open(this.path, 'w');
-		
-		this.data[k] = v;
+  file:write(json.encode(self.contents))
+  file:close()
+end
 
-		data:write(JSON.encode(this.data));
+---@param refetch? boolean
+---@param key? string
+---@return any
+function JsonTable:get(refetch, key)
+  if refetch then
+    self:fetchContents()
+  end
 
-		data:close();
-	end,
+  if key then
+    return self.contents[key]
+  end
 
-	-- Get an item or the whole table
-	---@param this JSONTable
-	---@param k? string
-	---@param refetch? boolean
-	---@return any
-	get = function(this, refetch, k)
-		if (refetch) then this:refetch(); end
+  return self.contents
+end
 
-		if (k) then return this.data[k]; end
-
-		return this.data;
-	end,
-};
-
-return JSONTable;
+return JsonTable

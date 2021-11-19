@@ -1,0 +1,11 @@
+---@meta
+
+---
+---`ScoreReplay` object.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/gameplay.html#scorereplay)
+---
+---@class ScoreReplay
+---
+---@field currentScore integer # The current score of the replay.
+---
+---@field maxScore integer # The ending score of the replay.

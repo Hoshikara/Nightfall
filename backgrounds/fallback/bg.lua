@@ -1,2 +1,2 @@
-render_bg = function(dt)
+function render_bg(dt)
 end

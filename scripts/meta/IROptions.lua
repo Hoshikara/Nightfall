@@ -1,0 +1,17 @@
+---@meta
+
+---
+---`IROptions` object.  
+---[Official Documentation](https://uscir.readthedocs.io/en/latest/endpoints/score-submit.html#options-object)
+---
+---@class IROptions
+---
+---@field autoFlags autoFlags
+---
+---@field gaugeType gaugeType
+---
+---@field gaugeOpt gaugeOption
+---
+---@field mirror mirror
+---
+---@field random random

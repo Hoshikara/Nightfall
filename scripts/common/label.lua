@@ -1,156 +1,135 @@
-local max = math.max;
+local Fonts = require("common/constants/Fonts")
+local TextAlignments = require("common/constants/TextAlignments")
 
----Normalizes the given text
----@param text string
----@param font string
----@return string
-local normalize = function(text, font)
-  if (type(text) ~= 'string') then text = tostring(text); end
+local max = math.max
 
-  if (font ~= 'num') then text = text:upper(); end
+---@class Label
+local Label = {}
+Label.__index = Label
 
-  return text;
+---@param params Label.new.params
+---@return Label
+function Label.new(params)
+	---@type Label
+	local self = {
+		color = params.color or "Standard",
+		font = params.font or "JP",
+		size = params.size or 50,
+		text = params.text or "Label Text",
+		w = 0,
+		h = 0,
+	}
+	
+	if self.font ~= "Number" then
+		self.text = self.text:upper()
+	end
+
+	Fonts:load(self.font)
+	self.label = gfx.CreateLabel(self.text, self.size, 0)
+	self.w, self.h = gfx.LabelSize(self.label)
+
+	return setmetatable(self, Label)
 end
 
----@class LabelClass
----@field label table
-local Label =  {
-  -- Label constructor
-  ---@param this LabelClass
-  ---@param p LabelConstructorParams
-  ---@return Label
-  new = function(this, p)
-    ---@class Label : LabelClass
-    local t = {
-      color = p.color or 'norm',
-      font = p.font or 'jp',
-      size = p.size or 50,
-      text = p.text or 'LABEL TEXT',
-      w = 0,
-      h = 0,
-    };
-    
-    if (type(t.text) == 'table') then
-      t.label = {};
+---@param text string
+---@param size string
+---@param font string
+function Label:update(text, size, font)
+	font = font or self.font
+	text = text or self.text
 
-      for i, curr in ipairs(t.text) do
-        t.label[i] = this:new({
-          color = curr.color,
-          font = curr.font or t.font,
-          size = t.size,
-          text = curr.text,
-        });
+	if font ~= "Number" then
+		text = text:upper()
+	end
 
-        t.w = t.w + t.label[i].w;
-        t.h = t.label[i].h;
-      end
+	Fonts:load(font)
+	gfx.UpdateLabel(self.label, text, size or self.size)
+	self.w, self.h = gfx.LabelSize(self.label)
+end
 
-      loadFont(t.font);
+---@param params Label.draw.params
+function Label:draw(params)
+	local alpha = params.alpha or 1
+	local maxWidth = params.maxWidth or -1
+	local x = params.x or 0
+	local y = params.y or 0
 
-      t.space = gfx.LabelSize(gfx.CreateLabel(' ', t.size, 0));
-    else
-      loadFont(t.font);
+	if params.update then
+		self:update(params.text, params.size, params.font)
+	end
 
-      t.text = normalize(t.text, t.font);
-      t.label = gfx.CreateLabel(t.text, t.size, 0);
-      t.w, t.h = gfx.LabelSize(t.label);
-    end
+	gfx.BeginPath()
+	TextAlignments:align(params.align)
+	setColor("Black", alpha * 0.5)
+	gfx.DrawLabel(self.label, x + 1, y + 1, maxWidth)
+	setColor(params.color or self.color, alpha)
+	gfx.DrawLabel(self.label, x, y, maxWidth)
+end
 
-    setmetatable(t, this);
-    this.__index = this;
-  
-    return t;
-  end,
+---@param params Label.drawScrolling.params
+function Label:drawScrolling(params)
+	local alpha = params.alpha or 1
+	local scale = params.scale or 1
+	local timer = (params.timer or 0) * 2
+	local width = params.width or 0
+	local labelX = self.w + 80
+	local duration = (labelX / 80) * 0.75
+	local phase = max((timer % (duration + 1.5)) - 1.5, 0) / duration
+	local x = params.x or 0
+	local y = params.y or 0
 
-  -- Draws the current label
-  ---@param this Label
-  ---@param params LabelDrawParams
-  draw = function(this, params)
-    local x = params.x or 0;
-    local y = params.y or 0;
-    local alpha = params.alpha or 255;
-    local maxWidth = params.maxWidth or -1;
+	if params.update then
+		self:update(params.text, params.size, params.font)
+	end
 
-    if (params.update) then
-      this:update({ size = params.size, text = params.text });
-    end
-  
-    gfx.BeginPath();
+	gfx.Save()
+	gfx.BeginPath()
+	TextAlignments:align("params.align")
+	gfx.Scissor((x + 2) * scale, y * scale, width, self.h * 1.25)
+	setColor("Black", alpha * 0.5)
+	gfx.DrawLabel(self.label, x - (phase * labelX) + 1, y + 1, -1)
+	gfx.DrawLabel(self.label, x - (phase * labelX) + labelX + 1, y + 1, -1)
+	setColor(params.color or self.color, alpha)
+	gfx.DrawLabel(self.label, x - (phase * labelX), y, -1)
+	gfx.DrawLabel(self.label, x - (phase * labelX) + labelX, y, -1)
+	gfx.ResetScissor()
+	gfx.Restore()
+end
 
-    alignText(params.align);
+return Label
 
-    if (type(this.label) == 'table') then
-      local sign = 1;
+--#region Interfaces
 
-      if (params.align and (params.align == 'right')) then sign = -1; end
+---@class Label.new.params
+---@field color? string
+---@field font? string
+---@field size? integer
+---@field text? string
 
-      for _, label in ipairs(this.label) do
-        label:draw(params);
+---@class Label.draw.params
+---@field x? number
+---@field y? number
+---@field align? string
+---@field alpha? number
+---@field color? string|Color
+---@field font? string
+---@field maxWidth? number
+---@field size? integer
+---@field text? string
+---@field update? boolean
 
-        params.x = (params.x or 0)
-          + ((label.w + (this.space * (params.spaces or 1))) * sign);
-      end
-    else
-      setFill('dark', alpha * 0.5);
-      gfx.DrawLabel(this.label, x + 1, y + 1, maxWidth);
+---@class Label.drawScrolling.params
+---@field x? number
+---@field y? number
+---@field align? string
+---@field alpha? number
+---@field color? string|Color
+---@field font? string
+---@field scale? number
+---@field timer? number
+---@field width? number
+---@field size? integer
+---@field text? string
+---@field update? boolean
 
-      setFill(params.color or this.color, alpha);
-      gfx.DrawLabel(this.label, x, y, maxWidth);
-    end
-  end,
-
-  -- Draws a scrolling version of the current label, bound to the specified width
-  ---@param this Label
-  ---@param params LabelDrawScrollingParams
-  drawScrolling = function(this, params)
-    local x = params.x or 0;
-    local y = params.y or 0;
-    local alpha = params.alpha or 255;
-    local scale = params.scale or 1;
-    local timer = params.timer or 0;
-    local width = params.width or 0;
-
-    timer = timer * 2;
-
-    local labelX = this.w + 80;
-    local duration = (labelX / 80) * 0.75;
-    local phase = max((timer % (duration + 1.5)) - 1.5, 0) / duration;
-
-    gfx.Save();
-
-    gfx.BeginPath();
-
-    gfx.Scissor((x + 2) * scale, y * scale, width, this.h * 1.25);
-
-    alignText(params.align);
-
-    setFill('dark', alpha * 0.5);
-    gfx.DrawLabel(this.label, x + 1 - (phase * labelX), y + 1, -1);
-    gfx.DrawLabel(this.label, x + 1 - (phase * labelX) + labelX, y + 1, -1);
-  
-    setFill(params.color or this.color, alpha);
-    gfx.DrawLabel(this.label, x - (phase * labelX), y, -1);
-    gfx.DrawLabel(this.label, x - (phase * labelX) + labelX, y, -1);
-  
-    gfx.ResetScissor();
-  
-    gfx.Restore();
-  end,
-
-  -- Updates the font/size/text of the current label
-  ---@param this Label
-  ---@param params LabelUpdateParams
-  update = function(this, params)
-    loadFont(params.font or this.font);
-
-    gfx.UpdateLabel(
-      this.label,
-      params.text or this.text,
-      params.size or this.size
-    );
-
-    this.w, this.h = gfx.LabelSize(this.label);
-  end,
-};
-
-return Label;
+--#endregion

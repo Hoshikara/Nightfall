@@ -1,64 +1,66 @@
-local floor = math.floor;
-local min = math.min;
+local Image = require("common/Image")
 
----@class BackgroundClass
-local Background = {
-  -- Background constructor
-  ---@param this BackgroundClass
-  ---@param window Window
-  ---@return Background
-  new = function(this, window)
-    ---@class Background : BackgroundClass
-    ---@field window Window
-    local t = {
-      bg = Image:new('bg.png'),
-      bgPortrait = Image:new('bg_p.png'),
-      blue = 0,
-      red = 0,
-      green = 0,
-      window = window or {
-        isPortrait = false,
-        w = 0,
-        h = 0,
-      },
-      r = 0,
-      g = 0,
-      b = 0,
-    };
+local floor = math.floor
+local min = math.min
 
-    setmetatable(t, this);
-    this.__index = this;
+---@class Background
+local Background = {}
+Background.__index = Background
 
-    return t;
-  end,
+---@return Background
+function Background.new()
+	---@type Background
+	local self = {
+		blue = 0,
+		green = 0,
+		image = Image.new({ path = "bg.png" }),
+		imagePortrait = Image.new({ path = "bg_portrait.png" }),
+		red = 0,
+		tint = { 0, 0, 0 },
+		tintBackground = game.GetSkinSetting("tintBackground"),
+	}
 
-  -- Renders the current component
-  ---@param this Background
-  ---@param p BackgroundRenderParams
-  render = function(this, p)
-    p = p or {};
+	return setmetatable(self, Background)
+end
 
-    local r, g, b, _ = game.GetSkinSetting('colorScheme');
+function Background:draw()
+	local resX, resY = game.GetResolution()
 
-    if ((r ~= this.red) or (g ~= this.green) or (b ~= this.blue)) then
-      this.r = min(floor((r or 0) * 1.25), 255);
-      this.g = min(floor((g or 0) * 1.25), 255);
-      this.b = min(floor((b or 0) * 1.25), 255);
+	self:updateColors()
 
-      this.red = r;
-      this.green = g;
-      this.blue = b;
-    end
+	if resY > resX then
+		self.imagePortrait:draw({
+			x = 0,
+			y = 0,
+			w = resX,
+			h = resY,
+			tint = self.tintBackground and self.tint,
+		})
+	else
+		self.image:draw({
+			x = 0,
+			y = 0,
+			w = resX,
+			h = resY,
+			tint = self.tintBackground and self.tint,
+		})
+	end
+end
 
-    ((this.window.isPortrait and this.bgPortrait) or this.bg):draw({
-      x = p.x or 0,
-      y = p.y or 0,
-      w = p.w or this.window.w,
-      h = p.h or this.window.h,
-      centered = p.centered,
-      tint = { this.r, this.g, this.b },
-    });
-  end,
-};
+function Background:updateColors()
+	local r, g, b, _ = game.GetSkinSetting("colorScheme")
 
-return Background;
+	self.tintBackground = game.GetSkinSetting("tintBackground")
+
+	if (r ~= self.red) or (g ~= self.green) or (b ~= self.blue) then
+		self.tint[1] = min(floor((r or 0) * 1.25), 255)
+		self.tint[2] = min(floor((g or 0) * 1.25), 255)
+		self.tint[3] = min(floor((b or 0) * 1.25), 255)
+		
+		self.red = r
+		self.green = g
+		self.blue = b
+	end
+end
+
+return Background

@@ -1,0 +1,26 @@
+---@meta
+
+---
+---`Chart` object.  
+---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/chalwheel.html#chart)
+---
+---@class Chart
+---
+---@field artist artist
+---
+---@field bpm BPM
+---
+---@field difficulty difficultyIndex
+---
+---@field effector effector
+---
+---@field id integer # The chart difficulty's unique static identifier.
+---
+---@field illustrator illustrator
+---
+---@field jacketPath jacketPath
+---
+---@field level level
+---
+---@field title title
+---

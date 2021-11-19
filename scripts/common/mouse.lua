@@ -1,44 +1,46 @@
----@class MouseClass
-local Mouse = {
-	-- Mouse constructor
-	---@param this MouseClass
-	---@param window Window
-	---@return Mouse
-  new = function(this, window)
-		---@class Mouse : MouseClass
-		---@field window Window
-		local t = {
-			window = window,
-			x = 0,
-			y = 0,
-		};
+---@class Mouse
+local Mouse = {}
+Mouse.__index = Mouse
 
-		setmetatable(t, this);
-		this.__index = this;
+---@param window Window
+---@return Mouse
+function Mouse.new(window)
+	---@type Mouse
+	local self = {
+		window = window,
+		x = 0,
+		y = 0,
+	}
 
-		return t;
-  end,
+	return setmetatable(self, Mouse)
+end
 
-	-- Determines if the mouse is hovering over the specified bounds
-	---@param this Mouse
-	---@param x number
-	---@param y number
-	---@param w number
-	---@param h number
-  clipped = function(this, x, y, w, h)
-		local scale = this.window:getScale();
+function Mouse:update()
+	self.x, self.y = game.GetMousePos()
+end
 
-		x = x * scale;
-		y = y * scale;
-		w = x + (w * scale);
-		h = y + (h * scale);
+---@return number, number
+function Mouse:getPos()
+	local scale = self.window.scaleFactor
 
-		return (this.x > x) and (this.y > y) and (this.x < w) and (this.y < h);
-  end,
+	return (self.x - self.window.shiftX) / scale,
+		(self.y - self.window.shiftY) / scale
+end
 
-	-- Updates the current mouse position
-	---@param this Mouse
-  update = function(this) this.x, this.y = game.GetMousePos(); end,
-};
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+---@return boolean
+function Mouse:clipped(x, y, w, h)
+	local scale = self.window.scaleFactor
 
-return Mouse;
+	x = (x * scale) + self.window.shiftX
+	y = (y * scale) + self.window.shiftY
+	w = x + (w * scale)
+	h = y + (h * scale)
+
+	return (self.x > x) and (self.y > y) and (self.x < w) and (self.y < h)
+end
+
+return Mouse

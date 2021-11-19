@@ -1,0 +1,52 @@
+---@meta
+
+---
+---The global `SettingsDiag` table.  
+---Only available for `/scripts/gamesettingsdialog.lua`.
+---
+---@class SettingsDiag
+---
+---@field currentSetting integer # The current setting's index.
+---
+---@field currentTab integer # The current tab's index.
+---
+---@field posX number # The x-coordinate of the dialog window relative to the screen in range `[0, 1]`.
+---
+---@field posY number # The y-coordinate of the dialog window relative to the screen in range `[0, 1]`.
+---
+---@field tabs SettingsDiagTab[] # An array of available tabs, indexed with `SettingsDiag.currentTab`.
+SettingsDiag = {}
+
+---@class SettingsDiagTab
+---
+---@field name string # The current tab's name.
+---
+---@field settings SettingsDiagSetting[] # An array of available settings, indexed with `SettingsDiag.currentSetting`.
+
+---@class SettingsDiagSetting
+---
+---The setting's maximum allowed value.  
+---Only available if the `type` of the current setting is `"int"` or `"float"`.
+---@field max? number
+---
+---The setting's minimum allowed value.  
+---Only available if the `type` of the current setting is `"int"` or `"float"`.
+---@field min? number
+---
+---@field name string # The current setting's name.
+---
+---An array of the setting's possible names, indexed with the setting's `value`.  
+---Only available if the `type` of the current setting is `"enum"`.
+---@field options? string[]
+---
+---The setting's type which will be one of the following:
+---* `"button"`
+---* `"enum"`
+---* `"float"`
+---* `"int"`
+---* `"toggle"`
+---@field type string
+---
+---The setting's value.  
+---Only available if the `type` of the current setting is not `"button"`.
+---@field value? number|boolean

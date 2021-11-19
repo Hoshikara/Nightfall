@@ -1,78 +1,110 @@
----@class WindowClass
-local Window = {
-  -- Window constructor
-  ---@param this WindowClass
-  ---@param move? boolean
-  ---@return Window
-  new = function(this, move)
-    ---@class Window : WindowClass
-    local t = {
-      isPortrait = false,
-      padding = { x = 0, y = 0 },
-      resX = 0,
-      resY = 0,
-      sFactor = 1,
-      w = 0,
-      h = 0,
-    };
+---@class Window
+local Window = {}
+Window.__index = Window
 
-    if (move) then t.move = { x = 0, y = 0 }; end
+---@return Window
+function Window.new()
+	---@type Window
+	local self = {
+		cornerX = 0,
+		cornerY = 0,
+		footerY = 0,
+		headerY = 0,
+		isPortrait = false,
+		paddingX = 80,
+		paddingY = 56,
+		resized = false,
+		resX = 0,
+		resY = 0,
+		scaleFactor = 1,
+		shiftX = 0,
+		shiftY = 0,
+		w = 0,
+		h = 0,
+	}
 
-    setmetatable(t, this);
-    this.__index = this;
+	return setmetatable(self, Window)
+end
 
-    return t;
-  end,
+---@param dontScale boolean
+function Window:update(dontScale)
+	local resX, resY = game.GetResolution()
 
-  -- Returns the scaling factor of the current window
-  ---@param this Window
-  ---@return number
-  getScale = function(this) return this.sFactor; end,
+	if (self.resX ~= resX) or (self.resY ~= resY) then
+		local isPortrait = resY > resX
 
-  -- Undos any scaling currently applied to the drawn elements
-  ---@param this Window
-  unscale = function(this) gfx.Scale(1 / this.sFactor, 1 / this.sFactor); end,
+		self:updateProps(isPortrait)
 
-  -- Scales any proceeding elements by the current scaling factor
-  ---@param this Window
-  scale = function(this) gfx.Scale(this.sFactor, this.sFactor); end,
+		local scale = self:updateScaling(isPortrait, resX, resY)
 
-  -- Sets the scaling factor, scaled width, and scaled height for the current window
-  ---@param this Window
-  ---@param dontScale boolean
-  set = function(this, dontScale)
-    local resX, resY = game.GetResolution();
+		self.isPortrait = isPortrait
+		self.resized = not self.resized
+		self.resX = resX
+		self.resY = resY
+		self.scaleFactor = scale
+	end
 
-    if ((this.resX ~= resX) or (this.resY ~= resY)) then
-      this.isPortrait = resY > resX;
-      this.w = (this.isPortrait and 1080) or 1920;
-      this.h = this.w * (resY / resX);
-      this.sFactor = resX / this.w;
+	self:setup(dontScale)
+end
 
-      if (this.isPortrait) then
-        this.padding.x = this.w / 18;
-        this.padding.y = this.h / 32;
-      else
-        this.padding.x = this.w / 20;
-        this.padding.y = this.h / 20;
-      end
+---@param dontScale boolean
+function Window:setup(dontScale)
+	gfx.ResetTransform()
+	gfx.Translate(self.shiftX, self.shiftY)
 
-      if (this.move) then
-        if (this.sFactor > (resY / this.h)) then
-          this.move.x = (resX / (2 * this.sFactor)) - (this.w / 2);
-          this.move.y = 0;
-        else
-          this.move.x = 0;
-          this.move.y = (resY / (2 * this.sFactor)) - (this.h / 2);
-        end
-      end
+	if dontScale then
+		return
+	end
 
-      this.resX = resX;
-      this.resY = resY;
-    end
+	gfx.Scale(self.scaleFactor, self.scaleFactor)
+end
 
-    if (not dontScale) then this:scale(); end
-  end,
-};
+---@param isPortrait boolean
+function Window:updateProps(isPortrait)
+	if isPortrait then
+		self.w = 1080
+		self.h = 1920
+		self.paddingX = 56
+		self.paddingY = 80
+		self.footerY = self.h - self.paddingY + 30
+		self.headerY = self.paddingY - 38
+	else
+		self.w = 1920
+		self.h = 1080
+		self.paddingX = 80
+		self.paddingY = 56
+		self.footerY = self.h - self.paddingY + 17
+		self.headerY = self.paddingY - 38
+	end	
+end
 
-return Window;
+---@param isPortrait boolean
+---@param resX number
+---@param resY number
+---@return number
+function Window:updateScaling(isPortrait, resX, resY)
+	local aspectRatio = (isPortrait and (1080 / 1920)) or (1920 / 1080)
+	local scale = resX / self.w
+
+	if (resX / resY) > aspectRatio then
+		scale = resY / self.h
+	end
+
+	self.shiftX = (resX - (self.w * scale)) / 2
+	self.shiftY = (resY - (self.h * scale)) / 2
+	
+	return scale
+end
+
+---@param multiplier number
+function Window:scale(multiplier)
+	multiplier = multiplier or 1
+	
+	gfx.Scale(self.scaleFactor * multiplier, self.scaleFactor * multiplier)
+end
+
+function Window:unscale()
+	gfx.Scale(1 / self.scaleFactor, 1 / self.scaleFactor)
+end
+
+return Window

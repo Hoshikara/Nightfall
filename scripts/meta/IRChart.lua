@@ -1,0 +1,23 @@
+---@meta
+
+---
+---`IRChart` object.  
+---[Official Documentation](https://uscir.readthedocs.io/en/latest/endpoints/score-submit.html#chart-object)
+---
+---@class IRChart
+---
+---@field artist artist
+---
+---@field bpm BPM
+---
+---@field chartHash difficultyHash
+---
+---@field difficulty difficultyIndex
+---
+---@field effector effector
+---
+---@field illustrator illustrator
+---
+---@field level level
+---
+---@field title title
