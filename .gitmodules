@@ -1,0 +1,3 @@
+[submodule "scripts/usc-skinning-api"]
+	path = scripts/usc-skinning-api
+	url = https://github.com/Hoshikara/usc-skinning-api

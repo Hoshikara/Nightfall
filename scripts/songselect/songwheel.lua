@@ -1,150 +1,77 @@
--- Global `songwheel` table is available for this script and its related scripts
+--#region Require
 
-game.LoadSkinSample('click_difficulty');
-game.LoadSkinSample('click_song');
+local FolderStats = require("songselect/FolderStats")
+local LeaderboardCache = require("songselect/LeaderboardCache")
+local SongCache = require("songselect/SongCache")
+local SongGrid = require("songselect/SongGrid")
+local SongPanel = require("songselect/SongPanel")
+local SongSelectContext = require("songselect/SongSelectContext")
+local SongSelectFooter = require("songselect/SongSelectFooter")
+local SongSelectScoreList = require("songselect/SongSelectScoreList")
+local Top50 = require("songselect/Top50")
 
-local Helpers = require('helpers/songwheel');
+--#endregion
 
-local JSONTable = require('common/jsontable');
+local window = Window.new()
 
-local MiscInfo = require('components/songselect/miscinfo');
-local SongCache = require('components/songselect/songcache');
-local SongGrid = require('components/songselect/songgrid');
-local SongPanel = require('components/songselect/songpanel');
+--#region Components
 
-local window = Window:new();
-local background = Background:new(window);
+local context = SongSelectContext.new()
+local folderStats = FolderStats.new(context, window)
+local leaderboardCache = LeaderboardCache.new(context)
+local songCache = SongCache.new(context)
+local songGrid = SongGrid.new(context, songCache, window)
+local songPanel = SongPanel.new(context, songCache, window)
+local songSelectFooter = SongSelectFooter.new(context, window)
+local songSelectScoreList = SongSelectScoreList.new(context, leaderboardCache, songCache, window)
+local top50 = Top50.new(context, window)
 
-local top = {};
+--#endregion
 
-local VF = 0;
-
-local init = true;
-
----@class SongWheel
-local state = {
-	currDiff = 1,
-	currSong = 1,
-	infoLoaded = false,
-	max = 9,
-	songCount = 0,
-
-	---@param this SongWheel
-	update = function(this)
-		local song = songwheel.songs[this.currSong];
-		local diff = song and song.difficulties[this.currDiff];
-
-		if (diff) then
-			local key = diff.hash or ('%s_%d'):format(song.title, diff.level);
-
-			game.SetSkinSetting('_diffKey', key);
-			game.SetSkinSetting('_diffVF', (top[diff.id] and top[diff.id].VF) or 0);
-		end
-
-		this.songCount = #songwheel.songs;
-	end,
-};
-
--- SongWheel components
-local miscInfo = MiscInfo:new(window, state);
-local songCache = SongCache:new();
-local songGrid = SongGrid:new(window, state, songCache);
-local songPanel = SongPanel:new(window, state, songCache);
-
--- Parses player stats to display on `Player Info` page
-local makeStats = function(showNotif)
-	local folders = (JSONTable:new('folders')):get();
-	local player = JSONTable:new('player');
-
-	if (#folders > 0) then
-		local stats = Helpers.getStats(folders);
-
-		if (stats and VF) then
-			player:set('stats', stats);
-			player:set('VF', VF);
-
-			game.SetSkinSetting('_loadInfo', 'TRUE');
-
-			if (showNotif) then state.infoLoaded = true; end
-		end
-	end
-end
-
--- Check that all menus are closed
----@return boolean
-local menusClosed = function()
-	return (getSetting('_filtering', 'FALSE') == 'FALSE')
-		and (getSetting('_sorting', 'FALSE') == 'FALSE')
-		and (getSetting('_gameSettings', 'FALSE') == 'FALSE')
-		and (getSetting('_collections', 'FALSE') == 'FALSE')
-		and (not songwheel.searchInputActive);
-end
-
--- Called by the game every frame
 ---@param dt deltaTime
-render = function(dt)
-	if (init) then
-		game.SetSkinSetting('_songSelect', 'TRUE');
+function render(dt)
+	context:update(dt)
+	gfx.Save()
+	window:update()
+	songPanel:draw(dt)
+	songGrid:draw(dt)
+	songSelectFooter:draw()
+	songSelectScoreList:draw(dt)
 
-		init = false;
+	if songwheel.searchInputActive then
+		game.SetSkinSetting("_isViewingTop50", 0)
 	end
 
-	if ((not state.infoLoaded) and pressed('BTD') and menusClosed()) then
-		makeStats(true);
+	if context.folderStatsEnabled then
+		folderStats:draw(dt)
 	end
 
-	if (getSetting('_reloadInfo', 'FALSE') == 'TRUE') then
-		makeStats();
-
-		game.SetSkinSetting('_reloadInfo', 'FALSE');
+	if context.viewingTop50 then
+		top50:draw()
 	end
 
-	state:update();
-
-	window:set();
-
-	gfx.Save();
-
-	background:render();
-
-	songGrid:render(dt);
-
-	local w = songPanel:render(dt);
-
-	miscInfo:render(dt, w, VF);
-
-	gfx.Restore();
+	gfx.Restore()
+	gfx.ForceRender()
 end
 
--- Called by the game when `Page Up` or `Page Down` is pressed  
--- Advances the current song index by the specified amount
 ---@return integer
-get_page_size = function() return state.max; end
+function get_page_size()
+	return context.pageItemCount
+end
 
--- Called by the game when the current song is changed
 ---@param newSong integer
-set_index = function(newSong)
-	if (state.currSong ~= newSong) then game.PlaySample('click_song'); end
-
-	state.currSong = newSong;
+function set_index(newSong)
+	context:updateSong(newSong)
 end
 
--- Called by the game when the current difficulty is changed
 ---@param newDiff integer
-set_diff = function(newDiff)
-	if (state.currDiff ~= newDiff) then game.PlaySample('click_difficulty'); end
-
-	state.currDiff = newDiff;
+function set_diff(newDiff)
+	context:updateDiff(newDiff)
 end
 
--- Called by the game when the `songs` table is modified
----@param withAll boolean # `true` if `allSongs`
-songs_changed = function(withAll)
-	if (not withAll) then return end
-
-	songCache.top = {};
-
-	VF = Helpers.getVF(songCache.top);
-
-	top = songCache.top;
+---@param withAll boolean
+function songs_changed(withAll)
+	if withAll then
+		context:updateVolforce()
+	end
 end

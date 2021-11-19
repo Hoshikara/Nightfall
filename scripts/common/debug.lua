@@ -1,40 +1,52 @@
-return function(t)
-  if (not t) then return end
+local Fonts = require("common/constants/Fonts")
+local TextAlignments = require("common/constants/TextAlignments")
 
-  local w = 0;
-  local h = 0;
-  local i = 0;
-  local n = 0;
+---@param t table<string, any>
+local function debug(t)
+	if (not t) then
+		return
+	end
 
-  gfx.FontSize(30);
-  loadFont('mono');
+	local numItems = 0
+	local w = 0
+	local h = 0
 
-  for k, v in pairs(t) do
-  local x1, y1, x2, y2 = gfx.TextBounds(0, 0, ('%s: %s'):format(k, v));
+	gfx.FontSize(32)
+	Fonts:load("Regular")
+	TextAlignments:align("LeftTop")
 
-  if ((x2 - x1) > w) then w = x2 - x1; end
-  if ((y2 - y1) > h) then h = y2 - y1; end
+	for k, v in pairs(t) do
+		local x1, y1, x2, y2 = gfx.TextBounds(0, 0, ("%s: %s"):format(k, v))
 
-  n = n + 1;
-  end
+		if ((x2 - x1) > w) then
+			w = x2 - x1
+		end
 
-  gfx.Save();
-  gfx.Translate(8, 4);
+		if ((y2 - y1) > h) then
+			h = y2 - y1
+		end
 
-  gfx.BeginPath();
-  gfx.FillColor(0, 0, 0, 255);
-  gfx.Rect(-8, -4, w + 16, (h * n) + 8);
-  gfx.Fill();
+		numItems = numItems + 1
+	end
 
-  gfx.BeginPath();
-  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP);
-  gfx.FillColor(255, 255, 255, 255);
+	gfx.Save()
+	gfx.Translate(8, 4)
+	gfx.BeginPath()
+	gfx.FillColor(0, 0, 0, 255)
+	gfx.Rect(-8, -4, w + 16, (h * numItems) + 8)
+	gfx.Fill()
+	gfx.BeginPath()
+	gfx.FillColor(255, 255, 255, 255)
 
-  for k, v in pairs(t) do
-  gfx.Text(('%s: %s'):format(k, v), 0, h * i);
+	numItems = 0
 
-  i = i + 1;
-  end
+	for k, v in pairs(t) do
+		gfx.Text(("%s: %s"):format(k, v), 0, h * numItems)
 
-  gfx.Restore();
+		numItems = numItems + 1
+	end
+
+	gfx.Restore()
 end
+
+return debug

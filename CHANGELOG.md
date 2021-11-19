@@ -1,3 +1,46 @@
+### 1.5.0 - January 9, 2024
+- Moderate design update which includes changes of varying degree to animations, fonts, UI elements, screen layouts, and more
+- Added JPG image support
+- Added a skin settings to disable the tinting and adjust the dim of the common background image
+- Modified layout logic to support more aspect ratios; elements will no longer be cut off but instead be scaled to fit within the horizontal/vertical edges
+- Standardized knob behavior to be left knob for horizontal navigation and right knob for vertical navigation
+- `Main Menu` changes:
+  - Added `VOLFORCE TARGET` page which calculates and displays a list of scores required for a given target volforce value
+  - Removed `PLAYER INFO` page
+- `Song Select` changes:
+  - Added a Top 50 display that can be opened with `BT-A`
+  - Added a folder stats display that appears during folder/level selection; this can be disabled in skin settings
+  - Added effect radar display for known converts
+  - Added support for defining custom chart effect radar, see `radar.lua` for more information
+  - Added a slide-out window to display local and online scores (if applicable), revealed with `BT-D`
+  - Removed density graph display
+- `Gameplay` changes:
+  - Added a player card component which displays:
+    - Avatar (image file is `/textures/gameplay/avatar.png`)
+    - Player name
+    - Volforce value
+    - Dan level (user configurable)
+  - Added new textures for buttons and fx buttons; including holds
+  - Added new laser textures; they are now configurable via the USC laser color setting
+  - Added a new track texture which matches the configured laser colors
+  - Removed the chain burst animation due to large memory consumption
+  - Added an EX SCORE percentage display
+  - Holding down `START` now shows the lane-speed range of the current chart (if applicable)
+- `Gameplay Settings` changes:
+  - Renamed from `In-game Preview`
+  - Added a setting to change the position of the hit delta bar
+  - Added a setting to change the position and opacity of the chain display
+  - Added settings to change the scale of all elements
+  - Added settings to change the hue of hit/hold/laser animations
+  - Added various player card settings
+  - Added settings to change the fill and percentage displys for the gauge bar
+- `Results` changes:
+  - Added a score and object "replay" feature in place of the previous hover-to-zoom hit stat graph--the lengths of hold and laser objects may be inaccurate due to skinning limitations
+  - Added a skin setting to disable the color coding of rating texts
+  - Added absolute mean delta and standard deviation information
+  - Added an EX SCORE percentage display
+  - Added support for IR leaderboards which can be toggled with `BT-D`
+
 ### 1.4.8 - October 9, 2021
 - Changed Blastive Level display to pull from appropriate sources; effectively fixes challenges with forced Blastive Rate displaying the incorrect level
 

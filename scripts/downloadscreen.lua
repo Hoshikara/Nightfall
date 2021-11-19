@@ -1,347 +1,517 @@
--- Global `dlScreen` table is available for this script and its related scripts
+---@diagnostic disable
 
-local CustomsFolder = ('/%s/'):format(getSetting('nauticaPath'), 'nautica');
-local Header = { ['user-agent'] = 'unnamed_sdvx_clone' };
-local NextURL = 'https://ksm.dev/app/songs';
-local SongsURL = 'https://ksm.dev/app/songs?sort=%s';
+json = require "json"
+local header = {}
+header["user-agent"] = "unnamed_sdvx_clone"
 
-local JSON = require('lib/json');
+local jacketFallback = gfx.CreateSkinImage("song_select/loading.png", 0)
+local diffColors = { { 50, 50, 127 }, { 50, 127, 50 }, { 127, 50, 50 }, { 127, 50, 127 } }
+local entryW = 770
+local entryH = 320
+local resX, resY = game.GetResolution()
+local xCount = math.floor(resX / entryW)
+local yCount = math.floor(resY / entryH)
+local xOffset = (resX - xCount * entryW) / 2
+local cursorPos = 0
+local cursorPosX = 0
+local cursorPosY = 0
+local displayCursorPosX = 0
+local displayCursorPosY = 0
+local nextUrl = "https://ksm.dev/app/songs"
+local screenState = 0 --0 = normal, 1 = level, 2 = sorting
+local loading = true
+local downloaded = {}
+local songs = {}
+local filters = {}
+local selectedLevels = {}
+local soffset = 0
+local selectedSorting = "Uploaded"
+local lastPlaying = nil
+for i = 1, 20 do
+	selectedLevels[i] = false
+end
+local searchText = gfx.CreateLabel("", 5, 0)
+local searchIndex = 1
+local searchInputActive = false
 
-local JSONTable = require('common/jsontable');
+local cachepath = path.Absolute("skins/" .. game.GetSkin() .. "/nautica.json")
+local levelcursor = 0
+local sortingcursor = 0
+local sortingOptions = { "Uploaded", "Oldest" }
+local needsReload = false
 
-local NauticaCache = require('components/downloadscreen/nauticacache');
-local NauticaList = require('components/downloadscreen/nauticalist');
-local NauticaSidebar = require('components/downloadscreen/nauticasidebar');
-
-local window = Window:new();
-local background = Background:new(window);
-
-local jacketFallback = gfx.CreateSkinImage('loading.png', 0);
-
-local nauticaJSON = JSONTable:new('nautica');
-local userData = nauticaJSON:get();
-
-if (not userData.blacklist) then
-  userData = {
-    blacklist = {},
-    downloaded = {},
-  };
+function addsong(song)
+	if song.jacket_url ~= nil then
+		song.jacket = gfx.LoadWebImageJob(song.jacket_url, jacketFallback, 250, 250)
+	else
+		song.jacket = jacketFallback
+	end
+	if downloaded[song.id] then
+		song.status = "Downloaded"
+	end
+	table.insert(songs, song)
 end
 
----@class DownloadScreen
-local state = {
-  action = 'BROWSING',
-  currLevel = 1,
-  currSong = 1,
-  filtered = false,
-  levels = {},
-  loading = false,
-  playingSong = nil,
-  sort = 'uploaded',
-  songs = {},
-  songCount = 0,
+local yOffset = 0
+local backgroundImage = gfx.CreateSkinImage("bg.png", 1)
 
-  -- Add the songs received from nautica
-  ---@param this DownloadScreen
-  ---@param songs NauticaSong[]
-  addSongs = function(this, songs)
-    for _, song in ipairs(songs) do
-      if (not userData.blacklist[song.user_id]) then
-        song.jacket = jacketFallback;
-
-        song.status = userData.downloaded[song.id] and 'DOWNLOADED';
-
-        this.songs[#this.songs + 1] = song;
-        this.songCount = this.songCount + 1;
-      end
-    end
-
-    this.loading = false;
-  end,
-};
-
-do
-  for i = 1, 20 do state.levels[i] = false; end
+dlcache = io.open(cachepath, "r")
+if dlcache then
+	downloaded = json.decode(dlcache:read("*all"))
+	dlcache:close()
+end
+function encodeURI(str)
+	if (str) then
+		str = string.gsub(str, "\n", "\r\n")
+		str = string.gsub(str, "([^%w ])",
+			function(c)
+				local dontChange = "-/_:."
+				for i = 1, #dontChange do
+					if c == dontChange:sub(i, i) then return c end
+				end
+				return string.format("%%%02X", string.byte(c))
+			end)
+		str = string.gsub(str, " ", "%%20")
+	end
+	return str
 end
 
--- Nautica response callback
----@param res HttpResponse
-local songsCallback = function(res)
-  if (res.status ~= 200) then
-    error(('Error accessing %s: status %d'):format(NextURL, res.status));
-
-    return;
-  end
-
-  ---@type NauticaResponseBody
-  local body = JSON.decode(res.text);
-
-  state:addSongs(body.data);
-
-  NextURL = body.links.next;
+function gotSongsCallback(response)
+	if response.status ~= 200 then
+		error()
+		return
+	end
+	local jsondata = json.decode(response.text)
+	for i, song in ipairs(jsondata.data) do
+		addsong(song)
+	end
+	nextUrl = jsondata.links.next
+	loading = false
 end
 
--- Fetch songs from nautica
-local getSongs = function()
-  if (NextURL and (not state.loading)) then
-    Http.GetAsync(NextURL, Header, songsCallback);
+Http.GetAsync(nextUrl, header, gotSongsCallback)
 
-    state.loading = true;
-  end
+
+function render_song(song, x, y)
+	gfx.Save()
+	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
+	gfx.Translate(x, y)
+	gfx.Scissor(0, 0, 750, 300)
+	gfx.BeginPath()
+	gfx.FillColor(0, 0, 0, 140)
+	gfx.Rect(0, 0, 750, 300)
+	gfx.Fill()
+	gfx.FillColor(255, 255, 255)
+	gfx.FontSize(30)
+	gfx.Text(song.title, 2, 2)
+	gfx.FontSize(24)
+	gfx.Text(song.artist, 2, 26)
+	if song.jacket_url ~= nil and song.jacket == jacketFallback then
+		song.jacket = gfx.LoadWebImageJob(song.jacket_url, jacketFallback, 250, 250)
+	end
+	gfx.BeginPath()
+	gfx.ImageRect(0, 50, 250, 250, song.jacket, 1, 0)
+	gfx.BeginPath()
+	gfx.Rect(250, 50, 500, 250)
+	gfx.FillColor(55, 55, 55, 128)
+	gfx.Fill()
+	for i, diff in ipairs(song.charts) do
+		local col = diffColors[diff.difficulty]
+		local diffY = 50 + 250 / 4 * (diff.difficulty - 1)
+		gfx.BeginPath()
+
+		gfx.Rect(250, diffY, 500, 250 / 4)
+		gfx.FillColor(col[1], col[2], col[3])
+		gfx.Fill()
+		gfx.FillColor(255, 255, 255)
+		gfx.FontSize(40)
+		gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_MIDDLE)
+		gfx.Text(string.format("%d Effected by %s", diff.level, diff.effector), 255, diffY + 250 / 8)
+	end
+	if downloaded[song.id] then
+		gfx.BeginPath()
+		gfx.Rect(0, 0, 750, 300)
+		gfx.FillColor(0, 0, 0, 127)
+		gfx.Fill()
+		gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
+		gfx.FontSize(60)
+		gfx.FillColor(255, 255, 255)
+		gfx.Text(downloaded[song.id], 375, 150)
+	elseif song.status then
+		gfx.BeginPath()
+		gfx.Rect(0, 0, 750, 300)
+		gfx.FillColor(0, 0, 0, 127)
+		gfx.Fill()
+		gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
+		gfx.FontSize(60)
+		gfx.FillColor(255, 255, 255)
+		gfx.Text(song.status, 375, 150)
+	end
+	gfx.ResetScissor()
+	gfx.Restore()
 end
 
--- Reload songs to reflect filters/sorts
-local reloadSongs = function()
-  if (state.loading) then return; end
-
-  local applyFilter = false;
-  local levels = {};
-
-  for i, v in ipairs(state.levels) do
-    if (v) then
-      applyFilter = true;
-
-      levels[#levels + 1] = i;
-    end
-  end
-
-  NextURL = SongsURL:format(state.sort:lower());
-
-  if (applyFilter) then
-    NextURL = NextURL .. '&levels=' .. table.concat(levels, ',');
-  end
-
-  state.currSong = 1;
-  state.songs = {};
-  state.songCount = 0;
-
-  getSongs();
+function load_more()
+	if nextUrl ~= nil and not loading then
+		Http.GetAsync(nextUrl, header, gotSongsCallback)
+		loading = true
+	end
 end
 
--- DownloadScreen components
-local nauticaCache = NauticaCache:new();
-local nauticaList = NauticaList:new(window, state, nauticaCache);
-local nauticaSidebar = NauticaSidebar:new(window, state);
-
--- Initial song fetching
-Http.GetAsync(NextURL, Header, songsCallback);
-
--- Called by the game every frame
----@param dt deltaTime
-render = function(dt)
-  gfx.Save();
-
-  window:set();
-
-  background:render();
-
-  nauticaSidebar:render();
-
-  nauticaList:render(dt);
-
-  gfx.Restore();
+function render_cursor()
+	local x = displayCursorPosX * entryW
+	local y = displayCursorPosY * entryH
+	gfx.BeginPath()
+	gfx.Rect(x, y, 750, 300)
+	gfx.StrokeColor(255, 128, 0)
+	gfx.StrokeWidth(5)
+	gfx.Stroke()
 end
 
-local chars = '-/_:.';
-
-local charReplace = function(c)
-  for i = 1, #chars do
-    if (c == chars:sub(i, i)) then return c; end
-  end
-
-  return ('%%%02X'):format(c:byte());
+function render_loading()
+	if not loading then return end
+	gfx.Save()
+	gfx.ResetTransform()
+	gfx.BeginPath()
+	gfx.MoveTo(resX, resY)
+	gfx.LineTo(resX - 350, resY)
+	gfx.LineTo(resX - 300, resY - 50)
+	gfx.LineTo(resX, resY - 50)
+	gfx.ClosePath()
+	gfx.FillColor(33, 33, 33)
+	gfx.Fill()
+	gfx.FillColor(255, 255, 255)
+	gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT, gfx.TEXT_ALIGN_BOTTOM)
+	gfx.FontSize(70)
+	gfx.Text("LOADING...", resX - 20, resY - 3)
+	gfx.Restore()
 end
 
-local encodeURI = function(str)
-  if (str) then
-    str = str:gsub('\n', '\r\n');
-    str = str:gsub('([^%w ])', charReplace);
-    str = str:gsub(' ', '%%20');
-
-    return str;
-  end
-
-  return '';
+function render_hotkeys()
+	gfx.Save()
+	gfx.ResetTransform()
+	gfx.BeginPath()
+	gfx.FillColor(0, 0, 0, 240)
+	gfx.Rect(0, resY - 50, resX, 50)
+	gfx.Fill()
+	gfx.FontSize(30)
+	gfx.FillColor(255, 255, 255)
+	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT, gfx.TEXT_ALIGN_BOTTOM)
+	gfx.Text("FXR: Sorting", resX / 2 + 20, resY - 10)
+	gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT, gfx.TEXT_ALIGN_BOTTOM)
+	gfx.Text("FXL: Levels", resX / 2 - 20, resY - 10)
+	gfx.Restore()
 end
 
-local archiveCallback = function(entries, id)
-  local songsFolder = dlScreen.GetSongsPath();
-
-  local longestPath;
-  local res = {};
-  local root = songsFolder .. CustomsFolder .. id .. '/';
-  local song = state.songs[state.currSong];
-  local folders = { songsFolder .. CustomsFolder };
-
-  for _, entry in ipairs(entries) do
-    if (longestPath) then
-      if (#entry < #longestPath) then
-        longestPath = longestPath:sub(1, #entry);
-      end
-
-      for i = 1, #longestPath do
-        if (longestPath:sub(i, i) ~= entry:sub(i, i)) then
-          longestPath = longestPath:sub(1, i - 1);
-
-          break;
-        end
-      end
-    else
-      longestPath = entry;
-    end
-  end
-
-  if (not longestPath) then return res; end
-
-  for i = #longestPath, 1, -1 do
-    if (longestPath:sub(i, i) == '/') then
-      longestPath = longestPath:sub(1, i);
-
-      break;
-    end
-  end
-
-  folders[#folders + 1] = root;
-
-  for _, entry in ipairs(entries) do
-    local replaced = entry;
-
-    if (#longestPath > 1) then replaced = replaced:sub(#longestPath + 1); end
-
-    if (#replaced > 0) then
-      for i = 1, #replaced do
-        if (replaced:sub(i, i) == '/') then
-          folders[#folders + 1] = root .. replaced:sub(1, i);
-        end
-      end
-
-      res[entry] = root .. replaced;
-    end
-  end
-
-  if ((song and song.id) == id) then song.status = 'DOWNLOADED'; end
-
-  userData.downloaded[id] = 'DOWNLOADED';
-  res['.folders'] = table.concat(folders, '|');
-
-  return res;
+function render_info()
+	gfx.Save()
+	gfx.ResetTransform()
+	gfx.BeginPath()
+	gfx.MoveTo(0, resY)
+	gfx.LineTo(350, resY)
+	gfx.LineTo(300, resY - 50)
+	gfx.LineTo(0, resY - 50)
+	gfx.ClosePath()
+	gfx.FillColor(33, 33, 33)
+	gfx.Fill()
+	gfx.FillColor(255, 255, 255)
+	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT, gfx.TEXT_ALIGN_BOTTOM)
+	gfx.FontSize(70)
+	gfx.Text("Nautica", 3, resY - 3)
+	local xmin, ymin, xmax, ymax = gfx.TextBounds(3, resY - 3, "Nautica")
+	gfx.FontSize(20)
+	gfx.Text("https://ksm.dev/", xmax + 13, resY - 3)
+	gfx.Restore()
 end
 
--- Toggle current user action
----@param action string
-local toggleAction = function(action)
-  if (state.action ~= action) then
-    state.action = action;
-  else
-    state.action = 'BROWSING';
-  end
+function render(deltaTime)
+	gfx.BeginPath()
+	gfx.ImageRect(0, 0, resX, resY, backgroundImage, 1, 0)
+	gfx.LoadSkinFont("RajdhaniMedium.ttf")
+	displayCursorPosX = displayCursorPosX - (displayCursorPosX - cursorPosX) * deltaTime * 10
+	displayCursorPosY = displayCursorPosY - (displayCursorPosY - cursorPosY) * deltaTime * 10
+	if displayCursorPosY - yOffset > yCount - 1 then --scrolling down
+		yOffset = yOffset - (yOffset - displayCursorPosY) - yCount + 1
+	elseif displayCursorPosY - yOffset < 0 then
+		yOffset = yOffset - (yOffset - displayCursorPosY)
+	end
+	gfx.Translate(xOffset, 50 - yOffset * entryH)
+	for i, song in ipairs(songs) do
+		if math.abs(cursorPos - i) <= xCount * yCount + xCount then
+			i = i - 1
+			local x = entryW * (i % xCount)
+			local y = math.floor(i / xCount) * entryH
+			render_song(song, x, y)
+			if math.abs(#songs - i) < 4 then load_more() end
+		end
+	end
+	render_cursor()
+	if needsReload then reload_songs() end
+	if screenState == 1 then
+		render_level_filters()
+	elseif screenState == 2 then
+		render_sorting_selection()
+	end
+	render_hotkeys()
+	render_loading()
+	render_info()
+
+	local fifthX = resX / 5
+	local fifthY = resY / 5
+	local fourthX = resX / 4
+	local fourthY = resY / 4
+	--draw text search
+	soffset = soffset * 0.8
+	draw_search(fifthX * 2, 10, fifthX * 3 + 30, fifthY / 4)
 end
 
--- Called by the game when knobs are turned or arrow keys are pressed
----@param step integer # `-1` or `1`
-advance_selection = function(step)
-  if (state.action == 'BROWSING') then
-    if (state.songCount > 0) then
-      state.currSong = advance(state.currSong, state.songCount, step);
+function archive_callback(entries, id)
+	game.Log("Listing entries for " .. id, 0)
+	local songsfolder = dlScreen.GetSongsPath()
+	res = {}
+	folders = { songsfolder .. "/nautica/" }
+	local hasFolder = false
+	for i, entry in ipairs(entries) do
+		for j = 1, #entry do
+			if entry:sub(j, j) == "/" then
+				hasFolder = true
+				table.insert(folders, songsfolder .. "/nautica/" .. entry:sub(1, j))
+			end
+		end
+		game.Log(entry, 0)
+		res[entry] = songsfolder .. "/nautica/" .. entry
+	end
 
-      if (state.currSong > (state.songCount - 6)) then getSongs(); end
-    end
-  elseif (state.action == 'FILTERING') then
-    state.currLevel = advance(state.currLevel, 20, step);
-  end
+	if not hasFolder then
+		for i, entry in ipairs(entries) do
+			res[entry] = songsfolder .. "/nautica/" .. id .. "/" .. entry
+		end
+		table.insert(folders, songsfolder .. "/nautica/" .. id .. "/")
+	end
+	downloaded[id] = "Downloaded"
+	res[".folders"] = table.concat(folders, "|")
+	return res
 end
 
--- Called by the game when a (gamepad) button is pressed
----@param btn integer
-button_pressed = function(btn)
-  local action = state.action;
-
-  if (btn == game.BUTTON_STA) then
-    if (action == 'BROWSING') then
-      local song = state.songs[state.currSong];
-
-      if (not song) then return; end
-
-      dlScreen.DownloadArchive(
-        encodeURI(song.cdn_download_url),
-        Header,
-        song.id,
-        archiveCallback
-      );
-
-      song.status = 'DOWNLOADING';
-      userData.downloaded[song.id] = 'DOWNLOADING';
-    elseif (action == 'FILTERING') then
-      if (state.levels[state.currLevel]) then
-        local filtered = false;
-
-        state.levels[state.currLevel] = false;
-
-        for i = 1, 20 do
-          if (state.levels[i]) then filtered = true; end
-        end
-
-        state.filtered = filtered;
-      else
-        state.filtered = true;
-        state.levels[state.currLevel] = true;
-      end
-
-      reloadSongs();
-    end
-  elseif (btn == game.BUTTON_BTA) then
-    if (action == 'BROWSING') then
-      local song = state.songs[state.currSong];
-
-      if (not song) then return; end
-
-      if (state.playingSong and (state.playingSong.id == song.id)) then
-        dlScreen.StopPreview();
-        state.playingSong.status = nil;
-        state.playingSong = nil;
-      else
-        dlScreen.PlayPreview(encodeURI(song.preview_url), Header, song.id);
-
-        song.status = 'PREVIEWING';
-
-        if (state.playingSong) then state.playingSong.status = nil; end
-
-        state.playingSong = song;
-      end
-    end
-  elseif (btn == game.BUTTON_BTB) then
-    if (action == 'BROWSING') then
-      local song = state.songs[state.currSong];
-
-      if (song) then
-        userData.blacklist[song.user_id] = song.user and song.user.name;
-
-        reloadSongs();
-      end
-    end
-  elseif (btn == game.BUTTON_FXL) then
-    if (state.sort == 'uploaded') then
-      state.sort = 'oldest';
-    else
-      state.sort = 'uploaded';
-    end
-
-    reloadSongs();
-  elseif (btn == game.BUTTON_FXR) then
-    toggleAction('FILTERING');
-  end
+local char_to_hex = function(c)
+	return string.format("%%%02X", string.byte(c))
 end
 
--- Called by the game when a key is pressed
----@param key integer
-key_pressed = function(key)
-  if (key == 27) then
-    if (state.action == 'BROWSING') then
-      nauticaJSON:overwrite(userData);
+local function urlencode(url)
+	if url == nil then
+		return
+	end
+	url = url:gsub("\n", "\r\n")
+	url = url:gsub("([^%w _%%%-%.~])", char_to_hex)
+	url = url:gsub(" ", "+")
+	return url
+end
 
-      dlScreen.Exit();
-    else
-      state.action = 'BROWSING';
-    end
-  end
+function reload_songs()
+	needsReload = true
+	if loading then return end
+	local useLevels = false
+	local levelarr = {}
+
+	for i, value in ipairs(selectedLevels) do
+		if value then
+			useLevels = true
+			table.insert(levelarr, i)
+		end
+	end
+	if filters.levels ~= nil then
+		for i, value in ipairs(filters.levels) do
+			useLevels = true
+			table.insert(levelarr, value)
+		end
+	end
+	nextUrl = string.format("https://ksm.dev/app/songs?sort=%s", selectedSorting:lower())
+	if useLevels then
+		nextUrl = nextUrl .. "&levels=" .. table.concat(levelarr, ",")
+	end
+	if filters.effector ~= nil then
+		nextUrl = nextUrl .. "&effector=" .. urlencode(filters.effector)
+	end
+	if filters.uploader ~= nil then
+		nextUrl = nextUrl .. "&uploader=" .. urlencode(filters.uploader)
+	end
+	if filters.query ~= nil then
+		nextUrl = nextUrl .. "&q=" .. urlencode(filters.query)
+	end
+
+	songs = {}
+	cursorPos = 0
+	cursorPosX = 0
+	cursorPosY = 0
+	displayCursorPosX = 0
+	displayCursorPosY = 0
+	load_more()
+	game.Log(nextUrl, 0)
+	needsReload = false
+end
+
+function button_pressed(button)
+	if button == game.BUTTON_STA then
+		if screenState == 0 then
+			local song = songs[cursorPos + 1]
+			if song == nil then return end
+			dlScreen.DownloadArchive(encodeURI(song.cdn_download_url), header, song.id, archive_callback)
+			downloaded[song.id] = "Downloading..."
+		elseif screenState == 1 then
+			if selectedLevels[levelcursor + 1] then
+				selectedLevels[levelcursor + 1] = false
+			else
+				selectedLevels[levelcursor + 1] = true
+			end
+			reload_songs()
+		elseif screenState == 2 then
+			selectedSorting = sortingOptions[sortingcursor + 1]
+			reload_songs()
+		end
+
+	elseif button == game.BUTTON_BTA then
+		if screenState == 0 then
+			local song = songs[cursorPos + 1]
+			if song == nil then return end
+			if lastPlaying ~= nil and lastPlaying.id == song.id then
+				dlScreen.StopPreview()
+				lastPlaying.status = nil
+				lastPlaying = nil
+			else
+				dlScreen.PlayPreview(encodeURI(song.preview_url), header, song.id)
+				song.status = "Playing"
+				if lastPlaying ~= nil then
+					lastPlaying.status = nil
+				end
+				lastPlaying = song
+			end
+		end
+
+	elseif button == game.BUTTON_FXL then
+		if screenState ~= 1 then
+			screenState = 1
+		else
+			screenState = 0
+		end
+	elseif button == game.BUTTON_FXR then
+		if screenState ~= 2 then
+			screenState = 2
+		else
+			screenState = 0
+		end
+	elseif button == game.BUTTON_BCK then
+		dlcache = io.open(cachepath, "w")
+		dlcache:write(json.encode(downloaded))
+		dlcache:close()
+		dlScreen.Exit()
+	end
+end
+
+function key_pressed(key)
+end
+
+function advance_selection(steps)
+	if screenState == 0 and #songs > 0 then
+		cursorPos = (cursorPos + steps) % #songs
+		cursorPosX = cursorPos % xCount
+		cursorPosY = math.floor(cursorPos / xCount)
+		if cursorPos > #songs - 6 then
+			load_more()
+		end
+	elseif screenState == 1 then
+		levelcursor = (levelcursor + steps) % 20
+	elseif screenState == 2 then
+		sortingcursor = (sortingcursor + steps) % #sortingOptions
+	end
+end
+
+function render_level_filters()
+	gfx.Save()
+	gfx.ResetTransform()
+	gfx.BeginPath()
+	gfx.Rect(0, 0, resX, resY)
+	gfx.FillColor(0, 0, 0, 200)
+	gfx.Fill()
+	gfx.FillColor(255, 255, 255)
+	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
+	gfx.FontSize(60)
+	gfx.Text("Level filters:", 10, 10)
+	gfx.BeginPath()
+	gfx.Rect(resX / 2 - 30, resY / 2 - 22, 60, 44)
+	gfx.StrokeColor(255, 128, 0)
+	gfx.StrokeWidth(2)
+	gfx.Stroke()
+	gfx.FontSize(40)
+	gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
+	for i = 1, 20 do
+		y = (resY / 2) + (i - (levelcursor + 1)) * 40
+		if selectedLevels[i] then gfx.FillColor(255, 255, 255) else gfx.FillColor(127, 127, 127) end
+		gfx.Text(tostring(i), resX / 2, y)
+	end
+	gfx.Restore()
+end
+
+function render_sorting_selection()
+	gfx.Save()
+	gfx.ResetTransform()
+	gfx.BeginPath()
+	gfx.Rect(0, 0, resX, resY)
+	gfx.FillColor(0, 0, 0, 200)
+	gfx.Fill()
+	gfx.FillColor(255, 255, 255)
+	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
+	gfx.FontSize(60)
+	gfx.Text("Sorting method:", 10, 10)
+	gfx.BeginPath()
+	gfx.Rect(resX / 2 - 75, resY / 2 - 22, 150, 44)
+	gfx.StrokeColor(255, 128, 0)
+	gfx.StrokeWidth(2)
+	gfx.Stroke()
+	gfx.FontSize(40)
+	gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
+	for i, opt in ipairs(sortingOptions) do
+		y = (resY / 2) + (i - (sortingcursor + 1)) * 40
+		if selectedSorting == opt then gfx.FillColor(255, 255, 255) else gfx.FillColor(127, 127, 127) end
+		gfx.Text(opt, resX / 2, y)
+	end
+	gfx.Restore()
+end
+
+function update_search_text(active, text)
+	searchInputActive = active
+	gfx.UpdateLabel(searchText, string.format("Search: %s", text), 30, 0)
+end
+
+function update_search_filters(new_filters)
+	filters = new_filters
+	reload_songs()
+end
+
+local searchIndex = 1
+function draw_search(x, y, w, h)
+	gfx.Save()
+	gfx.ResetTransform()
+	soffset = soffset + (searchIndex) - (searchInputActive and 0 or 1)
+	searchIndex = searchInputActive and 0 or 1
+
+	gfx.BeginPath()
+	local bgfade = 1 - (searchIndex + soffset)
+	--if not searchInputActive then bgfade = soffset end
+	gfx.FillColor(0, 0, 0, math.floor(150 * bgfade))
+	gfx.Rect(0, 0, resX, resY)
+	gfx.Fill()
+	gfx.ForceRender()
+	local xpos = x + (searchIndex + soffset) * w
+	gfx.BeginPath()
+	gfx.RoundedRect(xpos, y, w, h, h / 2)
+	gfx.FillColor(30, 30, 30)
+	gfx.StrokeColor(0, 128, 255)
+	gfx.StrokeWidth(1)
+	gfx.Fill()
+	gfx.Stroke()
+	gfx.BeginPath()
+	gfx.LoadSkinFont("RajdhaniMedium.ttf")
+	gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_MIDDLE)
+	gfx.DrawLabel(searchText, xpos + 10, y + (h / 2), w - 20)
+
 end

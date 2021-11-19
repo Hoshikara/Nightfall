@@ -1,400 +1,288 @@
--- Global `gameplay` table is available for this script and its related scripts
+---@diagnostic disable: need-check-nil, undefined-field
 
-game.LoadSkinSample('tick_bt');
-game.LoadSkinSample('tick_fx');
+--#region Require
 
-local JSON = require('lib/json');
+local BpmData = require("gameplay/BpmData")
+local Chain = require("gameplay/Chain")
+local Console = require("gameplay/Console")
+local CritBar = require("gameplay/CritBar")
+local Earlate = require("gameplay/Earlate")
+local GameplayContext = require("gameplay/GameplayContext")
+local GaugeBar = require("gameplay/GaugeBar")
+local HitAnimations = require("gameplay/HitAnimations")
+local HitDeltaBar = require("gameplay/HitDeltaBar")
+local LaserAlerts = require("gameplay/LaserAlerts")
+local LaserAnimations = require("gameplay/LaserAnimations")
+local LaserCursors = require("gameplay/LaserCursors")
+local PlayerCard = require("gameplay/PlayerCard")
+local PracticeInfo = require("gameplay/PracticeInfo")
+local ScoreDifference = require("gameplay/ScoreDifference")
+local ScoreInfo = require("gameplay/ScoreInfo")
+local SongInfo = require("gameplay/SongInfo")
+local didPress = require("common/helpers/didPress")
 
-local BPMS = require('components/gameplay/bpms');
-local Chain = require('components/gameplay/chain');
-local Console = require('components/gameplay/console');
-local CritBar = require('components/gameplay/critbar');
-local Earlate = require('components/gameplay/earlate');
-local GaugeBar = require('components/gameplay/gaugebar');
-local HitAnimation = require('components/gameplay/hitanimation');
-local HitDeltaBar = require('components/gameplay/hitdeltabar');
-local LaserAlerts = require('components/gameplay/laseralerts');
-local LaserAnimation = require('components/gameplay/laseranimation');
-local LaserCursors = require('components/gameplay/lasercursors');
-local Outro = require('components/gameplay/outro');
-local PracticeInfo = require('components/gameplay/practiceinfo');
-local ScoreInfo = require('components/gameplay/scoreinfo');
-local Scoreboard = require('components/gameplay/scoreboard');
-local SongInfo = require('components/gameplay/songinfo');
-local UserInfo = require('components/gameplay/userinfo');
+--#endregion
 
-local window = Window:new();
+local window = Window.new()
 
-local abs = math.abs;
+local earlateEnabled = getSetting("showEarlate", true)
+local gaugeBarEnabled = getSetting("showGaugeBar", true)
+local hitAnimationsEnabled = getSetting("showHitAnimations", true)
+local hitDeltaBarEnabled = getSetting("showHitDeltaBar", true)
+local playerCardEnabled = getSetting("showPlayerCard", true)
+local scoreDifferenceEnabled = getSetting("showScoreDifference", true)
 
-local assistTick = getSetting('assistTick', false);
+local autoplayText = nil
 
----@type number
-local minCritDelta = getSetting('minCritDelta', 23);
----@type boolean
-local showCritDelta = getSetting('showCritDelta', false);
+local abs = math.abs
 
-local sCritWindow = nil;
+--#region Components
 
-local players = nil;
+local context = GameplayContext.new()
+local bpmData = BpmData.new(context)
+local chain = nil
+local console = Console.new(context, window)
+local critBar = CritBar.new(window)
+---@type Earlate
+local earlate = nil
+local gaugeBar = nil
+---@type HitAnimations
+local hitAnimations = hitAnimationsEnabled and HitAnimations.new(context, window)
+---@type HitDeltaBar
+local hitDeltaBar = nil
+local laserAlerts = nil
+---@type LaserAnimations
+local laserAnimations = hitAnimationsEnabled and LaserAnimations.new(window)
+local laserCursors = LaserCursors.new(window)
+local playerCard = nil
+local practiceInfo = nil
+---@type ScoreDifference
+local scoreDifference = nil
+local scoreInfo = nil
+local songInfo = nil
 
----@type boolean
-local showHitAnims = getSetting('showHitAnims', true);
----@type boolean
-local showHitDeltaBar = getSetting('showHitDeltaBar', true);
+--#endregion
 
----@class Gameplay
-local state = {
-	bpms = nil,
-	buttonDelta = 0,
-	chain = 0,
-	exScore = 0,
-	intro = { alpha = 255, offset = 0 },
-	isCrit = false,
-	isButton = false,
-	isLate = false,
-	maxChain = 0,
-	score = 0,
-	showAdjustments = true,
-	timers = {
-		alerts = { -1.5, -1.5 },
-		chain = 0,
-		earlate = 0,
-		intro = 2,
-		outro = 0,
-	},
-};
+local init = true
 
--- Gameplay components
-local bpms = BPMS:new(state);
-local chain = nil;
-local console = Console:new(window, state);
-local critBar = CritBar:new(window);
-local earlate = nil;
-local gaugeBar = nil;
-local hitAnimation = showHitAnims and HitAnimation:new(window);
-local hitDeltaBar = nil;
-local laserAlerts = nil;
-local laserAnimation = showHitAnims and LaserAnimation:new(window);
-local laserCursors = LaserCursors:new(window);
-local outro = nil;
-local practiceInfo = nil;
-local scoreInfo = nil;
-local scoreboard = nil;
-local songInfo = nil;
-local userInfo = nil;
+local function initAll()
+	chain = Chain.new(context, window)
+	earlate = earlateEnabled and Earlate.new(context, window)
+	gaugeBar = gaugeBarEnabled and GaugeBar.new(context, window)
+	hitDeltaBar = hitDeltaBarEnabled and HitDeltaBar.new(window)
+	laserAlerts = LaserAlerts.new(context, window)
+	playerCard = PlayerCard.new(context, window)
+	scoreDifference = scoreDifferenceEnabled and ScoreDifference.new(context, window)
+	scoreInfo = ScoreInfo.new(context, window)
+	songInfo = SongInfo.new(context, window)
 
-local init = true;
-
-local initAll = function()
-	chain = Chain:new(window, state);
-	earlate = Earlate:new(window, state);
-	gaugeBar = GaugeBar:new(window, state);
-	hitDeltaBar = HitDeltaBar:new(window);
-	laserAlerts = LaserAlerts:new(window, state);
-	outro = Outro:new(window);
-	scoreInfo = ScoreInfo:new(window, state);
-	songInfo = SongInfo:new(window, state);
-	userInfo = UserInfo:new(window, state);
-
-	if (gameplay.multiplayer) then scoreboard = Scoreboard:new(window); end
-
-	if (gameplay.practice_setup ~= nil) then
-		practiceInfo = PracticeInfo:new(window);
+	if gameplay.practice_setup ~= nil then
+		practiceInfo = PracticeInfo.new(window)
 	end
 
-	init = false;
+	autoplayText = makeLabel("Medium", "AUTOPLAY", 48)
+
+	init = false
 end
 
--- Translates coordinates to the center of the critical line and applies any rotation from tilt effects
-local setupCritTransform = function()
-	gfx.ResetTransform();
-	gfx.Translate(gameplay.critLine.x, gameplay.critLine.y);
-	gfx.Rotate(-gameplay.critLine.rotation);
+local function setupCritTransform()
+	gfx.ResetTransform()
+	gfx.Translate(gameplay.critLine.x, gameplay.critLine.y)
+	gfx.Rotate(-gameplay.critLine.rotation)
 end
 
--- Called by the game when a button is pressed
----@param btn integer # `0` = BTA, `1` = BTB, `2` = BTC, `3` = BTD, `4` = FXL, `5` = FXR
----@param rating integer # `0` = Miss, `1` = Near, `2` = Crit, `3` = Idle
----@param delta integer # delta from 0 of the hit, in milliseconds
-button_hit = function(btn, rating, delta)
-	if (not sCritWindow) then
-		sCritWindow = math.floor(
-			(gameplay.hitWindow and gameplay.hitWindow.perfect or 46) * 0.5
-		);
+---@param btn integer
+---@param rating rating
+---@param delta integer
+---@return integer, integer, integer # r, g, b used as `color` for `sprite.fs`
+function button_hit(btn, rating, delta)
+	context:handleButton(delta, rating)
+
+	if hitAnimationsEnabled then
+		hitAnimations:enqueueHit(btn, delta, rating)
 	end
 
-	if (rating ~= 3) then
-		state.isButton = true;
-
-		if (assistTick) then
-			if (btn < 4) then
-				game.PlaySample('tick_bt');
-			else
-				game.PlaySample('tick_fx');
-			end
-		end
+	if hitDeltaBarEnabled and (not gameplay.autoplay) then
+		hitDeltaBar:enqueueHit(btn, delta, rating)
 	end
 
-	if (rating == 1) then
-		state.isCrit = false;
-		state.buttonDelta = delta;
-
-		state.exScore = state.exScore + 2;
-	elseif (rating == 2) then
-		local d = abs(delta);
-
-		if (showCritDelta) then
-			if (d >= minCritDelta) then
-				state.isCrit = true;
-				state.buttonDelta = delta;
-				state.timers.earlate = 0.75;
-			end
+	-- r values here correspond to each state of the `scorehit` texture
+	if rating == 3 then
+		return 150, 0, 0
+	elseif rating == 2 then
+		if abs(delta) <= context.sCritWindow then
+			return 100, 0, 0
 		end
 
-		if (d <= sCritWindow) then
-			state.exScore = state.exScore + 5;
-		else
-			state.exScore = state.exScore + 4;
+		return 200, 0, 0
+	elseif rating == 1 then
+		return 50, 0, 0
+	end
+
+	return 0, 0, 0
+end
+
+---@param length number
+---@param startPos number
+---@param endPos number
+---@param index integer
+function laser_slam_hit(length, startPos, endPos, index)
+	if hitAnimationsEnabled then
+		laserAnimations:enqueueSlamHit(index, endPos)
+	end
+end
+
+---@param dt deltaTime
+function render_crit_base(dt)
+	window:update(true)
+	setupCritTransform()
+	critBar:draw(dt)
+	gfx.ResetTransform()
+end
+
+---@param dt deltaTime
+function render_crit_overlay(dt)
+	if hitAnimationsEnabled then
+		hitAnimations:draw(dt)
+		laserAnimations:draw(dt)
+	end
+
+	setupCritTransform()
+
+	if window.isPortrait then
+		console:draw(dt)
+	end
+
+	laserCursors:draw(dt)
+end
+
+---@param dt deltaTime
+function render(dt)
+	if init then
+		initAll()
+	end
+
+	bpmData:collect(dt)
+	context:update()
+
+	gfx.ResetTransform()
+	window:update()
+	chain:draw(dt)
+
+	if gaugeBarEnabled then
+		gaugeBar:draw(dt)
+	end
+
+	laserAlerts:draw(dt)
+	scoreInfo:draw()
+	songInfo:draw(dt)
+
+	if scoreDifferenceEnabled then
+		scoreDifference:draw(dt)
+	end
+
+	if gameplay.autoplay then
+		autoplayText:draw({
+			x = window.w / 2,
+			y = (window.isPortrait and 290) or 0,
+			align = "CenterTop",
+			alpha = context.introAlpha,
+			color = "White",
+		})
+	else
+		if earlateEnabled then
+			earlate:draw(dt)
+		end
+
+		if hitDeltaBarEnabled then
+			hitDeltaBar:draw(dt)
+		end
+
+		if playerCardEnabled
+			and (not gameplay.multiplayer)
+			and (gameplay.practice_setup == nil)
+		then
+			playerCard:draw()
+		end
+
+		if gameplay.practice_setup ~= nil then
+			practiceInfo:draw()
 		end
 	end
-
-	if (showHitDeltaBar and hitDeltaBar) then
-		hitDeltaBar:trigger(btn, rating, delta);
-	end
-
-	if (showHitAnims) then hitAnimation:trigger(btn, rating); end
 end
 
--- Called by the game when a laser slam is hit
----@param len number # Length of the slam relative to the track, sign indicates slam direction
----@param startPos number # The x-coordinate of the slam start, relative to the center of the crit line
----@param endPos number # The x-coordinate of the slam end, relative to the center of the crit line
----@param index integer # Laser index, `0` = left, `1` = right
-laser_slam_hit = function(len, startPos, endPos, index)
-	if (showHitAnims) then laserAnimation:trigger(endPos, index + 1); end
-end
-
--- Called by the game after rendering the track and playable objects (buttons and lasers)  
--- Drawn before built-in particle effects
 ---@param dt deltaTime
-render_crit_base = function(dt)
-	window:set(true);
+function render_intro(dt)
+	if gameplay.demoMode then
+		context.introAlpha = 0
 
-	setupCritTransform();
+		return true
+	end
 
-	critBar:render(dt);
+	if not didPress("STA") then
+		context:handleIntro(dt)
+	end
 
-	gfx.ResetTransform();
+	return context.introTimer <= 1
 end
 
--- Called by the game after rendering the base of the crit line  
--- Drawn above built-in particle effects but before the main `render` function
 ---@param dt deltaTime
-render_crit_overlay = function(dt)
-	if (showHitAnims) then
-		hitAnimation:render(dt);
-
-		laserAnimation:render(dt);
+---@param clearState integer
+function render_outro(dt, clearState)
+	if clearState == 0 then
+		return true
 	end
 
-	setupCritTransform();
+	if clearState > 1 then
+		bpmData:save()
+	end
 
-	if (window.isPortrait) then console:render(dt); end
+	context.outroTimer = context.outroTimer + dt
 
-	laserCursors:render(dt);
+	if not gameplay.demoMode then
+		return context.outroTimer > 2, 1 - context.outroTimer
+	end
 
-	gfx.ResetTransform();
+	return context.outroTimer > 2, 1
 end
 
--- Called by the game every frame
----@param dt deltaTime
-render = function(dt)
-	gfx.ResetTransform();
-
-	window:set();
-
-	bpms:get(dt);
-
-	if (init) then initAll(); end
-
-	if (gameplay.progress == 0) then
-		state.isButton = false;
-		state.exScore = 0;
-		state.maxChain = 0;
-	end
-
-	if (state.chain > 0) then chain:render(dt); end
-
-	earlate:render(dt);
-
-	gaugeBar:render(dt);
-
-	laserAlerts:render(dt);
-
-	scoreInfo:render();
-
-	songInfo:render(dt);
-
-	if (showHitDeltaBar and (not gameplay.practice_setup)) then
-		hitDeltaBar:render(dt);
-	end
-
-	if ((not gameplay.multiplayer) and (gameplay.practice_setup == nil)) then
-		userInfo:render(dt);
-	end
-
-	if (gameplay.multiplayer and players) then scoreboard:render(players); end
-
-	if (gameplay.practice_setup ~= nil) then
-		practiceInfo:render();
-
-		state.showAdjustments = not gameplay.practice_setup;
-	end
-end
-
--- Called by the game every frame until it returns `true`
----@param dt deltaTime
----@return boolean
-render_intro = function(dt)
-	if (gameplay.demoMode) then
-		state.timers.intro = 0;
-
-		return true;
-	end
-
-	if (not pressed('STA')) then
-		state.timers.intro = to0(state.timers.intro, dt, 2);
-
-		local t = math.max(state.timers.intro - 1, 0);
-
-		state.intro.alpha = math.floor(255 * (1 - t ^ 1.5));
-		state.intro.offset = t ^ 4;
-	end
-
-	return state.timers.intro <= 1;
-end
-
--- Called by the game every frame until it returns `true`
----@param dt deltaTime
----@param clearState integer # `0` = Exit, `1` = Fail, `2` = Clear, `3` = Hard Clear, `4` = UC, `5` = PUC
----@return boolean, number # The second return value is playback speed during the outro
-render_outro = function(dt, clearState)
-	if (clearState == 0) then return true; end
-
-	if (clearState > 1) then bpms:save(); end
-
-	state.timers.outro = state.timers.outro + dt;
-
-	if (not gameplay.demoMode) then
-		outro:render(dt, clearState);
-
-		return (state.timers.outro > 2), (1 - state.timers.outro);
-	end
-	
-	return state.timers.outro > 2, 1;
-end
-
--- Called by the game when there is an upcoming laser
 ---@param isRight boolean
-laser_alert = function(isRight)
-	if (isRight and (state.timers.alerts[2] < -1)) then
-		state.timers.alerts[2] = 1;
-	elseif (state.timers.alerts[1] < -1) then
-		state.timers.alerts[1] = 1;
-	end
+function laser_alert(isRight)
+	context:updateLaserAlerts(isRight)
 end
 
--- Called by the game when there is a near hit
 ---@param isLate boolean
-near_hit = function(isLate)
-	state.isLate = isLate;
-	state.timers.earlate = 0.75;
+function near_hit(isLate)
+	context.earlateTimer = 0.75
 end
 
--- Called by the game to update the current chain
 ---@param newChain integer
-update_combo = function(newChain)
-	if ((newChain > state.chain) and (not state.isButton)) then
-		state.exScore = state.exScore + 2;
-	end
-
-	state.chain = newChain;
-
-	if (state.chain > state.maxChain) then state.maxChain = state.chain; end
-
-	state.timers.chain = 0.75;
-
-	state.isButton = false;
+function update_combo(newChain)
+	context:updateChain(newChain)
 end
 
--- Called by the game to update the current score
-update_score = function(newScore) state.score = newScore; end
-
-----------------------------------------
--- MULTIPLAYER
-----------------------------------------
-
--- Called by the game when a multiplayer game is started
-init_tcp = function()
-	Tcp.SetTopicHandler(
-		'game.scoreboard',
-		function(data)
-			players = {};
-
-			for i, player in ipairs(data.users) do players[i] = player; end
-		end
-	);
+---@param newScore integer
+function update_score(newScore)
+	context.score = newScore
 end
 
--- Called by the game to update multiplayer user information
----@param res table
-score_callback = function(res)
-	if (res.status ~= 200) then
-		error();
-	
-		return;
-	end
-
-	local data = JSON.decode(res.text);
-
-	players = {};
-
-	for i, player in ipairs(data.users) do players[i] = player; end
+---@param type string
+---@param missionThreshold any
+---@param mission string
+function practice_start(type, missionThreshold, mission)
+	practiceInfo:start(mission)
 end
 
-----------------------------------------
--- PRACTICE MODE
-----------------------------------------
-
--- Called by the game when practice is starting
----@param type string # Type of the requirement: `'None'`, `'Score'`, `'Grade'`, `'Miss'`, `'MissAndNear'`, `'Gauge'`
----@param threshold any # Current requirement
----@param desc string # Description of the current requirement
-practice_start = function(type, threshold, desc) practiceInfo:start(desc); end
-
--- Called by the game when a practice run is completed
----@param plays integer # Current count of total runs
----@param passes integer # Current count of successful runs
----@param passed boolean # Whether the run was successful
----@param scoreInfo table #
--- ```
--- {
--- 	goods: integer,
--- 	meanHitDelta: integer,
--- 	meanHitDeltaAbs: integer,
--- 	medianHitDelta: integer,
--- 	medianHitDeltaAbs: integer
--- 	misses: integer,
--- 	perfects: integer,
--- 	score: integer,
--- }
--- ```
-practice_end_run = function(plays, passes, passed, scoreInfo)
-	practiceInfo:set(passes, plays, scoreInfo);
+---@param playCount integer
+---@param passCount integer
+---@param didPass boolean
+---@param practiceScoreInfo PracticeScoreInfo
+function practice_end_run(playCount, passCount, didPass, practiceScoreInfo)
+	practiceInfo:set(playCount, passCount, practiceScoreInfo)
 end
 
--- Called by the game when practice setup is entered during or after a run
----@param plays integer # Current count of total runs
----@param passes integer # Current count of successful runs
-practice_end = function(plays, passes) practiceInfo:set(passes, plays); end
+---@param playCount integer
+---@param passCount integer
+function practice_end(playCount, passCount)
+	practiceInfo:set(passCount, playCount)
+end

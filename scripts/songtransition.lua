@@ -1,271 +1,206 @@
-local Cursor = require('components/common/cursor');
+---@diagnostic disable
 
-local Order = {
-	'title',
-	'artist',
-	'effector',
-	'illustrator',
-};
+-- Global song table available here
+-- song = {
+--   "illustrator": "いそにん",
+--   "level": 13,
+--   "bpm": "159-212",
+--   "title": "refluxio",
+--   "jacket": 77,
+--   "effector": "電撃ロブスター＆ロイヤルクラッカー",
+--   "artist": "Juggernaut.",
+--   "difficulty": 1
+-- }
 
-local window = Window:new();
-local background = Background:new(window);
+local DifficultyNames = require("common/constants/DifficultyNames")
+local Easing = require("common/Easing")
 
-local cursor = Cursor:new({ size = 26, stroke = 2.5 }, true);
+local window = Window.new()
+local background = Background.new()
+local isPortrait = false
 
-local floor = math.floor;
+local introDone = false
+local introEasing = Easing.new()
+local outroDone = false
+local outroEasing = Easing.new()
+local staticTimer = 0
 
-local alpha = 0;
+local jacket = nil
+local jacketFallback = gfx.CreateSkinImage("loading.png", 0)
+local jacketSize = 484
 
-local introDone = false;
-local outroDone = false;
+local title = makeLabel("JP", "", 42, "White")
+local artist = makeLabel("JP", "", 28)
+local jpText1 = makeLabel("JP", "", 25, "White")
+local jpText2 = makeLabel("JP", "", 25, "White")
+local mediumText = makeLabel("Medium", "", 32)
+local numberText = makeLabel("Number", "", 28, "White")
 
-local jacket = nil;
-local jacketFallback = gfx.CreateSkinImage('loading.png', 0);
-local jacketSize = nil;
-
-local labels = nil;
-
-local songAlpha = {
-	artist = 0,
-	effector = 0,
-	illustrator = 0,
-	title = 0,
-};
-local songInfo = nil;
-
-local timers = {
-	artist = 0,
-	effector = 0,
-	flicker = { i = 0, o = 0 },
-	illustrator = 0,
-	title = 0,
-	i = 0,
-	o = 0,
-};
-
--- Sets the jacket size
-local setSizes = function()
-	if (not jacket) then
-		jacket = ((song.jacket == 0) and jacketFallback) or song.jacket;
-	end
-
-	if (not jacketSize) then
-		if (window.isPortrait) then
-			jacketSize = window.w - (window.padding.x * 6);
-		else
-			jacketSize = window.h - (window.padding.y * 10);
-		end
-	end
-end
-
--- Creates the labels used for song information
-local setSongInfo = function()
-	if (not songInfo) then
-		labels = {
-			artist = makeLabel('med', 'ARTIST'),
-			effector = makeLabel('med', 'EFFECTOR'),
-			illustrator = makeLabel('med', 'ILLUSTRATOR'),
-			title = makeLabel('med', 'TITLE'),
-		};
-
-		songInfo = {
-			artist = makeLabel('jp', song.artist, 30),
-			difficulty = makeLabel('norm', 'MAXIMUM', 24),
-			effector = makeLabel('jp', song.effector, 30),
-			illustrator = makeLabel('jp', song.illustrator, 30),
-			level = makeLabel('num', ('%02d'):format(song.level), 24),
-			title = makeLabel('jp', song.title, 36),
-		};
-	end
-end
-
--- Handles the animation timers
 ---@param dt deltaTime
 ---@param isIntro boolean
-local handleTimers = function(dt, isIntro)
-	if (isIntro) then
-		timers.flicker.i = timers.flicker.i + dt;
-		timers.i = to1(timers.i, dt, (window.isPortrait and 0.15) or 0.2);
+local function handleTimers(dt, isIntro)
+	local duration = 0.3
 
-		alpha = floor(timers.flicker.i * 30) % 2;
-		alpha = ((alpha * 80) + 175) / 255;
+	if window.h > window.w then
+		duration = 0.22
+	end
 
-		if (timers.flicker.i >= 0.3) then alpha = 1; end
+	if isIntro then
+		introEasing:start(dt, 1, duration)
 
-		if (timers.i >= 1) then
-			timers.title = timers.title + dt;
-			songAlpha.title = flicker(timers.title);
-
-			if (timers.title > 0.22) then
-				timers.artist = timers.artist + dt;
-				songAlpha.artist = flicker(timers.artist);
-			end
-
-			if (timers.artist > 0.22) then
-				timers.effector = timers.effector + dt;
-				songAlpha.effector = flicker(timers.effector);
-			end
-
-			if (timers.effector > 0.22) then
-				timers.illustrator = timers.illustrator + dt;
-				songAlpha.illustrator = flicker(timers.illustrator);
-			end
+		if introEasing.value >= 1 then
+			staticTimer = staticTimer + dt
 		end
 
-		introDone = timers.illustrator >= 0.75;
+		introDone = staticTimer >= 1
 	else
-		timers.flicker.o = timers.flicker.o + dt;
-		timers.o = to1(timers.o, dt, (window.isPortrait and 0.2) or 0.28);
-
-		alpha = floor(timers.flicker.o * 36) % 2;
-		alpha = ((alpha * 80) + 175) / 255;
-		
-		outroDone = timers.o >= 1;
+		outroEasing:start(dt, 2, duration)
+		outroDone = outroEasing.value >= 1
 	end
 end
 
--- Renders the transition
 ---@param dt deltaTime
 ---@param isIntro boolean
-local renderTransition = function(dt, isIntro);
-	window:set();
+local function drawTransition(dt, isIntro)
+	gfx.Save()
+	window:update()
 
-	handleTimers(dt, isIntro);
+	local w, h = window.w, window.h
+	local isPortrait = window.isPortrait
+	local x = (isPortrait and (window.paddingX + 242)) or ((w * 0.5) - 294)
+	local y = (isPortrait and ((h * 0.5) - 190)) or (h * 0.5)
 
-	setSongInfo();
+	handleTimers(dt, isIntro)
 
-	setSizes();
-
-	local padding = (jacketSize / 2) / 3.5;
-	local x = window.w / 2;
-	local y = (window.h / 2) + (window.padding.y * 1.35) - jacketSize;
-	local w = window.w / 2.5;
-	local maxWidth = w - (w / 10);
-
-	if (window.isPortrait) then
-		maxWidth = jacketSize - (jacketSize / 10);
-		padding = (jacketSize / 2) / 4.5;
-		y = (window.h / 2) + (window.padding.y * 2) - jacketSize;
-		w = jacketSize;
-	end
-
-	gfx.Save();
-
-	gfx.Scissor(
-		window.w * timers.o,
-		0,
-		window.w * timers.i,
-		window.h
-	);
-
-	background:render({ w = window.w, h = window.h });
-
-	gfx.ResetScissor();
-
-	if (window.isPortrait) then
-		x = window.padding.x * 3;
-	else
-		x = (window.w / 2) - (jacketSize / 2);
-	end
-
-	cursor:draw({
-		x = x,
-		y = y,
-		w = jacketSize,
-		h = jacketSize,
-		alpha = 255 * alpha,
-		size = window.isPortrait and 30,
-	});
-
+	gfx.Scissor(w * outroEasing.value, 0, w * introEasing.value, h)
+	window:unscale()
+	background:draw()
+	window:scale()
 	drawRect({
 		x = x,
 		y = y,
 		w = jacketSize,
 		h = jacketSize,
-		alpha = alpha,
 		image = jacket,
-		stroke = {
-			alpha = 255 * alpha,
-			color = 'norm',
-			size = (window.isPortrait and 2.5) or 2,
-		},
-	});
+		isCentered = true,
+		stroke = { color = "Medium", size = 3 },
+	})
+	drawChartInfo(x, y, isPortrait)
+	gfx.ResetScissor()
+	gfx.Restore()
+end
 
-	x = (window.w / 2) - (w / 2)
-	y = y + jacketSize + window.padding.y;
-
-	if (isIntro) then
-		drawRect({
-			x = x + (w / 2) - ((w / 2) * timers.i),
-			y = y,
-			w = w * timers.i,
-			h = ((window.isPortrait) and (w / 2)) or (w / 2.225),
-			alpha = 180,
-			color = 'dark',
-			fast = true,
-		});
-
-		x = x + (w / 20);
-		y = y + (w / 2) / 14;
-
-		for _, name in ipairs(Order) do
-			labels[name]:draw({
-				x = x,
-				y = y,
-				alpha = 255 * timers.i,
-			});
-
-			songInfo[name]:draw({
-				x = x,
-				y = y + (labels[name].h * 1.35),
-				alpha = 255 * songAlpha[name],
-				color = 'white',
-				maxWidth = maxWidth,
-			});
-
-			y = y + padding;
-		end
+---@param x number
+---@param y number
+---@param isPortrait boolean
+function drawChartInfo(x, y, isPortrait)
+	if isPortrait then
+		x = window.paddingX - 3
+		y = 1082
+	else
+		x = x + 319
+		y = y - 166
 	end
 
-	gfx.Restore();
+	title:draw({
+		x = x,
+		y = y,
+		maxWidth = (isPortrait and 968) or 852,
+		text = song.title,
+		update = true,
+	})
+	artist:draw({
+		x = x + 1,
+		y = y + 57,
+		maxWidth = (isPortrait and 968) or 852,
+		text = song.artist,
+		update = true,
+	})
+	numberText:draw({
+		x = x,
+		y = y + 98,
+		text = song.bpm,
+		update = true,
+	})
+	mediumText:draw({
+		x = x + numberText.w + 12,
+		y = y + 94,
+		text = "BPM",
+		update = true,
+	})
+
+	y = y + 194
+
+	mediumText:draw({
+		x = x + 1,
+		y = y,
+		color = "White",
+		text = DifficultyNames:get("", song.difficulty),
+		update = true,
+	})
+	numberText:draw({
+		x = x + mediumText.w + 14,
+		y = y + 4,
+		text = ("%02d"):format(song.level),
+		update = true,
+	})
+	mediumText:draw({
+		x = x + 1,
+		y = y + 40,
+		color = "Standard",
+		text = "EFFECTED BY",
+		update = true,
+	})
+	jpText1:draw({
+		x = x + 1 + mediumText.w + 14,
+		y = y + 46,
+		maxWidth = (isPortrait and 768) or 670,
+		text = song.effector or "-",
+		update = true,
+	})
+	mediumText:draw({
+		x = x + 1,
+		y = y + 80,
+		color = "Standard",
+		text = "ILLUSTRATED BY",
+		update = true,
+	})
+	jpText2:draw({
+		x = x + 1 + mediumText.w + 14,
+		y = y + 86,
+		maxWidth = (isPortrait and 742) or 628,
+		text = song.illustrator or "-",
+		update = true,
+	})
 end
 
--- Called by the game for the intro transition
 ---@param dt deltaTime
-render = function(dt)
-	reloadColors();
-	
-	renderTransition(dt, true);
-	
-  return introDone;
+---@return boolean
+function render(dt)
+	if not jacket then
+		Colors:update()
+
+		jacket = ((song.jacket == 0) and jacketFallback) or song.jacket
+	end
+
+	game.SetSkinSetting("_isViewingTop50", 0)
+	drawTransition(dt, true)
+
+	return introDone
 end
 
--- Called by the game for the outro transition
 ---@param dt deltaTime
-render_out = function(dt)
-	renderTransition(dt, false);
+---@return boolean
+function render_out(dt)
+	drawTransition(dt, false)
 
-	return outroDone;
+	return outroDone
 end
 
--- Called by the game when the transition is started
-reset = function()
-	jacket = nil;
-	jacketSize = nil;
-	labels = nil;
-	songInfo = nil;
+function reset()
+	jacket = nil
+	staticTimer = 0
 
-	songAlpha.artist = 0;
-	songAlpha.effector = 0;
-	songAlpha.illustrator = 0;
-	songAlpha.title = 0;
-	
-	timers.artist = 0;
-	timers.effector = 0;
-	timers.flicker.i = 0;
-	timers.flicker.o = 0;
-	timers.illustrator = 0;
-	timers.title = 0;
-	timers.i = 0;
-	timers.o = 0;
+	introEasing:reset()
+	outroEasing:reset()
 end

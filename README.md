@@ -6,11 +6,8 @@
 
 ## [FAQ](https://github.com/Hoshikara/Nightfall/wiki/FAQ)
 
-## Disclaimer
-### When downloading a new skin version please copy over the `JSON` folder as it contains personalized data necessary for some features to work.
-
 ## Preview Video
-[![Preview Video](https://images2.imgbox.com/cd/f0/iTKcCn4h_o.png)](https://www.youtube.com/watch?v=HDeC9cX2pk8)
+[![Preview Video](https://images2.imgbox.com/25/32/2JulHqDy_o.png)](https://www.youtube.com/watch?v=KVazaZcb15A)
 
 ## Contact
-### Encountered a bug/error or have a suggestion? Check out the troubleshooting  page [**here**](https://github.com/Hoshikara/Nightfall/wiki/Troubleshooting) or contact me on Discord: Hoshikara#5973.
+### Encountered a bug/error or have a suggestion? Check out the troubleshooting  page [**here**](https://github.com/Hoshikara/Nightfall/wiki/Troubleshooting) or contact me on Discord: hoshikara
