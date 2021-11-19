@@ -10,10 +10,6 @@ local buttonHeight = 75;
 local buttonBorder = 2;
 local portrait
 
-game.LoadSkinSample("click-02")
-game.LoadSkinSample("click-01")
-game.LoadSkinSample("menu_click")
-
 local loading = true;
 local rooms = {};
 local lobby_users = {};
@@ -407,7 +403,6 @@ draw_diffs = function(diffs, x, y, w, h, selectedDiff)
 end
 
 set_diff = function(oldDiff, newDiff)
-    game.PlaySample("click-02")
     doffset = doffset + oldDiff - newDiff
 end;
 
@@ -479,8 +474,6 @@ change_selected_room = function(off)
     else
         ioffset = ioffset - new_index + selected_room_index;
     end
-
-    game.PlaySample("menu_click")
 
     selected_room_index = new_index;
 end
@@ -941,7 +934,6 @@ function repeat_sound(clip, times, interval)
     sound_time = 0;
     sounds_left = times - 1;
     sound_interval = interval;
-    game.PlaySample(clip)
 end
 
 function do_sounds(deltaTime)
@@ -952,7 +944,6 @@ function do_sounds(deltaTime)
     sound_time = sound_time + deltaTime;
     if sound_time > sound_interval then
         sound_time = sound_time - sound_interval;
-        game.PlaySample(sound_clip);
         sounds_left = sounds_left - 1
         if sounds_left <= 0 then
             sound_clip = nil
@@ -987,7 +978,6 @@ Tcp.SetTopicHandler("room.update", function(data)
     end
 
     if data.song ~=nil and last_song ~=data.song then
-        game.PlaySample("menu_click")
         last_song = data.song
     end
     host = data.host

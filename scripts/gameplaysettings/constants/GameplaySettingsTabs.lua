@@ -189,6 +189,7 @@ local GameplaySettingsTabs = {
   HitAnimations = makeTab("HIT ANIMATIONS", "HitAnimations", "showHitAnimations"),
   HitDeltaBar = makeTab("HIT DELTA BAR", "HitDeltaBar", "showHitDeltaBar"),
   LaneSpeed = makeTab("LANE-SPEED", "LaneSpeed", "showLaneSpeed"),
+  PlayerCard = makeTab("PLAYER CARD", "PlayerCard", "showPlayerCard"),
   ScoreDifference = makeTab("SCORE DIFFERENCE", "ScoreDifference", "showScoreDifference"),
 }
 

@@ -1255,7 +1255,6 @@ render = function(deltaTime, newScroll)
         
         if fxLeft then
             showChartInfo = (showChartInfo - 1) % (#charts + 1)
-            game.PlaySample("menu_click")
         end
     end
     
@@ -1264,7 +1263,6 @@ render = function(deltaTime, newScroll)
         
         if fxRight then
             showChartInfo = (showChartInfo + 1) % (#charts + 1)
-            game.PlaySample("menu_click")
         end
     end
 

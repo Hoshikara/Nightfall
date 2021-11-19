@@ -9,6 +9,7 @@ local HitDeltaBar = require("gameplay/HitDeltaBar")
 local LaneSpeed = require("gameplay/LaneSpeed")
 local LaserAnimations = require("gameplay/LaserAnimations")
 local LaserCursors = require("gameplay/LaserCursors")
+local PlayerCard = require("gameplay/PlayerCard")
 local ScoreDifference = require("gameplay/ScoreDifference")
 
 --#endregion
@@ -20,6 +21,7 @@ local TabNames = {
   "hitAnimations",
   "hitDeltaBar",
   "laneSpeed",
+  "playerCard",
   "scoreDifference",
 }
 
@@ -94,7 +96,7 @@ function GameplaySettings:setProps()
   if self.windowResized ~= self.window.resized then
     if self.window.isPortrait then
       self.offsetY = 0
-      self.y = 1408
+      self.y = 1350
       self.w = 1080
       self.h = 720
     else
@@ -105,7 +107,6 @@ function GameplaySettings:setProps()
     end
 
     self.x = self.window.w - self.w
-
     self.windowResized = self.window.resized
   end
 end
@@ -431,6 +432,7 @@ function GameplaySettings:makeTabs()
   local hitAnimations = GameplaySettingsTabs.HitAnimations
   local hitDeltaBar = GameplaySettingsTabs.HitDeltaBar
   local laneSpeed = GameplaySettingsTabs.LaneSpeed
+  local playerCard = GameplaySettingsTabs.PlayerCard
   local scoreDifference = GameplaySettingsTabs.ScoreDifference
   local window = self.window
 
@@ -460,6 +462,15 @@ function GameplaySettings:makeTabs()
   laneSpeed.draw = function()
     laneSpeed.component:draw()
   end
+
+  playerCard.component = PlayerCard.new(
+    { introAlpha = 1, introOffset = 0 },
+    window,
+    true
+  )
+  playerCard.draw = function()
+    playerCard.component:draw()
+  end
   
   scoreDifference.component = ScoreDifference.new({}, window, true)
   scoreDifference.draw = function(dt)
@@ -471,6 +482,7 @@ function GameplaySettings:makeTabs()
     hitAnimations = hitAnimations,
     hitDeltaBar = hitDeltaBar,
     laneSpeed = laneSpeed,
+    playerCard = playerCard,
     scoreDifference = scoreDifference,
   }
 end

@@ -72,8 +72,7 @@ local function initAll()
 	scoreInfo = ScoreInfo.new(context, window)
 	songInfo = SongInfo.new(context, window)
 
-	-- if gameplay.practice_setup ~= nil then
-	if true then
+	if gameplay.practice_setup ~= nil then
 		practiceInfo = PracticeInfo.new(window)
 	end
 
@@ -186,8 +185,7 @@ function render(dt)
 			playerCard:draw()
 		end
 
-		-- if gameplay.practice_setup ~= nil then
-		if true then
+		if gameplay.practice_setup ~= nil then
 			practiceInfo:draw()
 		end
 	end

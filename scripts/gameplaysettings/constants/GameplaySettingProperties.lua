@@ -210,6 +210,44 @@ local GameplaySettingProperties = {
       templateString = "%.0f%%",
     },
   },
+  PlayerCard = {
+    {
+      default = 1,
+      key = "showPlayerAvatar",
+      name = "AVATAR",
+    },
+    {
+      default = "NONE",
+      key = "danLevel",
+      name = "DAN LEVEL",
+      options = {
+        "NONE",
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "∞",
+      },
+    },
+    {
+      default = "NONE",
+      key = "wingsType",
+      name = "WINGS TYPE",
+      options = {
+        "NONE",
+        "SILVER",
+        "GOLD",
+        "HALO",
+      },
+    },
+  },
   ScoreDifference = {
     {
       default = 1.0,

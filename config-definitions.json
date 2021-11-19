@@ -420,6 +420,36 @@
 		"type": "bool",
 		"default": true
 	},
+	"danLevel": {
+		"type": "selection",
+		"default": "NONE",
+		"values": [
+			"NONE",
+			"01",
+			"02",
+			"03",
+			"04",
+			"05",
+			"06",
+			"07",
+			"08",
+			"09",
+			"10",
+			"11",
+			"∞"
+		]
+	},
+	"wingsType": {
+		"type": "selection",
+		"default": "NONE",
+		"values": [
+			"NONE",
+			"SILVER",
+			"GOLD",
+			"HALO"
+		]
+	},
+	"separator_erq": {},
 	"showScoreDifference": {
 		"label": "Show Score Difference",
 		"type": "bool",

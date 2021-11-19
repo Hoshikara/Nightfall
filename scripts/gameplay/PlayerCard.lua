@@ -15,6 +15,9 @@ function PlayerCard.new(ctx, window, isGameplaySettings)
     avatar = Image.new({ path = "gameplay/avatar.png" }),
     avatarEnabled = getSetting("showPlayerAvatar", true),
     ctx = ctx,
+    danLevel = getSetting("danLevel", "NONE"),
+    danLevelText = makeLabel("Number", "0", 19),
+    danText = makeLabel("SemiBold", "DAN"),
     isGameplaySettings = isGameplaySettings,
     player = makeLabel("Medium", getSetting("playerName", "GUEST"), 34),
     vf = makeLabel("SemiBold", "VF"),
@@ -29,6 +32,8 @@ function PlayerCard.new(ctx, window, isGameplaySettings)
     ),
     window = window,
     windowResized = nil,
+    wingsText = makeLabel("SemiBold", ""),
+    wingsType = getSetting("wingsType", "NONE"),
     x = 0,
     y = 0,
   }
@@ -38,12 +43,12 @@ end
 
 function PlayerCard:draw()
   if self.isGameplaySettings then
-    self.avatarEnabled = getSetting("showPlayerAvatar", true)
+    self:updateProps()
   end
 
   self:setProps()
 
-  local introAlpha = self.ctx.introAlpha or 1
+  local introAlpha = self.ctx.introAlpha
 
   gfx.Save()
   gfx.Translate(self.x - ((self.window.w / 4) * self.ctx.introOffset), self.y)
@@ -55,7 +60,7 @@ function PlayerCard:setProps()
   if self.windowResized ~= self.window.resized then
     if self.window.isPortrait then
       self.x = 32
-      self.y = (self.window.h / 2) - 141
+      self.y = (self.window.h / 2) - 165
     else
       self.x = self.window.paddingX / 2
       self.y = self.window.h / 2
@@ -83,6 +88,7 @@ function PlayerCard:drawCard(introAlpha)
   })
 
   self:drawVolforce(x, introAlpha)
+  self:drawDan(x, introAlpha)
 end
 
 ---@param x number
@@ -111,15 +117,6 @@ end
 ---@param x number
 ---@param introAlpha number
 function PlayerCard:drawVolforce(x, introAlpha)
-  self.volforceRank:draw({
-    x = x - 1,
-    y = 27,
-    alpha = introAlpha,
-    color = "Standard"
-  })
-
-  x = x + self.volforceRank.w + 6
-
   self.volforce:draw({
     x = x,
     y = 28,
@@ -132,6 +129,50 @@ function PlayerCard:drawVolforce(x, introAlpha)
     alpha = introAlpha,
     color = "Standard",
   })
+  self.volforceRank:draw({
+    x = x + self.volforce.w + 36,
+    y = 27,
+    alpha = introAlpha,
+    color = "Standard"
+  })
+end
+
+---@param x number
+---@param introAlpha number
+function PlayerCard:drawDan(x, introAlpha)
+  if self.danLevel ~= "NONE" then
+    self.danLevelText:draw({
+      x = x,
+      y = 53,
+      alpha = introAlpha,
+      color = "White",
+      text = self.danLevel,
+      update = true,
+    })
+    self.danText:draw({
+      x = x + self.danLevelText.w + 6,
+      y = 52,
+      alpha = introAlpha,
+      color = "White",
+    })
+
+    if self.wingsType ~= "NONE" then
+      self.wingsText:draw({
+        x = x + self.danLevelText.w + self.danText.w + 16,
+        y = 52,
+        alpha = introAlpha,
+        color = "Standard",
+        text = ("[ %s ]"):format(self.wingsType),
+        update = true,
+      })
+    end
+  end
+end
+
+function PlayerCard:updateProps()
+  self.avatarEnabled = getSetting("showPlayerAvatar", true)
+  self.danLevel = getSetting("danLevel", "NONE")
+  self.wingsType = getSetting("wingsType", "NONE")
 end
 
 return PlayerCard

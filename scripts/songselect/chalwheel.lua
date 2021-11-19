@@ -53,9 +53,7 @@ local badges = {
     gfx.CreateSkinImage("badges/perfect.png", 0)
 }
 
-gfx.LoadSkinFont("NotoSans-Regular.ttf");
-
-game.LoadSkinSample("click-02")
+gfx.LoadSkinFont("SmartFontUI.otf");
 
 local wheelSize = 12
 
@@ -604,7 +602,7 @@ draw_search = function(x,y,w,h)
   gfx.Fill()
   gfx.Stroke()
   gfx.BeginPath();
-  gfx.LoadSkinFont("NotoSans-Regular.ttf");
+  gfx.LoadSkinFont("SmartFontUI.otf");
   gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_MIDDLE);
   gfx.DrawLabel(searchText, xpos+10,y+(h/2), w-20)
 
@@ -616,7 +614,7 @@ render = function(deltaTime)
     resx,resy = game.GetResolution();
     adjustScreen(resx,resy);
     gfx.BeginPath();
-    gfx.LoadSkinFont("NotoSans-Regular.ttf");
+    gfx.LoadSkinFont("SmartFontUI.otf");
     gfx.FontSize(40);
     gfx.FillColor(255,255,255);
     if chalwheel.challenges == nil then
@@ -659,7 +657,7 @@ render = function(deltaTime)
 		gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
 		gfx.Text(chalwheel.searchStatus, 3, 3)
 	end
-    gfx.LoadSkinFont("NotoSans-Regular.ttf");
+  gfx.LoadSkinFont("SmartFontUI.otf");
     gfx.ResetTransform()
     gfx.ForceRender()
 end

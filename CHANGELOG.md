@@ -4,6 +4,11 @@
 - Modified layout logic to support more aspect ratios; elements will no longer be cut off but instead be scaled to fit within the horizontal/vertical edges
 - Standardized knob behavior to be left knob for horizontal navigation and right knob for vertical navigation
 - `Gameplay` changes:
+  - Added a player card component which displays:
+    - Avatar (image file is `/textures/gameplay/avatar.png`)
+    - Player name
+    - Volforce value and rank
+    - Dan level and wings type (user configurable)
   - Added new textures for buttons and fx buttons; including holds
   - Added new laser textures; they are now configurable via the USC laser color setting
   - Added a new track texture which matches the configured laser colors
@@ -13,6 +18,7 @@
   - Added a setting to change the position of the hit delta bar
   - Added settings to change the scale of all elements
   - Added settings to change the hue of hit/hold/laser animations
+  - Added various player card settings
 - `Player Info` changes:
   - Added a `PLAYED` category to the clear stats page
   - Changed chart page navigation from `FX-L` / `FX-R` to `KNOB-R`
