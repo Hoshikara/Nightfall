@@ -127,7 +127,7 @@ function SongPanel:setProps()
 
       self.itemCursor:setProps({
         x = self.x + 40,
-        y = self.y + self.scissorSize - 379,
+        y = self.y + self.scissorSize - 383,
         w = self.button.w,
         h = self.button.h,
         margin = self.buttonMargin,
