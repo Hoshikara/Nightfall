@@ -26,6 +26,7 @@
 - `Results` changes:
   - Added a skin setting to disable the color coding of rating texts
   - Added absolute mean delta and standard deviation information
+- Removed density graph and its corresponding skin setting
 
 ### 1.4.8 - October 9, 2021
 - Changed Blastive Level display to pull from appropriate sources; effectively fixes challenges with forced Blastive Rate displaying the incorrect level
