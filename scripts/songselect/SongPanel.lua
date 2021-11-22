@@ -8,26 +8,11 @@ local Image = require("common/Image")
 local ItemCursor = require("common/ItemCursor")
 local SearchBar = require("common/SearchBar")
 local Spinner = require("common/Spinner")
+local getDiffInOrder = require("songselect/helpers/getDiffInOrder")
 
 --#endregion
 
-local floor = math.floor 
 local min = math.min
-
----@param cachedDiffs CachedDiff[]
----@param itemIndex integer
----@return CachedDiff
-local function getDiffInOrder(cachedDiffs, itemIndex)
-  local index = nil
-
-  for i, cachedDiff in ipairs(cachedDiffs) do
-    if (cachedDiff.diffIndex + 1) == itemIndex then
-      index = i
-    end
-  end
-
-  return cachedDiffs[index]
-end
 
 ---@class SongPanel
 ---@field diffNames Label[]
@@ -145,7 +130,7 @@ function SongPanel:setProps()
       self.button.w = 128
       self.buttonMargin = 58.6
       self.jacketSize = 768
-      self.scissorSize = 546
+      self.scissorSize = 597
       self.score = DimmedNumber.new({ size = 155 })
 
       self.itemCursor:setProps({
@@ -246,7 +231,7 @@ function SongPanel:drawPanel(dt, song, currentSong, currentDiff)
   if isPortrait then
     y = y - 161 + diffOffset
   else
-    y = y + 35
+    y = y + 86
   end
 
   self:drawDiffs(dt, x, y, cachedSong.diffs, cachedDiff.diffIndex, diffOffset)
@@ -503,7 +488,7 @@ end
 ---@param isPortrait boolean
 function SongPanel:drawScoreInfo(x, y, cachedDiff, labels, isPortrait)
   local margin = self.buttonMargin
-  local offset = (self.button.w * 2) + margin
+  local offset = self.button.w + margin
 
   if isPortrait then
     y = y + 32
@@ -522,9 +507,8 @@ function SongPanel:drawScoreInfo(x, y, cachedDiff, labels, isPortrait)
       color = "Standard"
     })
     self.clearText:draw({
-      x = x + offset + 3,
+      x = x + offset,
       y = y + 20,
-      align = "RightTop",
       color = "White",
       text = cachedDiff.clear,
       update = true,
@@ -535,9 +519,8 @@ function SongPanel:drawScoreInfo(x, y, cachedDiff, labels, isPortrait)
       color = "Standard"
     })
     self.gradeText:draw({
-      x = x + offset + 3,
+      x = x + offset,
       y = y + 72,
-      align = "RightTop",
       color = "White",
       text = cachedDiff.grade,
       update = true,
@@ -545,38 +528,35 @@ function SongPanel:drawScoreInfo(x, y, cachedDiff, labels, isPortrait)
   else
     y = y + 52
 
-  labels.clear:draw({
-    x = x,
-    y = y,
-    color = "Standard"
-  })
-  self.clearText:draw({
-    x = x + offset + 3,
-    y = y,
-    align = "RightTop",
-    color = "White",
-    text = cachedDiff.clear,
-    update = true,
-  })
-
-  labels.grade:draw({
-    x = x,
-    y = y + 52,
-    color = "Standard"
-  })
-  self.gradeText:draw({
-    x = x + offset + 3,
-    y = y + 52,
-    align = "RightTop",
-    color = "White",
-    text = cachedDiff.grade,
-    update = true,
-  })
-  self.score:draw({
-    x = x - 8 + ((isPortrait and 101) or 0),
-    y = y + 69,
-    value = cachedDiff.score,
-  })
+    labels.clear:draw({
+      x = x,
+      y = y,
+      color = "Standard"
+    })
+    self.clearText:draw({
+      x = x + offset - 2,
+      y = y,
+      color = "White",
+      text = cachedDiff.clear,
+      update = true,
+    })
+    labels.grade:draw({
+      x = x + (offset * 2),
+      y = y,
+      color = "Standard"
+    })
+    self.gradeText:draw({
+      x = x + (offset * 3) - 2,
+      y = y,
+      color = "White",
+      text = cachedDiff.grade,
+      update = true,
+    })
+    self.score:draw({
+      x = x - 8,
+      y = y + 18,
+      value = cachedDiff.score,
+    })
   end
 end
 
