@@ -124,10 +124,11 @@ function SongPanel:setProps()
       self.buttonMargin = 125.3
       self.jacketSize = self.w
       self.scissorSize = self.h
+      self.score = DimmedNumber.new({ size = 105 })
 
       self.itemCursor:setProps({
         x = self.x + 40,
-        y = self.y + self.scissorSize - 383,
+        y = self.y + self.scissorSize - 244,
         w = self.button.w,
         h = self.button.h,
         margin = self.buttonMargin,
@@ -145,6 +146,7 @@ function SongPanel:setProps()
       self.buttonMargin = 58.6
       self.jacketSize = 768
       self.scissorSize = 546
+      self.score = DimmedNumber.new({ size = 155 })
 
       self.itemCursor:setProps({
         x = self.x + 40,
@@ -208,14 +210,14 @@ function SongPanel:drawPanel(dt, song, currentSong, currentDiff)
 
   if isPortrait then
     if not cachedDiff.clear then
-      diffOffset = 244
+      diffOffset = 105
     end
      
     drawRect({
       x = x,
-      y = y + scissorSize - 423 + diffOffset,
+      y = y + scissorSize - 284 + diffOffset,
       w = self.w,
-      h = self.h - scissorSize + 423 - diffOffset,
+      h = self.h - scissorSize + 284 - diffOffset,
       alpha = 0.85,
       color = "Black",
     })
@@ -242,7 +244,7 @@ function SongPanel:drawPanel(dt, song, currentSong, currentDiff)
   self:drawMetadata(dt, x, y, cachedSong)
 
   if isPortrait then
-    y = y - 300 + diffOffset
+    y = y - 161 + diffOffset
   else
     y = y + 35
   end
@@ -503,7 +505,45 @@ function SongPanel:drawScoreInfo(x, y, cachedDiff, labels, isPortrait)
   local margin = self.buttonMargin
   local offset = (self.button.w * 2) + margin
 
-  y = y + 52
+  if isPortrait then
+    y = y + 32
+
+    self.score:draw({
+      x = x - 5,
+      y = y,
+      value = cachedDiff.score,
+    })
+
+    x = x + 506
+
+    labels.clear:draw({
+      x = x,
+      y = y + 20,
+      color = "Standard"
+    })
+    self.clearText:draw({
+      x = x + offset + 3,
+      y = y + 20,
+      align = "RightTop",
+      color = "White",
+      text = cachedDiff.clear,
+      update = true,
+    })
+    labels.grade:draw({
+      x = x,
+      y = y + 72,
+      color = "Standard"
+    })
+    self.gradeText:draw({
+      x = x + offset + 3,
+      y = y + 72,
+      align = "RightTop",
+      color = "White",
+      text = cachedDiff.grade,
+      update = true,
+    })
+  else
+    y = y + 52
 
   labels.clear:draw({
     x = x,
@@ -516,19 +556,6 @@ function SongPanel:drawScoreInfo(x, y, cachedDiff, labels, isPortrait)
     align = "RightTop",
     color = "White",
     text = cachedDiff.clear,
-    update = true,
-  })
-  labels.date:draw({
-    x = x + offset + margin,
-    y = y,
-    color = "Standard"
-  })
-  self.dateText:draw({
-    x = x + (offset * 2) + margin + 2,
-    y = y + 3,
-    align = "RightTop",
-    color = "White",
-    text = cachedDiff.date,
     update = true,
   })
 
@@ -550,6 +577,7 @@ function SongPanel:drawScoreInfo(x, y, cachedDiff, labels, isPortrait)
     y = y + 69,
     value = cachedDiff.score,
   })
+  end
 end
 
 ---@param dt deltaTime

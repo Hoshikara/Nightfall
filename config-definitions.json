@@ -93,12 +93,6 @@
 			"ORIGINAL"
 		]
 	},
-	"separator_ejn": {},
-	"showNoteDensity": {
-		"label": "Show note density graph if available",
-		"type": "bool",
-		"default": true
-	},
 	"separator_c": {},
 	"////////// GAMEPLAY //////////": {
 		"type": "label"

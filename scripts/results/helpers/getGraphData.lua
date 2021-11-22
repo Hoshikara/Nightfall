@@ -1,10 +1,28 @@
 local getGaugeData = require("results/helpers/getGaugeData")
-local getHistogramData = require("results/helpers/getHistogramData")
 local getHitStats = require("results/helpers/getHitStats")
 local getHitWindows = require("results/helpers/getHitWindows")
 local getObjectRatings = require("results/helpers/getObjectRatings")
 local getRatings = require("results/helpers/getRatings")
 local getTimingData = require("results/helpers/getTimingData")
+
+---@param data result
+---@param hardFail boolean
+---@return number[]
+local function getHistogramData(data, hitStats, hardFail)
+  local histogram = {}
+
+  for _, stat in ipairs(hitStats) do
+    if (stat.rating == 1) or (stat.rating == 2) then
+      if not histogram[stat.delta] then
+        histogram[stat.delta] = 0
+      end
+
+      histogram[stat.delta] = histogram[stat.delta] + 1
+    end
+  end
+
+  return histogram
+end
 
 ---@param data result
 ---@return ResultsDuration, number

@@ -3,7 +3,6 @@
 local Clears = require("common/constants/Clears")
 local DifficultyNames = require("common/constants/DifficultyNames")
 local Grades = require("common/constants/Grades")
-local JsonTable = require("common/JsonTable")
 local getDateTemplate = require("common/helpers/getDateTemplate")
 local loadJackets = require("common/helpers/loadJackets")
 
@@ -13,7 +12,6 @@ local date = os.date
 
 ---@class SongCache
 ---@field cache table<integer, CachedSong> # Index with `Song.id`
----@field densityData table<string, integer[]> # Index with `Difficulty.hash` or `"{Song.title}_{Difficulty.level}"`
 local SongCache = {}
 SongCache.__index = SongCache
 
@@ -24,7 +22,6 @@ function SongCache.new(ctx)
   local self = {
     cache = {},
     ctx = ctx,
-    densityData = JsonTable.new("densities"),
   }
 
   return setmetatable(self, SongCache)
@@ -116,37 +113,6 @@ function SongCache:updateDiff(cachedDiff, diff, song, isInitialCache)
     cachedDiff.rank = self:getRank(diff.id)
     cachedDiff.score = topScore.score
   end
-
-  self:getDensityData(cachedDiff, diff, song, isInitialCache)
-end
-
----@param cachedDiff CachedDiff
----@param diff Difficulty
----@param song Song
----@param isInitialCache boolean
-function SongCache:getDensityData(cachedDiff, diff, song, isInitialCache)
-  local newDensityData = getSetting("_newDensityData", 0) == 1
-
-  if isInitialCache or newDensityData then
-    local key = diff.hash or ("%s_%d"):format(song.title, diff.level)
-    ---@type integer[]|nil
-    local rawData = self.densityData:get(newDensityData, key)
-
-    if rawData then
-      ---@type DensityData
-      local densityData = {
-        data = rawData,
-        normalized = false,
-        peak = -1,
-      }
-
-      cachedDiff.density = densityData
-
-      if newDensityData then
-        game.SetSkinSetting("_newDensityData", 0)
-      end
-    end
-  end
 end
 
 ---@param diffId integer
@@ -164,7 +130,6 @@ return SongCache
 ---@class CachedDiff
 ---@field clear string
 ---@field date string
----@field density? DensityData
 ---@field diffIndex integer
 ---@field diffName string
 ---@field effector string
@@ -180,8 +145,3 @@ return SongCache
 ---@field bpm number
 ---@field diffs CachedDiff[]
 ---@field title string
-
----@class DensityData
----@field data integer[]|nil,
----@field normalized boolean
----@field peak integer
