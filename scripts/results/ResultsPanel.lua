@@ -124,7 +124,7 @@ function ResultsPanel:drawJacket(dt, x, y)
     y = y + 1.5,
     w = self.w - 3,
     h = self.scissorSize - 3,
-    alpha = 0.8,
+    alpha = 0.85,
     color = "Black",
     stroke = { color = "Dark", size = 3 },
   })
