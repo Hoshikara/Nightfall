@@ -6,18 +6,50 @@
 ---
 ---@class IRScore
 ---
+---@field combo integer # The max chain value.
+---
 ---@field crit integer # The total critical count.
+---
+---@field early integer # The total early count.
 ---
 ---@field error integer # The total error count.
 ---
 ---@field gauge gaugeValue
 ---
+---The gauge type.
+---* `"NORMAL"`
+---* `"HARD"`
+---@field gaugeMod string
+---
+---If `true`, the score was just set by the player.  
+---Only available for `Results`.
+---@field justSet? boolean
+---
+---@field lamp badge
+---
+---@field late integer # The total late count.
+---
 ---@field near integer # The total near count.
 ---
+---The note modifier type.
+---* `"NORMAL"`
+---* `"MIRROR"`
+---* `"RANDOM"`
+---* `"MIR-RAN"`
+---@field noteMod string
+---
 ---@field options IROptions # The options used.
+---
+---@field rank integer # The ranking of the score.
 ---
 ---@field score score
 ---
 ---@field timestamp timestamp
 ---
+---@field username string # The username of the player.
+---
 ---@field windows HitWindow
+---
+---If `true`, the score belongs to the player.  
+---Only available for `Results`.
+---@field yours? boolean

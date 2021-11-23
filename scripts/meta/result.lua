@@ -42,7 +42,9 @@
 ---
 ---@field illustrator illustrator
 ---
----@field irDescription string # The internet ranking status.
+---@field irDescription string|nil # The internet ranking status. This value is `nil` if `irState` is `0` or `10`.
+---
+---@field irScores IRScore[]|nil # An array of `IRScore` sorted in descending order from the IR server. This value is `nil` if `irState` is not `20`.
 ---
 ---@field irState integer # The internet ranking response status, corresponding to `IRData.States.*`.
 ---

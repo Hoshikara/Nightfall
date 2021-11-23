@@ -1,0 +1,21 @@
+---@meta
+
+---
+---`IRResponse` object.  
+---[Official Documentation](https://uscir.readthedocs.io/en/latest/common/api.html#response-format)
+---
+---@class IRResponse
+---
+---@field description string # The description of the response.
+---
+---The status code of the response.
+---* `20` = Success
+---* `22` = Accepted
+---* `40` = Bad Request
+---* `41` = Unauthorized
+---* `42` = Chart Refused
+---* `43` = Forbidden
+---* `44` = Not Found
+---* `50` = Server Error
+---@field statusCode integer
+---
