@@ -48,7 +48,7 @@ function SongSelectContext:update()
 end
 
 function SongSelectContext:handlePlayerData()
-  if (not self.statsLoaded) and didPress("BTD") then-- and menusClosed() then
+  if (not self.statsLoaded) and didPress("BTD") and menusClosed() then
     self:makePlayerData(true)
   end
 
