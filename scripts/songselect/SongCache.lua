@@ -53,8 +53,19 @@ function SongCache:cacheSong(song)
     artist = song.artist:upper(),
     bpm = song.bpm,
     diffs = self:cacheDiffs(song),
+    illustrator = self:getIllustrator(song),
     title = song.title:upper(),
   }
+end
+
+---@param song Song
+---@return string?
+function SongCache:getIllustrator(song)
+  for _, diff in ipairs(song.difficulties) do
+    if (diff.illustrator ~= "") and (diff.illustrator ~= "-") then
+      return diff.illustrator
+    end
+  end
 end
 
 ---@param song Song
@@ -87,6 +98,7 @@ function SongCache:cacheDiffs(song)
       diffIndex = diff.difficulty,
       diffName = DifficultyNames:get(diff.jacketPath, diff.difficulty, true),
       effector = diff.effector:upper(),
+      illustrator = diff.illustrator:upper(),
       jacketPath = diff.jacketPath,
       level = ("%02d"):format(diff.level),
     }
@@ -144,4 +156,5 @@ return SongCache
 ---@field artist string
 ---@field bpm number
 ---@field diffs CachedDiff[]
+---@field illustrator? string
 ---@field title string

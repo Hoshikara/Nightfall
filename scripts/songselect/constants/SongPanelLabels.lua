@@ -3,7 +3,8 @@ local SongPanelLabels = {
   bpm = "BPM",
   clear = "CLEAR",
   date = "DATE",
-  effector = "EFFECTED BY",
+  effectedBy = "EFFECTED BY",
+  illustratedBy = "ILLUSTRATED BY",
   grade = "GRADE",
 }
 

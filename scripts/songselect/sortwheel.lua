@@ -48,7 +48,7 @@ end
 function render(dt, isSorting)
   local y = 0
 
-  game.SetSkinSetting("_isSorting", 1)
+  game.SetSkinSetting("_isSorting", (isSorting and 1) or 0)
   grid:setProps()
 
 	gfx.Save()

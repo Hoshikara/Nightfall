@@ -17,6 +17,7 @@ function SongSelectFooter.new(ctx, window)
     spinner = Spinner.new(),
     spinnerTimer = 0,
     vf = makeLabel("SemiBold", "VF"),
+    viewScoresControl = ControlLabel.new("BT-A", "VIEW SCORES"),
     volforce = makeLabel("Number", "0", 19),
     window = window,
   }
@@ -31,13 +32,15 @@ function SongSelectFooter:draw(dt)
 
   if self.window.isPortrait then
     self.openGameSettingsControl:draw(x, y)
+    self:drawLoadInfoControl(dt, (x * 2) + 280, y)
     
     y = 30
   else
     self.openGameSettingsControl:draw((x * 2) + 768, y)
+    self:drawLoadInfoControl(dt, (x * 2) + 1084, y)
   end
 
-  self:drawLoadInfoControl(dt, x, y)
+  self.viewScoresControl:draw(x, y)
   self:drawVolforce(x, y)
 end
 

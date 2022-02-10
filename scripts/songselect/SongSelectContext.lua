@@ -22,10 +22,12 @@ function SongSelectContext.new()
   local self = {
     currentDiff = 1,
     currentSong = 1,
+    didPressBTA = false,
     pageItemCount = 9,
     songCount = 0,
     statsLoaded = false,
     topPlays = {},
+    viewingScores = false,
     volforce = 0,
   }
 
@@ -44,12 +46,20 @@ function SongSelectContext:update()
 
   self.songCount = #songwheel.songs
 
-  self:handlePlayerData()
+  self:handleInput()
 end
 
-function SongSelectContext:handlePlayerData()
-  if (not self.statsLoaded) and didPress("BTD") and menusClosed() then
-    self:makePlayerData(true)
+function SongSelectContext:handleInput()
+  if menusClosed() then
+    if (not self.statsLoaded) and didPress("BTD") then
+      self:makePlayerData(true)
+    end
+
+    if (not self.didPressBTA) and didPress("BTA") then
+      self.viewingScores = not self.viewingScores
+    end
+
+    self.didPressBTA = didPress("BTA")
   end
 
   if getSetting("_reloadPlayerData", 0) == 1 then

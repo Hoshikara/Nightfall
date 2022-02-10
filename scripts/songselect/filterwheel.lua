@@ -34,7 +34,7 @@ local levelDropdownMenu = DropdownMenu.new(window, {
 function render(dt, isFiltering)
 	local y = 0
 
-	game.SetSkinSetting("_isFiltering", 1)
+	game.SetSkinSetting("_isFiltering", (isFiltering and 1) or 0)
 	getFolders()
 	grid:setProps()
 

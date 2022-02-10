@@ -1,5 +1,6 @@
 --#region Require
 
+local Easing = require("common/Easing")
 local Grid = require("common/Grid")
 local ItemCount = require("common/ItemCount")
 local ItemCursor = require("common/ItemCursor")
@@ -28,6 +29,7 @@ SongGrid.__index = SongGrid
 function SongGrid.new(ctx, songCache, window)
   ---@type SongGrid
   local self = {
+    alpha = Easing.new(1),
     ctx = ctx,
     gradeText = makeLabel("Medium", "", 40),
     grid = Grid.new(window),
@@ -57,19 +59,22 @@ function SongGrid:draw(dt)
   local songCount = self.ctx.songCount
 
   self:setProps()
+  self:handleAlpha(dt)
 
   gfx.Save()
 
   if songCount > 0 then
+    local alpha = self.alpha.value
     local isPortrait = self.window.isPortrait
     local params = {
+      alphaMod = alpha,
       currentItem = currentSong,
       isPortrait = isPortrait,
       totalItems = songCount,
     }
 
     self.list:update(dt, params)
-    self:drawGrid(currentSong)
+    self:drawGrid(alpha, currentSong)
     self.itemCursor:draw(dt, params)
 
     if songCount > self.ctx.pageItemCount then
@@ -114,8 +119,18 @@ function SongGrid:setProps()
   end
 end
 
+---@param dt deltaTime
+function SongGrid:handleAlpha(dt)
+  if self.ctx.viewingScores then
+    self.alpha:stop(dt, 3, 0.2)
+  else
+    self.alpha:start(dt, 3, 0.2)
+  end
+end
+
+---@param alpha number
 ---@param currentSong integer
-function SongGrid:drawGrid(currentSong)
+function SongGrid:drawGrid(alpha, currentSong)
   local currentDiff = self.ctx.currentDiff
   local jacketSize = self.grid.jacketSize
   local margin = self.grid.margin
@@ -130,6 +145,7 @@ function SongGrid:drawGrid(currentSong)
       self:drawJacket(
         x + ((jacketSize + margin) * column),
         y,
+        alpha,
         cachedDiff,
         i == currentSong,
         jacketSize
@@ -147,8 +163,8 @@ end
 ---@param cachedDiff CachedDiff|nil
 ---@param isCurrent boolean
 ---@param jacketSize number
-function SongGrid:drawJacket(x, y, cachedDiff, isCurrent, jacketSize)
-  local alpha = (isCurrent and 1) or 0.5
+function SongGrid:drawJacket(x, y, alpha, cachedDiff, isCurrent, jacketSize)
+  alpha = alpha * ((isCurrent and 1) or 0.5)
 
   if cachedDiff then
     drawRect({
@@ -156,6 +172,7 @@ function SongGrid:drawJacket(x, y, cachedDiff, isCurrent, jacketSize)
       y = y,
       w = jacketSize,
       h = jacketSize,
+      alpha = alpha,
       color = "Black",
     })
     drawRect({
@@ -165,7 +182,11 @@ function SongGrid:drawJacket(x, y, cachedDiff, isCurrent, jacketSize)
       h = jacketSize,
       alpha = alpha,
       image = cachedDiff.jacket,
-      stroke = { color = "Medium", size = 2 },
+      stroke = {
+        alpha = alpha,
+        color = "Medium",
+        size = 2
+      },
     })
 
     if cachedDiff.rank then

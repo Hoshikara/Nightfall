@@ -39,11 +39,12 @@ function SongPanel.new(ctx, songCache, window)
     ctx = ctx,
     currentDiff = 0,
     currentSong = 0,
-    dateText = makeLabel("Number", "", 29),
     diffText = makeLabel("Medium", ""),
     effectorText = makeLabel("JP", "", 25),
     effectorTimer = 0,
     gradeText = makeLabel("Medium", "", 32),
+    illustratorText = makeLabel("JP", "", "25"),
+    illustratorTimer = 0,
     itemCursor = ItemCursor.new({
       size = 10,
       stroke = 1.5,
@@ -266,8 +267,8 @@ function SongPanel:drawJacket(dt, x, y, cachedDiff, isPortrait)
     x = x,
     y = y,
     w = jacketSize,
-    h = (isPortrait and 448) or 520,
-    alpha = 0.8,
+    h = 640,
+    alpha = (isPortrait and 0.925) or 0.85,
   })
   gfx.ResetScissor()
 end
@@ -353,6 +354,41 @@ function SongPanel:drawMetadata(dt, x, y, cachedSong)
       text = cachedSong.artist,
       update = true,
     })
+  end
+
+  if cachedSong.illustrator then
+    maxWidth = maxWidth - 222
+
+    self.labels.illustratedBy:draw({
+      x = x,
+      y = y + 94,
+      color = "Standard",
+    })
+
+    if self.illustratorText.w > maxWidth then
+      self.illustratorTimer = self.illustratorTimer + dt
+
+      self.artistText:drawScrolling({
+        x = x + 223,
+        y = y + 100,
+        color = "White",
+        scale = scale,
+        text = cachedSong.illustrator,
+        timer = self.illustratorTimer,
+        update = true,
+        width = maxWidth,
+      })
+    else
+      self.illustratorText:draw({
+        x = x + 223,
+        y = y + 100,
+        color = "White",
+        text = cachedSong.illustrator,
+        update = true,
+      })
+    end
+
+    y = y + 40
   end
 
   self.bpmText:draw({
@@ -445,7 +481,7 @@ function SongPanel:drawDiffInfo(dt, x, y, cachedDiff, isPortrait)
   x = x + 39
   y = y + 617
 
-  labels.effector:draw({
+  labels.effectedBy:draw({
     x = x,
     y = y,
     color = "Standard",

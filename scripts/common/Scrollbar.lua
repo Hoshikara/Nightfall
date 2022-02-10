@@ -96,7 +96,7 @@ function Scrollbar:drawBar(alpha)
     y = y,
     w = w,
     h = self.h,
-    alpha = 0.4 * alpha,
+    alpha = 0.65 * alpha,
     color = "Black",
     isFast = true,
   })

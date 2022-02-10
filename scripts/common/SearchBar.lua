@@ -78,7 +78,7 @@ function SearchBar:drawBar(x, y)
     y = y + 0.5,
     w = self.w - 1,
     h = self.h - 1,
-    alpha = 0.5,
+    alpha = 0.65,
     color = "Black",
     stroke = {
       alpha = self.alpha.value,
