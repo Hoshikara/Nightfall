@@ -34,7 +34,7 @@ function SearchBar:draw(dt, params)
   local x = self.x
   local y = self.y
 
-  self:handleTimers(dt, isActive, shouldShow)
+  self:handleTimers(dt, shouldShow)
 
   gfx.Save()
   self.searchControl:draw(x, y + 6)
@@ -59,14 +59,13 @@ function SearchBar:setProps(params)
 end
 
 ---@param dt deltaTime
----@param isActive boolean
 ---@param shouldShow boolean
-function SearchBar:handleTimers(dt, isActive, shouldShow)
+function SearchBar:handleTimers(dt, shouldShow)
   if shouldShow then
-    self.alpha:start(dt, 3, 0.26)
+    self.alpha:start(dt, 3, 0.2)
     self.cursorTimer = self.cursorTimer + dt
   elseif (not shouldShow) and (self.alpha.value > 0) then
-    self.alpha:stop(dt, 3, 0.26)
+    self.alpha:stop(dt, 3, 0.2)
     self.cursorTimer = 0
   end
 end

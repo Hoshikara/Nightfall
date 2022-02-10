@@ -88,10 +88,10 @@ function SongPanel:draw(dt)
   local song = songwheel.songs[currentSong]
 
   self:setProps()
-  self:handleTimers(dt, currentSong, currentDiff)
+  self:handleTimers(currentSong, currentDiff)
 
   gfx.Save()
-  self:drawPanel(dt, song, currentSong, currentDiff)
+  self:drawPanel(dt, song, currentDiff)
   self:drawHeader(dt)
   gfx.Restore()
 end
@@ -155,10 +155,9 @@ function SongPanel:setProps()
   end
 end
 
----@param dt deltaTime
 ---@param currentSong integer
 ---@param currentDiff integer
-function SongPanel:handleTimers(dt, currentSong, currentDiff)
+function SongPanel:handleTimers(currentSong, currentDiff)
   if (self.currentSong ~= currentSong) or (self.currentDiff ~= currentDiff) then
     self.artistTimer = 0
     self.effectorTimer = 0
@@ -175,9 +174,8 @@ end
 
 ---@param dt deltaTime
 ---@param song Song|nil
----@param currentSong integer
 ---@param currentDiff integer
-function SongPanel:drawPanel(dt, song, currentSong, currentDiff)
+function SongPanel:drawPanel(dt, song, currentDiff)
   local cachedSong = self.songCache:get(song)
 
   if not cachedSong then

@@ -266,7 +266,7 @@ function DropdownMenu:drawItem(dt, x, y, w, alpha, highlight, isCurrent, item, l
       isFast = true,
     })
 
-    alpha = (alpha * 0.4) + (0.6 * highlight)
+    alpha = alpha * (0.4 + (0.6 * highlight))
 
     if mayOverflow and (item.w > (w - 32)) then
       if isCurrent then
