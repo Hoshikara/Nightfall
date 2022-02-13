@@ -59,7 +59,7 @@ function SongCache:cacheSong(song)
 end
 
 ---@param song Song
----@return string?
+---@return string|nil
 function SongCache:getIllustrator(song)
   for _, diff in ipairs(song.difficulties) do
     if (diff.illustrator ~= "") and (diff.illustrator ~= "-") then
@@ -82,7 +82,7 @@ function SongCache:updateDiffs(song, cachedSong)
     cachedSong.diffs = self:cacheDiffs(song)
   else
     for i, diff in ipairs(diffs) do
-      self:updateDiff(cachedDiffs[i], diff, song, false)
+      self:updateDiff(cachedDiffs[i], diff)
     end
   end
 end
@@ -103,7 +103,7 @@ function SongCache:cacheDiffs(song)
       level = ("%02d"):format(diff.level),
     }
 
-    self:updateDiff(cachedDiff, diff, song, true)
+    self:updateDiff(cachedDiff, diff)
 
     cachedDiffs[i] = cachedDiff
   end
@@ -113,9 +113,7 @@ end
 
 ---@param cachedDiff CachedDiff
 ---@param diff Difficulty
----@param song Song
----@param isInitialCache boolean
-function SongCache:updateDiff(cachedDiff, diff, song, isInitialCache)
+function SongCache:updateDiff(cachedDiff, diff)
   if diff.topBadge > 0 then
     local topScore = diff.scores[1]
     
@@ -124,7 +122,26 @@ function SongCache:updateDiff(cachedDiff, diff, song, isInitialCache)
     cachedDiff.grade = Grades:get(topScore.score)
     cachedDiff.rank = self:getRank(diff.id)
     cachedDiff.score = topScore.score
+    cachedDiff.scores = self:getScores(diff.scores)
   end
+end
+
+---@param scores Score[]
+---@return CachedScore[]
+function SongCache:getScores(scores)
+  local cachedScores = {}
+
+  for i, score in ipairs(scores) do
+    cachedScores[i] = {
+      clear = Clears:get(score.badge),
+      grade = Grades:get(score.score),
+      date = date(getDateTemplate(), score.timestamp),
+      score = score.score,
+      username = "HOSHIKARA"
+    }
+  end
+
+  return cachedScores
 end
 
 ---@param diffId integer
@@ -150,6 +167,12 @@ return SongCache
 ---@field jacketPath string
 ---@field level string
 ---@field rank? string
+---@field score integer
+---@field scores CachedScore[]
+
+---@class CachedScore
+---@field clear string
+---@field date string
 ---@field score integer
 
 ---@class CachedSong

@@ -81,7 +81,7 @@ function SongGrid:draw(dt)
       self.scrollbar:draw(dt, params)
     end
       
-    self:drawSongAmounts(currentSong, songCount)
+    self:drawSongAmounts(alpha, currentSong, songCount)
   else
     self.noSongsText:draw({
       x = self.window.w / 2,
@@ -255,12 +255,14 @@ function SongGrid:drawGrade(x, y, alpha, grade, jacketSize)
   })
 end
 
+---@param alpha number
 ---@param currentSong integer
 ---@param songCount integer
-function SongGrid:drawSongAmounts(currentSong, songCount)
+function SongGrid:drawSongAmounts(alpha, currentSong, songCount)
   self.songCount:draw({
     x = self.window.w - self.window.paddingX,
     y = self.window.footerY - 2,
+    alpha = alpha,
     currentItem = currentSong,
     totalItems = songCount,
   })

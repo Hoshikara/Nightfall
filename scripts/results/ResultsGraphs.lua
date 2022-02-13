@@ -276,7 +276,7 @@ function ResultsGraphs:drawGaugeBar(data, x, y)
     h = 15,
     color = "White",
   })
-  gauge.name:draw({
+  gauge.label:draw({
     x = x,
     y = y + 19,
     color = "White",

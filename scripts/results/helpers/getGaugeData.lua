@@ -54,7 +54,7 @@ local function getGaugeData(data, hardFail)
   gauge.currentValue = makeLabel("Number", "0", 18)
   gauge.endingValue = data.gauge
   gauge.labeledValue = getGaugeValue(data)
-  gauge.name = makeLabel("SemiBold", gauge.name, 20)
+  gauge.label = makeLabel("SemiBold", gauge.name, 20)
   gauge.samples = getGaugeSamples(data, hardFail)
   gauge.swapIndex = getSwapIndex(data, hardFail)
   gauge.unlabeledValue = getGaugeValue(data, true)
@@ -67,9 +67,9 @@ return getGaugeData
 ---@class ResultsGauge : GaugeProperties
 ---@field currentValue Label
 ---@field endingValue number
+---@field label Label
 ---@field labeledValue Label
 ---@field level Label
----@field name Label
 ---@field samples number[]
 ---@field swapIndex? integer
 ---@field unlabeledValue Label

@@ -21,7 +21,7 @@ function Label.new(params)
 	}
 	
 	if self.font ~= "Number" then
-		self.text = self.text:upper()
+		self.text = (self.text or ""):upper()
 	end
 
 	Fonts:load(self.font)

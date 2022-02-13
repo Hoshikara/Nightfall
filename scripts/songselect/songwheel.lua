@@ -22,9 +22,34 @@ local songSelectScoreList = SongSelectScoreList.new(context, songCache, window)
 
 --#endregion
 local debug = require("common/debug")
+local logger = require("common/logger")
+
+local cache = {}
+
+local function loggerFactory(hash)
+  return function(res)
+    logger:log(res.body, true)
+    cache[hash].body = res.body
+  end
+end
+
+local function getLeaderboard()
+  local song = songwheel.songs[context.currentSong]
+  local diff = song.difficulties[context.currentDiff]
+
+  if cache[diff.hash] then
+    logger:log(cache[diff.hash].body, true)
+  else
+    IR.Leaderboard(diff.hash, "best", 6, loggerFactory(diff.hash))
+  end
+
+  cache[diff.hash] = {}
+end
+
+
 ---@param dt deltaTime
 function render(dt)
-  context:update()
+  context:update(dt)
   gfx.Save()
   window:update()
   songPanel:draw(dt)
@@ -34,8 +59,11 @@ function render(dt)
   gfx.Restore()
   gfx.ForceRender()
   debug({
-    viewingScores = context.viewingScores
+    allowFetch = context.allowFetch
   });
+  -- if context.allowFetch and game.GetButton(game.BUTTON_BTB) then
+  --   getLeaderboard()
+  -- end
 end
 
 ---@return integer

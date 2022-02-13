@@ -368,7 +368,7 @@ function SongPanel:drawMetadata(dt, x, y, cachedSong)
     if self.illustratorText.w > maxWidth then
       self.illustratorTimer = self.illustratorTimer + dt
 
-      self.artistText:drawScrolling({
+      self.illustratorText:drawScrolling({
         x = x + 223,
         y = y + 100,
         color = "White",

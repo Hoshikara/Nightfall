@@ -71,7 +71,7 @@ function ResultsScoreList:draw(dt)
   local currentScore = self.currentScore
   local scoreCount = self.ctx.scoreCount
 
-  self:handleInput(dt, scoreCount)
+  self:handleInput(scoreCount)
 
   gfx.Save()
   self.list:update(dt, {
@@ -93,7 +93,7 @@ function ResultsScoreList:draw(dt)
   end
 
   if scoreCount > 1 then
-    self:drawFooter(currentScore, scoreCount)    
+    self:drawFooter(currentScore, scoreCount) 
   end
 
   gfx.Restore()
@@ -143,9 +143,8 @@ function ResultsScoreList:setProps()
   end
 end
 
----@param dt deltaTime
 ---@param scoreCount integer
-function ResultsScoreList:handleInput(dt, scoreCount)
+function ResultsScoreList:handleInput(scoreCount)
   if scoreCount > 1 then
     if (not self.didPressFXL) and didPress("FXL") then
       self.currentScore = advanceSelection(self.currentScore, scoreCount, -1)

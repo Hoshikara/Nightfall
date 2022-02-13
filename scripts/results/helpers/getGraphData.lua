@@ -5,10 +5,9 @@ local getObjectRatings = require("results/helpers/getObjectRatings")
 local getRatings = require("results/helpers/getRatings")
 local getTimingData = require("results/helpers/getTimingData")
 
----@param data result
----@param hardFail boolean
+---@param hitStats HitStat[]
 ---@return number[]
-local function getHistogramData(data, hitStats, hardFail)
+local function getHistogramData(hitStats)
   local histogram = {}
 
   for _, stat in ipairs(hitStats) do
@@ -54,7 +53,7 @@ local function getGraphData(data)
     duration = duration,
     exScore = exScore,
     gauge = getGaugeData(data, hardFail),
-    histogram = getHistogramData(data, hitStats, hardFail),
+    histogram = getHistogramData(hitStats),
     hitStats = getHitStats(hitStats, sCriticalWindow),
     hitWindows = getHitWindows(data, sCriticalWindow),
     hoverScale = hoverScale,
