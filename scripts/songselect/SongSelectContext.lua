@@ -20,9 +20,11 @@ SongSelectContext.__index = SongSelectContext
 function SongSelectContext.new()
   ---@type SongSelectContext
   local self = {
+    allowFetch = false,
     currentDiff = 1,
     currentSong = 1,
     didPressBTA = false,
+    fetchTimer = 0,
     pageItemCount = 9,
     songCount = 0,
     statsLoaded = false,
@@ -36,7 +38,8 @@ function SongSelectContext.new()
   return setmetatable(self, SongSelectContext)
 end
 
-function SongSelectContext:update()
+---@param dt deltaTime
+function SongSelectContext:update(dt)
   local song = songwheel.songs[self.currentSong]
   local diff = song and song.difficulties[self.currentDiff]
 
@@ -46,6 +49,7 @@ function SongSelectContext:update()
 
   self.songCount = #songwheel.songs
 
+  self:handleFetch(dt)
   self:handleInput()
 end
 
@@ -67,6 +71,12 @@ function SongSelectContext:handleInput()
 
     game.SetSkinSetting("_reloadPlayerData", 0)
   end
+end
+
+---@param dt deltaTime
+function SongSelectContext:handleFetch(dt)
+  self.allowFetch = self.fetchTimer >= 1
+  self.fetchTimer = self.fetchTimer + dt
 end
 
 function SongSelectContext:makePlayerData(showNotification)
@@ -99,6 +109,8 @@ end
 ---@param newSong integer
 function SongSelectContext:updateSong(newSong)
   if self.currentSong ~= newSong then
+    self.fetchTimer = 0
+
     game.PlaySample("click_song")
   end
 
@@ -108,6 +120,8 @@ end
 ---@param newDiff integer
 function SongSelectContext:updateDiff(newDiff)
   if self.currentDiff ~= newDiff then
+    self.fetchTimer = 0
+
     game.PlaySample("click_diff")
   end
 

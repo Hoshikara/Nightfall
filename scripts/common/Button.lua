@@ -19,16 +19,13 @@ function Button:draw(params)
     y = params.y,
     w = self.w,
     h = self.h,
-    alpha = 0.2 * (params.alpha or 1),
+    alpha = 0.4 * (params.alpha or 1),
     color = "Black",
-  })
-  drawRect({
-    x = params.x,
-    y = params.y,
-    w = 4,
-    h = self.h,
-    alpha = 1 * (params.accentAlpha or 1),
-    color = "Standard",
+    stroke = {
+      alpha = params.alpha,
+      color = (params.isActive and "Standard") or "Medium",
+      size = 1.5,
+    }
   })
 end
 
@@ -38,4 +35,4 @@ return Button
 ---@field x? number
 ---@field y? number
 ---@field alpha? number
----@field accentAlpha? number
+---@field isActive? boolean

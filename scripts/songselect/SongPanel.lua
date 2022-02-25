@@ -447,19 +447,19 @@ function SongPanel:drawDiff(x, y, diff, isCurrent)
     x = x,
     y = y,
     alpha = 3,
-    accentAlpha = (isCurrent and 1) or 0.4,
+    isActive = isCurrent,
   })
 
   if diff then
     self.diffText:draw({
-      x = x + 22,
+      x = x + 20,
       y = y + 7,
       color = "White",
       text = diff.diffName,
       update = true,
     })
     self.levelText:draw({
-      x = x + 109,
+      x = x + 107,
       y = y + 11,
       align = "RightTop",
       color = "White",

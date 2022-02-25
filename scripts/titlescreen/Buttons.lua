@@ -179,11 +179,11 @@ function Buttons:drawButton(alpha, button, index, isActionable, isActive)
   self.button:draw({
     x = x,
     y = y,
-    accentAlpha = ((isModifyingCtx and 1) or 0.4) * alpha,
     alpha = alpha,
+    isActive = isModifyingCtx,
   })
   button.text:draw({
-    x = x + 20,
+    x = x + 15,
     y = y + 7,
     alpha = alpha,
     color = "White",

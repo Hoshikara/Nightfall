@@ -98,6 +98,7 @@ function SongCache:cacheDiffs(song)
       diffIndex = diff.difficulty,
       diffName = DifficultyNames:get(diff.jacketPath, diff.difficulty, true),
       effector = diff.effector:upper(),
+      hash = diff.hash,
       illustrator = diff.illustrator:upper(),
       jacketPath = diff.jacketPath,
       level = ("%02d"):format(diff.level),
@@ -163,6 +164,7 @@ return SongCache
 ---@field diffName string
 ---@field effector string
 ---@field grade string
+---@field hash string
 ---@field jacket any
 ---@field jacketPath string
 ---@field level string
@@ -173,6 +175,7 @@ return SongCache
 ---@class CachedScore
 ---@field clear string
 ---@field date string
+---@field grade string
 ---@field score integer
 
 ---@class CachedSong

@@ -1,8 +1,10 @@
-### 1.5.0 - Upcoming, 2021 (?)
+### 1.5.0 - Upcoming, 2022 (?)
 - Moderate design update which includes changes of varying degree to animations, fonts, UI elements, screen layouts, and more
 - Added a skin setting to disable tinting of the common background image
 - Modified layout logic to support more aspect ratios; elements will no longer be cut off but instead be scaled to fit within the horizontal/vertical edges
 - Standardized knob behavior to be left knob for horizontal navigation and right knob for vertical navigation
+- `Song Select` changes:
+  - Added a slide-out window to display local and online scores (if applicable), revealed with `BT-A`
 - `Gameplay` changes:
   - Added a player card component which displays:
     - Avatar (image file is `/textures/gameplay/avatar.png`)

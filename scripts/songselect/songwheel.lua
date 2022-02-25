@@ -1,5 +1,6 @@
 --#region Require
 
+local LeaderboardCache = require("songselect/LeaderboardCache")
 local SongCache = require("songselect/SongCache")
 local SongGrid = require("songselect/SongGrid")
 local SongPanel = require("songselect/SongPanel")
@@ -14,38 +15,16 @@ local window = Window.new()
 --#region Components
 
 local context = SongSelectContext.new()
+local leaderboardCache = LeaderboardCache.new(context)
 local songCache = SongCache.new(context)
 local songGrid = SongGrid.new(context, songCache, window)
 local songPanel = SongPanel.new(context, songCache, window)
 local songSelectFooter = SongSelectFooter.new(context, window)
-local songSelectScoreList = SongSelectScoreList.new(context, songCache, window)
+local songSelectScoreList = SongSelectScoreList.new(context, leaderboardCache, songCache, window)
 
 --#endregion
 local debug = require("common/debug")
 local logger = require("common/logger")
-
-local cache = {}
-
-local function loggerFactory(hash)
-  return function(res)
-    logger:log(res.body, true)
-    cache[hash].body = res.body
-  end
-end
-
-local function getLeaderboard()
-  local song = songwheel.songs[context.currentSong]
-  local diff = song.difficulties[context.currentDiff]
-
-  if cache[diff.hash] then
-    logger:log(cache[diff.hash].body, true)
-  else
-    IR.Leaderboard(diff.hash, "best", 6, loggerFactory(diff.hash))
-  end
-
-  cache[diff.hash] = {}
-end
-
 
 ---@param dt deltaTime
 function render(dt)
@@ -59,7 +38,9 @@ function render(dt)
   gfx.Restore()
   gfx.ForceRender()
   debug({
-    allowFetch = context.allowFetch
+    allowFetch = context.allowFetch,
+    isOnline = IRData.Active,
+    called = leaderboardCache.called,
   });
   -- if context.allowFetch and game.GetButton(game.BUTTON_BTB) then
   --   getLeaderboard()

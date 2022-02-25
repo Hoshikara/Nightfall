@@ -16,9 +16,9 @@ local function makeTitlescreenButtons(ctx)
       },
       {
         event = function()
-          ctx.currentBtn = 1
-          ctx.currentPage = "MainMenu"
-          ctx.currentView = "Controls"
+          -- ctx.currentBtn = 1
+          -- ctx.currentPage = "MainMenu"
+          -- ctx.currentView = "Controls"
         end,
         text = makeLabel("Medium", "CONTROLS"),
       },
@@ -46,7 +46,7 @@ local function makeTitlescreenButtons(ctx)
         text = makeLabel("Medium", "MULTIPLAYER"),
       },
       {
-        event = Menu.Challenges,
+        event = function() end, --Menu.Challenges,
         text = makeLabel("Medium", "CHALLENGES"),
       },
       {
@@ -59,9 +59,9 @@ local function makeTitlescreenButtons(ctx)
       },
       {
         event = function()
-          ctx.currentBtn = 1
-          ctx.currentPage = "PlayOptions"
-          ctx.currentView = "PlayerInfo"
+          -- ctx.currentBtn = 1
+          -- ctx.currentPage = "PlayOptions"
+          -- ctx.currentView = "PlayerInfo"
         end,
         text = makeLabel("Medium", "PLAYER INFO"),
       },

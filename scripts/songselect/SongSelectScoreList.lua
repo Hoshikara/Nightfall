@@ -23,15 +23,19 @@ local SongSelectScoreList = {}
 SongSelectScoreList.__index = SongSelectScoreList
 
 ---@param ctx SongSelectContext
+---@param leaderboardCache LeaderboardCache
 ---@param songCache SongCache
 ---@param window Window
 ---@return SongSelectScoreList
-function SongSelectScoreList.new(ctx, songCache, window)
+function SongSelectScoreList.new(ctx, leaderboardCache, songCache, window)
   ---@type SongSelectScoreList
   local self = {
+    chartUntracked = makeLabel("Medium", "CHART IS NOT TRACKED", 40),
     ctx = ctx,
+    failedToFetch = makeLabel("Medium", "FAILED TO FETCH SCORES", 40),
     grid = Grid.new(window),
     labels = {},
+    leaderboardCache = leaderboardCache,
     localScores = makeLabel("Medium", "LOCAL SCORES", 40),
     localSpacing = 0,
     onlineScores = makeLabel("Medium", "ONLINE SCORES", 40),
@@ -39,6 +43,7 @@ function SongSelectScoreList.new(ctx, songCache, window)
     shiftAmount = 0,
     shiftEasing = Easing.new(1),
     songCache = songCache,
+    spinner = Spinner.new({ radius = 36, thickness = 4 }),
     text = {
       clear = makeLabel("Medium", "", 32),
       date = makeLabel("Number", "", 30),
@@ -68,7 +73,7 @@ function SongSelectScoreList:draw(dt)
   gfx.Save()
   gfx.Translate(self.x + (self.shiftAmount * self.shiftEasing.value), self.y)
   self:drawWindow()
-  self:drawLists()
+  self:drawLists(dt)
   gfx.Restore()
 end
 
@@ -92,7 +97,7 @@ function SongSelectScoreList:setProps()
     self.h = self.grid.h
     self.localSpacing = (self.w - 104 - localWidth) / 2
     self.onlineSpacing = (self.w - 104 - onlineWidth) / 2
-    self.shiftAmount = self.w + self.window.shiftX + self.window.paddingX
+    self.shiftAmount = self.w + self.window.shiftX + (self.window.paddingX * 2)
     self.windowResized = self.window.resized
   end
 end
@@ -117,7 +122,8 @@ function SongSelectScoreList:drawWindow()
   })
 end
 
-function SongSelectScoreList:drawLists()
+---@param dt delta
+function SongSelectScoreList:drawLists(dt)
   local cachedSong = self.songCache:get(songwheel.songs[self.ctx.currentSong])
 
   if not cachedSong then
@@ -127,29 +133,30 @@ function SongSelectScoreList:drawLists()
   ---@type CachedDiff
   local cachedDiff = cachedSong.diffs[self.ctx.currentDiff] or cachedSong.diffs[1]
   local labels = self.labels
-  local showOnlineScores = true--IRData.Active
+  local isOnline = IRData.Active
 
   if cachedDiff then
-    self:drawScores(labels, cachedDiff.scores, true)
-    self:drawScores(labels, cachedDiff.scores, false) 
+    self:drawScoreList(dt, labels, cachedDiff, true, isOnline)
+
+    if isOnline then
+      local cachedLeaderboard = self.leaderboardCache:get(cachedDiff.hash)
+
+      self:drawScoreList(dt, labels, cachedLeaderboard, false, true)
+    end
   end
 end
 
-function SongSelectScoreList:drawScores(labels, scores, isLocal, isOnline)
+---@param dt deltaTime
+---@param labels table<string, Label>
+---@param diffOrLeaderboard CachedDiff|CachedLeaderboard
+---@param isLocal boolean
+---@param isOnline boolean
+function SongSelectScoreList:drawScoreList(dt, labels, diffOrLeaderboard, isLocal, isOnline)
   local x = 37
   local y = 26
-  local w = self.w - 80
-  local isPortrait = self.window.isPortrait
   local spacing = (self.w - 104) / 4
-  local text = self.text
 
-  if isLocal then
-    self.localScores:draw({
-      x = x,
-      y = y,
-      color = "White",
-    })
-  else
+  if isOnline and (not isLocal) then
     y = 460
     
     self.onlineScores:draw({
@@ -157,15 +164,37 @@ function SongSelectScoreList:drawScores(labels, scores, isLocal, isOnline)
       y = y,
       color = "White",
     })
+  else
+    self.localScores:draw({
+      x = x,
+      y = y,
+      color = "White",
+    })
   end
 
-  if not scores then
-    return
+  if diffOrLeaderboard then
+    local scores = diffOrLeaderboard.scores
+
+    if isLocal and scores then
+      self:drawLabels(x + 14, y + 65, labels, isLocal, spacing)  
+      self:drawScores(x + 14, y + 100, scores, isLocal, isOnline, spacing)
+    else
+      if (not diffOrLeaderboard.isGood) then
+        self:handleBadReason(dt, diffOrLeaderboard.reason)
+      elseif scores then
+        self:drawLabels(x + 14, y + 65, labels, isLocal, spacing)  
+        self:drawScores(x + 14, y + 100, scores, isLocal, isOnline, spacing)  
+      end
+    end
   end
+end
 
-  x = x + 14
-  y = y + 65
-
+---@param x number
+---@param y number
+---@param labels table<string, Label>
+---@param isLocal boolean
+---@param spacing number
+function SongSelectScoreList:drawLabels(x, y, labels, isLocal, spacing)
   for i, name in ipairs((isLocal and LocalOrder) or OnlineOrder) do
     local tempX = x + ((i - 1) * spacing)
 
@@ -175,10 +204,18 @@ function SongSelectScoreList:drawScores(labels, scores, isLocal, isOnline)
       color = "Standard",
     })
   end
+end
 
-  y = y + 35
-
-  isOnline = true
+---@param x number
+---@param y number
+---@param scores CachedScore[]|CachedLeaderboardScore[]
+---@param isLocal boolean
+---@param isOnline boolean
+---@param spacing number
+function SongSelectScoreList:drawScores(x, y, scores, isLocal, isOnline, spacing)
+  local w = self.w - 80
+  local isPortrait = self.window.isPortrait
+  local text = self.text
 
   for i, score in ipairs(scores) do
     local tempY = y + ((i - 1) * 45)
@@ -194,55 +231,76 @@ function SongSelectScoreList:drawScores(labels, scores, isLocal, isOnline)
       })
     end
 
-    -- text.score:draw({
-    --   x = x - 1,
-    --   y = tempY,
-    --   value = score.score,
-    -- })
-    -- text.grade:draw({
-    --   x = x + spacing - 1,
-    --   y = tempY - 2,
-    --   color = "White",
-    --   text = score.grade,
-    --   update = true,
-    -- })
-    -- text.clear:draw({
-    --   x = x + (spacing * 2) - 1,
-    --   y = tempY - 2,
-    --   color = "White",
-    --   text = score.clear,
-    --   update = true,
-    -- })
+    text.score:draw({
+      x = x - 1,
+      y = tempY,
+      value = score.score,
+    })
+    text.grade:draw({
+      x = x + spacing - 1,
+      y = tempY - 2,
+      color = "White",
+      text = score.grade,
+      update = true,
+    })
+    text.clear:draw({
+      x = x + (spacing * 2) - 1,
+      y = tempY - 2,
+      color = "White",
+      text = score.clear,
+      update = true,
+    })
     
-    -- if isLocal then
-    --   text.date:draw({
-    --     x = x + (spacing * 3) - 1,
-    --     y = tempY,
-    --     color = "White",
-    --     text = score.date,
-    --     update = true,
-    --   })
-    -- else
-    --   text.username:draw({
-    --     x = x + (spacing * 3) - 1,
-    --     y = tempY + 4,
-    --     color = "White",
-    --     text = score.username,
-    --     update = true,
-    --   })
-    -- end
+    if isLocal then
+      text.date:draw({
+        x = x + (spacing * 3) - 1,
+        y = tempY,
+        color = "White",
+        text = score.date,
+        update = true,
+      })
+    else
+      text.username:draw({
+        x = x + (spacing * 3) - 1,
+        y = tempY + 4,
+        color = "White",
+        maxWidth = 202,
+        text = score.username,
+        update = true,
+      })
+    end
 
-    if not isLocal then
-      if i == 7 then
+    if isLocal and (not isOnline) then
+      if i == ((isPortrait and 18) or 16) then
         break
       end
-    else
-      if i == ((isPortrait and 18) or 16) then
+    elseif isLocal or isOnline then
+      if i == 7 then
         break
       end
     end
   end
+end
 
+---@param reason string
+function SongSelectScoreList:handleBadReason(dt, reason)
+  if reason == "LOADING" then
+    self.spinner:draw(dt, (self.w * 0.5) - 16, (self.h * 0.75) + 16)
+  elseif reason == "UNTRACKED" then
+    self.chartUntracked:draw({
+      x = self.w * 0.5,
+      y = self.h * 0.75,
+      align = "CenterMiddle",
+      color = "Negative",
+    })
+  elseif reason == "FAILED" then
+    self.failedToFetch:draw({
+      x = self.w * 0.5,
+      y = self.h * 0.75,
+      align = "CenterMiddle",
+      color = "Negative",
+    })
+  end
 end
 
 return SongSelectScoreList

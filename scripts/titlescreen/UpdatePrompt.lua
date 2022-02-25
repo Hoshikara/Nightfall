@@ -151,7 +151,7 @@ function UpdatePrompt:drawButton(x, y, button, index, alpha, isActive)
   self.button:draw({
     x = x,
     y = y,
-    accentAlpha = ((isModifyingCtx and 1) or 0.4) * alpha,
+    isActive = isModifyingCtx,
   })
   button.text:draw({
     x = x + 20,

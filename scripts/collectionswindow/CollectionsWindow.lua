@@ -166,10 +166,10 @@ function CollectionsWindow:drawOption(x, y, text, isCurrent)
   self.button:draw({
     x = x,
     y = y,
-    accentAlpha = (isCurrent and 1) or 0.4
+    isActive = isCurrent,
   })
   text:draw({
-    x = x + 20,
+    x = x + 15,
     y = y + 7,
     color = "White",
   })
