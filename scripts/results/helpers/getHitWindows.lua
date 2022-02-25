@@ -10,11 +10,11 @@ local function makeHitWindow(value)
   }
 end
 
----@param data result
+---@param data result|IRScore
 ---@param sCriticalWindow integer
 ---@return ResultsHitWindows
 local function getHitWindows(data, sCriticalWindow)
-  local hitWindows = data.hitWindow or {}
+  local hitWindows = data.hitWindow or data.windows or {}
 
   return {
     SCritical = makeHitWindow(sCriticalWindow),

@@ -23,8 +23,6 @@ local songSelectFooter = SongSelectFooter.new(context, window)
 local songSelectScoreList = SongSelectScoreList.new(context, leaderboardCache, songCache, window)
 
 --#endregion
-local debug = require("common/debug")
-local logger = require("common/logger")
 
 ---@param dt deltaTime
 function render(dt)
@@ -37,14 +35,6 @@ function render(dt)
   songSelectScoreList:draw(dt)
   gfx.Restore()
   gfx.ForceRender()
-  debug({
-    allowFetch = context.allowFetch,
-    isOnline = IRData.Active,
-    called = leaderboardCache.called,
-  });
-  -- if context.allowFetch and game.GetButton(game.BUTTON_BTB) then
-  --   getLeaderboard()
-  -- end
 end
 
 ---@return integer

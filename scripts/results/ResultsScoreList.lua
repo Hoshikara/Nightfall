@@ -4,6 +4,7 @@ local ItemCount = require("common/ItemCount")
 local ItemCursor = require("common/ItemCursor")
 local List = require("common/List")
 local Scrollbar = require("common/Scrollbar")
+local Spinner = require("common/Spinner")
 local advanceSelection = require("common/helpers/advanceSelection")
 local didPress = require("common/helpers/didPress")
 
@@ -31,8 +32,10 @@ function ResultsScoreList.new(ctx, window)
   local self = {
     ctx = ctx,
     currentScore = 1,
+    didPressBTD = false,
     didPressFXL = false,
     didPressFXR = false,
+    errorMessage = makeLabel("SemiBold", ""),
     itemCursor = ItemCursor.new({
       size = 18,
       stroke = 2,
@@ -45,6 +48,7 @@ function ResultsScoreList.new(ctx, window)
     scoreCount = ItemCount.new(),
     scrollbar = Scrollbar.new(),
     selectScore = ControlLabel.new("FX-L / FX-R", "SELECT SCORE"),
+    spinner = Spinner.new({ radius = 48, thickness = 6 }),
     window = window,
     windowResized = nil,
     x = 0,
@@ -69,31 +73,47 @@ function ResultsScoreList:draw(dt)
   self:setProps()
 
   local currentScore = self.currentScore
-  local scoreCount = self.ctx.scoreCount
+  local viewingOnlineScores = self.ctx.viewingOnlineScores
+  local scoreCount = (viewingOnlineScores and self.ctx.onlineScoreCount)
+    or self.ctx.scoreCount
 
   self:handleInput(scoreCount)
 
   gfx.Save()
-  self.list:update(dt, {
-    currentItem = currentScore,
-    isPortrait = self.window.isPortrait,
-  })
-  self:drawList(currentScore)
-  self.itemCursor:draw(dt, {
-    h = self.h.closed,
-    currentItem = currentScore,
-    totalItems = self.pageItemCount,
-  })
 
-  if scoreCount > self.pageItemCount then
-    self.scrollbar:draw(dt, {
-      currentItem = currentScore,
-      totalItems = scoreCount
+  if viewingOnlineScores and (self.ctx.irState == "LOADING") then
+    self.spinner:draw(dt, self.x + (self.w * 0.5) + 14, self.y + (self.h.total * 0.5) + 16)
+  elseif viewingOnlineScores and (self.ctx.irState == "ERROR") then
+    self.errorMessage:draw({
+      x = self.x + (self.w * 0.5),
+      y = self.y + (self.h.total * 0.5),
+      align = "CenterMiddle",
+      color = "Negative",
+      text = ("ERROR: %s (%d)"):format(result.irDescription, result.irState),
+      update = true,
     })
+  elseif scoreCount > 0 then
+    self.list:update(dt, {
+      currentItem = currentScore,
+      isPortrait = self.window.isPortrait,
+    })
+    self:drawList(currentScore)
+    self.itemCursor:draw(dt, {
+      h = self.h.closed,
+      currentItem = currentScore,
+      totalItems = self.pageItemCount,
+    })
+  
+    if scoreCount > self.pageItemCount then
+      self.scrollbar:draw(dt, {
+        currentItem = currentScore,
+        totalItems = scoreCount
+      })
+    end
   end
 
   if scoreCount > 1 then
-    self:drawFooter(currentScore, scoreCount) 
+    self:drawFooter(currentScore, scoreCount)
   end
 
   gfx.Restore()
@@ -146,6 +166,10 @@ end
 ---@param scoreCount integer
 function ResultsScoreList:handleInput(scoreCount)
   if scoreCount > 1 then
+    if (not self.didPressBTD) and didPress("BTD") then
+      self.currentScore = 1
+    end
+
     if (not self.didPressFXL) and didPress("FXL") then
       self.currentScore = advanceSelection(self.currentScore, scoreCount, -1)
     end
@@ -154,6 +178,7 @@ function ResultsScoreList:handleInput(scoreCount)
       self.currentScore = advanceSelection(self.currentScore, scoreCount, 1)
     end
 
+    self.didPressBTD = didPress("BTD")
     self.didPressFXL = didPress("FXL")
     self.didPressFXR = didPress("FXR")
   end
@@ -168,11 +193,12 @@ function ResultsScoreList:drawList(currentScore)
   local list = self.list
   local margin = self.margin
   local offset = (self.window.isPortrait and 128) or 0
+  local scores = (self.ctx.viewingOnlineScores and self.ctx.onlineScores) or self.ctx.scores
   local x = self.x
   local y = self.y + list.offset
   local w = self.w
 
-  for i, score in ipairs(self.ctx.scores) do
+  for i, score in ipairs(scores) do
     local isCurrent = i == currentScore
     local h = (isCurrent and openHeight) or closedHeight
 
@@ -250,9 +276,13 @@ function ResultsScoreList:drawScore(score, x, y, w, h, offset, labels, isCurrent
 
     for i, stat in ipairs(StatOrder) do
       local tempY = y + 103 + ((i - 1) * 43)
+
+      if (not score[stat]) and (stat == "hitWindows") then
+        stat = "player"
+      end
       
       if score[stat] then
-        local offsetY = ((stat == "grade") and 0) or 2
+        local offsetY = (((stat == "grade") or (stat == "player")) and 0) or 2
 
         labels[stat]:draw({ x = x + 344 + offset, y = tempY })
         score[stat]:draw({

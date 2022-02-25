@@ -18,7 +18,16 @@ local OnlineOrder = {
   "username",
 }
 
+local function makeWebsiteFunction(self)
+  return function(res)
+    if (res.statusCode == 20) and res.body and res.body.serverName then
+      self.irWebsite = res.body.serverName .. " SCORES"
+    end
+  end
+end
+
 ---@class SongSelectScoreList
+---@field irWebsite? Label
 local SongSelectScoreList = {}
 SongSelectScoreList.__index = SongSelectScoreList
 
@@ -34,6 +43,7 @@ function SongSelectScoreList.new(ctx, leaderboardCache, songCache, window)
     ctx = ctx,
     failedToFetch = makeLabel("Medium", "FAILED TO FETCH SCORES", 40),
     grid = Grid.new(window),
+    isOnline = IRData.Active,
     labels = {},
     leaderboardCache = leaderboardCache,
     localScores = makeLabel("Medium", "LOCAL SCORES", 40),
@@ -61,6 +71,10 @@ function SongSelectScoreList.new(ctx, leaderboardCache, songCache, window)
 
   for name, str in pairs(SongSelectScoreListLabels) do
     self.labels[name] = makeLabel("SemiBold", str)
+  end
+
+  if self.isOnline then
+    IR.Heartbeat(makeWebsiteFunction(self))
   end
 
   return setmetatable(self, SongSelectScoreList)
@@ -133,7 +147,7 @@ function SongSelectScoreList:drawLists(dt)
   ---@type CachedDiff
   local cachedDiff = cachedSong.diffs[self.ctx.currentDiff] or cachedSong.diffs[1]
   local labels = self.labels
-  local isOnline = IRData.Active
+  local isOnline = self.isOnline
 
   if cachedDiff then
     self:drawScoreList(dt, labels, cachedDiff, true, isOnline)
@@ -163,6 +177,8 @@ function SongSelectScoreList:drawScoreList(dt, labels, diffOrLeaderboard, isLoca
       x = x,
       y = y,
       color = "White",
+      text = self.irWebsite or "ONLINE SCORES",
+      update = true,
     })
   else
     self.localScores:draw({

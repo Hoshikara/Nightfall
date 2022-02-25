@@ -19,10 +19,10 @@ local Clears = {
 
 ---@param badge integer
 ---@param getRate boolean
----@param result? result
+---@param result? result|IRScore
 ---@return string
 function Clears:get(badge, getRate, result)
-  if result then
+  if result and (not result.lamp) then
     if result.autoplay then
       return "AUTOPLAY"
     end

@@ -192,9 +192,7 @@ function GaugeBar:getGaugeInfo(dt, gaugeType, value)
     name = name .. (" [ %.1f ]"):format(gameplay.gauge.options * 0.5)
   end
 
-  -- TODO
-  -- if ((gaugeType > 0) and getSetting("_arsEnabled", 0) == 1) then
-  if gaugeType > 0 then
+  if (gaugeType > 0) and (getSetting("_arsEnabled", 0) == 1) then
     name = name .. " + ARS"
   end
   

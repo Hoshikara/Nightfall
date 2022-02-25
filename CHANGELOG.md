@@ -5,6 +5,7 @@
 - Standardized knob behavior to be left knob for horizontal navigation and right knob for vertical navigation
 - `Song Select` changes:
   - Added a slide-out window to display local and online scores (if applicable), revealed with `BT-A`
+  - Removed density graph display
 - `Gameplay` changes:
   - Added a player card component which displays:
     - Avatar (image file is `/textures/gameplay/avatar.png`)
@@ -28,6 +29,7 @@
 - `Results` changes:
   - Added a skin setting to disable the color coding of rating texts
   - Added absolute mean delta and standard deviation information
+  - Added support for IR leaderboards which can be toggled with `BT-D`
 - Removed density graph and its corresponding skin setting
 
 ### 1.4.8 - October 9, 2021

@@ -20,6 +20,7 @@ function ResultsPanel.new(ctx, window)
     ctx = ctx,
     detailedViewControl = ControlLabel.new("BT-A", "DETAILED VIEW"),
     effectorTimer = 0,
+    isOnline = IRData.Active,
     jacketAlpha = Easing.new(),
     jacketOffset = 0,
     jacketShift1 = 0,
@@ -29,6 +30,7 @@ function ResultsPanel.new(ctx, window)
       minus = makeLabel("Number", "-", 27),
       plus = makeLabel("Number", "+", 18),
     },
+    localScoresControl = ControlLabel.new("BT-D", "LOCAL SCORES"),
     maxWidth = 0,
     scissorSize = 310,
     screenshotControl = ControlLabel.new("F12", "SCREENSHOT"),
@@ -37,6 +39,7 @@ function ResultsPanel.new(ctx, window)
     shiftDelayTimer = 0,
     simpleViewControl = ControlLabel.new("BT-A", "SIMPLE VIEW"),
     smallJacketSize = 230,
+    onlineScoresControl = ControlLabel.new("BT-D", "ONLINE SCORES"),
     titleTimer = 0,
     window = window,
     windowResized = nil,
@@ -75,7 +78,7 @@ function ResultsPanel:setProps()
     self.x = self.window.paddingX
     self.y = self.window.paddingY
 
-    if self.ctx.scoreCount == 0 then
+    if (self.ctx.scoreCount == 0) and (not self.isOnline) then
       if self.window.isPortrait then
         self.y = (self.window.h / 2) - (self.w / 2)
       else
@@ -451,6 +454,14 @@ function ResultsPanel:drawControls(dt, x, y)
     self.detailedViewControl:draw(x, y + 985)
   else
     self.simpleViewControl:draw(x, y + 985)
+  end
+
+  if self.isOnline then
+    if self.ctx.viewingOnlineScores then
+      self.localScoresControl:draw(x + self.w - 167, y + 985)
+    else
+      self.onlineScoresControl:draw(x + self.w - 175, y + 985)
+    end
   end
 end
 

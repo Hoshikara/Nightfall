@@ -5,7 +5,7 @@ local getDateTemplate = require("common/helpers/getDateTemplate")
 local getVolforce = require("common/helpers/getVolforce")
 local getGaugeValue = require("results/helpers/getGaugeValue")
 
----@param data result|score
+---@param data result|Score
 ---@return Label
 local function getDate(data)
   local date = os.date(getDateTemplate(), data.timestamp or os.time())
@@ -13,7 +13,7 @@ local function getDate(data)
   return makeLabel("Number", date, 27)
 end
 
----@param data result|score
+---@param data result|Score
 ---@return Label
 local function getHitWindows(data)
   if not data.hitWindow then
@@ -30,22 +30,23 @@ local function getHitWindows(data)
   )
 end
 
----@param data result|score
+---@param data result|IRScore
 ---@return Label
 local function getPlayer(data)
   local playerName = getSetting("playerName", "GUEST")
 
   return makeLabel(
     "Medium",
-    data.name or data.playerName or playerName or "GUEST",
+    data.name or data.playerName or data.username or playerName or "GUEST",
     29
   )
 end
 
----@param data result|score
+---@param data result|Score
+---@param i integer
 ---@return ResultsScoreDifference
-local function getScoreDifference(data)
-  if data.uid or (not data.isSelf) then
+local function getScoreDifference(data, i)
+  if data.uid or (not data.isSelf) or i then
     return
   end
 
@@ -77,9 +78,14 @@ local function getScoreDifference(data)
   end
 end
 
----@param data result|score
+---@param data result|Score
+---@param i integer
 ---@return ResultsVolforce
-local function getPlayerVolforce(data)
+local function getPlayerVolforce(data, i)
+  if i then
+    return
+  end
+
   local diffVolforce = getSetting("_diffVolforce", 0)
   local increase = nil
   local minimumVolforce = getSetting("_minimumVolforce", 0)
@@ -117,24 +123,24 @@ local function makeNumber(value, size)
   })
 end
 
----@param data result|score
+---@param data result|Score|IRScore
 ---@return ResultsScore
 local function formatScore(data, i)
   return {
-    clear = makeLabel("Medium", Clears:get(data.badge, false, data), 29),
-    critical = makeNumber(data.perfects),
+    clear = makeLabel("Medium", Clears:get(data.badge or data.lamp, false, data), 29),
+    critical = makeNumber(data.perfects or data.crit),
     date = getDate(data),
     gauge = getGaugeValue(data),
     grade = makeLabel("Medium", Grades:get(data.score), 29),
     hitWindows = getHitWindows(data),
-    error = makeNumber(data.misses),
-    maxChain = makeNumber(data.maxCombo, 27),
-    near = makeNumber(data.goods),
+    error = makeNumber(data.misses or data.error),
+    maxChain = makeNumber(data.maxCombo or data.combo, 27),
+    near = makeNumber(data.goods or data.near),
     player = getPlayer(data),
-    place = makeLabel("Number", ("%02d"):format(i or 0), 18),
+    place = makeLabel("Number", ("%02d"):format(data.rank or i or 0), 18),
     score = DimmedNumber.new({ size = (i and 89) or 108, value = data.score or 0 }),
-    scoreDifference = getScoreDifference(data),
-    volforce = getPlayerVolforce(data),
+    scoreDifference = getScoreDifference(data, i),
+    volforce = getPlayerVolforce(data, i),
   }
 end
 

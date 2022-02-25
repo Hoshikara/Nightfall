@@ -168,6 +168,11 @@
 		"type": "bool",
 		"default": false
 	},
+	"showOnlineScores": {
+		"label": "Show online scores",
+		"type": "bool",
+		"default": false
+	},
 	"separator_kqm": {},
 	"separator_shj": {},
 	"suggestSongOffset": {

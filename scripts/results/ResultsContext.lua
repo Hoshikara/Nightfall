@@ -1,8 +1,14 @@
+local didPress = require("common/helpers/didPress")
 local formatChart = require("results/helpers/formatChart")
 local formatScore = require("results/helpers/formatScore")
 local getGraphData = require("results/helpers/getGraphData")
 
 local showHardScores = getSetting("showHardScores", false)
+local showOnlineScores = getSetting("showOnlineScores", false)
+
+local AcceptedState = IRData.States.Accepted
+local PendingState = IRData.States.Pending
+local SuccessState = IRData.States.Success
 
 ---@class ResultsContext
 ---@field getPanelRegion function
@@ -15,20 +21,48 @@ function ResultsContext.new()
   ---@type ResultsContext
   local self = {
     chart = nil,
+    didPressBTD = false,
     graphData = nil,
+    irState = "LOADING",
+    isOnline = IRData.Active,
     isSingleplayer = true,
     myScore = nil,
+    onlineScores = {},
+    onlineScoreCount = 0,
     scores = {},
     scoreCount = 0,
     screenshotPath = "",
     screenshotTimer = 0,
+    viewingOnlineScores = showOnlineScores and IRData.Active,
   }
 
   return setmetatable(self, ResultsContext)
 end
 
+function ResultsContext:update()
+  if self.isOnline then
+    if result.irState == PendingState then
+      self.irState = "LOADING"
+    elseif result.irState == AcceptedState then
+      self.irState = "ACCEPTED"
+    elseif result.irState == SuccessState then
+      self.irState = "SUCCESS"
+    else
+      self.irState = "ERROR"
+    end
+
+    if (not self.didPressBTD) and didPress("BTD") then
+      self.viewingOnlineScores = not self.viewingOnlineScores
+
+      game.SetSkinSetting("showOnlineScores", (self.viewingOnlineScores and 1) or 0)
+    end
+
+    self.didPressBTD = didPress("BTD")
+  end
+end
+
 ---@param data result
-function ResultsContext:update(data)
+function ResultsContext:set(data)
   local isSingleplayer = data.uid == nil
 
   if not self.chart then
@@ -45,6 +79,10 @@ function ResultsContext:update(data)
 
   if isSingleplayer or data.isSelf then
     self.graphData = getGraphData(data)
+  end
+
+  if self.isOnline and data.irScores then
+    self:updateOnlineScores(data.irScores)
   end
 
   self:updateScores(data, isSingleplayer)
@@ -82,12 +120,25 @@ function ResultsContext:updateScores(data, isSingleplayer)
 
   for i, score in ipairs(highScores) do
     scores[i] = formatScore(score, i)
-
     count = count + 1
   end
 
   self.scoreCount = count
   self.scores = scores
+end
+
+---@param scores IRScore[]
+function ResultsContext:updateOnlineScores(scores)
+  local count = 0
+  local onlineScores = {}
+
+  for i, score in ipairs(scores) do
+    onlineScores[i] = formatScore(score, i)
+    count = count + 1
+  end
+
+  self.onlineScores = onlineScores
+  self.onlineScoreCount = count
 end
 
 ---@param path string

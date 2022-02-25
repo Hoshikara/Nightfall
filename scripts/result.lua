@@ -20,20 +20,17 @@ local resultsScoreList = ResultsScoreList.new(context, window)
 --#endregion
 
 function result_set()
-	context:update(result)
+	context:set(result)
 end
 
 ---@param dt deltaTime
 function render(dt)
+	context:update()
 	gfx.Save()
 	background:draw()
 	window:update()
 	resultsPanel:draw(dt)
-
-	if context.scoreCount > 0 then
-		resultsScoreList:draw(dt)
-	end
-
+	resultsScoreList:draw(dt)
 	gfx.Restore()
 end
 
