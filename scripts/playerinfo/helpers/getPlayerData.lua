@@ -3,7 +3,7 @@ local playerJson = JsonTable.new("player")
 local playerData = playerJson:get()
 
 do
-  if not playerData.version then
+  if (not playerData.version) and playerData.stats then
     local levels = {}
 
     for levelKey, level in pairs(playerData.stats.levels) do

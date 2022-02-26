@@ -46,7 +46,7 @@ local function makeTitlescreenButtons(ctx)
         text = makeLabel("Medium", "MULTIPLAYER"),
       },
       {
-        event = function() end, --Menu.Challenges,
+        event = Menu.Challenges,
         text = makeLabel("Medium", "CHALLENGES"),
       },
       {
