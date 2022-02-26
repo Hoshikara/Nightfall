@@ -19,7 +19,7 @@ function Mouse:update()
 	self.x, self.y = game.GetMousePos()
 end
 
----@return number, number
+---@return number x, number y
 function Mouse:getPos()
 	local scale = self.window.scaleFactor
 

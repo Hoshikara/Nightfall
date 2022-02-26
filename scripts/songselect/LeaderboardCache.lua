@@ -70,6 +70,11 @@ function LeaderboardCache:getScores(scores)
       clear = Clears:get(score.lamp),
       grade = Grades:get(score.score),
       score = score.score,
+      stats = {
+        critical = score.crit or 0,
+        error = score.error or 0,
+        near = score.near or 0,
+      },
       username = score.username or "",
     }
   end
