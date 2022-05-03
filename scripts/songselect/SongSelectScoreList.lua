@@ -2,6 +2,7 @@ local SongSelectScoreListLabels = require("songselect/constants/SongSelectScoreL
 local DimmedNumber = require("common/DimmedNumber")
 local Easing = require("common/Easing")
 local Grid = require("common/Grid")
+local Mouse = require("common/Mouse")
 local Spinner = require("common/Spinner")
 
 local LocalOrder = {
@@ -16,6 +17,12 @@ local OnlineOrder = {
   "grade",
   "clear",
   "username",
+}
+
+local StatOrder = {
+  "critical",
+  "near",
+  "error",
 }
 
 local function makeWebsiteFunction(self)
@@ -41,6 +48,7 @@ function SongSelectScoreList.new(ctx, leaderboardCache, songCache, window)
   local self = {
     chartUntracked = makeLabel("Medium", "CHART IS NOT TRACKED", 40),
     ctx = ctx,
+    currentStats = nil,
     failedToFetch = makeLabel("Medium", "FAILED TO FETCH SCORES", 40),
     grid = Grid.new(window),
     isOnline = IRData.Active,
@@ -48,12 +56,18 @@ function SongSelectScoreList.new(ctx, leaderboardCache, songCache, window)
     leaderboardCache = leaderboardCache,
     localScores = makeLabel("Medium", "LOCAL SCORES", 40),
     localSpacing = 0,
+    mouse = Mouse.new(window),
     onlineScores = makeLabel("Medium", "ONLINE SCORES", 40),
     onlineSpacing = 0,
     shiftAmount = 0,
     shiftEasing = Easing.new(1),
     songCache = songCache,
     spinner = Spinner.new({ radius = 36, thickness = 4 }),
+    stats = {
+      critical = DimmedNumber.new({ digits = 5, size = 19 }),
+      error = DimmedNumber.new({ digits = 5, size = 19 }),
+      near = DimmedNumber.new({ digits = 5, size = 19 }),
+    },
     text = {
       clear = makeLabel("Medium", "", 32),
       date = makeLabel("Number", "", 30),
@@ -81,14 +95,21 @@ function SongSelectScoreList.new(ctx, leaderboardCache, songCache, window)
 end
 
 function SongSelectScoreList:draw(dt)
+  self.mouse:update()
   self:setProps()
   self:handleShift(dt)
-
   gfx.Save()
   gfx.Translate(self.x + (self.shiftAmount * self.shiftEasing.value), self.y)
   self:drawWindow()
   self:drawLists(dt)
+
+  if self.currentStats then
+    self:drawStatsWindow()
+  end
+
   gfx.Restore()
+
+  self.currentStats = nil
 end
 
 function SongSelectScoreList:setProps()
@@ -231,6 +252,9 @@ end
 function SongSelectScoreList:drawScores(x, y, scores, isLocal, isOnline, spacing)
   local w = self.w - 80
   local isPortrait = self.window.isPortrait
+  local mouse = self.mouse
+  local offsetX = self.x
+  local offsetY = self.y
   local text = self.text
 
   for i, score in ipairs(scores) do
@@ -245,6 +269,10 @@ function SongSelectScoreList:drawScores(x, y, scores, isLocal, isOnline, spacing
         alpha = 0.2,
         color = "Standard",
       })
+    end
+
+    if mouse:clipped(x - 7 + offsetX, tempY + 1 + offsetY, w - 8, 37) then
+      self.currentStats = score.stats
     end
 
     text.score:draw({
@@ -295,6 +323,41 @@ function SongSelectScoreList:drawScores(x, y, scores, isLocal, isOnline, spacing
         break
       end
     end
+  end
+end
+
+function SongSelectScoreList:drawStatsWindow()
+  local x, y = self.mouse:getPos()
+
+  x = x - 95 - self.x
+  y = y - self.y - 107
+
+  drawRect({
+    x = x,
+    y = y,
+    w = 189,
+    h = 95,
+    alpha = 0.9,
+    color = "Black",
+    isFast = true,
+  })
+
+  y = y + 9
+
+  for _, stat in ipairs(StatOrder) do
+    self.labels[stat]:draw({
+      x = x + 11,
+      y = y,
+      color = "Standard"
+    })
+    self.stats[stat]:draw({
+      x = x + 114,
+      y = y + 1,
+      color = "White",
+      value = self.currentStats[stat],
+    })
+
+    y = y + 25
   end
 end
 

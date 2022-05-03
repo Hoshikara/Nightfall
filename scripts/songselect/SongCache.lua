@@ -138,6 +138,11 @@ function SongCache:getScores(scores)
       grade = Grades:get(score.score),
       date = date(getDateTemplate(), score.timestamp),
       score = score.score,
+      stats = {
+        critical = score.perfects,
+        error = score.misses,
+        near = score.goods,
+      },
       username = "HOSHIKARA"
     }
   end
@@ -177,6 +182,7 @@ return SongCache
 ---@field date string
 ---@field grade string
 ---@field score integer
+---@field stats CachedHitStats
 
 ---@class CachedSong
 ---@field artist string
@@ -184,3 +190,8 @@ return SongCache
 ---@field diffs CachedDiff[]
 ---@field illustrator? string
 ---@field title string
+
+---@class CachedHitStats
+---@field critical integer
+---@field near integer
+---@field error integer
