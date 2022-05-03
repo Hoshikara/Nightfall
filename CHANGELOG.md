@@ -1,3 +1,6 @@
+### 1.4.9 - May 3, 2022
+- Added support for EXCEED (XCD) difficulty
+
 ### 1.4.8 - October 9, 2021
 - Changed Blastive Level display to pull from appropriate sources; effectively fixes challenges with forced Blastive Rate displaying the incorrect level
 

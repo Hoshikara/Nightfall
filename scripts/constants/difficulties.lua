@@ -8,6 +8,7 @@ local Difficulties = {
   'GRAVITY',
   'HEAVENLY',
   'VIVID',
+  'EXCEED',
 };
 
 return Difficulties;

@@ -1,7 +1,7 @@
 -- This script is loaded for every screen of the game
 -- All of the functions below are available to all of the scripts of the skin
 
-SkinVersion = '1.4.8';
+SkinVersion = '1.4.9';
 
 Developer = false;
 
@@ -138,6 +138,8 @@ getDiffIndex = function(jacketPath, diffIndex)
 				return 7;
 			elseif (path:find('vvd')) then
 				return 8;
+			elseif (path:find('xcd')) then
+				return 9;
 			end
 		end
 	end
