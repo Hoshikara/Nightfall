@@ -8,6 +8,7 @@ local DifficultyNames = {
 	{ full = "GRAVITY", short = "GRV" },
 	{ full = "HEAVENLY", short = "HVN" },
 	{ full = "VIVID", short = "VVD" },
+	{ full = "EXCEED", short = "XCD" },
 }
 
 ---@param jacketPath string
@@ -26,17 +27,19 @@ function DifficultyNames:get(jacketPath, diffIndex, isShort)
 				diffIndex = 6
 			elseif path:find("vvd") then
 				diffIndex = 7
+			elseif path:find("xcd") then
+				diffIndex = 8
 			end
 		end
 	end
 
-  if isShort then
-    return self[diffIndex + 1].short
-  end
+	if isShort then
+		return self[diffIndex + 1].short
+	end
 
 	return self[diffIndex + 1].full
 end
-  
+
 return DifficultyNames
 
 ---@class DifficultyName
