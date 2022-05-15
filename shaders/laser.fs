@@ -22,9 +22,11 @@ uniform int hitState;
 vec4 generic_desaturate(vec3 color, float factor) {
 	vec3 lum = vec3(0.299, 0.587, 0.114);
 	vec3 gray = vec3(dot(lum, color));
+
 	return vec4(mix(color, gray, factor), 1.0);
 }
-const float laserSize = 1.15;
+
+const float laserSize = 1.025;
 
 void main() {
 	float x = fsTex.x;
@@ -52,5 +54,5 @@ void main() {
 	vec4 mainColor = clamp(texture(mainTex, vec2(x * 0.5, y)) * color, 0, 1.0);
 	vec4 glow = texture(mainTex, vec2(0.5 + (x * 0.5), y));
 
-	target = generic_desaturate(mainColor.rgb, 0.3) + glow;
+	target = generic_desaturate(mainColor.rgb, 0.25) + glow;
 }
