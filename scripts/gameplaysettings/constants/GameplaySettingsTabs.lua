@@ -6,7 +6,7 @@ local advanceSelection = require("common/helpers/advanceSelection")
 ---@param settings GameplaySetting[]
 ---@return number
 local function getHeight(settings)
-  return #settings * 35
+	return #settings * 35
 end
 
 ---@param value number
@@ -15,154 +15,154 @@ end
 ---@param increment number
 ---@return number
 local function step(value, min, max, increment)
-  value = value + increment
+	value = value + increment
 
-  if value < min then
-    value = max
-  end
+	if value < min then
+		value = max
+	end
 
-  if value > max then
-    value = min
-  end
+	if value > max then
+		value = min
+	end
 
-  if value > min and (value < (min + increment)) then
-    value = min
-  end
+	if value > min and (value < (min + increment)) then
+		value = min
+	end
 
-  return value
+	return value
 end
 
 ---@param int integer
 ---@return integer
 local function toggle(int)
-  if int == 0 then
-    return 1
-  end
+	if int == 0 then
+		return 1
+	end
 
-  return 0
+	return 0
 end
 
 ---@param setting GameplaySetting
 ---@param params makeSetting.params
 local function handleIncrementSetting(setting, params)
-  setting.text = (setting.templateString):format(setting.value * setting.multi)
-  setting.valueLabel = makeLabel("Number", setting.text, 27)
-  setting.offsetY = 3
+	setting.text = (setting.templateString):format(setting.value * setting.multi)
+	setting.valueLabel = makeLabel("Number", setting.text, 27)
+	setting.offsetY = 3
 
-  function setting.event(sign)
-    setting.value = step(
-      setting.value,
-      params.min,
-      params.max,
-      params.increment * sign
-    )
-    setting.text = (setting.templateString):format(setting.value * setting.multi)
+	function setting.event(sign)
+		setting.value = step(
+			setting.value,
+			params.min,
+			params.max,
+			params.increment * sign
+		)
+		setting.text = (setting.templateString):format(setting.value * setting.multi)
 
-    game.SetSkinSetting(params.key, setting.value)
-  end
+		game.SetSkinSetting(params.key, setting.value)
+	end
 end
 
 ---@param setting GameplaySetting
 ---@param params makeSetting.params
 local function handleOptionsSetting(setting, params)
-  setting.options = params.options
+	setting.options = params.options
 
-  for i, option in ipairs(params.options) do
-    if option == setting.value then
-      setting.currentOption = i
+	for i, option in ipairs(params.options) do
+		if option == setting.value then
+			setting.currentOption = i
 
-      break
-    end
-  end
+			break
+		end
+	end
 
-  if not setting.currentOption then
-    setting.currentOption = 1
-  end
+	if not setting.currentOption then
+		setting.currentOption = 1
+	end
 
-  setting.value = setting.options[setting.currentOption]
-  setting.text = setting.value
-  setting.valueLabel = makeLabel("Medium", setting.text, 30)
+	setting.value = setting.options[setting.currentOption]
+	setting.text = setting.value
+	setting.valueLabel = makeLabel("Medium", setting.text, 30)
 
-  function setting.event(sign)
-    setting.currentOption = advanceSelection(
-      setting.currentOption,
-      #setting.options,
-      sign
-    )
-    setting.value = setting.options[setting.currentOption]
-    setting.text = setting.value
+	function setting.event(sign)
+		setting.currentOption = advanceSelection(
+			setting.currentOption,
+			#setting.options,
+			sign
+		)
+		setting.value = setting.options[setting.currentOption]
+		setting.text = setting.value
 
-    game.SetSkinSetting(params.key, setting.value)
-  end
+		game.SetSkinSetting(params.key, setting.value)
+	end
 end
 
 ---@param setting GameplaySetting
 ---@param params makeSetting.params
 local function handleToggleSetting(setting, params)
-  setting.options = { [0] = "DISABLED", [1] = "ENABLED" }
-  setting.text = setting.options[setting.value]
-  setting.valueLabel = makeLabel("Medium", setting.text, 30)
+	setting.options = { [0] = "DISABLED", [1] = "ENABLED" }
+	setting.text = setting.options[setting.value]
+	setting.valueLabel = makeLabel("Medium", setting.text, 30)
 
-  function setting.event()
-    setting.value = toggle(setting.value)
-    setting.text = setting.options[setting.value]
+	function setting.event()
+		setting.value = toggle(setting.value)
+		setting.text = setting.options[setting.value]
 
-    if setting.value == 0 then
-      setting.color = "Negative"
-    else
-      setting.color = "Positive"
-    end
+		if setting.value == 0 then
+			setting.color = "Negative"
+		else
+			setting.color = "Positive"
+		end
 
-    game.SetSkinSetting(params.key, setting.value)
-  end
+		game.SetSkinSetting(params.key, setting.value)
+	end
 end
 
 ---@param params makeSetting.params
 ---@return GameplaySetting
 local function makeSetting(params)
-  ---@type GameplaySetting
-  local setting = {
-    color = "White",
-    currentOption = 1,
-    event = nil,
-    multi = params.multi or 100,
-    offsetY = 0,
-    templateString = params.templateString or "%.0f%%",
-    text = "",
-    value = getSetting(params.key, params.default or 0),
-    valueLabel = nil,
-  }
+	---@type GameplaySetting
+	local setting = {
+		color = "White",
+		currentOption = 1,
+		event = nil,
+		multi = params.multi or 100,
+		offsetY = 0,
+		templateString = params.templateString or "%.0f%%",
+		text = "",
+		value = getSetting(params.key, params.default or 0),
+		valueLabel = nil,
+	}
 
-  if params.name then
-    setting.name = makeLabel("Medium", params.name, 30)
-  end
+	if params.name then
+		setting.name = makeLabel("Medium", params.name, 30)
+	end
 
-  if type(setting.value) == "boolean" then
-    setting.color = (setting.value and "Positive") or "Negative"
-    setting.value = (setting.value and 1) or 0
-  end
+	if type(setting.value) == "boolean" then
+		setting.color = (setting.value and "Positive") or "Negative"
+		setting.value = (setting.value and 1) or 0
+	end
 
-  if params.increment then
-    handleIncrementSetting(setting, params)
-  elseif params.options then
-    handleOptionsSetting(setting, params)
-  else
-    handleToggleSetting(setting, params)
-  end
+	if params.increment then
+		handleIncrementSetting(setting, params)
+	elseif params.options then
+		handleOptionsSetting(setting, params)
+	else
+		handleToggleSetting(setting, params)
+	end
 
-  return setting
+	return setting
 end
 
 ---@param tabName string
 ---@return GameplaySetting[]
 local function makeSettings(tabName)
-  local settings = {}
+	local settings = {}
 
-  for i, props in ipairs(GameplaySettingProperties[tabName]) do
-    settings[i] = makeSetting(props)
-  end
+	for i, props in ipairs(GameplaySettingProperties[tabName]) do
+		settings[i] = makeSetting(props)
+	end
 
-  return settings
+	return settings
 end
 
 ---@param heading string
@@ -170,27 +170,28 @@ end
 ---@param statusKey string
 ---@return GameplaySettingTab
 local function makeTab(heading, tabName, statusKey)
-  local tab = {
-    heading = makeLabel("Medium", heading, 40),
-    settings = makeSettings(tabName),
-    status = makeSetting({ default = 1, key = statusKey }),
-  }
+	local tab = {
+		heading = makeLabel("Medium", heading, 40),
+		settings = makeSettings(tabName),
+		status = makeSetting({ default = 1, key = statusKey }),
+	}
 
-  tab.height = getHeight(tab.settings)
+	tab.height = getHeight(tab.settings)
 
-  return tab
+	return tab
 end
 
 --#endregion
 
 ---@type table<string, GameplaySettingTab>
 local GameplaySettingsTabs = {
-  Earlate = makeTab("EARLY / LATE", "Earlate", "showEarlate"),
-  HitAnimations = makeTab("HIT ANIMATIONS", "HitAnimations", "showHitAnimations"),
-  HitDeltaBar = makeTab("HIT DELTA BAR", "HitDeltaBar", "showHitDeltaBar"),
-  LaneSpeed = makeTab("LANE-SPEED", "LaneSpeed", "showLaneSpeed"),
-  PlayerCard = makeTab("PLAYER CARD", "PlayerCard", "showPlayerCard"),
-  ScoreDifference = makeTab("SCORE DIFFERENCE", "ScoreDifference", "showScoreDifference"),
+	Chain = makeTab("CHAIN", "Chain", "showChain"),
+	Earlate = makeTab("EARLY / LATE", "Earlate", "showEarlate"),
+	HitAnimations = makeTab("HIT ANIMATIONS", "HitAnimations", "showHitAnimations"),
+	HitDeltaBar = makeTab("HIT DELTA BAR", "HitDeltaBar", "showHitDeltaBar"),
+	LaneSpeed = makeTab("LANE-SPEED", "LaneSpeed", "showLaneSpeed"),
+	PlayerCard = makeTab("PLAYER CARD", "PlayerCard", "showPlayerCard"),
+	ScoreDifference = makeTab("SCORE DIFFERENCE", "ScoreDifference", "showScoreDifference"),
 }
 
 return GameplaySettingsTabs
@@ -210,6 +211,7 @@ return GameplaySettingsTabs
 ---@field currentOption? integer
 ---@field event? function
 ---@field multi? number
+---@field name Label
 ---@field offsetY string
 ---@field templateString? string
 ---@field text? string

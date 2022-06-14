@@ -26,7 +26,7 @@ function Window.new()
 	return setmetatable(self, Window)
 end
 
----@param dontScale boolean
+---@param dontScale? boolean
 function Window:update(dontScale)
 	local resX, resY = game.GetResolution()
 
@@ -75,7 +75,7 @@ function Window:updateProps(isPortrait)
 		self.paddingY = 56
 		self.footerY = self.h - self.paddingY + 17
 		self.headerY = self.paddingY - 38
-	end	
+	end
 end
 
 ---@param isPortrait boolean
@@ -92,14 +92,14 @@ function Window:updateScaling(isPortrait, resX, resY)
 
 	self.shiftX = (resX - (self.w * scale)) / 2
 	self.shiftY = (resY - (self.h * scale)) / 2
-	
+
 	return scale
 end
 
 ---@param multiplier number
 function Window:scale(multiplier)
 	multiplier = multiplier or 1
-	
+
 	gfx.Scale(self.scaleFactor * multiplier, self.scaleFactor * multiplier)
 end
 
