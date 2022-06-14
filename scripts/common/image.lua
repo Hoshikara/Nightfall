@@ -1,4 +1,23 @@
+---@param path? string
+---@param extension? string
+---@return string
+local function getImagePath(path, extension)
+	if not path then
+		return ""
+	end
+
+	return path .. (extension or ".png")
+end
+
 ---@class Image
+---@field hueSettingKey string
+---@field image integer
+---@field isCentered boolean
+---@field mesh ShadedMesh
+---@field scale number
+---@field updateMeshHue boolean
+---@field w number
+---@field h number
 local Image = {}
 Image.__index = Image
 
@@ -18,15 +37,19 @@ end
 ---@param params Image.new.params
 ---@return Image
 function Image.createImage(params)
-	local image = gfx.CreateSkinImage(params.path or "", 0)
+	local image = gfx.CreateSkinImage(getImagePath(params.path), 0)
 	local w, h = 0, 0
 
 	if not image then
 		if params.disableFallbackImage then
 			return
+		else
+			image = gfx.CreateSkinImage(getImagePath(params.path, ".jpg"), 0)
+
+			if not image then
+				image = gfx.CreateSkinImage("image_warning.png", 0)
+			end
 		end
-		
-		image = gfx.CreateSkinImage("image_warning.png", 0)
 	end
 
 	w, h = gfx.ImageSize(image)
@@ -141,7 +164,7 @@ function Image:drawMesh(x, y, w, h, alpha, updateData)
 			{ { x + w, y + h }, { 1, 1 } },
 			{ { x, y + h }, { 0, 1 } },
 		})
-		self.mesh:SetParam("alpha", alpha * 0.999)		
+		self.mesh:SetParam("alpha", alpha * 0.999)
 	end
 
 	if self.updateMeshHue then
