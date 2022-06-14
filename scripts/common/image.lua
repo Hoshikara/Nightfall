@@ -1,14 +1,3 @@
----@param path? string
----@param extension? string
----@return string
-local function getImagePath(path, extension)
-	if not path then
-		return ""
-	end
-
-	return path .. (extension or ".png")
-end
-
 ---@class Image
 ---@field hueSettingKey string
 ---@field image integer
@@ -37,14 +26,14 @@ end
 ---@param params Image.new.params
 ---@return Image
 function Image.createImage(params)
-	local image = gfx.CreateSkinImage(getImagePath(params.path), 0)
+	local image = gfx.CreateSkinImage((params.path or "") .. ".png", 0)
 	local w, h = 0, 0
 
 	if not image then
 		if params.disableFallbackImage then
 			return
 		else
-			image = gfx.CreateSkinImage(getImagePath(params.path, ".jpg"), 0)
+			image = gfx.CreateSkinImage((params.path or "") .. ".jpg", 0)
 
 			if not image then
 				image = gfx.CreateSkinImage("image_warning.png", 0)
@@ -79,7 +68,7 @@ function Image.createMesh(params, w, h)
 	local scaledW = w * (params.scale or 1)
 	local scaledH = h * (params.scale or 1)
 
-	mesh:AddSkinTexture("mainTex", params.path)
+	mesh:AddSkinTexture("mainTex", params.path .. ".png")
 	mesh:SetBlendMode(params.meshBlendMode or 0)
 	mesh:SetParam("alpha", 0.999)
 	mesh:SetParam("hue", getSetting(params.hueSettingKey, 0))
