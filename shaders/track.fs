@@ -51,7 +51,7 @@ void main() {
     vec3 colHsv = rgb2hsv(col);
 
     colHsv.r -= hue;
-    track.rgb += hsv2rgb(colHsv);
-
+    lanes.rgb += hsv2rgb(colHsv);
     target = track + lanes;
+    target.a = track.a;
 }
