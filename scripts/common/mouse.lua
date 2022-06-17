@@ -1,4 +1,5 @@
 ---@class Mouse
+---@field window Window
 local Mouse = {}
 Mouse.__index = Mouse
 
@@ -24,7 +25,7 @@ function Mouse:getPos()
 	local scale = self.window.scaleFactor
 
 	return (self.x - self.window.shiftX) / scale,
-		(self.y - self.window.shiftY) / scale
+	(self.y - self.window.shiftY) / scale
 end
 
 ---@param x number

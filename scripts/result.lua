@@ -36,7 +36,7 @@ end
 
 function get_capture_rect()
 	if (screenshotRegion == "FULLSCREEN") or (not context.getPanelRegion) then
-		return 0, 0, game.GetResolution()	
+		return 0, 0, game.GetResolution()
 	end
 
 	return context.getPanelRegion()
