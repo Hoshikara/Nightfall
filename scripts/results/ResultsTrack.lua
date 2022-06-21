@@ -189,6 +189,7 @@ end
 ---@param scoreData integer[]
 function ResultsTrack:drawScore(progress, scoreData)
 	local x = self.w + 6
+	local default = scoreData[1]
 
 	if not self.numScoreData then
 		self.numScoreData = #scoreData
@@ -196,12 +197,13 @@ function ResultsTrack:drawScore(progress, scoreData)
 
 	if progress >= 0.5 then
 		x = -self.score.w - 7
+		default = scoreData[self.numScoreData]
 	end
 
 	self.score:draw({
 		x = x,
 		y = -7,
-		value = scoreData[floor(progress * self.numScoreData)] or scoreData[self.numScoreData],
+		value = scoreData[floor(progress * self.numScoreData)] or default,
 	})
 end
 
