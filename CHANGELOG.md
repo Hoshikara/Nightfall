@@ -1,6 +1,7 @@
 ### 1.5.0 - Upcoming, 2022 (?)
 - Moderate design update which includes changes of varying degree to animations, fonts, UI elements, screen layouts, and more
-- Added a skin setting to disable tinting of the common background image
+- Added JPG image support
+- Added a skin settings to disable the tinting and adjust the dim of the common background image
 - Modified layout logic to support more aspect ratios; elements will no longer be cut off but instead be scaled to fit within the horizontal/vertical edges
 - Standardized knob behavior to be left knob for horizontal navigation and right knob for vertical navigation
 - `Song Select` changes:
@@ -19,6 +20,7 @@
 - `Gameplay Settings` changes:
   - Renamed from `In-game Preview`
   - Added a setting to change the position of the hit delta bar
+  - Added a setting to change the position and opacity of the chain display
   - Added settings to change the scale of all elements
   - Added settings to change the hue of hit/hold/laser animations
   - Added various player card settings
@@ -27,6 +29,7 @@
   - Changed chart page navigation from `FX-L` / `FX-R` to `KNOB-R`
   - Removed ability to select a chart folder by clicking
 - `Results` changes:
+  - Added a score and object "replay" feature in place of the previous hover-to-zoom hit stat graph--the lengths of hold and laser objects may be inaccurate due to skinning limitations
   - Added a skin setting to disable the color coding of rating texts
   - Added absolute mean delta and standard deviation information
   - Added support for IR leaderboards which can be toggled with `BT-D`
