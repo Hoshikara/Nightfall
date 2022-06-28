@@ -7,17 +7,6 @@ local getScoreData = require("results/helpers/getScoreData")
 local getTimingData = require("results/helpers/getTimingData")
 local getTrackObjects = require("results/helpers/getTrackObjects")
 
-local JsonTable = require("common/JsonTable")
-local holdsJson = JsonTable.new("holds")
-local lasersJson = JsonTable.new("lasers")
-local notesJson = JsonTable.new("notes")
----@type HitStat[]
-local holdsData = holdsJson:get()
----@type HitStat[]
-local lasersData = lasersJson:get()
----@type HitStat[]
-local notesData = notesJson:get()
-
 ---@param hitStats HitStat[]
 ---@return number[]
 local function getHistogramData(hitStats)
