@@ -216,20 +216,20 @@ end
 ---@param tabName string
 function GameplaySettings:drawTab(dt, x1, x2, y, w, tab, shift, isExpanded, tabName)
 	local isEnabled = tab.status.value == 1
-	local returnY = y + 58 + (tab.height * shift)
+	local returnY = y + 46 + (tab.height * shift)
 
 	x1 = x1 + 24
 
 	self:drawToggleBtn(x1, y, isEnabled, tab.status)
 	tab.heading:draw({
-		x = x1 + 39,
-		y = y + 2,
+		x = x1 + 30,
+		y = y,
 		color = (isExpanded and "Standard") or "White",
 	})
 	self:drawExpandBtn(x2, y, isExpanded, tabName)
 
-	x1 = x1 + 40
-	y = y + 47
+	x1 = x1 + 42
+	y = y + 39
 
 	for _, setting in ipairs(tab.settings) do
 		y = self:drawSetting(x1, x2, y, setting, shift, isEnabled, isExpanded)
@@ -258,8 +258,8 @@ end
 function GameplaySettings:drawExpandBtn(x, y, isExpanded, tabName)
 	local alpha = 0.4
 
-	x = x - 24
-	y = y + 17
+	x = x - 26
+	y = y + 11
 
 	if self.mouse:clipped(x - 4, y - 4, 32, 32) then
 		self.ctx.btnEvent = function()
@@ -301,15 +301,15 @@ end
 function GameplaySettings:drawToggleBtn(x, y, isEnabled, toggleSetting)
 	local alpha = (isEnabled and 1) or 0
 
-	if self.mouse:clipped(x + 1, y + 17, 24, 24) then
+	if self.mouse:clipped(x - 5, y + 13, 20, 20) then
 		self.ctx.btnEvent = toggleSetting.event
 	end
 
 	drawRect({
-		x = x + 1,
-		y = y + 17,
-		w = 24,
-		h = 24,
+		x = x - 5,
+		y = y + 13,
+		w = 20,
+		h = 20,
 		alpha = alpha,
 		color = EnabledColor,
 		stroke = {
@@ -331,7 +331,7 @@ function GameplaySettings:drawSetting(x1, x2, y, setting, shift, isEnabled,
                                       isExpanded)
 	local alpha = ((isEnabled and 1) or 0.2) * shift
 
-	x2 = x2 - 16
+	x2 = x2 - 18
 
 	setting.name:draw({
 		x = x1,
@@ -340,7 +340,7 @@ function GameplaySettings:drawSetting(x1, x2, y, setting, shift, isEnabled,
 		color = "White",
 	})
 	setting.valueLabel:draw({
-		x = x2 - 48,
+		x = x2 - 50,
 		y = y + setting.offsetY,
 		align = "RightTop",
 		alpha = alpha,

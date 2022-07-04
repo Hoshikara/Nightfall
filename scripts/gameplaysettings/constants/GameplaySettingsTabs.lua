@@ -43,7 +43,7 @@ local function toggle(int)
 end
 
 ---@param setting GameplaySetting
----@param params makeSetting.params
+---@param params GameplaySettingProperties
 local function handleIncrementSetting(setting, params)
 	setting.text = (setting.templateString):format(setting.value * setting.multi)
 	setting.valueLabel = makeLabel("Number", setting.text, 27)
@@ -63,7 +63,7 @@ local function handleIncrementSetting(setting, params)
 end
 
 ---@param setting GameplaySetting
----@param params makeSetting.params
+---@param params GameplaySettingProperties
 local function handleOptionsSetting(setting, params)
 	setting.options = params.options
 
@@ -97,7 +97,7 @@ local function handleOptionsSetting(setting, params)
 end
 
 ---@param setting GameplaySetting
----@param params makeSetting.params
+---@param params GameplaySettingProperties
 local function handleToggleSetting(setting, params)
 	setting.options = { [0] = "DISABLED", [1] = "ENABLED" }
 	setting.text = setting.options[setting.value]
@@ -117,7 +117,7 @@ local function handleToggleSetting(setting, params)
 	end
 end
 
----@param params makeSetting.params
+---@param params GameplaySettingProperties
 ---@return GameplaySetting
 local function makeSetting(params)
 	---@type GameplaySetting
@@ -171,7 +171,7 @@ end
 ---@return GameplaySettingTab
 local function makeTab(heading, tabName, statusKey)
 	local tab = {
-		heading = makeLabel("Medium", heading, 40),
+		heading = makeLabel("Medium", heading, 34),
 		settings = makeSettings(tabName),
 		status = makeSetting({ default = 1, key = statusKey }),
 	}
@@ -212,22 +212,10 @@ return GameplaySettingsTabs
 ---@field event? function
 ---@field multi? number
 ---@field name Label
----@field offsetY string
+---@field offsetY number
 ---@field templateString? string
 ---@field text? string
 ---@field value? any
 ---@field valueLabel? Label
-
----@class makeSetting.params
----@field default? any
----@field increment? number
----@field key? string
----@field label? string
----@field max? number
----@field min? number
----@field multi? number
----@field name? string
----@field options? string[]
----@field templateString? string
 
 --#endregion
