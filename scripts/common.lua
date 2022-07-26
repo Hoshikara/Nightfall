@@ -89,9 +89,9 @@ function getSetting(settingKey, default)
 end
 
 ---@param font? string
----@param text? string
+---@param text? number|string
 ---@param size? integer
----@param color? string|Color
+---@param color? Color|string
 ---@return Label
 function makeLabel(font, text, size, color)
 	return Label.new({
@@ -144,6 +144,6 @@ end
 ---@class setStrokeParams
 ---@field alpha? number
 ---@field color? string|Color
----@field size? integer
+---@field size? number
 
 --#endregion

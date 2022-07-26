@@ -8,25 +8,16 @@ local laserColors = getLaserColors()
 
 local floor = math.floor
 
----@class ResultsTrack
----@field btHolds HitStat[]
----@field score DimmedNumber
----@field duration number
----@field fxHolds HitStat[]
----@field init boolean
----@field mouse Mouse
----@field numScoreData integer
----@field offset number
----@field trackHeight number
----@field w number
----@field h number
+---@class ResultsTrack: ResultsTrackBase
 local ResultsTrack = {}
 ResultsTrack.__index = ResultsTrack
 
 ---@param mouse Mouse
 ---@return ResultsTrack
 function ResultsTrack.new(mouse)
-	---@type ResultsTrack
+	---@class ResultsTrackBase
+	---@field btHolds HitStat[]
+	---@field fxHolds HitStat[]
 	local self = {
 		btHolds = {},
 		duration = nil,
@@ -41,6 +32,7 @@ function ResultsTrack.new(mouse)
 		h = 276,
 	}
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, ResultsTrack)
 end
 

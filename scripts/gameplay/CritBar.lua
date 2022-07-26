@@ -6,13 +6,13 @@ local sin = math.sin
 local r, g, b, _ = game.GetSkinSetting("colorScheme")
 local Color = { r, g, b }
 
----@class CritBar
+---@class CritBar: CritBarBase
 local CritBar = {}
 CritBar.__index = CritBar
 
 ---@return CritBar
 function CritBar.new(window)
-	---@type CritBar
+	---@class CritBarBase
 	local self = {
 		consoleFront = Image.new({ path = "gameplay/console/front" }),
 		fill = Image.new({ path = "gameplay/crit_bar/fill" }),
@@ -21,6 +21,7 @@ function CritBar.new(window)
 		window = window,
 	}
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, CritBar)
 end
 

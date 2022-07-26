@@ -15,46 +15,46 @@ local sortMenu = DropdownMenu.new(window, { control = "FX-R", name = "SORTING MO
 
 ---@param items string[]
 function DropdownMenu:makeItems(items)
-  if self.totalItems ~= #items then
-    local maxItems = self.pageItemCount
-    local totalItems = 0
-    local w = 0
-    local h = 0
+	if self.totalItems ~= #items then
+		local maxItems = self.pageItemCount
+		local totalItems = 0
+		local w = 0
+		local h = 0
 
-    self:resetProps()
+		self:resetProps()
 
-    for i, item in ipairs(items) do
-      self.items[i] = SortItem.new(item)
+		for i, item in ipairs(items) do
+			self.items[i] = SortItem.new(item)
 
-      if self.items[i].w > w then
-        w = self.items[i].w
-      end
+			if self.items[i].w > w then
+				w = self.items[i].w
+			end
 
-      if i <= maxItems then
-        h = h + 44
-      end
+			if i <= maxItems then
+				h = h + 44
+			end
 
-      totalItems = totalItems + 1
-    end
+			totalItems = totalItems + 1
+		end
 
-    self.totalItems = totalItems
-    self.w = w + 28
-    self.h = h
-  end
+		self.totalItems = totalItems
+		self.w = w + 28
+		self.h = h
+	end
 end
 
 ---@param dt deltaTime
 ---@param isSorting boolean
 function render(dt, isSorting)
-  local y = 0
+	local y = 0
 
-  game.SetSkinSetting("_isSorting", (isSorting and 1) or 0)
-  grid:setProps()
+	game.SetSkinSetting("_isSorting", (isSorting and 1) or 0)
+	grid:setProps()
 
 	gfx.Save()
 	window:update()
 
-  if window.isPortrait then
+	if window.isPortrait then
 		y = grid.y - 94
 	else
 		y = window.headerY
@@ -73,5 +73,5 @@ end
 
 ---@param newSort integer
 function set_selection(newSort)
-  currentSort = newSort
+	currentSort = newSort
 end

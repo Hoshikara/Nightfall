@@ -1,24 +1,25 @@
 local max = math.max
 local min = math.min
 
----@class Easing
+---@class Easing: EasingBase
 local Easing = {}
 Easing.__index = Easing
 
 ---@param initialValue? number
 ---@return Easing
 function Easing.new(initialValue)
-	---@type Easing
+	---@class EasingBase
 	local self = {
 		initialValue = initialValue or 0,
 		timer = initialValue or 0,
 		value = initialValue or 0,
 	}
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, Easing)
 end
 
----@param value number
+---@param value? number
 function Easing:reset(value)
 	self.timer = value or self.initialValue
 	self.value = value or self.initialValue

@@ -1,7 +1,7 @@
 local Image = require("common/Image")
 
 ---@param laserIndex integer
----@param isGameplaySettings boolean
+---@param isGameplaySettings? boolean
 ---@return Image[]
 local function makeLaserRings(laserIndex, isGameplaySettings)
 	local params = {

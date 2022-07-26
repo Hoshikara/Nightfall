@@ -26,35 +26,35 @@ local songSelectScoreList = SongSelectScoreList.new(context, leaderboardCache, s
 
 ---@param dt deltaTime
 function render(dt)
-  context:update(dt)
-  gfx.Save()
-  window:update()
-  songPanel:draw(dt)
-  songGrid:draw(dt)
-  songSelectFooter:draw(dt)
-  songSelectScoreList:draw(dt)
-  gfx.Restore()
-  gfx.ForceRender()
+	context:update(dt)
+	gfx.Save()
+	window:update()
+	songPanel:draw(dt)
+	songGrid:draw(dt)
+	songSelectFooter:draw(dt)
+	songSelectScoreList:draw(dt)
+	gfx.Restore()
+	gfx.ForceRender()
 end
 
 ---@return integer
 function get_page_size()
-  return context.pageItemCount
+	return context.pageItemCount
 end
 
 ---@param newSong integer
 function set_index(newSong)
-  context:updateSong(newSong)
+	context:updateSong(newSong)
 end
 
 ---@param newDiff integer
 function set_diff(newDiff)
-  context:updateDiff(newDiff)
+	context:updateDiff(newDiff)
 end
 
 ---@param withAll boolean
 function songs_changed(withAll)
 	if withAll then
-    context:updateVolforce()
-  end
+		context:updateVolforce()
+	end
 end

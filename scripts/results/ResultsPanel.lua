@@ -5,23 +5,7 @@ local ResultsGraphs = require("results/ResultsGraphs")
 
 local min = math.min
 
----@class ResultsPanel
----@field ctx ResultsContext
----@field detailedViewControl ControlLabel
----@field graphs ResultsGraphs
----@field isOnline boolean
----@field jacketAlpha Easing
----@field labels table<string, Label>
----@field localScoresControl ControlLabel
----@field onlineScoresControl ControlLabel
----@field scissorSize number
----@field screenshotControl ControlLabel
----@field screenshotPath Label
----@field screenshotSaved Label
----@field simpleViewControl ControlLabel
----@field smallJacketSize number
----@field window Window
----@field w number
+---@class ResultsPanel: ResultsPanelBase
 local ResultsPanel = {}
 ResultsPanel.__index = ResultsPanel
 
@@ -29,7 +13,8 @@ ResultsPanel.__index = ResultsPanel
 ---@param window Window
 ---@return ResultsPanel
 function ResultsPanel.new(ctx, window)
-	---@type ResultsPanel
+	---@class ResultsPanelBase
+	---@field labels table<string, Label>
 	local self = {
 		artistTimer = 0,
 		ctx = ctx,
@@ -70,6 +55,7 @@ function ResultsPanel.new(ctx, window)
 		self.labels[name] = makeLabel("Medium", str, 29)
 	end
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, ResultsPanel)
 end
 

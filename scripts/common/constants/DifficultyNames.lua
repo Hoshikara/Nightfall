@@ -12,7 +12,7 @@ local DifficultyNames = {
 }
 
 ---@param jacketPath string
----@param diffIndex integer
+---@param diffIndex integer|string
 ---@return string
 function DifficultyNames:get(jacketPath, diffIndex, isShort)
 	if jacketPath then

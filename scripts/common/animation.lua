@@ -32,7 +32,7 @@ local function loadFrames(folderPath, hueSettingKey, updateMeshHue)
 	return frames, i
 end
 
----@class Animation
+---@class Animation: AnimationBase
 ---@field frameTime number
 local Animation = {}
 Animation.__index = Animation
@@ -40,7 +40,7 @@ Animation.__index = Animation
 ---@param params Animation.new.params
 ---@return Animation
 function Animation.new(params)
-	---@type Animation
+	---@class AnimationBase
 	local self = {
 		alpha = params.alpha or 1,
 		frameTime = 1 / (params.fps or 60),
@@ -57,12 +57,13 @@ function Animation.new(params)
 		params.updateMeshHue
 	)
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, Animation)
 end
 
 ---@param dt deltaTime
 ---@param state AnimationState
----@param effect? function
+---@param effect? boolean|function
 function Animation:play(dt, state, effect)
 	state.timer = state.timer + dt
 

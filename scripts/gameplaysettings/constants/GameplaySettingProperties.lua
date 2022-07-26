@@ -320,7 +320,7 @@ local GameplaySettingProperties = {
 return GameplaySettingProperties
 
 ---@class GameplaySettingProperties
----@field default number
+---@field default number|string
 ---@field increment? number
 ---@field key string
 ---@field max? number

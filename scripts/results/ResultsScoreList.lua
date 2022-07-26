@@ -20,7 +20,7 @@ local StatOrder = {
 	"hitWindows",
 }
 
----@class ResultsScoreList
+---@class ResultsScoreList: ResultsScoreListBase
 local ResultsScoreList = {}
 ResultsScoreList.__index = ResultsScoreList
 
@@ -28,7 +28,7 @@ ResultsScoreList.__index = ResultsScoreList
 ---@param window Window
 ---@return ResultsScoreList
 function ResultsScoreList.new(ctx, window)
-	---@type ResultsScoreList
+	---@class ResultsScoreListBase
 	local self = {
 		ctx = ctx,
 		currentScore = 1,
@@ -65,6 +65,7 @@ function ResultsScoreList.new(ctx, window)
 		self.labels[name] = makeLabel("Medium", str, 29)
 	end
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, ResultsScoreList)
 end
 
@@ -75,7 +76,7 @@ function ResultsScoreList:draw(dt)
 	local currentScore = self.currentScore
 	local viewingOnlineScores = self.ctx.viewingOnlineScores
 	local scoreCount = (viewingOnlineScores and self.ctx.onlineScoreCount)
-			or self.ctx.scoreCount
+	or self.ctx.scoreCount
 
 	self:handleInput(scoreCount)
 
@@ -136,8 +137,8 @@ function ResultsScoreList:setProps()
 		end
 
 		local availableSpace = self.h.total
-				- self.h.open
-				- ((self.h.closed) * (self.pageItemCount - 1))
+		- self.h.open
+		- ((self.h.closed) * (self.pageItemCount - 1))
 
 		self.margin = availableSpace / (self.pageItemCount - 1)
 

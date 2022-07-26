@@ -7,20 +7,19 @@ local laserColors = getLaserColors()
 local abs = math.abs
 local sin = math.sin
 
----@class LaserCursors
+---@class LaserCursors: LaserCursorsBase
 local LaserCursors = {}
 LaserCursors.__index = LaserCursors
 
 ---@param window Window
----@param isGameplaySettings boolean
+---@param isGameplaySettings? boolean
 ---@return LaserCursors
 function LaserCursors.new(window, isGameplaySettings)
-	---@type LaserCursors
+	---@class LaserCursorsBase
 	local self = {
 		fill = Image.new({ path = "gameplay/laser_cursors/fill" }),
 		flickerTimer = 0,
 		isGameplaySettings = isGameplaySettings,
-		---@type MockCritLine
 		mockCritLine = isGameplaySettings and MockCritLine.new(window),
 		overlay = Image.new({ path = "gameplay/laser_cursors/overlay" }),
 		tail = Image.new({ path = "gameplay/laser_cursors/tail" }),
@@ -29,14 +28,17 @@ function LaserCursors.new(window, isGameplaySettings)
 
 	self.h = self.overlay.h * 1.15
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, LaserCursors)
 end
 
 function LaserCursors:draw(dt)
 	local cursors = (self.mockCritLine or gameplay.critLine).cursors
+	---@type Image
 	local fill = self.fill
 	local laserActive = (self.mockCritLine or gameplay).laserActive
 	local scale = self.window.scaleFactor
+	---@type Image
 	local tail = self.tail
 	local cursorScale = 0.4 * scale
 	local h = self.h

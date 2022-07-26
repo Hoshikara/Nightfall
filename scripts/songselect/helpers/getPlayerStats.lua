@@ -19,136 +19,138 @@ local sort = table.sort
 --#region Helpers
 
 ---@param folders string[]
----@param isClear boolean
+---@param isClear? boolean
 ---@return PlayerStatsClears|PlayerStatsGrades
 local function makeClearOrGradeTables(folders, isClear)
-  local tables = {}
+	local tables = {}
 
-  for _, key in ipairs(PlayerStatsKeys[(isClear and "Clears") or "Grades"]) do
-    tables[key] = {}
+	for _, key in ipairs(PlayerStatsKeys[(isClear and "Clears") or "Grades"]) do
+		tables[key] = {}
 
-    local current = tables[key]
+		local current = tables[key]
 
-    for __, folder in ipairs(folders) do
-      current[folder] = {}
-    end
-  end
+		for __, folder in ipairs(folders) do
+			current[folder] = {}
+		end
+	end
 
-  return tables
+	return tables
 end
 
 ---@param folders string[]
 ---@return PlayerStatsLevel
 local function makeLevelTable(folders)
-  local clears = makeClearOrGradeTables(folders, true)
-  local grades = makeClearOrGradeTables(folders)
+	local clears = makeClearOrGradeTables(folders, true)
+	local grades = makeClearOrGradeTables(folders)
 
-  local clearTotals = {}
-  local diffTotals = {}
-  local gradeTotals = {}
-  local scoreStats = {}
+	local clearTotals = {}
+	local diffTotals = {}
+	local gradeTotals = {}
+	local scoreStats = {}
 
-  for _, folder in ipairs(folders) do
-    clearTotals[folder] = 0
-    diffTotals[folder] = 0
-    gradeTotals[folder] = 0
-    scoreStats[folder] = {
-      avg = 0,
-      count = 0,
-      max = 0,
-      min = 0,
-      total = 0,
-    }
-  end
+	for _, folder in ipairs(folders) do
+		clearTotals[folder] = 0
+		diffTotals[folder] = 0
+		gradeTotals[folder] = 0
+		scoreStats[folder] = {
+			avg = 0,
+			count = 0,
+			max = 0,
+			min = 0,
+			total = 0,
+		}
+	end
 
-  return {
-    clears = clears,
-    clearTotals = clearTotals,
-    diffTotals = diffTotals,
-    grades = grades,
-    gradeTotals = gradeTotals,
-    scoreStats = scoreStats,
-  }
+	return {
+		clears = clears,
+		clearTotals = clearTotals,
+		diffTotals = diffTotals,
+		grades = grades,
+		gradeTotals = gradeTotals,
+		scoreStats = scoreStats,
+	}
 end
 
 ---@param folders string[]
 ---@return PlayerStatsLevels
 local function makeLevelTables(folders)
-  local levels = {}
+	local levels = {}
 
-  for _, level in ipairs(PlayerStatsKeys.Levels) do
-    levels[level] = makeLevelTable(folders)
-  end
+	for _, level in ipairs(PlayerStatsKeys.Levels) do
+		levels[level] = makeLevelTable(folders)
+	end
 
-  return levels
+	return levels
 end
 
 ---@param play PlayerStatsTopPlay|Difficulty
 ---@return PlayerStatsTopPlay
 local function makeTopPlay(play)
-  local topPlay = {
-    bpm = play.bpm,
-    clear = Clears:get(play.topBadge),
-    difficulty = DifficultyNames:get(play.jacketPath, play.difficulty),
-    grade = Grades:get(play.scores[1].score),
-    jacketPath = play.jacketPath,
-    level = ("%02d"):format(play.level),
-    score = play.scores[1].score,
-    title = play.title,
-    volforce = play.volforce,
-  }
+	local topPlay = {
+		bpm = play.bpm,
+		clear = Clears:get(play.topBadge),
+		difficulty = DifficultyNames:get(play.jacketPath, play.difficulty),
+		grade = Grades:get(play.scores[1].score),
+		jacketPath = play.jacketPath,
+		level = ("%02d"):format(play.level),
+		score = play.scores[1].score,
+		title = play.title,
+		volforce = play.volforce,
+	}
 
-  if play.artist then
-    topPlay.artist = play.artist
-    topPlay.effector = play.effector
-    topPlay.timestamp = os.date(getDateTemplate(), play.scores[1].timestamp)
-  end
+	if play.artist then
+		topPlay.artist = play.artist
+		topPlay.effector = play.effector
+		topPlay.timestamp = os.date(getDateTemplate(), play.scores[1].timestamp)
+	end
 
-  return topPlay
+	return topPlay
 end
 
 ---@param plays PlayerStatsTopPlay[]
 ---@return PlayerStatsTopPlay[]
 local function makeTop50(plays)
-  sort(plays, function (l, r)
-    if l.volforce == r.volforce then
-      return l.scores[1].score > r.scores[1].score
-    end
+	sort(plays, function(l, r)
+		if l.volforce == r.volforce then
+			return l.scores[1].score > r.scores[1].score
+		end
 
-    return l.volforce > r.volforce
-  end)
+		return l.volforce > r.volforce
+	end)
 
-  local top50 = {}
+	local top50 = {}
 
-  for i, play in ipairs(plays) do
-    if play.volforce == 0 then
-      break
-    end
+	for i, play in ipairs(plays) do
+		if play.volforce == 0 then
+			break
+		end
 
-    if i > 1 then
-      play.artist = nil
-      play.effector = nil
-      play.timestamp = nil
-    end
+		if i > 1 then
+			play.artist = nil
+			play.effector = nil
+			play.timestamp = nil
+		end
 
-    top50[i] = makeTopPlay(play)
+		top50[i] = makeTopPlay(play)
 
-    if i == 50 then
-      break
-    end
-  end
+		if i == 50 then
+			break
+		end
+	end
 
-  return top50
+	return top50
 end
 
 ---@param folders string[]
 ---@param songPath string
+---@return string, integer|nil
 local function updateProps(folders, songPath)
-  for __, folder in ipairs(folders) do
-    if songPath:find(folder) then
-      return folder, isOfficialChart(songPath)
-    end
-  end
+	for __, folder in ipairs(folders) do
+		if songPath:find(folder) then
+			return folder, isOfficialChart(songPath)
+		end
+		---@diagnostic disable-next-line
+	end
 end
 
 ---@param diff Difficulty
@@ -157,191 +159,192 @@ end
 ---@param title title
 ---@return PlayerStatsTopPlay
 local function updateDiff(diff, artist, bpm, title)
-  diff.artist = artist
-  diff.bpm = bpm
-  diff.title = title
-  diff.volforce = getVolforce({}, diff)
+	diff.artist = artist
+	diff.bpm = bpm
+	diff.title = title
+	diff.volforce = getVolforce({}, diff)
 
-  return diff
+	---@diagnostic disable-next-line
+	return diff
 end
 
 ---@param clearOrGrade PlayerStatsClear|PlayerStatsGrade
 ---@param folder string
----@param isOfficial boolean
+---@param isOfficial integer|nil
 ---@param artist string
 ---@param title string
 ---@param score integer
 local function updateCharts(clearOrGrade, folder, isOfficial, artist, title, score)
-  if not clearOrGrade[folder] then
-    return
-  end
+	if not clearOrGrade[folder] then
+		return
+	end
 
-  local chart = {
-    artist = artist,
-    score = score,
-    title = title
-  }
+	local chart = {
+		artist = artist,
+		score = score,
+		title = title
+	}
 
-  clearOrGrade[folder][#clearOrGrade[folder] + 1] = chart
-  clearOrGrade.All[#clearOrGrade.All + 1] = chart
+	clearOrGrade[folder][#clearOrGrade[folder] + 1] = chart
+	clearOrGrade.All[#clearOrGrade.All + 1] = chart
 
-  if isOfficial then
-    clearOrGrade[OFFICIAL_FOLDER][#clearOrGrade[OFFICIAL_FOLDER] + 1] = chart
-  end
+	if isOfficial then
+		clearOrGrade[OFFICIAL_FOLDER][#clearOrGrade[OFFICIAL_FOLDER] + 1] = chart
+	end
 end
 
 ---@param scoreStat PlayerStatsScoreStats
 ---@param score integer
 local function updateScoreStat(scoreStat, score)
-  scoreStat.count = scoreStat.count + 1
-  scoreStat.total = scoreStat.total + (score / 10000)
+	scoreStat.count = scoreStat.count + 1
+	scoreStat.total = scoreStat.total + (score / 10000)
 
-  if (score < scoreStat.min) or (scoreStat.min == 0) then
-    scoreStat.min = score
-  end
+	if (score < scoreStat.min) or (scoreStat.min == 0) then
+		scoreStat.min = score
+	end
 
-  if (score > scoreStat.max) or (scoreStat.max == 0) then
-    scoreStat.max = score
-  end
+	if (score > scoreStat.max) or (scoreStat.max == 0) then
+		scoreStat.max = score
+	end
 end
 
 ---@param scoreStats table<string, PlayerStatsScoreStats>
 ---@param folder string
----@param isOfficial boolean
+---@param isOfficial integer|nil
 ---@param score integer
 local function updateScoreStats(scoreStats, folder, isOfficial, score)
-  if not scoreStats[folder] then
-    return
-  end
+	if not scoreStats[folder] then
+		return
+	end
 
-  updateScoreStat(scoreStats[folder], score)
-  updateScoreStat(scoreStats.All, score)
+	updateScoreStat(scoreStats[folder], score)
+	updateScoreStat(scoreStats.All, score)
 
-  if isOfficial then
-    updateScoreStat(scoreStats[OFFICIAL_FOLDER], score)
-  end
+	if isOfficial then
+		updateScoreStat(scoreStats[OFFICIAL_FOLDER], score)
+	end
 end
 
 ---@param totals PlayerStatsTotals
 ---@param folder string
----@param isOfficial boolean
+---@param isOfficial integer|nil
 local function updateTotal(totals, folder, isOfficial)
-  if not totals[folder] then
-    return
-  end
+	if not totals[folder] then
+		return
+	end
 
-  totals[folder] = totals[folder] + 1
-  totals.All = totals.All + 1
+	totals[folder] = totals[folder] + 1
+	totals.All = totals.All + 1
 
-  if isOfficial then
-    totals[OFFICIAL_FOLDER] = totals[OFFICIAL_FOLDER] + 1
-  end
+	if isOfficial then
+		totals[OFFICIAL_FOLDER] = totals[OFFICIAL_FOLDER] + 1
+	end
 end
 
 ---@param level PlayerStatsLevel
 ---@param folder string
----@param isOfficial boolean
+---@param isOfficial integer|nil
 ---@param diff Difficulty
 ---@param artist string
 ---@param title string
 local function updateAll(level, folder, isOfficial, diff, artist, title)
-  if diff.topBadge > 0 then
-    local score = diff.scores[1].score
+	if diff.topBadge > 0 then
+		local score = diff.scores[1].score
 
-    updateCharts(level.clears[Clears:get(diff.topBadge)], folder, isOfficial, artist, title, score)
-    updateTotal(level.clearTotals, folder, isOfficial)
+		updateCharts(level.clears[Clears:get(diff.topBadge)], folder, isOfficial, artist, title, score)
+		updateTotal(level.clearTotals, folder, isOfficial)
 
-    if score >= 8700000 then
-      updateCharts(level.grades[Grades:get(score)], folder, isOfficial, artist, title, score)
-      updateTotal(level.gradeTotals, folder, isOfficial)
-      updateScoreStats(level.scoreStats, folder, isOfficial, score)
-    end
-  end
+		if score >= 8700000 then
+			updateCharts(level.grades[Grades:get(score)], folder, isOfficial, artist, title, score)
+			updateTotal(level.gradeTotals, folder, isOfficial)
+			updateScoreStats(level.scoreStats, folder, isOfficial, score)
+		end
+	end
 
-  updateTotal(level.diffTotals, folder, isOfficial)
+	updateTotal(level.diffTotals, folder, isOfficial)
 end
 
 ---@param clearsOrGrades PlayerStatsClears|PlayerStatsGrades
 ---@param folder string
 local function sortCharts(clearsOrGrades, folder)
-  ---@type PlayerStatsClear|PlayerStatsGrade
-  for _, clearOrGrade in pairs(clearsOrGrades) do
-    local charts = clearOrGrade[folder]
+	---@type PlayerStatsClear|PlayerStatsGrade
+	for _, clearOrGrade in pairs(clearsOrGrades) do
+		local charts = clearOrGrade[folder]
 
-    if #charts > 1 then
-      sort(charts, function(l, r)
-        return l.score > r.score
-      end)
-    end
-  end
+		if #charts > 1 then
+			sort(charts, function(l, r)
+				return l.score > r.score
+			end)
+		end
+	end
 end
 
 ---@param levels PlayerStatsLevels
 ---@param folders string[]
 local function formatStats(levels, folders)
-  ---@type PlayerStatsLevel
-  for _, level in pairs(levels) do
-    for __, folder in ipairs(folders) do
-      local scoreStats = level.scoreStats[folder]
+	---@type PlayerStatsLevel
+	for _, level in pairs(levels) do
+		for __, folder in ipairs(folders) do
+			local scoreStats = level.scoreStats[folder]
 
-      if scoreStats.count > 0 then
-        scoreStats.avg = ceil((scoreStats.total / scoreStats.count) * 10000)
-      end
+			if scoreStats.count > 0 then
+				scoreStats.avg = ceil((scoreStats.total / scoreStats.count) * 10000)
+			end
 
-      sortCharts(level.clears, folder)
-      sortCharts(level.grades, folder)
-    end
-  end
+			sortCharts(level.clears, folder)
+			sortCharts(level.grades, folder)
+		end
+	end
 end
 
 --#endregion
 
----@return PlayerStats
+---@return PlayerStats|nil
 local function getPlayerStats()
-  ---@type string[]
-  local folders = JsonTable.new("folders"):get()
+	---@type string[]
+	local folders = JsonTable.new("folders"):get()
 
-  if #folders == 0 then
-    return
-  end
+	if #folders == 0 then
+		return
+	end
 
-  local currentFolder = ""
-  local levels = makeLevelTables(folders)
-  local isOfficial = false
-  local plays = {}
-  local playCount = 0
+	local currentFolder = ""
+	local levels = makeLevelTables(folders)
+	local isOfficial = nil
+	local plays = {}
+	local playCount = 0
 
-  for _, song in ipairs(songwheel.allSongs) do
-    currentFolder, isOfficial = updateProps(folders, song.path)
+	for _, song in ipairs(songwheel.allSongs) do
+		currentFolder, isOfficial = updateProps(folders, song.path)
 
-    for __, diff in ipairs(song.difficulties) do
-      if isOfficial and diff.scores[1] then
-        plays[#plays + 1] = updateDiff(diff, song.artist, song.bpm, song.title)
-      end
+		for __, diff in ipairs(song.difficulties) do
+			if isOfficial and diff.scores[1] then
+				plays[#plays + 1] = updateDiff(diff, song.artist, song.bpm, song.title)
+			end
 
-      if diff.level >= 10 then
-        playCount = playCount + #diff.scores
+			if diff.level >= 10 then
+				playCount = playCount + #diff.scores
 
-        updateAll(
-          levels[tostring(diff.level)],
-          currentFolder,
-          isOfficial,
-          diff,
-          song.artist,
-          song.title
-        )
-      end
-    end
-  end
+				updateAll(
+					levels[tostring(diff.level)],
+					currentFolder,
+					isOfficial,
+					diff,
+					song.artist,
+					song.title
+				)
+			end
+		end
+	end
 
-  formatStats(levels, folders)
+	formatStats(levels, folders)
 
-  return {
-    folders = folders,
-    levels = levels,
-    playCount = playCount,
-    top50 = makeTop50(plays),
-  }
+	return {
+		folders = folders,
+		levels = levels,
+		playCount = playCount,
+		top50 = makeTop50(plays),
+	}
 end
 
 return getPlayerStats
@@ -381,6 +384,7 @@ return getPlayerStats
 ---@field jacketPath jacketPath
 ---@field level string
 ---@field score score
+---@field scores Score[]
 ---@field timestamp? string
 ---@field title title
 ---@field volforce integer

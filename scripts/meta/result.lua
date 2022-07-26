@@ -1,8 +1,8 @@
 ---@meta
 
 ---
----The global `result` table.  
----Only available for `/scripts/result.lua`.  
+---The global `result` table.
+---Only available for `/scripts/result.lua`.
 ---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/scorescreen.html)
 ---
 ---@class result : Score
@@ -17,7 +17,7 @@
 ---
 ---@field difficulty difficultyIndex
 ---
----The index of the score being viewed.  
+---The index of the score being viewed.
 ---Only available for `Multiplayer`.
 ---@field displayIndex integer
 ---
@@ -35,8 +35,8 @@
 ---
 ---@field highScores scores
 ---
----An array of hit stats for the chart's hold objects.  
----Always available for `Singleplayer`.  
+---An array of hit stats for the chart's hold objects.
+---Always available for `Singleplayer`.
 ---Only available for `Multiplayer` if `result.isSelf` is `true`.
 ---@field holdHitStats HitStat[]
 ---
@@ -44,24 +44,25 @@
 ---
 ---@field irDescription string|nil # The internet ranking status. This value is `nil` if `irState` is `0` or `10`.
 ---
----@field irScores IRScore[]|nil # An array of `IRScore` sorted in descending order from the IR server. This value is `nil` if `irState` is not `20`.
+---@field irScores IRScore[]|nil # An array of `IRScore` sorted in descending order from the IR server.
+---This value is `nil` if `irState` is not `20`.
 ---
 ---@field irState integer # The internet ranking response status, corresponding to `IRData.States.*`.
 ---
----If `true`, the score being viewed is the player's.  
+---If `true`, the score being viewed is the player's.
 ---Only available for `Multiplayer`.
 ---@field isSelf boolean
 ---
 ---@field jacketPath jacketPath
 ---
----An array of hit stats for the chart's laser objects.  
----Always available for `Singleplayer`.  
+---An array of hit stats for the chart's laser objects.
+---Always available for `Singleplayer`.
 ---Only available for `Multiplayer` if `result.isSelf` is `true`.
 ---@field laserHitStats HitStat[]
 ---
 ---@field lates integer # The total late near count.
 ---
----For normal results, this is the chart's level.  
+---For normal results, this is the chart's level.
 ---For challenge results, this is the challenge's level.
 ---@field level integer
 ---
@@ -75,16 +76,16 @@
 ---
 ---@field medianHitDeltaAbs number # The absolute value of the score's median hit delta.
 ---
----The score's mission description.  
+---The score's mission description.
 ---Only available for `Practice Mode`.
 ---@field mission string
 ---
----An array of hit stats for the chart's note objects.  
----Always available for `Singleplayer`.  
+---An array of hit stats for the chart's note objects.
+---Always available for `Singleplayer`.
 ---Only available for `Multiplayer` if `result.isSelf` is `true`.
 ---@field noteHitStats HitStat[]
 ---
----The score's playback speed in range `[0.25, 1.0]`.  
+---The score's playback speed in range `[0.25, 1.0]`.
 ---Only available for `Practice Mode`.
 ---@field playbackSpeed number
 ---
@@ -92,24 +93,24 @@
 ---
 ---@field realTitle string # The chart's title excluding player names.
 ---
----The score's retry count.  
+---The score's retry count.
 ---Only available for `Practice Mode`.
 ---@field retryCount integer
 ---
----The score's Lane-Speed type.  
+---The score's Lane-Speed type.
 ---Only available for `Singleplayer`.
 ---* `0` = XMOD
 ---* `1` = MMOD
 ---* `2` = CMOD
 ---@field speedModType integer
 ---
----The score's Lane-Speed value.  
----Only available for `Singleplayer`.  
+---The score's Lane-Speed value.
+---Only available for `Singleplayer`.
 ---If `results.speedModType` is `0`, this is the multiplier value.
 ---@field speedModValue number
 ---
----For `Singleplayer`, this is the chart's title.  
----For `Multiplayer`, this is the chart's title appended with the name of the player whose score is being viewed.  
+---For `Singleplayer`, this is the chart's title.
+---For `Multiplayer`, this is the chart's title appended with the name of the player whose score is being viewed.
 ---For challenge results, this is the challenge's title.
 ---@field title string
 ---

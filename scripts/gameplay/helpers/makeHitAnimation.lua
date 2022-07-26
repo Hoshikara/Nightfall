@@ -4,13 +4,13 @@ local HitAnimationProperties = require("gameplay/constants/HitAnimationPropertie
 ---@param hitType string
 ---@return Animation
 local function makeHitAnimation(hitType, isGameplaySettings)
-  local props =
-    HitAnimationProperties[hitType][getSetting("hitAnimationType", "STANDARD")]
-  
-  props.isCentered = true
-  props.updateMeshHue = isGameplaySettings
+	local props =
+	  HitAnimationProperties[hitType][getSetting("hitAnimationType", "STANDARD")]
 
-  return Animation.new(props)
+	props.isCentered = true
+	props.updateMeshHue = isGameplaySettings
+
+	return Animation.new(props)
 end
 
 return makeHitAnimation

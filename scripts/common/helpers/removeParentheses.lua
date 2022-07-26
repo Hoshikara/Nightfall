@@ -1,7 +1,7 @@
 ---@param str string
----@return string
+---@return string, integer
 local function removeParentheses(str)
-  return str:gsub(" %((.*)%)", "")
+	return str:gsub(" %((.*)%)", "")
 end
 
 return removeParentheses

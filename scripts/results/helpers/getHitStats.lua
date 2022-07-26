@@ -2,7 +2,7 @@ local RatingColors = require("common/constants/RatingColors")
 
 ---@param hitStats HitStat[]
 ---@param sCriticalWindow integer
----@return ResultsHitStat[]
+---@return ResultsHitStat[]|nil
 local function getHitStats(hitStats, sCriticalWindow)
 	if #hitStats == 0 then
 		return

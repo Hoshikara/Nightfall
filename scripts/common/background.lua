@@ -3,16 +3,13 @@ local Image = require("common/Image")
 local floor = math.floor
 local min = math.min
 
----@class Background
----@field image Image
----@field imagePortrait Image
----@field tint Color
+---@class Background: BackgroundBase
 local Background = {}
 Background.__index = Background
 
 ---@return Background
 function Background.new()
-	---@type Background
+	---@class BackgroundBase
 	local self = {
 		blue = 0,
 		dim = getSetting("backgroundDim", 0),
@@ -24,6 +21,7 @@ function Background.new()
 		tintBackground = getSetting("tintBackground", true),
 	}
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, Background)
 end
 

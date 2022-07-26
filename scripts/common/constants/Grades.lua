@@ -13,22 +13,22 @@ local Grades = {
 }
 
 ---@param score integer
----@param getRate boolean
----@return string|nil
+---@param getRate? boolean
+---@return nil|number|string
 function Grades:get(score, getRate)
-  if not score then
+	if not score then
 		return
 	end
 
-  for _, grade in ipairs(self) do
-    if score >= grade.min then
+	for _, grade in ipairs(self) do
+		if score >= grade.min then
 			if getRate then
 				return grade.rate
 			end
 
 			return grade.name
 		end
-  end
+	end
 end
 
 return Grades

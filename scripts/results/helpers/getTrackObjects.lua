@@ -50,7 +50,7 @@ end
 
 ---@param holdsOrLasers HitStat[]
 ---@param isLasers? boolean
----@return HitStat[][], HitStat[][]|HitStat[][]
+---@return HitStat[][]|HitStat[][], ...
 local function separateObjects(holdsOrLasers, isLasers)
 	if isLasers then
 		local lasers = { {}, {} }
@@ -267,7 +267,7 @@ end
 ---@param notes HitStat[]
 ---@param holds HitStat[]
 ---@param duration number
----@return ResultsTrackObjects
+---@return ResultsTrackObjects|nil
 local function getTrackObjects(notes, holds, lasers, duration)
 	if (#notes == 0) and (#holds == 0) and (#lasers == 0) then
 		return

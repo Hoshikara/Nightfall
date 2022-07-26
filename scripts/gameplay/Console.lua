@@ -3,7 +3,7 @@ local Image = require("common/Image")
 local abs = math.abs
 local sin = math.sin
 
----@class Console
+---@class Console: ConsoleBase
 local Console = {}
 Console.__index = Console
 
@@ -11,7 +11,7 @@ Console.__index = Console
 ---@param window Window
 ---@return Console
 function Console.new(ctx, window)
-	---@type Console
+	---@class ConsoleBase
 	local self = {
 		base = Image.new({ path = "gameplay/console/base" }),
 		buttons = {},
@@ -36,6 +36,7 @@ function Console.new(ctx, window)
 		}
 	end
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, Console)
 end
 

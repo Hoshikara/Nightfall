@@ -7,100 +7,100 @@ local makeHoldAnimationStates = require("gameplay/helpers/makeHoldAnimationState
 
 --#endregion
 
----@class HoldAnimation
+---@class HoldAnimation: HoldAnimationBase
 local HoldAnimation = {}
 HoldAnimation.__index = HoldAnimation
 
 ---@param window Window
----@param isGameplaySettings boolean
+---@param isGameplaySettings? boolean
 ---@return HoldAnimation
 function HoldAnimation.new(window, isGameplaySettings)
-  ---@type HoldAnimation
-  local self = {
-    animation = RingAnimation.new(false, isGameplaySettings),
-    animationType = getSetting("hitAnimationType", "STANDARD"),
-    isGameplaySettings = isGameplaySettings,
-    ---@type MockCritLine
-    mockCritLine = isGameplaySettings and MockCritLine.new(window),
-    scale = 0.85 * getSetting("hitAnimationScale", 1),
-    states = makeHoldAnimationStates(),
-    window = window,
-  }
+	---@class HoldAnimationBase
+	local self = {
+		animation = RingAnimation.new(nil, isGameplaySettings),
+		animationType = getSetting("hitAnimationType", "STANDARD"),
+		isGameplaySettings = isGameplaySettings,
+		mockCritLine = isGameplaySettings and MockCritLine.new(window),
+		scale = 0.85 * getSetting("hitAnimationScale", 1),
+		states = makeHoldAnimationStates(),
+		window = window,
+	}
 
-  return setmetatable(self, HoldAnimation)
+	---@diagnostic disable-next-line
+	return setmetatable(self, HoldAnimation)
 end
 
 ---@param dt deltaTime
 function HoldAnimation:draw(dt)
-  local isGameplaySettings = self.isGameplaySettings
-  local noteHeld = nil
+	local isGameplaySettings = self.isGameplaySettings
+	local noteHeld = nil
 
-  if isGameplaySettings then
-    local state = self.states[4]
+	if isGameplaySettings then
+		local state = self.states[4]
 
-    self:updateProps(state)
+		self:updateProps(state)
 
-    state.active = true
+		state.active = true
 
-    self:playHold(dt, 4, state)
-  else
-    noteHeld = gameplay.noteHeld
-  end
+		self:playHold(dt, 4, state)
+	else
+		noteHeld = gameplay.noteHeld
+	end
 
-  for btn, state in ipairs(self.states) do
-    if not isGameplaySettings then
-      state.active = noteHeld[btn]
+	for btn, state in ipairs(self.states) do
+		if not isGameplaySettings then
+			state.active = noteHeld[btn]
 
-      self:playHold(dt, btn, state)
-    end
-  end
+			self:playHold(dt, btn, state)
+		end
+	end
 end
 
 ---@param dt deltaTime
 ---@param btn integer
 ---@param state HoldAnimationState
 function HoldAnimation:playHold(dt, btn, state)
-  gfx.Save()
-  self:setupCritLineTransform(btn)
-  self.animation:play(dt, state)
-  gfx.Restore()
+	gfx.Save()
+	self:setupCritLineTransform(btn)
+	self.animation:play(dt, state)
+	gfx.Restore()
 end
 
 ---@param btn integer
 function HoldAnimation:setupCritLineTransform(btn)
-  local critLine = self.mockCritLine or gameplay.critLine
+	local critLine = self.mockCritLine or gameplay.critLine
 
-  gfx.Translate(
-    critLine.line.x1 + (critLine.line.x2 - critLine.line.x1) * HitLanes[btn],
-    critLine.line.y1 + (critLine.line.y2 - critLine.line.y1) * HitLanes[btn]
-  )
-  gfx.Rotate(-critLine.rotation * (180 / 3.14))
-  self.window:scale(self.scale)
+	gfx.Translate(
+		critLine.line.x1 + (critLine.line.x2 - critLine.line.x1) * HitLanes[btn],
+		critLine.line.y1 + (critLine.line.y2 - critLine.line.y1) * HitLanes[btn]
+	)
+	gfx.Rotate(-critLine.rotation * (180 / 3.14))
+	self.window:scale(self.scale)
 end
 
 ---@param state HoldAnimationState
 function HoldAnimation:updateProps(state)
-  local animationType = getSetting("hitAnimationType", "STANDARD")
+	local animationType = getSetting("hitAnimationType", "STANDARD")
 
-  self.scale = 0.85 * getSetting("hitAnimationScale", 1)
+	self.scale = 0.85 * getSetting("hitAnimationScale", 1)
 
-  self.mockCritLine:update()
+	self.mockCritLine:update()
 
-  if self.animationType ~= animationType then
-    self:resetProps(state)
-    
-    self.animationType = animationType
-  end
+	if self.animationType ~= animationType then
+		self:resetProps(state)
+
+		self.animationType = animationType
+	end
 end
 
 ---@param state HoldAnimationState
 function HoldAnimation:resetProps(state)
-  self.animation = RingAnimation.new(nil, true)
+	self.animation = RingAnimation.new(nil, true)
 
-  state.active = false
-  state.timer = 0
-  state.inner.frame = 1
-  state.inner.timer = 0
+	state.active = false
+	state.timer = 0
+	state.inner.frame = 1
+	state.inner.timer = 0
 end
 
 return HoldAnimation

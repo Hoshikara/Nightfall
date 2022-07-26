@@ -2,15 +2,15 @@
 ---@param itemIndex integer
 ---@return CachedDiff
 local function getDiffInOrder(cachedDiffs, itemIndex)
-  local index = nil
+	local index = nil
 
-  for i, cachedDiff in ipairs(cachedDiffs) do
-    if (cachedDiff.diffIndex + 1) == itemIndex then
-      index = i
-    end
-  end
+	for i, cachedDiff in ipairs(cachedDiffs) do
+		if (cachedDiff.diffIndex + 1) == itemIndex then
+			index = i
+		end
+	end
 
-  return cachedDiffs[index]
+	return cachedDiffs[index]
 end
 
 return getDiffInOrder

@@ -51,17 +51,17 @@ function render(dt)
 			mainMenuControlY = window.headerY
 		end
 	elseif (context.currentView == "PlayerInfo")
-		or (context.currentView == "Charts")
-		or (context.currentView == "Top50")
+	or (context.currentView == "Charts")
+	or (context.currentView == "Top50")
 	then
 		playerInfo:draw(dt)
 	end
 
 	if (context.currentView ~= "UpdatePrompt")
-		and (context.currentPage ~= "MainMenu")
+	and (context.currentPage ~= "MainMenu")
 	then
-    mainMenuControl:draw(window.paddingX, mainMenuControlY)
-  end
+		mainMenuControl:draw(window.paddingX, mainMenuControlY)
+	end
 
 	gfx.Restore()
 end

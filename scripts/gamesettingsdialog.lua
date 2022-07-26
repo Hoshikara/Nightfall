@@ -33,6 +33,6 @@ function render(dt, isVisible)
 			practiceSettingsWindow:draw(dt)
 		end
 	end
-	
+
 	gfx.Restore()
 end

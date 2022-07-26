@@ -3,14 +3,14 @@ local TextAlignments = require("common/constants/TextAlignments")
 
 local max = math.max
 
----@class Label
+---@class Label: LabelBase
 local Label = {}
 Label.__index = Label
 
 ---@param params Label.new.params
 ---@return Label
 function Label.new(params)
-	---@type Label
+	---@class LabelBase
 	local self = {
 		color = params.color or "Standard",
 		font = params.font or "JP",
@@ -19,7 +19,7 @@ function Label.new(params)
 		w = 0,
 		h = 0,
 	}
-	
+
 	if self.font ~= "Number" then
 		self.text = (self.text or ""):upper()
 	end
@@ -28,12 +28,13 @@ function Label.new(params)
 	self.label = gfx.CreateLabel(self.text, self.size, 0)
 	self.w, self.h = gfx.LabelSize(self.label)
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, Label)
 end
 
----@param text string
----@param size string
----@param font string
+---@param text integer|string
+---@param size? integer
+---@param font? string
 function Label:update(text, size, font)
 	font = font or self.font
 	text = text or self.text
@@ -101,10 +102,10 @@ return Label
 --#region Interfaces
 
 ---@class Label.new.params
----@field color? string
+---@field color? Color|string
 ---@field font? string
 ---@field size? integer
----@field text? string
+---@field text? number|string
 
 ---@class Label.draw.params
 ---@field x? number
@@ -115,7 +116,7 @@ return Label
 ---@field font? string
 ---@field maxWidth? number
 ---@field size? integer
----@field text? string
+---@field text? string|number
 ---@field update? boolean
 
 ---@class Label.drawScrolling.params
@@ -129,7 +130,7 @@ return Label
 ---@field timer? number
 ---@field width? number
 ---@field size? integer
----@field text? string
+---@field text? string|number
 ---@field update? boolean
 
 --#endregion

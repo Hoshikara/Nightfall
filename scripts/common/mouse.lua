@@ -1,18 +1,18 @@
----@class Mouse
----@field window Window
+---@class Mouse: MouseBase
 local Mouse = {}
 Mouse.__index = Mouse
 
 ---@param window Window
 ---@return Mouse
 function Mouse.new(window)
-	---@type Mouse
+	---@class MouseBase
 	local self = {
 		window = window,
 		x = 0,
 		y = 0,
 	}
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, Mouse)
 end
 

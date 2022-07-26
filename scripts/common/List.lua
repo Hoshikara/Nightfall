@@ -2,13 +2,13 @@ local Easing = require("common/Easing")
 
 local floor = math.floor
 
----@class List
+---@class List: ListBase
 local List = {}
 List.__index = List
 
 ---@return List
 function List.new()
-	---@type List
+	---@class ListBase
 	local self = {
 		currentItem = nil,
 		currentPage = 0,
@@ -20,6 +20,7 @@ function List.new()
 		previousOffset = 0,
 	}
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, List)
 end
 
@@ -42,7 +43,7 @@ function List:isOnPage(itemIndex, pageItemCount)
 	pageItemCount = pageItemCount or self.pageItemCount
 
 	return (itemIndex > ((self.currentPage - 1) * pageItemCount))
-		and (itemIndex <= (self.currentPage * pageItemCount))
+	and (itemIndex <= (self.currentPage * pageItemCount))
 end
 
 ---@param dt deltaTime

@@ -6,19 +6,38 @@ local floor = math.floor
 ---@param itemIndex integer
 ---@return integer row, integer column
 local function getGridPos(itemIndex)
-  return floor((itemIndex - 1) / 3) % 3, floor((itemIndex - 1) % 3)
+	return floor((itemIndex - 1) / 3) % 3, floor((itemIndex - 1) % 3)
 end
 
----@class ItemCursor
-local ItemCursor =  {}
+---@class ItemCursor: ItemCursorBase
+---@field type string
+local ItemCursor = {}
 ItemCursor.__index = ItemCursor
 
 ---@param params ItemCursor.new.params
----@param simpleItemCursor boolean
+---@param simpleItemCursor? boolean
 ---@return ItemCursor
 function ItemCursor.new(params, simpleItemCursor)
-	---@type ItemCursor
-	local self
+	---@class ItemCursorBase
+	local self = {
+		alpha = 0,
+		currentItem = 0,
+		easing = Easing.new(),
+		margin = 0,
+		offsetX = 0,
+		offsetY = 0,
+		phaseTimer = 0,
+		previousX = 0,
+		previousY = 0,
+		size = params.size or 6,
+		speed = params.speed or 6,
+		stroke = params.stroke or 1,
+		type = params.type or "Horizontal",
+		x = 0,
+		y = 0,
+		w = 0,
+		h = 0,
+	}
 
 	if simpleItemCursor then
 		self = {
@@ -26,28 +45,9 @@ function ItemCursor.new(params, simpleItemCursor)
 			stroke = params.stroke or 1,
 			type = params.type or "Horizontal",
 		}
-	else
-		self = {
-			alpha = 0,
-			currentItem = 0,
-			easing = Easing.new(),
-			margin = 0,
-			offsetX = 0,
-			offsetY = 0,
-			phaseTimer = 0,
-			previousX = 0,
-			previousY = 0,
-			size = params.size or 6,
-			speed = params.speed or 6,
-			stroke = params.stroke or 1,
-			type = params.type or "Horizontal",
-			x = 0,
-			y = 0,
-			w = 0,
-			h = 0,
-		}
 	end
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, ItemCursor)
 end
 
@@ -65,7 +65,7 @@ function ItemCursor:draw(dt, params)
 	self:drawItemCursor({
 		xOffset = params.xOffset or 0,
 		yOffset = params.yOffset or 0,
-		alphaMod = params.alphaMod, 
+		alphaMod = params.alphaMod,
 	})
 	gfx.Restore()
 end
@@ -86,7 +86,7 @@ end
 ---@param currentItem integer
 ---@param totalItems integer
 function ItemCursor:updateProps(dt, h, currentItem, totalItems)
-  self:updateTimers(dt, currentItem)
+	self:updateTimers(dt, currentItem)
 
 	if self.type == "Grid" then
 		local column, row = getGridPos(currentItem)
@@ -109,13 +109,13 @@ end
 function ItemCursor:updateTimers(dt, currentItem)
 	self.phaseTimer = self.phaseTimer + dt
 
-  if self.currentItem ~= currentItem then
+	if self.currentItem ~= currentItem then
 		self.easing:reset()
 		self.currentItem = currentItem
 	end
 
-  self.alpha = pulse(self.phaseTimer, 0.15, 4.5)
-  self.easing:start(dt, 3, 1 / self.speed)
+	self.alpha = pulse(self.phaseTimer, 0.15, 4.5)
+	self.easing:start(dt, 3, 1 / self.speed)
 end
 
 ---@param currentX number
@@ -161,7 +161,7 @@ function ItemCursor:drawItemCursor(params)
 end
 
 ---@param amount integer
----@param dimension number
+---@param dimension? number
 ---@return number
 function ItemCursor:getCurrentPos(amount, dimension)
 	return ((dimension or self.h) + self.margin) * amount

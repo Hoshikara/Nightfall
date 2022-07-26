@@ -95,7 +95,7 @@ end
 ---@param rating rating
 ---@param delta integer
 function button_hit(btn, rating, delta)
-	context:handleButton(btn, delta, rating)
+	context:handleButton(delta, rating)
 
 	if hitAnimationsEnabled then
 		hitAnimations:enqueueHit(btn, delta, rating)
@@ -148,7 +148,7 @@ function render(dt)
 
 	bpmData:collect(dt)
 	context:update()
-	
+
 	gfx.ResetTransform()
 	window:update()
 	chain:draw(dt)
@@ -179,8 +179,8 @@ function render(dt)
 		end
 
 		if playerCardEnabled
-			and (not gameplay.multiplayer)
-			and (gameplay.practice_setup == nil)
+		and (not gameplay.multiplayer)
+		and (gameplay.practice_setup == nil)
 		then
 			playerCard:draw()
 		end
@@ -226,7 +226,7 @@ function render_outro(dt, clearState)
 	return context.outroTimer > 2, 1
 end
 
----@param isRight boolean 
+---@param isRight boolean
 function laser_alert(isRight)
 	context:updateLaserAlerts(isRight)
 end
@@ -266,5 +266,3 @@ end
 function practice_end(playCount, passCount)
 	practiceInfo:set(passCount, playCount)
 end
-
-

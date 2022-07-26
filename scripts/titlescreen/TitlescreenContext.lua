@@ -3,19 +3,14 @@ local Knobs = require("common/Knobs")
 local BACK = game.BUTTON_BCK
 local START = game.BUTTON_STA
 
----@class TitlescreenContext
----@field btnCount integer
----@field btnEvent function|nil
----@field isClickable boolean
----@field knobs Knobs
----@field tabCount integer
----@field window Window
+---@class TitlescreenContext: TitlescreenContextBase
 local TitlescreenContext = {}
 TitlescreenContext.__index = TitlescreenContext
 
 ---@return TitlescreenContext
 function TitlescreenContext.new(window)
-	---@type TitlescreenContext
+	---@class TitlescreenContextBase
+	---@field btnEvent function|nil
 	local self = {
 		btnCount = 0,
 		btnEvent = nil,
@@ -35,6 +30,7 @@ function TitlescreenContext.new(window)
 		window = window,
 	}
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, TitlescreenContext)
 end
 

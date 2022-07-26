@@ -1,15 +1,15 @@
 local Image = require("common/Image")
 
----@class PlayerCard
+---@class PlayerCard: PlayerCardBase
 local PlayerCard = {}
 PlayerCard.__index = PlayerCard
 
 ---@param ctx GameplayContext
 ---@param window Window
----@param isGameplaySettings boolean
+---@param isGameplaySettings? boolean
 ---@return PlayerCard
 function PlayerCard.new(ctx, window, isGameplaySettings)
-	---@type PlayerCard
+	---@class PlayerCardBase
 	local self = {
 		avatar = Image.new({ path = "gameplay/avatar" }),
 		avatarEnabled = getSetting("showPlayerAvatar", true),
@@ -31,6 +31,7 @@ function PlayerCard.new(ctx, window, isGameplaySettings)
 		y = 0,
 	}
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, PlayerCard)
 end
 
@@ -84,9 +85,8 @@ function PlayerCard:drawCard(introAlpha)
 	self:drawDan(x, introAlpha)
 end
 
----@param x number
 ---@param introAlpha number
-function PlayerCard:drawAvatar(x, introAlpha)
+function PlayerCard:drawAvatar(introAlpha)
 	gfx.Scissor(0, 0, 72, 72)
 	self.avatar:draw({
 		x = 72 / 2,

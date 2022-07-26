@@ -8,9 +8,9 @@ local pi = math.pi
 ---@param val number
 ---@return integer
 local function getSign(val)
-  return (val > 0 and 1) or (val < 0 and -1) or 0
+	return (val > 0 and 1) or (val < 0 and -1) or 0
 end
-  
+
 ---@param delta number
 ---@return number
 local function getDelta(delta)
@@ -20,7 +20,7 @@ local function getDelta(delta)
 
 	return delta
 end
-  
+
 ---@param val number
 ---@return integer
 local function roundToZero(val)
@@ -35,19 +35,20 @@ end
 
 --#endregion
 
----@class Knobs
+---@class Knobs: KnobsBase
 local Knobs = {}
 Knobs.__index = Knobs
 
 ---@return Knobs
 function Knobs.new()
-	---@type Knobs
+	---@class KnobsBase
 	local self = {
 		knobs = nil,
 		oldProgress = { 0, 0 },
 		progress = { 0, 0 },
 	}
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, Knobs)
 end
 

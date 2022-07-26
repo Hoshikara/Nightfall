@@ -1,21 +1,21 @@
 ---@meta
 
 ---
----The `ShadedMesh` object created with `gfx.CreateShadedMesh`.  
+---The `ShadedMesh` object created with `gfx.CreateShadedMesh`.
 ---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/shadedmesh.html)
 ---
 ---@class ShadedMesh
 ShadedMesh = {
-  BLEND_NORM = 0,
-  BLEND_ADD = 1,
-  BLEND_MULT = 2,
+	BLEND_NORM = 0,
+	BLEND_ADD = 1,
+	BLEND_MULT = 2,
 
-  PRIM_TRILIST = 0,
-  PRIM_TRIFAN = 1,
-  PRIM_TRISTRIP = 2,
-  PRIM_LINELIST = 3,
-  PRIM_LINESTRIP = 4,
-  PRIM_POINTLIST = 5,
+	PRIM_TRILIST = 0,
+	PRIM_TRIFAN = 1,
+	PRIM_TRISTRIP = 2,
+	PRIM_LINELIST = 3,
+	PRIM_LINESTRIP = 4,
+	PRIM_POINTLIST = 5,
 }
 
 ---
@@ -66,8 +66,8 @@ function ShadedMesh:SetBlendMode(blendMode) end
 ---
 ---Sets the geometry data for the current mesh.
 ---
----@param data table # An array of vertices in clockwise order starting from the top left.  
---- A vertex has the form `{ { x, y }, { u, v } }`.  
+---@param data table # An array of vertices in clockwise order starting from the top left.
+--- A vertex has the form `{ { x, y }, { u, v } }`.
 --- Example:
 ---```lua
 ---{
@@ -80,7 +80,7 @@ function ShadedMesh:SetBlendMode(blendMode) end
 function ShadedMesh:SetData(data) end
 
 ---
----Sets the current mesh as opaque or non-opaque.  
+---Sets the current mesh as opaque or non-opaque.
 ---Meshes are non-opaque by default.
 ---
 ---@param opaque boolean
@@ -121,8 +121,8 @@ function ShadedMesh:SetParamVec3(uniformName, x, y, z) end
 function ShadedMesh:SetParamVec4(uniformName, x, y, z, w) end
 
 ---
----Sets the translation for the current mesh.  
----For `ShadedMesh` objects, the translation is relative the screen.  
+---Sets the translation for the current mesh.
+---For `ShadedMesh` objects, the translation is relative the screen.
 ---For `ShadedMeshOnTrack` objects, the translation is relative to the critical line.
 ---
 ---@param x number
@@ -143,8 +143,9 @@ function ShadedMesh:SetPosition(x, y, z) end
 function ShadedMesh:SetPrimitiveType(primitiveType) end
 
 ---
----Sets the rotation of the current mesh in degrees.  
----**WARNING:** For `ShadedMesh` objects, pitch and yaw may clip resulting in portions or the entire mesh being invisible.
+---Sets the rotation of the current mesh in degrees.
+---**WARNING:** For `ShadedMesh` objects, pitch and yaw may clip resulting in portions or
+---the entire mesh being invisible.
 ---
 ---@param roll number
 ---@param yaw? number # Default: `0`
@@ -172,7 +173,7 @@ function ShadedMesh:SetWireframe(useWireframe) end
 function ShadedMesh:Draw() end
 
 ---
----The `ShadedMeshOnTrack` object created with `track.CreateShadedMesh`.  
+---The `ShadedMeshOnTrack` object created with `track.CreateShadedMesh`.
 ---
 ---@class ShadedMeshOnTrack : ShadedMesh
 ---
@@ -190,7 +191,7 @@ ShadedMeshOnTrack = {}
 function ShadedMeshOnTrack:GetLength() end
 
 ---
----Sets the y-scale of the current mesh based on its length.  
+---Sets the y-scale of the current mesh based on its length.
 ---This is useful for creating fake buttons which may have variable length based on duration.
 ---
 ---@param length number

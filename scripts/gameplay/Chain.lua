@@ -8,26 +8,22 @@ local ChainColors = {
 	[2] = getColor("PucChainColor"),
 }
 
----@class Chain
----@field ctx GameplayContext
----@field isGameplaySettings boolean
----@field number DimmedNumber
----@field scale number
----@field text Label
----@field window Window
+---@class Chain: ChainBase
 local Chain = {}
 Chain.__index = Chain
 
 ---@param ctx GameplayContext
 ---@param window Window
----@param isGameplaySettings boolean
+---@param isGameplaySettings? boolean
 ---@return Chain
 function Chain.new(ctx, window, isGameplaySettings)
-	---@type Chain
+	---@class ChainBase
+	---@field scale number
 	local self = {
 		ctx = ctx,
 		isGameplaySettings = isGameplaySettings,
 		number = DimmedNumber.new({ digits = 4, size = 72 }),
+		opacity = 1,
 		scale = getSetting("chainScale", 1.0),
 		text = makeLabel("Medium", "CHAIN"),
 		window = window,
@@ -36,6 +32,7 @@ function Chain.new(ctx, window, isGameplaySettings)
 		y = 0,
 	}
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, Chain)
 end
 

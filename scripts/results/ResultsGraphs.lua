@@ -44,25 +44,17 @@ local floor = math.floor
 
 local suggestSongOffset = getSetting("suggestSongOffset", true)
 
----@class ResultsGraphs
----@field button Label
----@field ctx ResultsContext
----@field disclaimer Label
----@field labels table<string, Label>
----@field mouse Mouse
----@field panel ResultsPanel
----@field showDisclaimer boolean
----@field track ResultsTrack
----@field window Window
+---@class ResultsGraphs: ResultsGraphsBase
 local ResultsGraphs = {}
 ResultsGraphs.__index = ResultsGraphs
 
 ---@param ctx ResultsContext
----@param panel ResultsPanel
+---@param panel ResultsPanel|ResultsPanelBase
 ---@param window Window
 ---@return ResultsGraphs
 function ResultsGraphs.new(ctx, panel, window)
-	---@type ResultsGraphs
+	---@class ResultsGraphsBase
+	---@field labels table<string, Label>
 	local self = {
 		button = makeLabel("SemiBold", "", 20),
 		ctx = ctx,
@@ -90,6 +82,7 @@ function ResultsGraphs.new(ctx, panel, window)
 		self.labels[name] = makeLabel("SemiBold", str, 20)
 	end
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, ResultsGraphs)
 end
 
@@ -525,7 +518,7 @@ end
 
 ---@param histogram number[]
 ---@param maxHeight number
----@return integer
+---@return number
 function ResultsGraphs:normalizeHistogram(histogram, maxHeight)
 	local mode = 0
 

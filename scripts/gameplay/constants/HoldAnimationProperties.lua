@@ -20,7 +20,7 @@ local HoldAnimationProperties = {
 
 return HoldAnimationProperties
 
----@class HoldAnimationProperties
+---@class HoldAnimationProperties:Animation.new.params
 ---@field alpha number
 ---@field effect string
 ---@field folderPath string

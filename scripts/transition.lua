@@ -46,7 +46,7 @@ end
 function render(dt)
 	drawTransition(dt, true)
 
-  return introDone
+	return introDone
 end
 
 ---@param dt deltaTime

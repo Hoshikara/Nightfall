@@ -1,15 +1,12 @@
----@class LaneSpeed
----@field isGameplaySettings boolean
----@field text Label
----@field window Window
+---@class LaneSpeed: LaneSpeedBase
 local LaneSpeed = {}
 LaneSpeed.__index = LaneSpeed
 
 ---@param window Window
----@param isGameplaySettings boolean
+---@param isGameplaySettings? boolean
 ---@return LaneSpeed
 function LaneSpeed.new(window, isGameplaySettings)
-	---@type LaneSpeed
+	---@class LaneSpeedBase
 	local self = {
 		ignoreHint = getSetting("ignoreSpeedChange", false),
 		isGameplaySettings = isGameplaySettings,
@@ -22,6 +19,7 @@ function LaneSpeed.new(window, isGameplaySettings)
 		y = 0,
 	}
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, LaneSpeed)
 end
 
@@ -116,6 +114,7 @@ end
 
 ---@param params LaneSpeed.draw.params
 function LaneSpeed:getHintInfo(params)
+	---@type Color|string
 	local color = "White"
 	local hintText = params.hintText or "> 8.00   4.00"
 	local x = 0

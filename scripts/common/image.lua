@@ -1,30 +1,22 @@
----@class Image
----@field hueSettingKey string
----@field image integer
----@field isCentered boolean
----@field mesh ShadedMesh
----@field scale number
----@field updateMeshHue boolean
----@field w number
----@field h number
+---@class Image: ImageBase
 local Image = {}
 Image.__index = Image
 
 ---@param params Image.new.params
----@return Image
+---@return Image|nil
 function Image.new(params)
-	---@type Image
 	local self = Image.createImage(params)
 
 	if not self then
 		return
 	end
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, Image)
 end
 
 ---@param params Image.new.params
----@return Image
+---@return ImageBase|nil
 function Image.createImage(params)
 	local image = gfx.CreateSkinImage((params.path or "") .. ".png", 0)
 	local w, h = 0, 0
@@ -47,22 +39,19 @@ function Image.createImage(params)
 		return Image.createMesh(params, w, h)
 	end
 
-	---@type Image
-	local self = {
+	return {
 		image = image,
 		isCentered = params.isCentered,
 		scale = params.scale or 1,
 		w = w,
 		h = h,
 	}
-
-	return self
 end
 
 ---@param params Image.new.params
 ---@param w number
 ---@param h number
----@return Image
+---@return ImageBase
 function Image.createMesh(params, w, h)
 	local mesh = gfx.CreateShadedMesh("image")
 	local scaledW = w * (params.scale or 1)
@@ -90,7 +79,8 @@ function Image.createMesh(params, w, h)
 		})
 	end
 
-	---@type Image
+	---@class ImageBase
+	---@field image any
 	local self = {
 		hueSettingKey = params.hueSettingKey,
 		isCentered = params.isCentered,
@@ -190,4 +180,5 @@ return Image
 ---@field tint? Color
 ---@field updateData? boolean
 
+--#endregion
 --#endregion

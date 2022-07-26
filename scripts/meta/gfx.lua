@@ -1,59 +1,59 @@
 ---@meta
 
 ---
----The global `gfx` table.  
----Available for all scripts.  
+---The global `gfx` table.
+---Available for all scripts.
 ---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/gfx.html)
 ---
 ---@class gfx
 gfx = {
-  BLEND_ZERO = 1,
-  BLEND_ONE = 2,
-  BLEND_SRC_COLOR = 4,
-  BLEND_ONE_MINUS_SRC_COLOR = 8,
-  BLEND_DST_COLOR = 16,
-  BLEND_ONE_MINUS_DST_COLOR = 32,
-  BLEND_SRC_ALPHA = 64,
-  BLEND_ONE_MINUS_SRC_ALPHA = 128,
-  BLEND_DST_ALPHA = 256,
-  BLEND_ONE_MINUS_DST_ALPHA = 512,
-  BLEND_SRC_ALPHA_SATURATE = 1024,
+	BLEND_ZERO = 1,
+	BLEND_ONE = 2,
+	BLEND_SRC_COLOR = 4,
+	BLEND_ONE_MINUS_SRC_COLOR = 8,
+	BLEND_DST_COLOR = 16,
+	BLEND_ONE_MINUS_DST_COLOR = 32,
+	BLEND_SRC_ALPHA = 64,
+	BLEND_ONE_MINUS_SRC_ALPHA = 128,
+	BLEND_DST_ALPHA = 256,
+	BLEND_ONE_MINUS_DST_ALPHA = 512,
+	BLEND_SRC_ALPHA_SATURATE = 1024,
 
-  BLEND_OP_SOURCE_OVER = 0,
-  BLEND_OP_SOURCE_IN = 1,
-  BLEND_OP_SOURCE_OUT = 2,
-  BLEND_OP_ATOP = 3,
-  BLEND_OP_DESTINATION_OVER = 4,
-  BLEND_OP_DESTINATION_IN = 5,
-  BLEND_OP_DESTINATION_OUT = 6,
-  BLEND_OP_DESTINATION_ATOP = 7,
-  BLEND_OP_LIGHTER = 8,
-  BLEND_OP_COPY = 9,
-  BLEND_OP_XOR = 10,
+	BLEND_OP_SOURCE_OVER = 0,
+	BLEND_OP_SOURCE_IN = 1,
+	BLEND_OP_SOURCE_OUT = 2,
+	BLEND_OP_ATOP = 3,
+	BLEND_OP_DESTINATION_OVER = 4,
+	BLEND_OP_DESTINATION_IN = 5,
+	BLEND_OP_DESTINATION_OUT = 6,
+	BLEND_OP_DESTINATION_ATOP = 7,
+	BLEND_OP_LIGHTER = 8,
+	BLEND_OP_COPY = 9,
+	BLEND_OP_XOR = 10,
 
-  IMAGE_GENERATE_MIPMAPS = 1,
-  IMAGE_REPEATX = 2,
-  IMAGE_REPEATY = 4,
-  IMAGE_FLIPY = 8,
-  IMAGE_PREMULTIPLIED = 16,
-  IMAGE_NEAREST = 32,
+	IMAGE_GENERATE_MIPMAPS = 1,
+	IMAGE_REPEATX = 2,
+	IMAGE_REPEATY = 4,
+	IMAGE_FLIPY = 8,
+	IMAGE_PREMULTIPLIED = 16,
+	IMAGE_NEAREST = 32,
 
-  LINE_BUTT = 0,
-  LINE_ROUND = 1,
-  LINE_SQUARE = 2,
-  LINE_BEVEL = 3,
-  LINE_MITER = 4,
+	LINE_BUTT = 0,
+	LINE_ROUND = 1,
+	LINE_SQUARE = 2,
+	LINE_BEVEL = 3,
+	LINE_MITER = 4,
 
-  -- Horizontal Alignment
-  TEXT_ALIGN_LEFT = 1,
-  TEXT_ALIGN_CENTER = 2,
-  TEXT_ALIGN_RIGHT = 4,
+	-- Horizontal Alignment
+	TEXT_ALIGN_LEFT = 1,
+	TEXT_ALIGN_CENTER = 2,
+	TEXT_ALIGN_RIGHT = 4,
 
-  -- Vertical Alignment
-  TEXT_ALIGN_TOP = 8,
-  TEXT_ALIGN_MIDDLE = 16,
-  TEXT_ALIGN_BOTTOM = 32,
-  TEXT_ALIGN_BASELINE = 64,
+	-- Vertical Alignment
+	TEXT_ALIGN_TOP = 8,
+	TEXT_ALIGN_MIDDLE = 16,
+	TEXT_ALIGN_BOTTOM = 32,
+	TEXT_ALIGN_BASELINE = 64,
 }
 
 ---
@@ -85,7 +85,7 @@ function gfx.ArcTo(x1, y1, x2, y2, radius) end
 function gfx.BeginPath() end
 
 ---
----Adds a cubic bezier segment from the previous point to the specified point.  
+---Adds a cubic bezier segment from the previous point to the specified point.
 ---The two control points are `(cx1, cy1)` and `(cx2, cy2)`.
 ---
 ---@param cx1 number
@@ -130,16 +130,17 @@ function gfx.CreateImage(imagePath, options) end
 ---
 ---Creates a cached text that can be used by `gfx.DrawLabel`.
 ---
----@param text string
+---@param text boolean|integer|number|string
 ---@param size integer
----@param makeMonospace boolean
+---@param makeMonospace boolean|integer
 function gfx.CreateLabel(text, size, makeMonospace) end
 
 ---
 ---Creates a `ShadedMesh` object.
 ---
 ---@param materialName string
----@param materialPath? string # An optional file path to the material, otherwise loads from the `shaders` folder of the current skin.  
+---@param materialPath? string # An optional file path to the material, otherwise
+---loads from the `shaders` folder of the current skin.
 ---`<materialName>.fs` and `<materialName>.vs` must exist at either location.
 ---@return ShadedMesh
 function gfx.CreateShadedMesh(materialName, materialPath) end
@@ -152,7 +153,7 @@ function gfx.CreateShadedMesh(materialName, materialPath) end
 function gfx.CreateSkinImage(imagePath, options) end
 
 ---
----Draws a label created with `gfx.CreateLabel`.  
+---Draws a label created with `gfx.CreateLabel`.
 ---Labels will be drawn on top of other drawn elements.
 ---
 ---@param label label
@@ -181,7 +182,7 @@ function gfx.Ellipse(x, y, radiusX, radiusY) end
 function gfx.FastRect(x, y, w, h) end
 
 ---
----Draws the given text at the specified location.  
+---Draws the given text at the specified location.
 ---`FastText` will be drawn on top of other drawn elements.
 ---
 ---@param text string
@@ -229,8 +230,9 @@ function gfx.FontFace(font) end
 function gfx.FontSize(size) end
 
 ---
----Forces the current render queue to be processed.  
----Any "fast" elements such as `FastRect`, `FastText` or `labels` will be rendered immediately rather than at the end of the render queue.
+---Forces the current render queue to be processed.
+---Any "fast" elements such as `FastRect`, `FastText` or `labels` will
+---be rendered immediately rather than at the end of the render queue.
 ---
 function gfx.ForceRender() end
 
@@ -242,14 +244,14 @@ function gfx.ForceRender() end
 function gfx.GetSharedTexture(name) end
 
 ---
----Sets the global alpha value for all proceeding elements.  
+---Sets the global alpha value for all proceeding elements.
 ---Elements that have their alpha set will be adjusted relative to the given value.
 ---
 ---@param alpha number
 function gfx.GlobalAlpha(alpha) end
 
 ---
----Sets the composite operation with custom pixel arithmetic.  
+---Sets the composite operation with custom pixel arithmetic.
 ---
 ---@param srcFactor integer # Refer to `gfx.BLEND_*` for options.
 ---@param dstFactor integer # Refer to `gfx.BLEND_*` for options.
@@ -284,8 +286,8 @@ function gfx.GlobalCompositeOperation(op) end
 function gfx.GradientColors(ri, gi, bi, ai, ro, bo, go, ao) end
 
 ---
----Creates an image pattern that can be used by `gfx.FillPaint` or `gfx.StrokePaint`.  
----The top-left location of the pattern is `(x, y)`.  
+---Creates an image pattern that can be used by `gfx.FillPaint` or `gfx.StrokePaint`.
+---The top-left location of the pattern is `(x, y)`.
 ---The size of one image is `(w, h)`.
 ---
 ---@param x number
@@ -334,8 +336,8 @@ function gfx.IntersectScissor(x, y, w, h) end
 function gfx.LabelSize(label) end
 
 ---
----Creates a linear gradient that can be used by `gfx.FillPaint` or `gfx.StrokePaint`.  
----The starting coordinates are `(sx, sy)`.  
+---Creates a linear gradient that can be used by `gfx.FillPaint` or `gfx.StrokePaint`.
+---The starting coordinates are `(sx, sy)`.
 ---The ending coordinates are `(ex, ey)`.
 ---
 ---@param sx number
@@ -364,38 +366,41 @@ function gfx.LineJoin(join) end
 function gfx.LineTo(x, y) end
 
 ---
----Loads all images of the specified folder as frames to be used for an animation.  
+---Loads all images of the specified folder as frames to be used for an animation.
 ---Created animations can be used the same way as images.
 ---
 ---@param folderPath string
 ---@param frameTime number # The amount of time per frame.
 ---@param loopCount? integer # Default: `0`
 ---@param compressed boolean #
----If `true`, the animation will be stored in RAM and decoded on-demand.  
+---If `true`, the animation will be stored in RAM and decoded on-demand.
 ---This results in higher CPU usage but lower RAM usage.
 function gfx.LoadAnimation(folderPath, frameTime, loopCount, compressed) end
 
 ---
----Loads a persistent texture that can be accessed by the `name` in `gfx.GetSharedTexture` and `ShadedMesh:AddSharedTexture`.
+---Loads a persistent texture that can be accessed by the `name` in `gfx.GetSharedTexture` and
+---`ShadedMesh:AddSharedTexture`.
 ---
 ---@param name string
 ---@param imagePath string
 function gfx.LoadSharedTexture(name, imagePath) end
 
 ---
----Loads all images of the specified folder inside the `textures` folder of the current skin to be used for an animation.  
+---Loads all images of the specified folder inside the `textures` folder of the current skin to
+---be used for an animation.
 ---Created animations can be used the same way as images.
 ---
 ---@param folderPath string
 ---@param frameTime number # The amount of time per frame.
 ---@param loopCount? integer # Default: `0`
 ---@param compressed boolean #
----If `true`, the animation will be stored in RAM and decoded on-demand.  
+---If `true`, the animation will be stored in RAM and decoded on-demand.
 ---This results in higher CPU usage but lower RAM usage.
 function gfx.LoadSkinAnimation(folderPath, frameTime, loopCount, compressed) end
 
 ---
----Loads a persistent texture from the `textures` folder of the current skin that can be accessed by the `name` in `gfx.GetSharedTexture` and `ShadedMesh:AddSharedTexture`.
+---Loads a persistent texture from the `textures` folder of the current skin that
+----can be accessed by the `name` in `gfx.GetSharedTexture` and `ShadedMesh:AddSharedTexture`.
 ---
 ---@param name string
 ---@param imagePath imagePath
@@ -410,7 +415,7 @@ function gfx.LoadSharedSkinTexture(name, imagePath) end
 function gfx.LoadFont(name, fontPath) end
 
 ---
----Loads an image outside of the main thread to prevent rendering lock-up.  
+---Loads an image outside of the main thread to prevent rendering lock-up.
 ---Image will be loaded at full size unless `w` and `h` are provided.
 ---
 ---@param imagePath imagePath
@@ -421,15 +426,15 @@ function gfx.LoadFont(name, fontPath) end
 function gfx.LoadImageJob(imagePath, placeholder, w, h) end
 
 ---
----Loads a font from the `fonts` folder of the current skin to be used for the current text style.  
+---Loads a font from the `fonts` folder of the current skin to be used for the current text style.
 ---If the font is already loaded then it is set as the current style.
 ---
 ---@param name? string
----@param fontPath string
+---@param fontPath? string
 function gfx.LoadSkinFont(name, fontPath) end
 
 ---
----Loads a web image outside of the main thread to prevent rendering lock-up.  
+---Loads a web image outside of the main thread to prevent rendering lock-up.
 ---The image will be loaded at full size unless `w` and `h` are provided.
 ---
 ---@param url string # The web URL of image.
@@ -453,7 +458,7 @@ function gfx.MiterLimit(limit) end
 function gfx.MoveTo(x, y) end
 
 ---
----Adds a quadratic bezier segment from the previous point to the specified point.  
+---Adds a quadratic bezier segment from the previous point to the specified point.
 ---The control point is `(cx, cy)`.
 ---
 ---@param cx number
@@ -463,7 +468,7 @@ function gfx.MoveTo(x, y) end
 function gfx.QuadTo(cx, cy, x, y) end
 
 ---
----Creates a radial gradient that can be used by `gfx.FillPaint` or `gfx.StrokePaint`.  
+---Creates a radial gradient that can be used by `gfx.FillPaint` or `gfx.StrokePaint`.
 ---
 ---@param cx number
 ---@param cy number
@@ -481,7 +486,7 @@ function gfx.RadialGradient(cx, cy, innerRadius, outerRadius) end
 function gfx.Rect(x, y, w, h) end
 
 ---
----Resets the current render state to default values.  
+---Resets the current render state to default values.
 ---This does not affect the render state stack.
 ---
 function gfx.Reset() end
@@ -519,7 +524,7 @@ function gfx.Rotate(angle) end
 function gfx.RoundedRect(x, y, w, h, r) end
 
 ---
----Creates a rounded rectangle shaped sub-path with varying radii for each corner.  
+---Creates a rounded rectangle shaped sub-path with varying radii for each corner.
 ---The first corner radius is `r1` and continues clockwise.
 ---
 ---@param x number
@@ -533,7 +538,7 @@ function gfx.RoundedRect(x, y, w, h, r) end
 function gfx.RoundedRectVarying(x, y, w, h, r1, r2, r3, r4) end
 
 ---
----Pushes the current render state onto the render state stack.  
+---Pushes the current render state onto the render state stack.
 ---The render state can be popped from the stack using `gfx.Restore`.
 ---
 function gfx.Save() end
@@ -546,7 +551,7 @@ function gfx.Save() end
 function gfx.Scale(x, y) end
 
 ---
----Sets the current scissor rectangle.  
+---Sets the current scissor rectangle.
 ---Scissoring clips any rendering into a rectangle and is affected by the current transform.
 ---
 ---@param x number
@@ -639,8 +644,8 @@ function gfx.TickAnimation(animation, deltaTime) end
 function gfx.Translate(x, y) end
 
 ---
----Updates the properties of a pattern.  
----The top-left location of the pattern is `(x, y)`.  
+---Updates the properties of a pattern.
+---The top-left location of the pattern is `(x, y)`.
 ---The size of one image is `(w, h)`.
 ---
 ---@param pattern any # A pattern created by `gfx.ImagePattern`.
@@ -656,6 +661,6 @@ function gfx.UpdateImagePattern(pattern, x, y, w, h, angle, alpha) end
 ---Updates the properties of a label.
 ---
 ---@param label label
----@param newText? string
+---@param newText? integer|number|string
 ---@param newSize? integer
 function gfx.UpdateLabel(label, newText, newSize) end

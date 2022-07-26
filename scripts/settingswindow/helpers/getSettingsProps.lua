@@ -5,78 +5,79 @@ local max = math.max
 
 ---@param settings SettingsDiagSetting[]
 local function handleBlastiveLevel(settings)
-  if (settings[1].options and (#settings[1].options > 2))
-    and (settings[1].value and (settings[1].value ~= 4))
-  then
-    table.insert(settings, 2, {
-      name = "Blastive Rate Level",
-      type = "float",
-    })
-  end
+	if (settings[1].options and (#settings[1].options > 2))
+	and (settings[1].value and (settings[1].value ~= 4))
+	then
+		table.insert(settings, 2, {
+			name = "Blastive Rate Level",
+			type = "float",
+		})
+	end
 end
 
----@param isSongSelect boolean
+---@param isSongSelect? boolean
 ---@return Easing[], table<string, table<string, FormattedSetting>>, Label[]
 local function getSettingsProps(isSongSelect)
-  local FormattedTabs = (isSongSelect and require("settingswindow/constants/FormattedGameSettings"))
-    or require("settingswindow/constants/FormattedPracticeSettings")
-  local highlights = {}
-  local highlightCount = 0
-  local tabs = {}
-  local settings = {}
+	local FormattedTabs = (isSongSelect and require("settingswindow/constants/FormattedGameSettings"))
+	or require("settingswindow/constants/FormattedPracticeSettings")
+	local highlights = {}
+	local highlightCount = 0
+	local tabs = {}
+	local settings = {}
 
-  for i, tab in ipairs(SettingsDiag.tabs) do
-    local tabName = tab.name
-    local formattedTab = FormattedTabs[tabName]
-    local formattedTabName = (formattedTab and formattedTab.name) or tabName
-    
-    tabs[i] = makeLabel("SemiBold", formattedTabName)
+	for i, tab in ipairs(SettingsDiag.tabs) do
+		local tabName = tab.name
+		local formattedTab = FormattedTabs[tabName]
+		local formattedTabName = (formattedTab and formattedTab.name) or tabName
 
-    if isSongSelect and (tabName == "Game") then
-      handleBlastiveLevel(tab.settings)
-    end
+		---@diagnostic disable-next-line
+		tabs[i] = makeLabel("SemiBold", formattedTabName)
 
-    settings[i] = {}
+		if isSongSelect and (tabName == "Game") then
+			handleBlastiveLevel(tab.settings)
+		end
 
-    highlightCount = max(highlightCount, #tab.settings)
+		settings[i] = {}
 
-    for _, setting in ipairs(tab.settings) do
-      local settingName = removeParentheses(setting.name or "")
-      local settingType = setting.type
-      ---@type FormattedSetting
-      local formattedSetting = (formattedTab and formattedTab[settingName]) or {}
-      local newSetting = {
-        category = formattedSetting.category or "",
-        isInverted = formattedSetting.isInverted,
-        name = makeLabel("Medium", formattedSetting.name or settingName, 32),
-        options = formattedSetting.options or setting.options
-      }
+		highlightCount = max(highlightCount, #tab.settings)
 
-      if formattedSetting.description then
-        local description = {}
+		for _, setting in ipairs(tab.settings) do
+			local settingName = removeParentheses(setting.name or "")
+			local settingType = setting.type
+			local formattedSetting = (formattedTab and formattedTab[settingName]) or {}
+			local newSetting = {
+				category = formattedSetting.category or "",
+				isInverted = formattedSetting.isInverted,
+				---@diagnostic disable-next-line
+				name = makeLabel("Medium", formattedSetting.name or settingName, 32),
+				options = formattedSetting.options or setting.options
+			}
 
-        for j, text in ipairs(formattedSetting.description) do
-          description[j] = makeLabel("SemiBold", text)
-        end
+			if formattedSetting.description then
+				local description = {}
 
-        newSetting.description = description
-      end
+				for j, text in ipairs(formattedSetting.description) do
+					description[j] = makeLabel("SemiBold", text)
+				end
 
-      if (settingType == "int") or (settingType == "float") then
-        newSetting.value = makeLabel("Number", "0", 29)
-      elseif settingType ~= "button" then
-        newSetting.value = makeLabel("Medium", "", 32)
-      end
+				newSetting.description = description
+			end
 
-      settings[i][settingName] = newSetting
-    end
-  end
+			if (settingType == "int") or (settingType == "float") then
+				newSetting.value = makeLabel("Number", "0", 29)
+			elseif settingType ~= "button" then
+				newSetting.value = makeLabel("Medium", "", 32)
+			end
 
-  for i = 1, highlightCount do
-    highlights[i] = Easing.new()
-  end
+			settings[i][settingName] = newSetting
+		end
+	end
 
-  return highlights, settings, tabs
+	for i = 1, highlightCount do
+		highlights[i] = Easing.new()
+	end
+
+	return highlights, settings, tabs
 end
 
 return getSettingsProps

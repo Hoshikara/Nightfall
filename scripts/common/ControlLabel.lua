@@ -1,8 +1,4 @@
----@class ControlLabel
----@field altControl Label
----@field altText Label
----@field control Label
----@field text Label
+---@class ControlLabel: ControlLabelBase
 local ControlLabel = {}
 ControlLabel.__index = ControlLabel
 
@@ -11,7 +7,7 @@ ControlLabel.__index = ControlLabel
 ---@param altControl? string
 ---@return ControlLabel
 function ControlLabel.new(control, text, altControl, altText)
-	---@type ControlLabel
+	---@class ControlLabelBase
 	local self = {
 		altControl = altControl and makeLabel("SemiBold", altControl or "", 14),
 		altText = altText and makeLabel("SemiBold", altText),
@@ -21,6 +17,7 @@ function ControlLabel.new(control, text, altControl, altText)
 
 	self.w = self.control.w + self.text.w + 28
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, ControlLabel)
 end
 

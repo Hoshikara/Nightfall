@@ -14,11 +14,7 @@ local getDiffInOrder = require("songselect/helpers/getDiffInOrder")
 
 local min = math.min
 
----@class SongPanel
----@field diffNames Label[]
----@field labels table<string, Label>
----@field text table<string, Label>
----@field timers table<string, number>
+---@class SongPanel: SongPanelBase
 local SongPanel = {}
 SongPanel.__index = SongPanel
 
@@ -27,7 +23,11 @@ SongPanel.__index = SongPanel
 ---@param window Window
 ---@return SongPanel
 function SongPanel.new(ctx, songCache, window)
-	---@type SongPanel
+	---@class SongPanelBase
+	---@field diffNames Label[]
+	---@field labels table<string, Label>
+	---@field text table<string, Label>
+	---@field timers table<string, number>
 	local self = {
 		artistText = makeLabel("JP", "", 28),
 		artistTimer = 0,
@@ -43,7 +43,7 @@ function SongPanel.new(ctx, songCache, window)
 		effectorText = makeLabel("JP", "", 25),
 		effectorTimer = 0,
 		gradeText = makeLabel("Medium", "", 32),
-		illustratorText = makeLabel("JP", "", "25"),
+		illustratorText = makeLabel("JP", "", 25),
 		illustratorTimer = 0,
 		itemCursor = ItemCursor.new({
 			size = 10,
@@ -79,6 +79,7 @@ function SongPanel.new(ctx, songCache, window)
 		self.labels[name] = makeLabel("Medium", str, 32)
 	end
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, SongPanel)
 end
 

@@ -29,7 +29,7 @@ local function getMaxScore(objects)
 	return #objects * 2
 end
 
----@param objectTime integer
+---@param objectTime integer|number
 ---@param step number
 ---@return integer
 local function getObjectIndex(objectTime, step)
@@ -95,7 +95,7 @@ end
 ---@param holds HitStat[]
 ---@param lasers HitStat[]
 ---@param duration integer
----@return integer[]
+---@return integer[]|nil
 local function getScoreData(notes, holds, lasers, duration)
 	if (#notes == 0) and (#holds == 0) and (#lasers == 0) then
 		return

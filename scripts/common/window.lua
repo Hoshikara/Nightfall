@@ -47,7 +47,7 @@ function Window:update(dontScale)
 	self:setup(dontScale)
 end
 
----@param dontScale boolean
+---@param dontScale? boolean
 function Window:setup(dontScale)
 	gfx.ResetTransform()
 	gfx.Translate(self.shiftX, self.shiftY)
@@ -96,7 +96,7 @@ function Window:updateScaling(isPortrait, resX, resY)
 	return scale
 end
 
----@param multiplier number
+---@param multiplier? number
 function Window:scale(multiplier)
 	multiplier = multiplier or 1
 

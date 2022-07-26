@@ -27,15 +27,7 @@ local TabNames = {
 	"scoreDifference",
 }
 
----@class GameplaySettings
----@field bg Image
----@field bgPortrait Image
----@field ctx TitlescreenContext
----@field heading Label
----@field mouse Mouse
----@field sideShift Easing
----@field tabShifts table<string, Easing>
----@field window Window
+---@class GameplaySettings: GameplaySettingsBase
 local GameplaySettings = {}
 GameplaySettings.__index = GameplaySettings
 
@@ -44,7 +36,7 @@ GameplaySettings.__index = GameplaySettings
 ---@param window Window
 ---@return GameplaySettings
 function GameplaySettings.new(ctx, mouse, window)
-	---@type GameplaySettings
+	---@class GameplaySettingsBase
 	local self = {
 		bg = Image.new({ path = "settings_bg" }),
 		bgPortrait = Image.new({ path = "settings_bg_portrait" }),
@@ -70,6 +62,7 @@ function GameplaySettings.new(ctx, mouse, window)
 		self.tabShifts[name] = Easing.new()
 	end
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, GameplaySettings)
 end
 
@@ -327,8 +320,7 @@ end
 ---@param shift number
 ---@param isEnabled boolean
 ---@param isExpanded boolean
-function GameplaySettings:drawSetting(x1, x2, y, setting, shift, isEnabled,
-                                      isExpanded)
+function GameplaySettings:drawSetting(x1, x2, y, setting, shift, isEnabled, isExpanded)
 	local alpha = ((isEnabled and 1) or 0.2) * shift
 
 	x2 = x2 - 18

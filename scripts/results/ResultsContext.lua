@@ -10,16 +10,14 @@ local AcceptedState = IRData.States.Accepted
 local PendingState = IRData.States.Pending
 local SuccessState = IRData.States.Success
 
----@class ResultsContext
----@field getPanelRegion function
----@field isOnline boolean
----@field scores ResultsScore[]
+---@class ResultsContext: ResultsContextBase
 local ResultsContext = {}
 ResultsContext.__index = ResultsContext
 
 ---@return ResultsContext
 function ResultsContext.new()
-	---@type ResultsContext
+	---@class ResultsContextBase
+	---@field scores ResultsScore[]
 	local self = {
 		chart = nil,
 		didPressBTD = false,
@@ -37,6 +35,7 @@ function ResultsContext.new()
 		viewingOnlineScores = showOnlineScores and IRData.Active,
 	}
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, ResultsContext)
 end
 

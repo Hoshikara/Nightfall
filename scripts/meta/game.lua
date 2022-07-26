@@ -1,25 +1,25 @@
 ---@meta
 
 ---
----The global `game` table.  
----Available for all scripts.  
+---The global `game` table.
+---Available for all scripts.
 ---[Official Documentation](https://unnamed-sdvx-clone.readthedocs.io/en/latest/game.html)
 ---
 ---@class game
 game = {
-  BUTTON_BTA = 0,
-  BUTTON_BTB = 1,
-  BUTTON_BTC = 2,
-  BUTTON_BTD = 3,
-  BUTTON_FXL = 4,
-  BUTTON_FXR = 5,
-  BUTTON_STA = 6,
-  BUTTON_BCK = 11,
+	BUTTON_BTA = 0,
+	BUTTON_BTB = 1,
+	BUTTON_BTC = 2,
+	BUTTON_BTD = 3,
+	BUTTON_FXL = 4,
+	BUTTON_FXR = 5,
+	BUTTON_STA = 6,
+	BUTTON_BCK = 11,
 
-  LOGGER_INFO = 1,
-  LOGGER_NORMAL = 2,
-  LOGGER_WARNING = 3,
-  LOGGER_ERROR = 4,
+	LOGGER_INFO = 1,
+	LOGGER_NORMAL = 2,
+	LOGGER_WARNING = 3,
+	LOGGER_ERROR = 4,
 }
 
 ---
@@ -69,7 +69,7 @@ function game.GetSkin() end
 ---Gets the value of the named skin setting.
 ---
 ---@param skinSettingName string
----@return any skinSettingValue
+---@return ...
 function game.GetSkinSetting(skinSettingName) end
 
 ---

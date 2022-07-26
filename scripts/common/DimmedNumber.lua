@@ -1,16 +1,6 @@
 local floor = math.floor
 
----@class DimmedNumber
----@field alpha number[]
----@field color Color|string
----@field digits Label[]
----@field isScore boolean
----@field numbers integer[]
----@field offsetY number
----@field positions number[]
----@field value number
----@field w number
----@field h number
+---@class DimmedNumber: DimmedNumberBase
 local DimmedNumber = {}
 DimmedNumber.__index = DimmedNumber
 
@@ -19,7 +9,7 @@ DimmedNumber.__index = DimmedNumber
 function DimmedNumber.new(params)
 	local size = params.size or 100
 
-	---@type DimmedNumber
+	---@class DimmedNumberBase
 	local self = {
 		alpha = {},
 		color = params.color or "Standard",
@@ -66,6 +56,7 @@ function DimmedNumber.new(params)
 		end
 	end
 
+	---@diagnostic disable-next-line
 	return setmetatable(self, DimmedNumber)
 end
 
@@ -98,7 +89,7 @@ end
 
 ---@param x number
 ---@param y number
----@param color string
+---@param color Color|string
 function DimmedNumber:drawScore(x, y, color)
 	local alpha = self.alpha
 	local digits = self.digits
@@ -130,7 +121,7 @@ end
 
 ---@param x number
 ---@param y number
----@param color string
+---@param color Color|string
 function DimmedNumber:drawNumber(x, y, alphaMod, color, spacing)
 	local alpha = self.alpha
 	local numbers = self.numbers
@@ -165,7 +156,7 @@ return DimmedNumber
 ---@class DimmedNumber.draw.params
 ---@field x? number
 ---@field y? number
----@field alpha? integer
+---@field alpha? number
 ---@field color? Color|string
 ---@field offset? number
 ---@field spacing? number

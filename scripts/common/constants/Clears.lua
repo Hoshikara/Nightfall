@@ -1,10 +1,10 @@
----@param result result
+---@param result IRScore|result|Score
 ---@return boolean
 local function didCrash(result)
-  local gauge = result.gauge or 0
-  local gaugeType = result.gauge_type or 0
+	local gauge = result.gauge or 0
+	local gaugeType = result.gauge_type or 0
 
-  return (gaugeType == 0) and (gauge < 0.7)
+	return (gaugeType == 0) and (gauge < 0.7)
 end
 
 ---@type Clear[]
@@ -18,29 +18,29 @@ local Clears = {
 }
 
 ---@param badge integer
----@param getRate boolean
----@param result? result|IRScore
----@return string
+---@param getRate? boolean
+---@param result? IRScore|result|Score
+---@return number|string
 function Clears:get(badge, getRate, result)
-  if result and (not result.lamp) then
-    if result.autoplay then
-      return "AUTOPLAY"
-    end
+	if result and (not result.lamp) then
+		if result.autoplay then
+			return "AUTOPLAY"
+		end
 
-    if result.badge == 0 then
-      return "EXIT"
-    end
+		if result.badge == 0 then
+			return "EXIT"
+		end
 
-    if didCrash(result) then
-      return "CRASH"
-    end
-  end
+		if didCrash(result) then
+			return "CRASH"
+		end
+	end
 
-  if getRate then
-    return self[badge] and self[badge].rate
-  end
+	if getRate then
+		return self[badge] and self[badge].rate
+	end
 
-  return self[badge] and self[badge].name
+	return self[badge] and self[badge].name
 end
 
 return Clears
