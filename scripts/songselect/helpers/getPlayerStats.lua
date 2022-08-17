@@ -248,6 +248,10 @@ end
 ---@param artist string
 ---@param title string
 local function updateAll(level, folder, isOfficial, diff, artist, title)
+	if not level then
+		return
+	end
+
 	if diff.topBadge > 0 then
 		local score = diff.scores[1].score
 
