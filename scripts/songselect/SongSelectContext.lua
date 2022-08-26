@@ -1,5 +1,5 @@
-game.LoadSkinSample("click_diff")
-game.LoadSkinSample("click_song")
+game.LoadSkinSample("click_diff.wav")
+game.LoadSkinSample("click_song.wav")
 
 --#region Require
 
@@ -112,7 +112,7 @@ function SongSelectContext:updateSong(newSong)
 	if self.currentSong ~= newSong then
 		self.fetchTimer = 0
 
-		game.PlaySample("click_song")
+		game.PlaySample("click_song.wav")
 	end
 
 	self.currentSong = newSong
@@ -123,7 +123,7 @@ function SongSelectContext:updateDiff(newDiff)
 	if self.currentDiff ~= newDiff then
 		self.fetchTimer = 0
 
-		game.PlaySample("click_diff")
+		game.PlaySample("click_diff.wav")
 	end
 
 	self.currentDiff = newDiff
