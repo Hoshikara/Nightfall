@@ -12,8 +12,7 @@ uniform sampler2D mainTex;
 uniform sampler2D maskTex;
 uniform vec4 barColor;
 
-void main()
-{
+void main() {
 	vec4 tex = texture(mainTex, fsTex);
     float mask = texture(maskTex, fsTex).x;
     mask = rate - mask;

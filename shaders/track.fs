@@ -2,7 +2,6 @@
 varying vec2 fsTex;
 #else
 #extension GL_ARB_separate_shader_objects : enable
-
 layout(location=1) in vec2 fsTex;
 layout(location=0) out vec4 target;
 #endif
@@ -35,14 +34,14 @@ void main() {
     if (fsTex.y <= hidden) {
         vec4 total = track + lanes;
 
-        total.rgb = vec3(0);
+        total.rgb = vec3(0.0);
         total.a = total.a > 0.0 ? 0.35 : 0.0;
         target = total;
 
         return;
     }
 
-    vec3 col = vec3(0);
+    vec3 col = vec3(0.0);
     float hue = lanes.b * 0.1;
 
     col += lCol.rgb * lanes.b;

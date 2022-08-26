@@ -3,12 +3,10 @@ attribute vec2 inPos;
 attribute vec2 inTex;
 varying vec2 fsTex;
 varying vec4 position;
-
 #else
 #extension GL_ARB_separate_shader_objects : enable
 layout(location=0) in vec2 inPos;
 layout(location=1) in vec2 inTex;
-
 out gl_PerVertex
 {
 	vec4 gl_Position;
@@ -21,8 +19,7 @@ uniform mat4 proj;
 uniform mat4 camera;
 uniform mat4 world;
 
-void main()
-{
+void main() {
 	fsTex = inTex;
-	gl_Position = proj * camera * world * vec4(inPos.x, inPos.y * 6, 0, 1);
+	gl_Position = proj * camera * world * vec4(inPos.x, inPos.y * 6.0, 0.0, 1.0);
 }

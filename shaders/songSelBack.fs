@@ -8,7 +8,6 @@ layout(location=0) out vec4 target;
 
 uniform vec4 color;
 
-void main()
-{
+void main() {
 	target = color * pow(length(fsTex), 2.0) * 0.8;
 }

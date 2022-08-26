@@ -1,6 +1,16 @@
-#extension GL_ARB_separate_shader_objects : enable
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
+
+#ifdef EMBEDDED
+
+attribute vec4 inColor[1];
+attribute vec4 inParams[1];
+
+varying vec4 fsColor;
+varying vec2 fsTex;
+
+#else
+#extension GL_ARB_separate_shader_objects : enable
 
 // Input
 in gl_PerVertex
@@ -17,21 +27,21 @@ out gl_PerVertex
 };
 layout(location=1) out vec4 fsColor;
 layout(location=2) out vec2 fsTex;
+#endif
 
 uniform mat4 proj;
 uniform mat4 camera;
 uniform mat4 billboard;
 
-void main()
-{
+void main() {
 	float fScale = inParams[0].x;
 	float fRotation = inParams[0].y;
 	float fAnimationFrame = inParams[0].z;
 	
 	vec2 rightAxis2D = vec2(cos(fRotation), sin(fRotation));
 	vec2 upAxis2D = vec2(-sin(fRotation), cos(fRotation));
-	vec4 cameraRight = billboard * vec4(rightAxis2D, 0, 0);
-	vec4 cameraUp = billboard * vec4(upAxis2D, 0, 0);
+	vec4 cameraRight = billboard * vec4(rightAxis2D, 0.0, 0.0);
+	vec4 cameraUp = billboard * vec4(upAxis2D, 0.0, 0.0);
 	
 	gl_Position = proj * camera * (gl_in[0].gl_Position + (-cameraRight - cameraUp) * fScale);
 	fsColor = inColor[0];

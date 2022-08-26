@@ -8,8 +8,8 @@ layout(location=0) out vec4 target;
 
 uniform sampler2D mainTex;
 
-void main()
-{	
+void main() {	
 	vec4 mainColor = texture(mainTex, fsTex.xy);
+
 	target = mainColor;
 }

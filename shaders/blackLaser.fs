@@ -10,13 +10,12 @@ in vec4 position;
 
 uniform sampler2D mainTex;
 
-void main()
-{
+void main() {
     float x = fsTex.x;
 
 	if (x < 0.0 || x > 1.0)
     {
-		target = vec4(0);
+		target = vec4(0.0);
         return;
     }
 

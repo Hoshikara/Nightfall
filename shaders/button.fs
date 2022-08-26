@@ -11,16 +11,16 @@ in vec4 position;
 uniform sampler2D mainTex;
 uniform bool hasSample;
 
-void main()
-{	
+void main() {	
 	vec4 mainColor = texture(mainTex, fsTex.xy);
-    if(hasSample)
-    {
-        float addition = abs(0.5 - fsTex.x) * - 1.;
+
+    if(hasSample) {
+        float addition = abs(0.5 - fsTex.x) * - 1.0;
         addition += 0.3;
-        addition = max(addition,0.);
+        addition = max(addition, 0.0);
         addition *= 1.2;
         mainColor.xyz += addition;
     }
+
 	target = mainColor;
 }

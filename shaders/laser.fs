@@ -38,7 +38,7 @@ void main() {
 	}
 
 	if (laserPart == 1) {
-		vec4 mainColor = clamp(texture(mainTex, vec2(x * 0.5, fsTex.y)) * color, 0, 1.0);
+		vec4 mainColor = clamp(texture(mainTex, vec2(x * 0.5, fsTex.y)) * color, 0.0, 1.0);
 		vec4 glow = texture(mainTex, vec2(0.5 + (x * 0.5), fsTex.y));
 
 		target = generic_desaturate(mainColor.rgb, 0.3) + glow;
@@ -51,7 +51,7 @@ void main() {
 	x += (laserSize / 2);
 
 	float y = 0.33 * ceil(float(hitState) / 2) + 0.02;
-	vec4 mainColor = clamp(texture(mainTex, vec2(x * 0.5, y)) * color, 0, 1.0);
+	vec4 mainColor = clamp(texture(mainTex, vec2(x * 0.5, y)) * color, 0.0, 1.0);
 	vec4 glow = texture(mainTex, vec2(0.5 + (x * 0.5), y));
 
 	target = generic_desaturate(mainColor.rgb, 0.25) + glow;

@@ -12,8 +12,7 @@ uniform float hiddenFadeWindow;
 uniform float suddenCutoff;
 uniform float suddenFadeWindow;
 
-void main()
-{	
+void main() {	
 	#ifdef EMBEDDED
 	target = vec4(0.0);
 	#else

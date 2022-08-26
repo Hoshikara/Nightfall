@@ -1,8 +1,10 @@
-#version 330
+#ifdef EMBEDDED
+varying vec2 fsTex;
+#else
 #extension GL_ARB_separate_shader_objects : enable
-
 layout(location=1) in vec2 texVp;
 layout(location=0) out vec4 target;
+#endif
 
 uniform ivec2 screenCenter;
 // x = bar time
@@ -21,7 +23,6 @@ uniform float clearTransition;
 #define PI 3.14159265359
 #define TWO_PI 6.28318530718
 
-void main()
-{
-    target = vec4(0);
+void main() {
+    target = vec4(0.0);
 }
