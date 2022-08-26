@@ -1,6 +1,5 @@
 #ifdef EMBEDDED
 varying vec2 fsTex;
-varying vec4 position;
 #else
 #extension GL_ARB_separate_shader_objects : enable
 layout(location=1) in vec2 fsTex;
@@ -26,7 +25,7 @@ vec4 generic_desaturate(vec3 color, float factor) {
 	return vec4(mix(color, gray, factor), 1.0);
 }
 
-const float laserSize = 1.025;
+// const float laserSize = 1.025;
 
 void main() {
 	float x = fsTex.x;
@@ -46,11 +45,11 @@ void main() {
 		return;
 	}
 
-	x -= (laserSize / 2);
-	x /= laserSize;
-	x += (laserSize / 2);
+	x -= (1.025 / 2.0);
+	x /= 1.025;
+	x += (1.025 / 2.0);
 
-	float y = 0.33 * ceil(float(hitState) / 2) + 0.02;
+	float y = 0.33 * ceil(float(hitState) / 2.0) + 0.02;
 	vec4 mainColor = clamp(texture(mainTex, vec2(x * 0.5, y)) * color, 0.0, 1.0);
 	vec4 glow = texture(mainTex, vec2(0.5 + (x * 0.5), y));
 
