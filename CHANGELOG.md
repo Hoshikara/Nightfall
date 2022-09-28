@@ -1,3 +1,6 @@
+### 1.4.10 - September 28, 2022
+- Added a confirmation window for blacklisting Nautica users
+
 ### 1.4.9 - May 3, 2022
 - Added support for EXCEED (XCD) difficulty
 

@@ -13,6 +13,8 @@ local NauticaCache = require('components/downloadscreen/nauticacache');
 local NauticaList = require('components/downloadscreen/nauticalist');
 local NauticaSidebar = require('components/downloadscreen/nauticasidebar');
 
+local BlacklistWindow = require('components/downloadscreen/blacklistwindow');
+
 local window = Window:new();
 local background = Background:new(window);
 
@@ -31,6 +33,8 @@ end
 ---@class DownloadScreen
 local state = {
   action = 'BROWSING',
+	blacklistID = "",
+	blacklistName = "",
   currLevel = 1,
   currSong = 1,
   filtered = false,
@@ -122,6 +126,7 @@ end
 local nauticaCache = NauticaCache:new();
 local nauticaList = NauticaList:new(window, state, nauticaCache);
 local nauticaSidebar = NauticaSidebar:new(window, state);
+local blacklistWindow = BlacklistWindow:new(window, state);
 
 -- Initial song fetching
 Http.GetAsync(NextURL, Header, songsCallback);
@@ -138,6 +143,8 @@ render = function(dt)
   nauticaSidebar:render();
 
   nauticaList:render(dt);
+
+	blacklistWindow:render(dt);
 
   gfx.Restore();
 end
@@ -288,6 +295,11 @@ button_pressed = function(btn)
       end
 
       reloadSongs();
+		elseif (action == 'BLACKLISTING') then
+			userData.blacklist[state.blacklistID] = state.blacklistName;
+
+			toggleAction('BLACKLISTING');
+			reloadSongs();
     end
   elseif (btn == game.BUTTON_BTA) then
     if (action == 'BROWSING') then
@@ -314,9 +326,10 @@ button_pressed = function(btn)
       local song = state.songs[state.currSong];
 
       if (song) then
-        userData.blacklist[song.user_id] = song.user and song.user.name;
+				state.blacklistID = song.user_id;
+				state.blacklistName = (song.user and song.user.name) or '';
 
-        reloadSongs();
+				toggleAction('BLACKLISTING')
       end
     end
   elseif (btn == game.BUTTON_FXL) then

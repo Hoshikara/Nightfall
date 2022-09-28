@@ -256,7 +256,7 @@ local NauticaList = {
       y = this.window.h - (this.window.padding.y * 0.5) - 14;
     end
 
-    if (this.state.action == 'BROWSING') then
+    if (this.state.action == 'BROWSING' or this.state.action == 'BLACKLISTING') then
       this.labels.download:draw({ x = x, y = y });
     else
       this.labels.select:draw({ x = x, y = y });
