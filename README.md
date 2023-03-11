@@ -2,6 +2,8 @@
 
 ### A custom skin for [Unnamed SDVX Clone (USC)](https://github.com/Drewol/unnamed-sdvx-clone).
 
+## Click [here](https://github.com/Hoshikara/Nightfall/archive/refs/heads/1.5.0.zip) to download version `1.5.0` (incomplete development version).
+
 ## [Installation Guide](https://youtu.be/Hqxcwzge06I)
 
 ## [FAQ](https://github.com/Hoshikara/Nightfall/wiki/FAQ)
