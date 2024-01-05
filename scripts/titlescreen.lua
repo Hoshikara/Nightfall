@@ -87,11 +87,11 @@ local tagsCallback = function(res)
 end
 
 -- Gets list of tags for Nightfall repo
-Http.GetAsync(
-	'https://api.github.com/repos/Hoshikara/Nightfall/git/refs/tags',
-	{ ['user-agent'] = 'unnamed-sdvx-clone' },
-	tagsCallback
-);
+-- Http.GetAsync(
+-- 	'https://api.github.com/repos/Hoshikara/Nightfall/git/refs/tags',
+-- 	{ ['user-agent'] = 'unnamed-sdvx-clone' },
+-- 	tagsCallback
+-- );
 
 -- Called by the game every frame
 ---@param dt deltaTime
@@ -114,15 +114,15 @@ render = function(dt)
 
 	title:render(dt);
 
-	if (state.loaded and checkTags) then
-		Http.GetAsync(
-		'https://api.github.com/repos/Hoshikara/Nightfall/git/refs/tags',
-		{ ['user-agent'] = 'unnamed-sdvx-clone' },
-		tagsCallback
-		);
+	-- if (state.loaded and checkTags) then
+	-- 	Http.GetAsync(
+	-- 	'https://api.github.com/repos/Hoshikara/Nightfall/git/refs/tags',
+	-- 	{ ['user-agent'] = 'unnamed-sdvx-clone' },
+	-- 	tagsCallback
+	-- 	);
 
-		checkTags = false;
-	end
+	-- 	checkTags = false;
+	-- end
 
 	if (state.loaded and state.promptUpdate) then updatePrompt:render(dt); end
 
