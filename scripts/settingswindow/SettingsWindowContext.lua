@@ -44,11 +44,11 @@ end
 ---@param isVisible boolean
 function SettingsWindowContext:update(dt, isVisible)
 	self:handleShift(dt, isVisible)
+	self:setSettings(isVisible)
 
 	if self.shift.value > 0 then
 		local tabs = SettingsDiag.tabs
 
-		self.setSettings(isVisible)
 
 		self.isSongSelect = tabs[1].name ~= "Main"
 		self.settingIndex = SettingsDiag.currentSetting
@@ -73,7 +73,7 @@ function SettingsWindowContext:handleShift(dt, isVisible)
 end
 
 ---@param isVisible boolean
-function SettingsWindowContext.setSettings(isVisible)
+function SettingsWindowContext:setSettings(isVisible)
 	arsEnabled:set()
 	songOffset:set()
 	game.SetSkinSetting("_changingSettings", (isVisible and 1) or 0)

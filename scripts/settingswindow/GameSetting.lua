@@ -23,14 +23,17 @@ end
 
 function GameSetting:set()
 	local value = self:getSettingValue()
+	local formatted = nil
 
 	if self.type == "bool" then
-		game.SetSkinSetting(self.key, ((value == true) and 1) or 0)
+		formatted = ((value == true) and 1) or 0
 	elseif self.type == "number" then
-		game.SetSkinSetting(tostring(value))
+		formatted = tostring(value)
 	else
-		game.SetSkinSetting(value:upper())
+		formatted = value:upper()
 	end
+
+	game.SetSkinSetting(self.key, formatted)
 end
 
 ---@return any

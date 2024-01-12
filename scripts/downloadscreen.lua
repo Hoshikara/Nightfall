@@ -378,6 +378,7 @@ function button_pressed(button)
 				lastPlaying.status = nil
 				lastPlaying = nil
 			else
+				if song.preview_url == nil then return end
 				dlScreen.PlayPreview(encodeURI(song.preview_url), header, song.id)
 				song.status = "Playing"
 				if lastPlaying ~= nil then

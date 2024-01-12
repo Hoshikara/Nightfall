@@ -72,7 +72,7 @@ function Animation:play(dt, state, effect)
 
 	if state.timer >= self.frameTime then
 		state.frame = state.frame + 1
-		state.timer = 0
+		state.timer = state.timer - self.frameTime
 	end
 
 	if self.frames[state.frame] then

@@ -1,3 +1,9 @@
+### 1.5.1 - January 11, 2024
+- Fixed slow animations at lower framerates (Thanks to skade)
+- Fixed an error that occurred when attempting to preview a Nautica chart with no preview audio (Thanks to t3s)
+- Fixed Results song offset suggestion displaying incorrect values
+- Fixed the Early / Late opacity setting missing from Gameplay Settings
+
 ### 1.5.0 - January 9, 2024
 - Moderate design update which includes changes of varying degree to animations, fonts, UI elements, screen layouts, and more
 - Added JPG image support

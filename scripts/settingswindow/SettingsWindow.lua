@@ -33,7 +33,7 @@ function SettingsWindow.new(ctx, window, isSongSelect)
 		x = 0,
 		y = 0,
 		w = 808,
-		h = 640,
+		h = 664,
 	}
 
 	self.highlights, self.settings, self.tabs = getSettingsProps(isSongSelect)
@@ -289,7 +289,7 @@ function SettingsWindow:drawDescription(x, y)
 	local alpha = self.descriptionAlpha
 	local numLines = #self.description
 
-	y = y + 501
+	y = y + 525
 
 	for _, line in ipairs(self.description) do
 		---@diagnostic disable-next-line
@@ -310,7 +310,7 @@ function SettingsWindow:drawControls(x, y)
 	local whichControl = self.whichControl
 
 	x = x + 2
-	y = y + 529
+	y = y + 553
 
 	self.selectTabControl:draw(x, y)
 

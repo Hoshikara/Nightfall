@@ -7,6 +7,17 @@
 		"type": "text",
 		"default": "Guest"
 	},
+	"separator_ivy": {},
+	"dateFormat": {
+		"label": "Date Format",
+		"type": "selection",
+		"default": "DAY-MONTH-YEAR",
+		"values": [
+			"DAY-MONTH-YEAR",
+			"MONTH-DAY-YEAR",
+			"YEAR-MONTH-DAY"
+		]
+	},
 	"separator_dvj": {},
 	"nauticaPath": {
 		"label": "Nautica Download Folder i.e. 'nautica' (no quotes, case-sensitive)",
@@ -120,29 +131,6 @@
 	"////////// GAMEPLAY //////////": {
 		"type": "label"
 	},
-	"leftLaserColor": {
-		"label": "Left Laser Animation Color",
-		"type": "selection",
-		"default": "BLUE",
-		"values": [
-			"RED",
-			"GREEN",
-			"BLUE",
-			"YELLOW"
-		]
-	},
-	"rightLaserColor": {
-		"label": "Right Laser Animation Color",
-		"type": "selection",
-		"default": "RED",
-		"values": [
-			"RED",
-			"GREEN",
-			"BLUE",
-			"YELLOW"
-		]
-	},
-	"separator_cdf": {},
 	"assistTick": {
 		"label": "Enable Assist Tick",
 		"type": "bool",
@@ -150,7 +138,7 @@
 	},
 	"separator_lbr": {},
 	"showCriticalDelta": {
-		"label": "Show Critical hit delta (Early / Late Display must be enabled)",
+		"label": "Show hit delta for Critical hits (Early / Late Display must be enabled)",
 		"type": "bool",
 		"default": false
 	},
@@ -213,17 +201,6 @@
 		"default": 3,
 		"min": 1,
 		"max": 50
-	},
-	"separator_ivy": {},
-	"dateFormat": {
-		"label": "Date Format",
-		"type": "selection",
-		"default": "DAY-MONTH-YEAR",
-		"values": [
-			"DAY-MONTH-YEAR",
-			"MONTH-DAY-YEAR",
-			"YEAR-MONTH-DAY"
-		]
 	},
 	"separator_owf": {},
 	"screenshotRegion": {

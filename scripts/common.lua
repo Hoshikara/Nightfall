@@ -1,4 +1,4 @@
-SKIN_VERSION = "1.5.0"
+SKIN_VERSION = "1.5.1"
 
 gfx.LoadSkinFont("SmartFontUI.otf")
 

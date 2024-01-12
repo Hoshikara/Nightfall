@@ -70,6 +70,16 @@ local GameplaySettingProperties = {
 			templateString = "%.0f%%",
 		},
 		{
+			default = 1.0,
+			key = "earlateOpacity",
+			increment = 0.05,
+			max = 1.0,
+			min = 0.05,
+			multi = 100,
+			name = "OPACITY",
+			templateString = "%.0f%%",
+		},
+		{
 			default = 1,
 			key = "earlateFlicker",
 			name = "FLICKER",
