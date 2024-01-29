@@ -83,7 +83,7 @@ local FormattedPracticeSettings = {
 			category = "percentage",
 			name = "\tSONG SPEED DECREASE DECREMENT",
 		},
-		["- required streakes"] = {
+		["- required streaks"] = {
 			name = "\tPASS STREAK REQUIREMENT",
 		},
 		["- minimum speed"] = {
@@ -165,6 +165,14 @@ local FormattedPracticeSettings = {
 		["Revert to the setup after the result is shown"] = {
 			isInverted = false,
 			name = "RETURN TO PRACTICE MODE AFTER RESULTS",
+		},
+		["Adjust HiSpeed for playback speeds lower than x1.0"] = {
+			isInverted = false,
+			name = "ADJUST LANE-SPEED FOR <100% SONG SPEED",
+		},
+		["Adjust HiSpeed for playback speeds higher than x1.0"] = {
+			isInverted = false,
+			name = "ADJUST LANE-SPEED FOR >100% SONG SPEED",
 		},
 	},
 }

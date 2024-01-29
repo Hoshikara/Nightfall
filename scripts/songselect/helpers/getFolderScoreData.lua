@@ -1,6 +1,9 @@
+local isOfficialChart = require("common/helpers/isOfficialChart")
+
 ---@param diffCount integer
+---@param doFilterAll boolean
 ---@return FolderStatsScoreData
-local function getFolderScoreData(diffCount)
+local function getFolderScoreData(diffCount, doFilterAll)
 	local min = 10000001
 	local max = 0
 	local total = 0
@@ -8,19 +11,40 @@ local function getFolderScoreData(diffCount)
 
 	if diffCount > 0 then
 		for _, song in ipairs(songwheel.songs) do
-			for _, diff in ipairs(song.difficulties) do
-				if diff.topBadge > 0 then
-					local score = diff.scores[1].score
+			if doFilterAll then
+				if isOfficialChart(song.path) then
+					for _, diff in ipairs(song.difficulties) do
+						if diff.topBadge > 0 then
+							local score = diff.scores[1].score
 
-					total = total + score
-					totalBest = totalBest + 1
+							total = total + score
+							totalBest = totalBest + 1
 
-					if score < min then
-						min = score
+							if score < min then
+								min = score
+							end
+
+							if score > max then
+								max = score
+							end
+						end
 					end
+				end
+			else
+				for _, diff in ipairs(song.difficulties) do
+					if diff.topBadge > 0 then
+						local score = diff.scores[1].score
 
-					if score > max then
-						max = score
+						total = total + score
+						totalBest = totalBest + 1
+
+						if score < min then
+							min = score
+						end
+
+						if score > max then
+							max = score
+						end
 					end
 				end
 			end

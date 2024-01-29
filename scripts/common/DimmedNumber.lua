@@ -80,6 +80,7 @@ end
 ---@param value number
 function DimmedNumber:updateNumbers(value)
 	local digitCount = #self.digits
+	self.value = value or 0
 
 	for i = 1, digitCount do
 		local min = 10 ^ (digitCount - i)

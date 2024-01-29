@@ -105,6 +105,11 @@
 		"type": "bool",
 		"default": true
 	},
+	"getOfficialStats": {
+		"label": "For All folder, only collect stats for official charts",
+		"type": "bool",
+		"default": true
+	},
 	"separator_olv": {},
 	"jacketQuality": {
 		"label": "Jacket Image Quality (decrease for faster loading and less RAM usage)",

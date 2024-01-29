@@ -77,7 +77,7 @@ local function initAll()
 	songInfo = SongInfo.new(context, window)
 
 	if gameplay.practice_setup ~= nil then
-		practiceInfo = PracticeInfo.new(window)
+		practiceInfo = PracticeInfo.new(context, window)
 	end
 
 	autoplayText = makeLabel("Medium", "AUTOPLAY", 48)
@@ -189,6 +189,10 @@ function render(dt)
 			alpha = context.introAlpha,
 			color = "White",
 		})
+
+		if gameplay.practice_setup ~= nil then
+			practiceInfo:drawControls()
+		end
 	else
 		if earlateEnabled then
 			earlate:draw(dt)

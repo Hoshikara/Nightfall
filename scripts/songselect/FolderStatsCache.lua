@@ -1,5 +1,8 @@
 local getFolderData = require("songselect/helpers/getFolderData")
 local getFolderScoreData = require("songselect/helpers/getFolderScoreData")
+local isOfficialChart = require("common/helpers/isOfficialChart")
+
+local getOfficialStats = getSetting("getOfficialStats", true)
 
 ---@class FolderStatsCache: FolderStatsCacheBase
 local FolderStatsCache = {}
@@ -24,7 +27,8 @@ function FolderStatsCache:get(dt)
 	local currentFolder = getSetting("_currentFolder", 1)
 	local currentLevel = getSetting("_currentLevel", 1)
 	local currentLevelName = "ALL"
-	local diffCount = self:getDiffCount()
+	local doFilterAll = getOfficialStats and (currentFolder == 1)
+	local diffCount = self:getDiffCount(doFilterAll)
 
 	if currentLevel > 1 then
 		currentLevelName = ("%02d"):format(currentLevel - 1)
@@ -49,11 +53,11 @@ function FolderStatsCache:get(dt)
 	if not cache[currentLevel] and self:shouldGetData(dt, currentFolder, currentLevel) then
 		cache[currentLevel] = {
 			diffCount = diffCount,
-			clears = getFolderData(diffCount, true),
+			clears = getFolderData(diffCount, true, doFilterAll),
 			folder = getSetting("_currentFolderName", ""),
-			grades = getFolderData(diffCount),
+			grades = getFolderData(diffCount, false, doFilterAll),
 			level = currentLevelName,
-			scores = getFolderScoreData(diffCount),
+			scores = getFolderScoreData(diffCount, doFilterAll),
 		}
 	end
 
@@ -80,12 +84,19 @@ function FolderStatsCache:shouldGetData(dt, currentFolder, currentLevel)
 	return timers[currentLevel] >= 1
 end
 
+---@param doFilterAll boolean
 ---@return integer
-function FolderStatsCache:getDiffCount()
+function FolderStatsCache:getDiffCount(doFilterAll)
 	local count = 0
 
 	for _, song in ipairs(songwheel.songs) do
-		count = count + #song.difficulties
+		if doFilterAll then
+			if isOfficialChart(song.path) then
+				count = count + #song.difficulties
+			end
+		else
+			count = count + #song.difficulties
+		end
 	end
 
 	return count

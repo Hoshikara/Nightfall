@@ -1,6 +1,7 @@
 local FolderStatsClears = require("songselect/constants/FolderStatsClears")
 local FolderStatsGrades = require("songselect/constants/FolderStatsGrades")
 local getSegmentColors = require("songselect/helpers/getSegmentColors")
+local isOfficialChart = require("common/helpers/isOfficialChart")
 
 ---@param isClears? boolean
 local function makeEmptyTable(isClears)
@@ -67,15 +68,22 @@ local function getCategoryCount(stats)
 end
 
 ---@param diffCount integer
----@param isClears? boolean
+---@param isClears boolean
+---@param doFilterAll boolean
 ---@return FolderStatsCategoryData
-local function getFolderData(diffCount, isClears)
+local function getFolderData(diffCount, isClears, doFilterAll)
 	local count = 0
 	local stats = makeEmptyTable(isClears)
 
 	if diffCount > 0 then
 		for _, song in ipairs(songwheel.songs) do
-			addToCount(isClears, stats, song.difficulties)
+			if doFilterAll then
+				if isOfficialChart(song.path) then
+					addToCount(isClears, stats, song.difficulties)
+				end
+			else
+				addToCount(isClears, stats, song.difficulties)
+			end
 		end
 
 		getTotalPercentages(diffCount, stats)

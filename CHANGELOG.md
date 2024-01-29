@@ -1,3 +1,8 @@
+### 1.5.2 - January 29, 2024
+- Added Practice Mode information which includes goal, pass rate, score, and a button rating graph
+- Added a skin setting to filter the `ALL` folder stats to only show stats for official charts
+- Fixed Practice Mode controls not appearing
+
 ### 1.5.1 - January 11, 2024
 - Fixed slow animations at lower framerates (Thanks to skade)
 - Fixed an error that occurred when attempting to preview a Nautica chart with no preview audio (Thanks to t3s)
