@@ -71,7 +71,8 @@ function ResultsContext:set(data)
 	end
 
 	if not self.myScore then
-		self.myScore = formatScore(data)
+		---@diagnostic disable-next-line
+		self.myScore = formatScore(data, nil, isSingleplayer and data.highScores)
 	end
 
 	if isSingleplayer then

@@ -1,5 +1,8 @@
 ---@diagnostic disable: need-check-nil, undefined-field
 
+game.LoadSkinSample("tick_bt")
+game.LoadSkinSample("tick_fx")
+
 --#region Require
 
 local BpmData = require("gameplay/BpmData")
@@ -25,6 +28,7 @@ local didPress = require("common/helpers/didPress")
 
 local window = Window.new()
 
+local assistTickEnabled = getSetting("assistTick", false)
 local earlateEnabled = getSetting("showEarlate", true)
 local gaugeBarEnabled = getSetting("showGaugeBar", true)
 local hitAnimationsEnabled = getSetting("showHitAnimations", true)
@@ -97,6 +101,14 @@ end
 ---@return integer, integer, integer # r, g, b used as `color` for `sprite.fs`
 function button_hit(btn, rating, delta)
 	context:handleButton(delta, rating)
+
+	if assistTickEnabled and (rating ~= 3) then
+		if btn < 4 then
+			game.PlaySample("tick_bt")
+		else
+			game.PlaySample("tick_fx")
+		end
+	end
 
 	if hitAnimationsEnabled then
 		hitAnimations:enqueueHit(btn, delta, rating)
