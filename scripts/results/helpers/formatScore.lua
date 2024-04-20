@@ -6,6 +6,32 @@ local getVolforce = require("common/helpers/getVolforce")
 local getGaugeValue = require("results/helpers/getGaugeValue")
 
 ---@param data result|Score|IRScore
+---@param highScores Score[]
+local function getClearWithRaise(data, highScores)
+	if data.badge == 0 then
+		return makeLabel("Medium", Clears:get(data.badge, false, data), 29)
+	end
+
+	local currClear = data.badge
+	local highestClear = 0
+
+	for _, score in ipairs(highScores) do
+		if score.badge > highestClear then
+			highestClear = score.badge
+		end
+	end
+
+	if currClear > highestClear then
+		local curr = Clears:get(currClear, false, data)
+		local high = (highestClear == 0 and "NO PLAY") or Clears:get(highestClear, false, data)
+
+		return makeLabel("Medium", ("%s > %s"):format(high, curr), 29)
+	end
+
+	return makeLabel("Medium", Clears:get(currClear, false, data), 29)
+end
+
+---@param data result|Score|IRScore
 ---@return Label
 local function getDate(data)
 	local date = os.date(getDateTemplate(), data.timestamp or os.time())
@@ -44,7 +70,7 @@ local function getPlayer(data)
 end
 
 ---@param data result|Score|IRScore
----@param i integer
+---@param i? integer
 ---@return ResultsScoreDifference|nil
 local function getScoreDifference(data, i)
 	if data.uid or (not data.isSelf) or i then
@@ -80,7 +106,7 @@ local function getScoreDifference(data, i)
 end
 
 ---@param data result|Score|IRScore
----@param i integer
+---@param i? integer
 ---@return ResultsVolforce|nil
 local function getPlayerVolforce(data, i)
 	if i then
@@ -125,10 +151,15 @@ local function makeNumber(value, size)
 end
 
 ---@param data result|Score|IRScore
+---@param i? integer
+---@param highScores? Score[]
 ---@return ResultsScore
-local function formatScore(data, i)
+local function formatScore(data, i, highScores)
+	local clear = (highScores and getClearWithRaise(data, highScores)) or
+		makeLabel("Medium", Clears:get(data.badge or data.lamp, false, data), 29)
+
 	return {
-		clear = makeLabel("Medium", Clears:get(data.badge or data.lamp, false, data), 29),
+		clear = clear,
 		critical = makeNumber(data.perfects or data.crit),
 		date = getDate(data),
 		gauge = getGaugeValue(data),

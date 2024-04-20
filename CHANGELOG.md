@@ -1,3 +1,9 @@
+### 1.5.3 - April 20, 2024
+- `Gameplay` changes
+  - Re-implemented assist tick setting
+- `Results` changes
+  - Clear raise is now shown if applicable e.g. `NORMAL > HARD`, `HARD > PUC`, etc.
+
 ### 1.5.2 - January 29, 2024
 - Added Practice Mode information which includes goal, pass rate, score, and a button rating graph
 - Added a skin setting to filter the `ALL` folder stats to only show stats for official charts
