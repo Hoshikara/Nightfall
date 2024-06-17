@@ -79,6 +79,8 @@ function PlayerCard:drawCard(introAlpha)
 		y = -12,
 		alpha = introAlpha,
 		color = "White",
+		shadowAlpha = 1,
+		shadowOffset = 2,
 	})
 
 	self:drawVolforce(x, introAlpha)
@@ -87,6 +89,13 @@ end
 
 ---@param introAlpha number
 function PlayerCard:drawAvatar(introAlpha)
+	drawRect({
+		x = 0,
+		y = 0,
+		w = 73,
+		h = 73,
+		color = "Black",
+	})
 	gfx.Scissor(0, 0, 72, 72)
 	self.avatar:draw({
 		x = 72 / 2,
@@ -115,12 +124,16 @@ function PlayerCard:drawVolforce(x, introAlpha)
 		y = 28,
 		alpha = introAlpha,
 		color = "White",
+		shadowAlpha = 1,
+		shadowOffset = 2,
 	})
 	self.vf:draw({
 		x = x + self.volforce.w + 6,
 		y = 27,
 		alpha = introAlpha,
 		color = "Standard",
+		shadowAlpha = 1,
+		shadowOffset = 2,
 	})
 end
 
@@ -133,6 +146,8 @@ function PlayerCard:drawDan(x, introAlpha)
 			y = 53,
 			alpha = introAlpha,
 			color = "White",
+			shadowAlpha = 1,
+			shadowOffset = 2,
 			text = self.danLevel,
 			update = true,
 		})
@@ -141,6 +156,8 @@ function PlayerCard:drawDan(x, introAlpha)
 			y = 52,
 			alpha = introAlpha,
 			color = "Standard",
+			shadowAlpha = 1,
+			shadowOffset = 2,
 		})
 	end
 end

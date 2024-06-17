@@ -117,6 +117,14 @@ end
 ---@param introAlpha number
 function TrackInfo:drawProgressBar(x, w, introAlpha)
 	drawRect({
+		x = x - 1,
+		y = 88,
+		w = w + 3,
+		h = 24,
+		alpha = introAlpha,
+		color = "Black",
+	})
+	drawRect({
 		x = x,
 		y = 89,
 		w = w,
@@ -170,6 +178,8 @@ function TrackInfo:drawBpm(x, w, introAlpha, isPortrait)
 	local bpm = gameplay.bpm
 	local playbackSpeed = gameplay.playbackSpeed or 1
 	local playbackText = ""
+	local shadowAlpha = 1
+	local shadowOffset = 2
 	local y = 0
 
 	if isPortrait then
@@ -190,6 +200,8 @@ function TrackInfo:drawBpm(x, w, introAlpha, isPortrait)
 		alpha = introAlpha,
 		align = "RightTop",
 		color = "Standard",
+		shadowAlpha = shadowAlpha,
+		shadowOffset = shadowOffset,
 	})
 	self.bpmValue:draw({
 		x = x,
@@ -197,6 +209,8 @@ function TrackInfo:drawBpm(x, w, introAlpha, isPortrait)
 		align = "RightTop",
 		alpha = introAlpha,
 		color = "White",
+		shadowAlpha = shadowAlpha,
+		shadowOffset = shadowOffset,
 		text = ("%.0f"):format(bpm),
 		update = true,
 	})
@@ -206,6 +220,8 @@ function TrackInfo:drawBpm(x, w, introAlpha, isPortrait)
 		align = "LeftTop",
 		alpha = introAlpha,
 		color = "White",
+		shadowAlpha = shadowAlpha,
+		shadowOffset = shadowOffset,
 		text = playbackText,
 		update = true,
 	})
@@ -218,6 +234,8 @@ end
 ---@param minBpm number
 ---@param maxBpm number
 function TrackInfo:drawLaneSpeed(x, w, introAlpha, isPortrait, minBpm, maxBpm)
+	local shadowAlpha = 1
+	local shadowOffset = 2
 	local y = 0
 
 	---@type Color|string
@@ -244,6 +262,8 @@ function TrackInfo:drawLaneSpeed(x, w, introAlpha, isPortrait, minBpm, maxBpm)
 			alpha = introAlpha,
 			align = "RightTop",
 			color = "White",
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 		})
 		self.laneSpeedMultiplier:draw({
 			x = x - 95,
@@ -251,6 +271,8 @@ function TrackInfo:drawLaneSpeed(x, w, introAlpha, isPortrait, minBpm, maxBpm)
 			alpha = introAlpha,
 			align = "RightTop",
 			color = self.multiplierColor,
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 			text = ("%.2f"):format(gameplay.hispeed),
 			update = true,
 		})
@@ -260,6 +282,8 @@ function TrackInfo:drawLaneSpeed(x, w, introAlpha, isPortrait, minBpm, maxBpm)
 			alpha = introAlpha,
 			align = "RightTop",
 			color = "White",
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 			update = true,
 		})
 		self.bpmValue:draw({
@@ -268,6 +292,8 @@ function TrackInfo:drawLaneSpeed(x, w, introAlpha, isPortrait, minBpm, maxBpm)
 			alpha = introAlpha,
 			align = "RightTop",
 			color = "White",
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 			text = ("%.0f"):format(gameplay.bpm),
 			update = true,
 		})
@@ -279,6 +305,8 @@ function TrackInfo:drawLaneSpeed(x, w, introAlpha, isPortrait, minBpm, maxBpm)
 				alpha = introAlpha,
 				align = "RightTop",
 				color = "White",
+				shadowAlpha = shadowAlpha,
+				shadowOffset = shadowOffset,
 				text = ("%.2f"):format(minBpm * gameplay.hispeed * 0.01),
 				update = true,
 			})
@@ -288,6 +316,8 @@ function TrackInfo:drawLaneSpeed(x, w, introAlpha, isPortrait, minBpm, maxBpm)
 				alpha = introAlpha,
 				align = "RightTop",
 				color = "White",
+				shadowAlpha = shadowAlpha,
+				shadowOffset = shadowOffset,
 			})
 			self.maxSpeed:draw({
 				x = x - 19,
@@ -295,6 +325,8 @@ function TrackInfo:drawLaneSpeed(x, w, introAlpha, isPortrait, minBpm, maxBpm)
 				alpha = introAlpha,
 				align = "LeftTop",
 				color = "White",
+				shadowAlpha = shadowAlpha,
+				shadowOffset = shadowOffset,
 				text = ("%.2f"):format(maxBpm * gameplay.hispeed * 0.01),
 				update = true,
 			})
@@ -306,6 +338,8 @@ function TrackInfo:drawLaneSpeed(x, w, introAlpha, isPortrait, minBpm, maxBpm)
 			alpha = introAlpha,
 			align = "RightTop",
 			color = "Standard",
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 		})
 	end
 
@@ -315,6 +349,8 @@ function TrackInfo:drawLaneSpeed(x, w, introAlpha, isPortrait, minBpm, maxBpm)
 		align = "RightTop",
 		alpha = introAlpha,
 		color = self.laneSpeedColor,
+		shadowAlpha = shadowAlpha,
+		shadowOffset = shadowOffset,
 		text = ("%.2f"):format(gameplay.bpm * gameplay.hispeed * 0.01),
 		update = true,
 	})
@@ -326,6 +362,8 @@ end
 function TrackInfo:drawHints(x, w, isPortrait)
 	local bpmHint, laneSpeedHint = self:getHints()
 	local color = (self.isSlowingDown and "Positive") or "Negative"
+	local shadowAlpha = 1
+	local shadowOffset = 2
 	local y = 0
 
 	if isPortrait then
@@ -340,6 +378,8 @@ function TrackInfo:drawHints(x, w, isPortrait)
 		y = y + 124,
 		align = "LeftTop",
 		color = color,
+		shadowAlpha = shadowAlpha,
+		shadowOffset = shadowOffset,
 		text = bpmHint,
 		update = true,
 	})
@@ -348,6 +388,8 @@ function TrackInfo:drawHints(x, w, isPortrait)
 		y = y + 165,
 		align = "LeftTop",
 		color = color,
+		shadowAlpha = shadowAlpha,
+		shadowOffset = shadowOffset,
 		text = laneSpeedHint,
 		update = true,
 	})

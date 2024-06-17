@@ -24,6 +24,7 @@ function LaserAlerts.new(ctx, window)
 		alpha = { 0, 0 },
 		ctx = ctx,
 		fade = { Easing.new(), Easing.new() },
+		blackCursor = ItemCursor.new({ size = 16, stroke = 4 }, true),
 		itemCursor = ItemCursor.new({ size = 16, stroke = 2 }, true),
 		pulseTimers = { 0, 0 },
 		size = 128,
@@ -99,8 +100,18 @@ function LaserAlerts:drawAlert(index, scale)
 		align = "CenterMiddle",
 		alpha = self.alpha[index],
 		color = laserColors[index],
+		shadowAlpha = 1,
+		shadowOffset = 2,
 	})
 	gfx.ResetScissor()
+	self.blackCursor:drawItemCursor({
+		x = x - (size / 2) * fade + 1,
+		y = -(size / 2) * fade + 1,
+		w = size * fade,
+		h = size * fade,
+		alpha = fade,
+		color = "Black",
+	})
 	self.itemCursor:drawItemCursor({
 		x = x - (size / 2) * fade,
 		y = -(size / 2) * fade,

@@ -80,12 +80,16 @@ function ScoreInfo:drawScore(introAlpha, isPortrait)
 		y = -33,
 		alpha = introAlpha,
 		color = "Standard",
+		shadowAlpha = 1,
+		shadowOffset = 2,
 	})
 	self.score:draw({
 		x = -8,
 		y = (isPortrait and 4) or 24,
 		alpha = introAlpha,
 		value = self.ctx.score,
+		shadowAlpha = 1,
+		shadowOffset = 2,
 	})
 end
 
@@ -96,18 +100,24 @@ function ScoreInfo:drawExScore(introAlpha, isPortrait)
 	local maxExScore = self.ctx.maxExScore
 	local maxExScoreAlpha = 1
 	local pctString = "(MAX-0)"
+	local shadowAlpha = 1
+	local shadowOffset = 2
 
 	self.exScoreLabel:draw({
 		x = (isPortrait and -5) or -2,
 		y = (isPortrait and 96) or 163,
 		alpha = introAlpha,
 		color = "Standard",
+		shadowAlpha = shadowAlpha,
+		shadowOffset = shadowOffset,
 	})
 	self.exScore:draw({
 		x = (isPortrait and 30) or 41,
 		y = (isPortrait and 99) or 166,
 		alpha = introAlpha,
 		color = "White",
+		shadowAlpha = shadowAlpha,
+		shadowOffset = shadowOffset,
 		value = exScore,
 	})
 
@@ -128,6 +138,8 @@ function ScoreInfo:drawExScore(introAlpha, isPortrait)
 		y = (isPortrait and 99) or 166,
 		alpha = introAlpha * maxExScoreAlpha,
 		color = "White",
+		shadowAlpha = shadowAlpha,
+		shadowOffset = shadowOffset,
 		text = pctString,
 		update = true,
 	})
@@ -141,12 +153,16 @@ function ScoreInfo:drawMaxChain(introAlpha, isPortrait)
 		y = (isPortrait and 96) or 163,
 		alpha = introAlpha,
 		color = "Standard",
+		shadowAlpha = 1,
+		shadowOffset = 2,
 	})
 	self.maxChain:draw({
 		x = (isPortrait and 312) or 494,
 		y = (isPortrait and 99) or 166,
 		alpha = introAlpha,
 		color = "White",
+		shadowAlpha = 1,
+		shadowOffset = 2,
 		value = self.ctx.maxChain,
 	})
 end

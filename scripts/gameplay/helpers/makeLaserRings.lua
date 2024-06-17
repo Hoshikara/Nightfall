@@ -8,7 +8,7 @@ local function makeLaserRings(laserIndex, isGameplaySettings)
 		hueSettingKey = ((laserIndex == 1) and "leftLaserHue") or "rightLaserHue",
 		isCentered = true,
 		isMesh = true,
-		meshBlendMode = 1,
+		meshBlendMode = 0,
 		path = ("gameplay/hit_animations/laser_ring_%d"):format(laserIndex),
 		updateMeshHue = isGameplaySettings,
 	}

@@ -66,14 +66,16 @@ function DimmedNumber:draw(params)
 	self:updateNumbers(params.value or self.value)
 
 	local color = params.color or self.color
+	local shadowAlpha = params.shadowAlpha or 0.5
+	local shadowOffset = params.shadowOffset or 1
 	local x = params.x or 0
 	local y = params.y or 0
 
 	if self.isScore then
 		---@diagnostic disable-next-line
-		self:drawScore(x, y, params.alpha or 1, color)
+		self:drawScore(x, y, params.alpha or 1, color, shadowAlpha, shadowOffset)
 	else
-		self:drawNumber(x, y, params.alpha, color, params.spacing)
+		self:drawNumber(x, y, params.alpha, color, params.spacing, shadowAlpha, shadowOffset)
 	end
 end
 
@@ -93,7 +95,7 @@ end
 ---@param x number
 ---@param y number
 ---@param color Color|string
-function DimmedNumber:drawScore(x, y, alpha, color)
+function DimmedNumber:drawScore(x, y, alpha, color, shadowAlpha, shadowOffset)
 	local align = self.align
 	local digits = self.digits
 	local digitAlphas = self.alpha
@@ -108,6 +110,8 @@ function DimmedNumber:drawScore(x, y, alpha, color)
 			align = align,
 			alpha = digitAlphas[i] * alpha,
 			color = "White",
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 			text = numbers[i],
 			update = true,
 		})
@@ -117,6 +121,8 @@ function DimmedNumber:drawScore(x, y, alpha, color)
 			align = align,
 			alpha = digitAlphas[i + 4] * alpha,
 			color = color,
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 			text = numbers[i + 4],
 			update = true,
 		})
@@ -126,7 +132,7 @@ end
 ---@param x number
 ---@param y number
 ---@param color Color|string
-function DimmedNumber:drawNumber(x, y, alphaMod, color, spacing)
+function DimmedNumber:drawNumber(x, y, alphaMod, color, spacing, shadowAlpha, shadowOffset)
 	local align = self.align
 	local alpha = self.alpha
 	local numbers = self.numbers
@@ -142,6 +148,8 @@ function DimmedNumber:drawNumber(x, y, alphaMod, color, spacing)
 			align = align,
 			alpha = alpha[i] * alphaMod,
 			color = color,
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 			text = numbers[i],
 			update = true,
 		})
@@ -165,6 +173,8 @@ return DimmedNumber
 ---@field alpha? number
 ---@field color? Color|string
 ---@field offset? number
+---@field shadowAlpha? number
+---@field shadowOffset? number
 ---@field spacing? number
 ---@field value? integer
 

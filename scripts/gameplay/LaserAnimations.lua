@@ -107,7 +107,7 @@ function LaserAnimations:setupCritLineTransform(pos, isRing)
 			line.x1 + ((line.x2 - line.x1) * pos),
 			line.y1 + ((line.y2 - line.y1) * pos) - (48 * self.window.scaleFactor)
 		)
-		gfx.Rotate(-critLine.rotation)
+		gfx.Rotate(-critLine.rotation * (180 / 3.14))
 		self.window:scale(self.scale)
 	end
 end

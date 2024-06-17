@@ -11,7 +11,7 @@ local function makeHoldAnimation(isGameplaySettings)
 		hueSettingKey = props.hueSettingKey,
 		isCentered = true,
 		isMesh = true,
-		meshBlendMode = 1,
+		meshBlendMode = 0,
 		path = props.effect,
 		updateMeshHue = isGameplaySettings,
 	}

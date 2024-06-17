@@ -59,8 +59,8 @@ function Image.createMesh(params, w, h)
 
 	mesh:AddSkinTexture("mainTex", params.path .. ".png")
 	mesh:SetBlendMode(params.meshBlendMode or 0)
-	mesh:SetParam("alpha", 0.999)
-	mesh:SetParam("hue", getSetting(params.hueSettingKey, 0))
+	mesh:SetParam("alpha", 1.0)
+	mesh:SetParam("hue", getSetting(params.hueSettingKey, 0) * 6.28)
 	mesh:SetPrimitiveType(2)
 
 	if params.isCentered then
@@ -143,7 +143,7 @@ function Image:drawMesh(x, y, w, h, alpha, updateData)
 			{ { x + w, y + h }, { 1, 1 } },
 			{ { x, y + h },     { 0, 1 } },
 		})
-		self.mesh:SetParam("alpha", alpha * 0.999)
+		self.mesh:SetParam("alpha", alpha)
 	end
 
 	if self.updateMeshHue then

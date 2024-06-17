@@ -53,6 +53,8 @@ end
 function Label:draw(params)
 	local alpha = params.alpha or 1
 	local maxWidth = params.maxWidth or -1
+	local shadowAlpha = params.shadowAlpha or 0.5
+	local shadowOffset = params.shadowOffset or 1
 	local x = params.x or 0
 	local y = params.y or 0
 
@@ -62,8 +64,8 @@ function Label:draw(params)
 
 	gfx.BeginPath()
 	TextAlignments:align(params.align)
-	setColor("Black", alpha * 0.5)
-	gfx.DrawLabel(self.label, x + 1, y + 1, maxWidth)
+	setColor("Black", alpha * shadowAlpha)
+	gfx.DrawLabel(self.label, x + shadowOffset, y + shadowOffset, maxWidth)
 	setColor(params.color or self.color, alpha)
 	gfx.DrawLabel(self.label, x, y, maxWidth)
 end
@@ -72,6 +74,8 @@ end
 function Label:drawCutoff(params)
 	local alpha = params.alpha or 1
 	local scale = params.scale or 1
+	local shadowAlpha = params.shadowAlpha or 0.5
+	local shadowOffset = params.shadowOffset or 1
 	local x = params.x or 0
 	local y = params.y or 0
 
@@ -94,9 +98,9 @@ function Label:drawCutoff(params)
 	gfx.BeginPath()
 	TextAlignments:align(params.align)
 	gfx.Scissor(x * scale, y * scale, width, self.h * 1.25)
-	setColor("Black", alpha * 0.5)
-	gfx.DrawLabel(self.label, x + 1, y + 1, -1)
-	gfx.DrawLabel(self.label, x + 1, y + 1, -1)
+	setColor("Black", alpha * shadowAlpha)
+	gfx.DrawLabel(self.label, x + shadowOffset, y + shadowOffset, -1)
+	gfx.DrawLabel(self.label, x + shadowOffset, y + shadowOffset, -1)
 	setColor(params.color or self.color, alpha)
 	gfx.DrawLabel(self.label, x, y, -1)
 	gfx.DrawLabel(self.label, x, y, -1)
@@ -115,6 +119,8 @@ end
 function Label:drawScrolling(params)
 	local alpha = params.alpha or 1
 	local scale = params.scale or 1
+	local shadowAlpha = params.shadowAlpha or 0.5
+	local shadowOffset = params.shadowOffset or 1
 	local timer = (params.timer or 0) * 2
 	local width = params.width or 0
 	local labelX = self.w + 80
@@ -131,9 +137,9 @@ function Label:drawScrolling(params)
 	gfx.BeginPath()
 	TextAlignments:align("params.align")
 	gfx.Scissor((x + 2) * scale, y * scale, width, self.h * 1.25)
-	setColor("Black", alpha * 0.5)
-	gfx.DrawLabel(self.label, x - (phase * labelX) + 1, y + 1, -1)
-	gfx.DrawLabel(self.label, x - (phase * labelX) + labelX + 1, y + 1, -1)
+	setColor("Black", alpha * shadowAlpha)
+	gfx.DrawLabel(self.label, x - (phase * labelX) + shadowOffset, y + shadowOffset, -1)
+	gfx.DrawLabel(self.label, x - (phase * labelX) + labelX + shadowOffset, y + shadowOffset, -1)
 	setColor(params.color or self.color, alpha)
 	gfx.DrawLabel(self.label, x - (phase * labelX), y, -1)
 	gfx.DrawLabel(self.label, x - (phase * labelX) + labelX, y, -1)
@@ -159,6 +165,8 @@ return Label
 ---@field color? string|Color
 ---@field font? string
 ---@field maxWidth? number
+---@field shadowAlpha? number
+---@field shadowOffset? number
 ---@field size? integer
 ---@field text? string|number
 ---@field update? boolean
@@ -171,6 +179,8 @@ return Label
 ---@field color? string|Color
 ---@field font? string
 ---@field scale? number
+---@field shadowAlpha? number
+---@field shadowOffset? number
 ---@field width? number
 ---@field size? integer
 ---@field text? string|number
@@ -184,6 +194,8 @@ return Label
 ---@field color? string|Color
 ---@field font? string
 ---@field scale? number
+---@field shadowAlpha? number
+---@field shadowOffset? number
 ---@field timer? number
 ---@field width? number
 ---@field size? integer

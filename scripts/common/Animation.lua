@@ -15,7 +15,7 @@ local function loadFrames(folderPath, hueSettingKey, updateMeshHue, scale)
 			hueSettingKey = hueSettingKey,
 			isCentered = true,
 			isMesh = true,
-			meshBlendMode = 1,
+			meshBlendMode = 0,
 			path = ("%s/%04d"):format(folderPath, i),
 			scale = scale,
 			updateMeshHue = updateMeshHue,

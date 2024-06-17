@@ -77,6 +77,13 @@ function SongInfo:drawJacket(introAlpha, jacketSize)
 	drawRect({
 		x = 1,
 		y = 1,
+		w = jacketSize - 1,
+		h = jacketSize - 1,
+		stroke = { color = "Black", size = 4 },
+	})
+	drawRect({
+		x = 1,
+		y = 1,
 		w = jacketSize - 2,
 		h = jacketSize - 2,
 		image = self.jacket,
@@ -93,6 +100,8 @@ function SongInfo:drawDifficulty(introAlpha, jacketSize)
 		y = jacketSize + 1,
 		alpha = introAlpha,
 		color = "White",
+		shadowAlpha = 1,
+		shadowOffset = 2,
 	})
 	self.level:draw({
 		x = jacketSize + 1,
@@ -100,6 +109,8 @@ function SongInfo:drawDifficulty(introAlpha, jacketSize)
 		align = "RightTop",
 		alpha = introAlpha,
 		color = "White",
+		shadowAlpha = 1,
+		shadowOffset = 2,
 	})
 end
 
@@ -109,6 +120,8 @@ end
 ---@param maxWidth number
 function SongInfo:drawMetadata(dt, introAlpha, jacketSize, maxWidth)
 	local canScroll = self.ctx.introOffset <= 0.2
+	local shadowAlpha = 1
+	local shadowOffset = 2
 
 	if self.title.w > maxWidth then
 		if canScroll then
@@ -121,6 +134,8 @@ function SongInfo:drawMetadata(dt, introAlpha, jacketSize, maxWidth)
 			alpha = introAlpha,
 			color = "White",
 			scale = self.window.scaleFactor,
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 			timer = self.titleTimer,
 			width = maxWidth,
 		})
@@ -129,6 +144,8 @@ function SongInfo:drawMetadata(dt, introAlpha, jacketSize, maxWidth)
 			x = jacketSize + 17,
 			y = -8,
 			alpha = introAlpha,
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 			color = "White",
 		})
 	end
@@ -144,6 +161,8 @@ function SongInfo:drawMetadata(dt, introAlpha, jacketSize, maxWidth)
 			alpha = introAlpha,
 			color = "Standard",
 			scale = self.window.scaleFactor,
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 			timer = self.artistTimer,
 			width = maxWidth,
 		})
@@ -153,6 +172,8 @@ function SongInfo:drawMetadata(dt, introAlpha, jacketSize, maxWidth)
 			y = 37,
 			alpha = introAlpha,
 			color = "Standard",
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 		})
 	end
 end

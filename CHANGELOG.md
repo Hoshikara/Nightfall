@@ -1,3 +1,9 @@
+### 1.5.4 - June 16, 2024
+- `Gameplay` changes
+  - Adjusted shadow of UI elements to improve readability when using backgrounds
+  - Fixed laser animations not rotating with the critical line
+  - Removed black backgrounds from hit animations so they do not appear when using backgrounds
+
 ### 1.5.3 - April 20, 2024
 - `Gameplay` changes
   - Re-implemented assist tick setting

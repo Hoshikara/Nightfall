@@ -108,6 +108,11 @@ function GaugeBar:drawBar(w, h, alpha, color, gaugeValue, threshold)
 		h = h,
 		alpha = 1,
 		color = "Black",
+		stroke = {
+			alpha = 1,
+			color = "Black",
+			size = 6,
+		},
 	})
 
 	if self.fillType ~= "HIDDEN" then
@@ -165,6 +170,8 @@ function GaugeBar:drawPercentage(h, gaugeValue, introAlpha)
 		align = "RightTop",
 		alpha = introAlpha,
 		color = "White",
+		shadowAlpha = 1,
+		shadowOffset = 2,
 		text = template:format(gaugeValue * 100),
 		update = true,
 	})
@@ -191,6 +198,8 @@ function GaugeBar:drawName(h, introAlpha, name, threshold)
 		align = align,
 		alpha = introAlpha,
 		color = "White",
+		shadowAlpha = 1,
+		shadowOffset = 2,
 		text = name,
 		update = true,
 	})

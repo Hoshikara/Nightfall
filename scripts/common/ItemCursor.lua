@@ -132,17 +132,18 @@ end
 
 ---@param params ItemCursor.drawItemCursor.params
 function ItemCursor:drawItemCursor(params)
+	local color = params.color or "White"
+	local size = (params.size or self.size) * 0.95
+	local gap = size / (size * 1.05)
 	local x = params.x or (self.x + self.offsetX) + (params.xOffset or 0)
 	local y = params.y or (self.y + self.offsetY) + (params.yOffset or 0)
 	local w = params.w or self.w
 	local h = params.h or self.h
-	local size = (params.size or self.size) * 0.95
-	local gap = size / (size * 1.05)
 
 	gfx.BeginPath()
 	setStroke({
 		alpha = params.alpha or (self.alpha * (params.alphaMod or 1)),
-		color = "White",
+		color = color,
 		size = self.stroke,
 	})
 	gfx.MoveTo(x - size - gap, y)
@@ -209,6 +210,7 @@ return ItemCursor
 ---@field h? number
 ---@field alpha? number
 ---@field alphaMod? number
+---@field color? Color|string
 ---@field size? number
 ---@field xOffset? number
 ---@field yOffset? number

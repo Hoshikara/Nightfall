@@ -103,6 +103,8 @@ function ScoreDifference:drawDifference()
 			y = offset,
 			alpha = getAlpha(absDifference, i),
 			color = color,
+			shadowAlpha = 1,
+			shadowOffset = 2,
 			text = difference:sub(i + 1, i + 1),
 			update = true,
 		})
@@ -116,12 +118,16 @@ function ScoreDifference:drawPrefix(isNegative)
 			x = -69.5,
 			y = -3,
 			color = "Negative",
+			shadowAlpha = 1,
+			shadowOffset = 2,
 		})
 	else
 		self.plus:draw({
 			x = -74,
 			y = 5.5,
 			color = "Positive",
+			shadowAlpha = 1,
+			shadowOffset = 2,
 		})
 	end
 end

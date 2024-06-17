@@ -95,6 +95,8 @@ function Earlate:drawEarlate(dt)
 	local color, delta, text = self:getProps()
 	local displayType = self.displayType
 	local offset = self.offset
+	local shadowAlpha = 1
+	local shadowOffset = 2
 
 	if (displayType ~= "DELTA") and (not self.ctx.critHit) then
 		text:draw({
@@ -103,6 +105,8 @@ function Earlate:drawEarlate(dt)
 			align = self.textAlign,
 			alpha = 0.4 * alpha,
 			color = "White",
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 		})
 		text:draw({
 			x = -offset,
@@ -110,6 +114,8 @@ function Earlate:drawEarlate(dt)
 			align = self.textAlign,
 			alpha = alpha,
 			color = color,
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 		})
 	end
 
@@ -120,6 +126,8 @@ function Earlate:drawEarlate(dt)
 			align = self.deltaAlign,
 			alpha = 0.4 * alpha,
 			color = "White",
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 			text = delta,
 			update = true,
 		})
@@ -129,6 +137,8 @@ function Earlate:drawEarlate(dt)
 			align = self.deltaAlign,
 			alpha = alpha,
 			color = color,
+			shadowAlpha = shadowAlpha,
+			shadowOffset = shadowOffset,
 			text = delta,
 			update = true,
 		})

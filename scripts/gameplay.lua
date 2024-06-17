@@ -200,6 +200,8 @@ function render(dt)
 			align = "CenterTop",
 			alpha = context.introAlpha,
 			color = "White",
+			shadowAlpha = 1,
+			shadowOffset = 2,
 		})
 
 		if gameplay.practice_setup ~= nil then
