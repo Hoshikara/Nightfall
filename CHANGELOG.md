@@ -1,3 +1,6 @@
+### 1.5.5 - June 26, 2024
+- Contribution by @zzunja [Fixed crash on hitDeltaBar if pressing buttons before chart is loaded](https://github.com/Hoshikara/Nightfall/pull/18)
+
 ### 1.5.4 - June 16, 2024
 - `Gameplay` changes
   - Adjusted shadow of UI elements to improve readability when using backgrounds
