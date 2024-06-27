@@ -114,7 +114,7 @@ function button_hit(btn, rating, delta)
 		hitAnimations:enqueueHit(btn, delta, rating)
 	end
 
-	if hitDeltaBarEnabled and (not gameplay.autoplay) then
+	if hitDeltaBarEnabled and (not gameplay.autoplay) and (gameplay.progress ~= nil) then
 		hitDeltaBar:enqueueHit(btn, delta, rating)
 	end
 
