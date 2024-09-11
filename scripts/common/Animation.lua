@@ -70,7 +70,7 @@ end
 function Animation:play(dt, state, effect)
 	state.timer = state.timer + dt
 
-	if state.timer >= self.frameTime then
+	while state.timer >= self.frameTime do
 		state.frame = state.frame + 1
 		state.timer = state.timer - self.frameTime
 	end
@@ -85,7 +85,7 @@ function Animation:play(dt, state, effect)
 		})
 	end
 
-	if state.frame == self.frameCount then
+	if state.frame >= self.frameCount then
 		if self.loop then
 			state.frame = self.loopPoint
 		else

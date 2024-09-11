@@ -1,3 +1,7 @@
+### 1.5.6 - September 10, 2024
+- `Gameplay` changes
+  - Improved performance of animations (Thanks to skade)
+
 ### 1.5.5 - June 26, 2024
 - Contribution by @zzunja [Fixed crash on hitDeltaBar if pressing buttons before chart is loaded](https://github.com/Hoshikara/Nightfall/pull/18)
 
