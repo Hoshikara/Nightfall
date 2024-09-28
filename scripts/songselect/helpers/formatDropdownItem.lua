@@ -24,7 +24,7 @@ end
 ---@return string, string, number
 local function formatDropdownItem(font, text)
 	text = removePrefixes(text)
-
+	game.Log(text, 2)
 	if text == "All" then
 		font = "Medium"
 	elseif (font == "Number") and (text ~= "∞") then

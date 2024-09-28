@@ -41,18 +41,18 @@ local function getHoverScale(data)
 	}, hoverScale
 end
 
----@param data result
+---@param data SongResultData
 ---@return ResultsGraphData
 local function getGraphData(data)
 	local duration, hoverScale = getHoverScale(data)
-	local hardFail = ((data.gauge_type or 0) == 1) and (data.badge == 1)
+	local hardFail = ((data.gaugeType or 0) == 1) and (data.badge == 1)
 	local hitStats = data.noteHitStats or {}
 	local holdStats = data.holdHitStats or {}
 	local laserStats = data.laserHitStats or {}
 	local scoreData = (data.badge > 0)
-		and getScoreData(hitStats, holdStats, laserStats, result.duration)
+	  and getScoreData(hitStats, holdStats, laserStats, result.duration)
 	local sCriticalWindow =
-		math.floor(((data.hitWindow and data.hitWindow.perfect) or 46) / 2)
+	  math.floor(((data.hitWindow and data.hitWindow.perfect) or 46) / 2)
 	local ratings, exScore, exScorePct = getRatings(data, hitStats, sCriticalWindow)
 
 	return {

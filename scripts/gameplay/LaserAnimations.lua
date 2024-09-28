@@ -49,7 +49,7 @@ function LaserAnimations:draw(dt)
 	end
 
 	for laserIndex = 1, 2 do
-		local cursor = cursors[laserIndex - 1]
+		local cursor = cursors[laserIndex]
 
 		for _, state in ipairs(self.slamStates[laserIndex]) do
 			if state.queued then
@@ -58,7 +58,7 @@ function LaserAnimations:draw(dt)
 		end
 
 		ringStates[laserIndex].active = isGameplaySettings
-			or gameplay.laserActive[laserIndex]
+		  or gameplay.laserActive[laserIndex]
 
 		self:playRing(
 			dt,

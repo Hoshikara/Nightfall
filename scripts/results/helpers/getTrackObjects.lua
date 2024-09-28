@@ -88,6 +88,7 @@ local function separateObjects(holdsOrLasers, isLasers)
 		local lasers = { {}, {} }
 
 		for _, obj in ipairs(holdsOrLasers) do
+			lasers[obj.lane - 5] = lasers[obj.lane - 5] or {}
 			lasers[obj.lane - 5][#lasers[obj.lane - 5] + 1] = obj
 		end
 

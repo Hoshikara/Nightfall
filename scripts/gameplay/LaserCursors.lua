@@ -54,7 +54,7 @@ function LaserCursors:draw(dt)
 	self.flickerTimer = self.flickerTimer + dt
 
 	for i = 1, 2 do
-		local cursor = cursors[i - 1]
+		local cursor = cursors[i]
 
 		gfx.SkewX(cursor.skew)
 
