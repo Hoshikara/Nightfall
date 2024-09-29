@@ -105,7 +105,7 @@ function SongCache:cacheDiffs(song)
 			diffIndex = diff.difficulty,
 			diffName = DifficultyNames:get(diff.jacketPath, diff.difficulty, true),
 			effector = diff.effector:upper(),
-			hash = diff.hash,
+			hash = diff.id,
 			illustrator = diff.illustrator:upper(),
 			jacketPath = diff.jacketPath,
 			level = ("%02d"):format(diff.level),
@@ -140,6 +140,8 @@ function SongCache:getDiffRadar(song, diffIndex, level)
 			end
 		end
 	end
+
+	if not song.path then return nil end
 
 	-- Check if the chart folder has a radar file
 	local radarFile = io.open(song.path .. "/radar.lua", "r")

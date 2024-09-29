@@ -1,0 +1,544 @@
+{
+	"////////// GENERAL //////////": {
+		"type": "label"
+	},
+	"playerName": {
+		"label": "Player Name",
+		"type": "text",
+		"default": "Guest"
+	},
+	"separator_ivy": {},
+	"dateFormat": {
+		"label": "Date Format",
+		"type": "selection",
+		"default": "DAY-MONTH-YEAR",
+		"values": [
+			"DAY-MONTH-YEAR",
+			"MONTH-DAY-YEAR",
+			"YEAR-MONTH-DAY"
+		]
+	},
+	"separator_dvj": {},
+	"nauticaPath": {
+		"label": "Nautica Download Folder i.e. 'nautica' (no quotes, case-sensitive)",
+		"type": "text",
+		"default": "nautica"
+	},
+	"separator_hjb": {},
+	"backgroundDim": {
+		"label": "Background dim: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"tintBackground": {
+		"label": "Tint background image",
+		"type": "bool",
+		"default": true
+	},
+	"separator_b": {},
+	"////////// COLORS //////////": {
+		"type": "label"
+	},
+	"colorScheme": {
+		"label": "Overall Color Scheme",
+		"type": "color",
+		"default": "78A0F0FF"
+	},
+	"positiveColor": {
+		"label": "Positive color (positive score difference, result stats, truthy values, etc.)",
+		"type": "color",
+		"default": "78A0F0FF"
+	},
+	"negativeColor": {
+		"label": "Negative color (negative score difference, result stats, falsy values, etc.)",
+		"type": "color",
+		"default": "C85050FF"
+	},
+	"SCriticalColor": {
+		"label": "S-Critical color",
+		"type": "color",
+		"default": "DCF0FFFF"
+	},
+	"criticalColor": {
+		"label": "Critical color",
+		"type": "color",
+		"default": "FFEB64FF"
+	},
+	"earlyColor": {
+		"label": "Early color",
+		"type": "color",
+		"default": "FF69FFFF"
+	},
+	"lateColor": {
+		"label": "Late color",
+		"type": "color",
+		"default": "69CDFFFF"
+	},
+	"errorColor": {
+		"label": "Error color",
+		"type": "color",
+		"default": "F02814FF"
+	},
+	"PucChainColor": {
+		"label": "PUC chain state color",
+		"type": "color",
+		"default": "FFEB64FF"
+	},
+	"UcChainColor": {
+		"label": "UC chain state color",
+		"type": "color",
+		"default": "FFEB64FF"
+	},
+	"normalChainColor": {
+		"label": "Normal chain state color",
+		"type": "color",
+		"default": "EBEBEBFF"
+	},
+	"separator_yui": {},
+	"////////// SONG SELECT //////////": {
+		"type": "label"
+	},
+	"showFolderStats": {
+		"label": "Enable Folder Stats",
+		"type": "bool",
+		"default": true
+	},
+	"getOfficialStats": {
+		"label": "For All folder, only collect stats for official charts",
+		"type": "bool",
+		"default": true
+	},
+	"separator_olv": {},
+	"jacketQuality": {
+		"label": "Jacket Image Quality (decrease for faster loading and less RAM usage)",
+		"type": "selection",
+		"default": "NORMAL",
+		"values": [
+			"LOW",
+			"NORMAL",
+			"HIGH",
+			"ORIGINAL"
+		]
+	},
+	"playSongSelectSound": {
+		"label": "Play sound when selecting a song",
+		"type": "bool",
+		"default": true
+	},
+	"playDiffSelectSound": {
+		"label": "Play sound when selecting a difficulty",
+		"type": "bool",
+		"default": true
+	},
+	"separator_c": {},
+	"////////// GAMEPLAY //////////": {
+		"type": "label"
+	},
+	"assistTick": {
+		"label": "Enable Assist Tick",
+		"type": "bool",
+		"default": false
+	},
+	"separator_lbr": {},
+	"showCriticalDelta": {
+		"label": "Show hit delta for Critical hits (Early / Late Display must be enabled)",
+		"type": "bool",
+		"default": false
+	},
+	"minCriticalDelta": {
+		"label": "Minimum value to show critical hit delta",
+		"default": 23,
+		"min": 0,
+		"max": 46,
+		"type": "int"
+	},
+	"separator_dofn": {},
+	"showPracticeControls": {
+		"label": "Show Controls for Practice Mode",
+		"type": "bool",
+		"default": true
+	},
+	"showPracticeSetup": {
+		"label": "Show Setup Instructions for Practice Mode",
+		"type": "bool",
+		"default": true
+	},
+	"separator_d": {},
+	"////////// RESULTS //////////": {
+		"type": "label"
+	},
+	"colorCodeRatings": {
+		"label": "Color code rating texts",
+		"type": "bool",
+		"default": false
+	},
+	"showSimpleGraph": {
+		"label": "Show simple hit graph",
+		"type": "bool",
+		"default": true
+	},
+	"distinguishCritRating": {
+		"label": "Distinguish Early / Late Criticals for hit graph and note display",
+		"type": "bool",
+		"default": false
+	},
+	"showHardScores": {
+		"label": "Only show High Scores with harder hit windows",
+		"type": "bool",
+		"default": false
+	},
+	"showOnlineScores": {
+		"label": "Show online scores",
+		"type": "bool",
+		"default": false
+	},
+	"separator_kqm": {},
+	"suggestSongOffset": {
+		"label": "Show song offset recommendation",
+		"type": "bool",
+		"default": true
+	},
+	"songOffsetMin": {
+		"label": "Minimum offset required to show recommendation",
+		"type": "int",
+		"default": 3,
+		"min": 1,
+		"max": 50
+	},
+	"separator_owf": {},
+	"screenshotRegion": {
+		"label": "Screenshot Capture Region",
+		"type": "selection",
+		"default": "PANEL",
+		"values": [
+			"FULLSCREEN",
+			"PANEL"
+		]
+	},
+	"separator_e": {},
+	"////////// DEVELOPER //////////": {
+		"type": "label"
+	},
+	"Do not modify here, use GAMEPLAY SETTINGS instead": {
+		"type": "label"
+	},
+	"separator_mmm": {},
+	"showChain": {
+		"label": "Show Chain",
+		"type": "bool",
+		"default": true
+	},
+	"chainScale": {
+		"label": "Chain Scale: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"min": 0.5,
+		"max": 5.0
+	},
+	"chainOpacity": {
+		"label": "Chain Opacity: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"min": 0.05,
+		"max": 1.0
+	},
+	"chainX": {
+		"label": "Chain X-Position: %.2f",
+		"type": "float",
+		"default": 0.5,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"chainY": {
+		"label": "Chain Y-Position: %.2f",
+		"type": "float",
+		"default": 0.75,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"separator_miu": {},
+	"showGaugeBar": {
+		"label": "Show Gauge Bar",
+		"type": "bool",
+		"default": true
+	},
+	"gaugeBarFillType": {
+		"label": "Gauge Bar Fill Type",
+		"type": "selection",
+		"default": "STANDARD",
+		"values": [
+			"STANDARD",
+			"HIDDEN"
+		]
+	},
+	"gaugeBarPctType": {
+		"label": "Gauge Bar Percentage Type",
+		"type": "selection",
+		"default": "STANDARD",
+		"values": [
+			"STANDARD",
+			"STATIC BOT",
+			"STATIC TOP",
+			"HIDDEN"
+		]
+	},
+	"separator_mrx": {},
+	"showHitAnimations": {
+		"label": "Show Hit Animations",
+		"type": "bool",
+		"default": true
+	},
+	"hitAnimationType": {
+		"label": "Hit Animation Type",
+		"type": "selection",
+		"default": "STANDARD",
+		"values": [
+			"SDVX",
+			"STANDARD"
+		]
+	},
+	"leftLaserHue": {
+		"label": "Left Laser Animation Hue: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"rightLaserHue": {
+		"label": "Right Laser Animation Hue: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"sCriticalHue": {
+		"label": "S-Critical Hit Animation Hue: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"criticalHue": {
+		"label": "Critical Hit Animation Hue: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"nearHue": {
+		"label": "Near Hit Animation Hue: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"holdHue": {
+		"label": "Hold Animation Hue: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"hitAnimationScale": {
+		"label": "Hit Animation Scale: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"min": 0.10,
+		"max": 4.00
+	},
+	"separator_ert": {},
+	"showEarlate": {
+		"label": "Show Early / Late Display",
+		"type": "bool",
+		"default": true
+	},
+	"earlateType": {
+		"label": "Early / Late Display Type",
+		"type": "selection",
+		"default": "TEXT",
+		"values": [
+			"DELTA",
+			"TEXT",
+			"TEXT + DELTA"
+		]
+	},
+	"earlateScale": {
+		"label": "Early / Late Scale: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"min": 0.5,
+		"max": 5.0
+	},
+	"earlateFlicker": {
+		"label": "Early / Late Flicker",
+		"type": "bool",
+		"default": true
+	},
+	"earlateOpacity": {
+		"label": "Early / Late Opacity: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"earlateX": {
+		"label": "Early / Late X-Position: %.2f",
+		"type": "float",
+		"default": 0.5,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"earlateY": {
+		"label": "Early / Late Y-Position: %.2f",
+		"type": "float",
+		"default": 0.70,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"earlateGap": {
+		"label": "Early / Late Text/Delta Gap: %.2f",
+		"type": "float",
+		"default": 0.25,
+		"min": 0,
+		"max": 1.0
+	},
+	"separator_mdu": {},
+	"showLaneSpeed": {
+		"label": "Show Lane Speed Display",
+		"type": "bool",
+		"default": true
+	},
+	"ignoreSpeedChange": {
+		"label": "Ignore incoming Lane-Speed changes",
+		"type": "bool",
+		"default": false
+	},
+	"laneSpeedScale": {
+		"label": "Lane-Speed Scale: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"max": 5.0,
+		"min": 0.5
+	},
+	"laneSpeedOpacity": {
+		"label": "Lane-Speed Opacity: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"max": 1.0,
+		"min": 0.2
+	},
+	"laneSpeedX": {
+		"label": "Lane-Speed X-Position: %.2f",
+		"type": "float",
+		"default": 0.5,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"laneSpeedY": {
+		"label": "Lane-Speed Y-Position: %.2f",
+		"type": "float",
+		"default": 0.5,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"separator_iuw": {},
+	"showHitDeltaBar": {
+		"label": "Show hit delta bar",
+		"type": "bool",
+		"default": false
+	},
+	"hitDecayTime": {
+		"label": "Hit delta bar hit decay time (in seconds): %.2f",
+		"type": "float",
+		"default": 6.0,
+		"max": 10.0,
+		"min": 2.0
+	},
+	"hitDeltaBarScale": {
+		"label": "Hit Delta Bar Scale: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"max": 2.0,
+		"min": 0.5
+	},
+	"hitDeltaBarX": {
+		"label": "Hit Delta Bar X-Position: %.2f",
+		"type": "float",
+		"default": 0.5,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"hitDeltaBarY": {
+		"label": "Hit Delta Bar Y-Position: %.2f",
+		"type": "float",
+		"default": 0.0,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"separator_wei": {},
+	"showPlayerCard": {
+		"label": "Show Player Card",
+		"type": "bool",
+		"default": true
+	},
+	"showPlayerAvatar": {
+		"label": "Show Player Avatar",
+		"type": "bool",
+		"default": true
+	},
+	"danLevel": {
+		"type": "selection",
+		"default": "NONE",
+		"values": [
+			"NONE",
+			"01",
+			"02",
+			"03",
+			"04",
+			"05",
+			"06",
+			"07",
+			"08",
+			"09",
+			"10",
+			"11",
+			"∞"
+		]
+	},
+	"separator_erq": {},
+	"showScoreDifference": {
+		"label": "Show Score Difference",
+		"type": "bool",
+		"default": true
+	},
+	"scoreDifferenceDelay": {
+		"label": "Score Difference update delay time (in seconds): %.2f",
+		"type": "float",
+		"default": 0.05,
+		"min": 0.05,
+		"max": 1.0
+	},
+	"scoreDifferenceScale": {
+		"label": "Score Difference Scale: %.2f",
+		"type": "float",
+		"default": 1.0,
+		"min": 0.50,
+		"max": 5.0
+	},
+	"scoreDifferenceX": {
+		"label": "Score Difference X-Position: %.2f",
+		"type": "float",
+		"default": 0.10,
+		"min": 0.0,
+		"max": 1.0
+	},
+	"scoreDifferenceY": {
+		"label": "Score Difference Y-Position: %.2f",
+		"type": "float",
+		"default": 0.55,
+		"min": 0.0,
+		"max": 1.0
+	}
+}

@@ -23,7 +23,7 @@ function MockCritLine.new(window)
 		y = 0,
 	}
 
-	for i = 0, 1 do
+	for i = 1, 2 do
 		self.cursors[i] = {
 			alpha = 1,
 			pos = 0,
@@ -56,10 +56,10 @@ function MockCritLine:updateCursors(translate)
 	local scale = self.window.scaleFactor
 
 	if self.window.isPortrait then
-		self.cursors[0].pos = -350 * scale
-		self.cursors[0].skew = -0.4
-		self.cursors[1].pos = 350 * scale
-		self.cursors[1].skew = 0.4
+		self.cursors[1].pos = -350 * scale
+		self.cursors[1].skew = -0.4
+		self.cursors[2].pos = 350 * scale
+		self.cursors[2].skew = 0.4
 
 		if translate then
 			gfx.Translate(
@@ -68,10 +68,10 @@ function MockCritLine:updateCursors(translate)
 			)
 		end
 	else
-		self.cursors[0].pos = -330 * scale
-		self.cursors[0].skew = -0.35
-		self.cursors[1].pos = 330 * scale
-		self.cursors[1].skew = 0.35
+		self.cursors[1].pos = -330 * scale
+		self.cursors[1].skew = -0.35
+		self.cursors[2].pos = 330 * scale
+		self.cursors[2].skew = 0.35
 
 		if translate then
 			gfx.Translate(

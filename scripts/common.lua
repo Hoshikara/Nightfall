@@ -8,6 +8,24 @@ Colors = require("common/constants/Colors")
 Background = require("common/Background")
 Window = require("common/Window")
 
+IRData = {
+	Active = false,
+	States = {
+		Unused = 0,
+		Pending = 10,
+		Success = 20,
+		Accepted = 22,
+		BadRequest = 40,
+		Unauthorized = 41,
+		ChartRefused = 42,
+		Forbidden = 43,
+		NotFound = 44,
+		ServerError = 50,
+		RequestFailure = 60,
+	},
+}
+
+
 local Label = require("common/Label")
 
 --#endregion
@@ -107,6 +125,13 @@ end
 function setColor(color, alpha, isStroke)
 	alpha = floor((alpha or 1) * 255)
 	color = Colors[color] or color or Colors.White
+
+	for key, value in pairs(color) do
+		color[key] = math.max(0, math.min(math.floor(value), 255))
+	end
+
+	alpha = math.max(0, math.min(math.floor(alpha), 255))
+
 
 	if isStroke then
 		gfx.StrokeColor(color[1], color[2], color[3], alpha)

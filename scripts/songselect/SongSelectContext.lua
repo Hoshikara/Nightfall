@@ -65,8 +65,8 @@ end
 function SongSelectContext:handleInput()
 	if menusClosed() then
 		if (not self.didPressBTA)
-			and didPress("BTA")
-			and (not self.viewingScores)
+		  and didPress("BTA")
+		  and (not self.viewingScores)
 		then
 			self.viewingTop50 = not self.viewingTop50
 
@@ -74,8 +74,8 @@ function SongSelectContext:handleInput()
 		end
 
 		if (not self.didPressBTD)
-			and didPress("BTD")
-			and (not self.viewingTop50)
+		  and didPress("BTD")
+		  and (not self.viewingTop50)
 		then
 			self.viewingScores = not self.viewingScores
 		end
@@ -94,7 +94,7 @@ end
 ---@param diff Difficulty
 ---@param song Song
 function SongSelectContext:setDiffInfo(diff, song)
-	local key = diff.hash or ("%s_%d"):format(song.title, diff.level)
+	local key = diff.id or ("%s_%d"):format(song.title, diff.level)
 	local topPlay = self.topPlays[diff.id]
 	local dashIndex = song.bpm:find("-")
 

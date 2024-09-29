@@ -191,7 +191,7 @@ function GaugeBar:drawName(h, introAlpha, name, threshold)
 	end
 
 	gfx.BeginPath()
-	gfx.Rotate(90)
+	gfx.Rotate(math.pi / 2)
 	self.name:draw({
 		x = position,
 		y = -59,
@@ -203,7 +203,7 @@ function GaugeBar:drawName(h, introAlpha, name, threshold)
 		text = name,
 		update = true,
 	})
-	gfx.Rotate(-90)
+	gfx.Rotate(-math.pi / 2)
 end
 
 ---@param dt deltaTime

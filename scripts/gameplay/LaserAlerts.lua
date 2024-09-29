@@ -87,10 +87,9 @@ function LaserAlerts:drawAlert(index, scale)
 	local fade = self.fade[index].value
 	local size = self.size
 	local x = self.x[index]
-
 	gfx.Scissor(
-		(x - (size / 2)) * scale,
-		-(size / 2) * scale,
+		x - (size / 2) * fade,
+		-(size / 2) * fade,
 		size,
 		size * fade
 	)
