@@ -75,7 +75,7 @@ function HoldAnimation:setupCritLineTransform(btn)
 		critLine.line.x1 + (critLine.line.x2 - critLine.line.x1) * HitLanes[btn],
 		critLine.line.y1 + (critLine.line.y2 - critLine.line.y1) * HitLanes[btn]
 	)
-	gfx.Rotate(-critLine.rotation * (180 / 3.14))
+	gfx.Rotate(-critLine.rotation)
 	self.window:scale(self.scale)
 end
 
