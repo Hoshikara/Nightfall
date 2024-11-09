@@ -189,7 +189,7 @@ function TrackInfo:drawBpm(x, w, introAlpha, isPortrait)
 		x = x + w + 1
 	end
 
-	if playbackSpeed < 1 then
+	if playbackSpeed ~= 1 then
 		bpm = floor(bpm * playbackSpeed)
 		playbackText = ("[ %d%% ]"):format(floor((playbackSpeed * 100) + 0.5))
 	end
