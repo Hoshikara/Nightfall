@@ -1,6 +1,11 @@
+### 1.5.8 - November 9, 2024
+- `Gameplay` changes
+  - Adjusted lane light texture
+  - Restored `ERROR` hit animation
+
 ### 1.5.7 - November 9, 2024
 - `Practice Mode` changes
-  - Fixed BPM and playback speed not displaying correcting when playback speed is above 100%
+  - Fixed BPM and playback speed not displaying correctly when playback speed is above 100%
 
 ### 1.5.6 - September 10, 2024
 - `Gameplay` changes

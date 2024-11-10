@@ -1,5 +1,19 @@
 ---@type table<string, table<string, HitAnimationProperties>>
 local HitAnimationProperties = {
+	Error = {
+		SDVX = {
+			folderPath = "gameplay/hit_animations/error/sdvx",
+			fps = 60,
+			hueSettingKey = "",
+			scale = 0.5,
+		},
+		STANDARD = {
+			folderPath = "gameplay/hit_animations/error/sdvx",
+			fps = 60,
+			hueSettingKey = "",
+			scale = 0.5,
+		},
+	},
 	Critical = {
 		SDVX = {
 			alpha = 1.0,

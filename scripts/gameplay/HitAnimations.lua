@@ -24,6 +24,8 @@ function HitAnimations.new(ctx, window, isGameplaySettings)
 		animationType = getSetting("hitAnimationType", "STANDARD"),
 		critAnimation = makeHitAnimation("Critical", isGameplaySettings),
 		critQueues = makeHitAnimationQueues(true),
+		errorAnimation = makeHitAnimation("Error", isGameplaySettings),
+		errorQueues = makeHitAnimationQueues(),
 		hitTimer = 0,
 		holdAnimation = HoldAnimation.new(window, isGameplaySettings),
 		isGameplaySettings = isGameplaySettings,
@@ -55,6 +57,8 @@ end
 function HitAnimations:dequeueHits(dt)
 	local critAnimation = self.critAnimation
 	local critQueues = self.critQueues
+	local errorAnimation = self.errorAnimation
+	local errorQueues = self.errorQueues
 	local nearAnimation = self.nearAnimation
 	local nearQueues = self.nearQueues
 	local sCritAnimation = self.sCritAnimation
@@ -75,6 +79,12 @@ function HitAnimations:dequeueHits(dt)
 		for _, state in ipairs(nearQueues[btn]) do
 			if state.queued then
 				self:dequeueHit(dt, nearAnimation, btn, state)
+			end
+		end
+
+		for _, state in ipairs(errorQueues[btn]) do
+			if state.queued then
+				self:dequeueHit(dt, errorAnimation, btn, state)
 			end
 		end
 	end
@@ -123,6 +133,14 @@ function HitAnimations:enqueueHit(btn, delta, rating)
 		end
 	elseif rating == 1 then
 		for _, state in ipairs(self.nearQueues[btn + 1]) do
+			if not state.queued then
+				state.queued = true
+
+				break
+			end
+		end
+	elseif rating == 0 then
+		for _, state in ipairs(self.errorQueues[btn + 1]) do
 			if not state.queued then
 				state.queued = true
 
