@@ -480,7 +480,7 @@ function ResultsGraphs:drawLeftGraphs(data, x, y, w, h)
 		x = x + w + 11,
 		y = y + h - 25,
 		color = "White",
-		text = ("%02d:%02d"):format(currentTime // 60000, (currentTime // 1000) % 60),
+		text = ("%02d:%02d"):format(math.floor(currentTime / 60000), math.floor(currentTime / 1000) % 60),
 		update = true,
 	})
 end

@@ -80,15 +80,16 @@ function RingAnimation:playRing(dt, state)
 	end
 
 	gfx.Translate(0, (isHold and 16) or -4)
-	gfx.Rotate(-(60 - (t * 1.5)))
+
+	gfx.Rotate((math.rad(-60) - (t * 1.5)))
 	self.rings[2]:draw({
 		w = w * cos(t),
 		alpha = alpha,
 		isCentered = true,
 		updateData = true,
 	})
-	gfx.Rotate(60 - (t * 1.5))
-	gfx.Rotate(-15 + (t * 1.5))
+	gfx.Rotate(math.rad(60) - (t * 1.5))
+	gfx.Rotate(math.rad(-15) + (t * 1.5))
 	self.rings[3]:draw({
 		w = w * cos(t),
 		alpha = alpha,
