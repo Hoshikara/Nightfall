@@ -141,19 +141,6 @@
 		"type": "bool",
 		"default": false
 	},
-	"separator_lbr": {},
-	"showCriticalDelta": {
-		"label": "Show hit delta for Critical hits (Early / Late Display must be enabled)",
-		"type": "bool",
-		"default": false
-	},
-	"minCriticalDelta": {
-		"label": "Minimum value to show critical hit delta",
-		"default": 23,
-		"min": 0,
-		"max": 46,
-		"type": "int"
-	},
 	"separator_dofn": {},
 	"showPracticeControls": {
 		"label": "Show Controls for Practice Mode",
@@ -354,14 +341,25 @@
 		"type": "bool",
 		"default": true
 	},
-	"earlateType": {
-		"label": "Early / Late Display Type",
+	"earlateDelta": {
+		"label": "Early / Late Delta",
 		"type": "selection",
-		"default": "TEXT",
+		"default": "OFF",
 		"values": [
-			"DELTA",
-			"TEXT",
-			"TEXT + DELTA"
+			"ALL",
+			"<= CRITICAL",
+			"<= NEAR",
+			"OFF"
+		]
+	},
+	"earlateText": {
+		"label": "Early / Late Text",
+		"type": "selection",
+		"default": "<= NEAR",
+		"values": [
+			"<= CRITICAL",
+			"<= NEAR",
+			"OFF"
 		]
 	},
 	"earlateScale": {

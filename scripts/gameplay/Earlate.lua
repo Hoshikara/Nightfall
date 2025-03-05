@@ -1,5 +1,17 @@
 local RatingColors = require("common/constants/RatingColors")
 
+local abs = math.abs
+
+local MOCK_HITS = {
+	0,
+	4,
+	-4,
+	24,
+	-24,
+	48,
+	-48,
+}
+
 ---@class Earlate: EarlateBase
 local Earlate = {}
 Earlate.__index = Earlate
@@ -13,17 +25,18 @@ function Earlate.new(ctx, window, isGameplaySettings)
 	local self = {
 		alpha = 0,
 		ctx = ctx,
-		delta = makeLabel("Number", "0.0 ms", 27),
 		deltaAlign = "CenterMiddle",
-		displayType = getSetting("earlateType", "TEXT"),
-		early = makeLabel("Medium", "EARLY", 30),
+		deltaText = makeLabel("Number", "0.0 ms", 27),
 		flickerEnabled = getSetting("earlateFlicker", true),
 		flickerTimer = 0,
 		isGameplaySettings = isGameplaySettings,
-		late = makeLabel("Medium", "LATE", 30),
+		mockIndex = 0,
 		offset = 0,
 		opacity = getSetting("earlateOpacity", 1),
 		scale = getSetting("earlateScale", 1),
+		showDeltaOn = getSetting("earlateDelta", "OFF"),
+		showTextOn = getSetting("earlateText", "<= NEAR"),
+		text = makeLabel("Medium", "EARLY", 30),
 		textAlign = "CenterMiddle",
 		textDeltaGap = getSetting("earlateGap", 0.25),
 		window = window,
@@ -32,28 +45,54 @@ function Earlate.new(ctx, window, isGameplaySettings)
 		y = 0,
 	}
 
+	if isGameplaySettings then
+		self.ctx = {
+			earlate = {
+				delta = 0,
+				deltaColor = RatingColors.SCritical,
+				deltaTimer = 0.5,
+				text = "EARLY",
+				textColor = RatingColors.Early,
+				textTimer = 0.5,
+			},
+		}
+	end
+
 	---@diagnostic disable-next-line
 	return setmetatable(self, Earlate)
 end
 
 ---@param dt deltaTime
 function Earlate:draw(dt)
-	if self.isGameplaySettings then
-		self:updateProps()
-	else
-		self.ctx.earlateTimer = self.ctx.earlateTimer - dt
+	local props = self.ctx.earlate
 
-		if self.ctx.earlateTimer < 0 then
-			return
-		end
+	if self.isGameplaySettings then
+		self:updateProps(props)
 	end
+
+	props.deltaTimer = props.deltaTimer - dt
+	props.textTimer = props.textTimer - dt
+
+	if props.deltaTimer < 0 and props.textTimer < 0 then
+		return
+	end
+
+	local alpha = self:getAlpha(dt)
 
 	self:setProps()
 
 	gfx.Save()
 	gfx.Translate(self.x, self.y)
 	gfx.Scale(self.scale, self.scale)
-	self:drawEarlate(dt)
+
+	if props.deltaTimer >= 0 and self.showDeltaOn ~= "OFF" then
+		self:drawDelta(props, alpha)
+	end
+
+	if props.textTimer >= 0 and self.showTextOn ~= "OFF" then
+		self:drawText(props, alpha)
+	end
+
 	gfx.Restore()
 end
 
@@ -71,7 +110,7 @@ function Earlate:setProps()
 			self.y = self.window.h * posY
 		end
 
-		if self.displayType == "TEXT + DELTA" then
+		if self.showDeltaOn ~= "OFF" and self.showTextOn ~= "OFF" then
 			self.deltaAlign = "RightMiddle"
 			self.textAlign = "LeftMiddle"
 
@@ -89,60 +128,56 @@ function Earlate:setProps()
 	end
 end
 
----@param dt deltaTime
-function Earlate:drawEarlate(dt)
-	local alpha = self:getAlpha(dt)
-	local color, delta, text = self:getProps()
-	local displayType = self.displayType
-	local offset = self.offset
-	local shadowAlpha = 1
-	local shadowOffset = 2
+---@param props EarlateProps
+---@param alpha number
+function Earlate:drawDelta(props, alpha)
+	local text = self:getDeltaString()
 
-	if (displayType ~= "DELTA") and (not self.ctx.critHit) then
-		text:draw({
-			x = -offset,
-			y = 1,
-			align = self.textAlign,
-			alpha = 0.4 * alpha,
-			color = "White",
-			shadowAlpha = shadowAlpha,
-			shadowOffset = shadowOffset,
-		})
-		text:draw({
-			x = -offset,
-			y = 0,
-			align = self.textAlign,
-			alpha = alpha,
-			color = color,
-			shadowAlpha = shadowAlpha,
-			shadowOffset = shadowOffset,
-		})
-	end
+	self.deltaText:draw({
+		x = self.offset,
+		y = 2,
+		align = self.deltaAlign,
+		alpha = 0.4 * alpha,
+		color = "White",
+		shadowAlpha = 0,
+		text = text,
+		update = true,
+	})
+	self.deltaText:draw({
+		x = self.offset,
+		y = 1,
+		align = self.deltaAlign,
+		alpha = alpha,
+		color = props.deltaColor,
+		shadowAlpha = 0,
+		text = text,
+		update = true,
+	})
+end
 
-	if displayType ~= "TEXT" then
-		self.delta:draw({
-			x = offset,
-			y = 2,
-			align = self.deltaAlign,
-			alpha = 0.4 * alpha,
-			color = "White",
-			shadowAlpha = shadowAlpha,
-			shadowOffset = shadowOffset,
-			text = delta,
-			update = true,
-		})
-		self.delta:draw({
-			x = offset,
-			y = 1,
-			align = self.deltaAlign,
-			alpha = alpha,
-			color = color,
-			shadowAlpha = shadowAlpha,
-			shadowOffset = shadowOffset,
-			text = delta,
-			update = true,
-		})
-	end
+---@param props EarlateProps
+---@param alpha number
+function Earlate:drawText(props, alpha)
+	self.text:draw({
+		x = -self.offset,
+		y = 1,
+		align = self.textAlign,
+		alpha = 0.4 * alpha,
+		color = "White",
+		shadowAlpha = 0,
+		text = props.text,
+		update = true,
+	})
+	self.text:draw({
+		x = -self.offset,
+		y = 0,
+		align = self.textAlign,
+		alpha = alpha,
+		color = props.textColor,
+		shadowAlpha = 0,
+		text = props.text,
+		update = true,
+	})
 end
 
 ---@param dt deltaTime
@@ -150,34 +185,69 @@ function Earlate:getAlpha(dt)
 	if self.flickerEnabled then
 		self.flickerTimer = self.flickerTimer + dt
 
-		return ((self.flickerTimer * 18) % 1) * self.opacity
+		return ((self.flickerTimer * 16) % 1) * self.opacity
 	end
 
 	return self.opacity
 end
 
----@return Color, string, Label
-function Earlate:getProps()
-	local buttonDelta = self.ctx.buttonDelta or -1
-	local color = RatingColors.Early
-	local delta = "%.1f ms"
-	local text = self.early
-
-	if buttonDelta > 0 then
-		color = RatingColors.Late
-		delta = "+%.1f ms"
-		text = self.late
-	end
-
-	return color, delta:format(buttonDelta), text
-end
-
-function Earlate:updateProps()
-	self.displayType = getSetting("earlateType", "TEXT")
+---@param props EarlateProps
+function Earlate:updateProps(props)
 	self.flickerEnabled = getSetting("earlateFlicker", true)
 	self.opacity = getSetting("earlateOpacity", 1)
 	self.scale = getSetting("earlateScale", 1)
+	self.showDeltaOn = getSetting("earlateDelta", "OFF")
+	self.showTextOn = getSetting("earlateText", "<= NEAR")
 	self.textDeltaGap = getSetting("earlateGap", 0.25)
+
+	-- This code mocks the behavior of GameplayContext:handleButton()
+
+	if props.deltaTimer <= 0 and props.textTimer <= 0 then
+		self.mockIndex = (self.mockIndex + 1) % #MOCK_HITS
+	else
+		return
+	end
+
+	local delta = MOCK_HITS[self.mockIndex + 1]
+
+	if abs(delta) >= 46 then
+		if self.showDeltaOn ~= "OFF" then
+			props.deltaColor = delta < 0 and RatingColors.Early or RatingColors.Late
+			props.delta = delta
+			props.deltaTimer = 0.5
+		end
+
+		if self.showTextOn ~= "OFF" then
+			props.text = delta < 0 and "EARLY" or "LATE"
+			props.textColor = delta < 0 and RatingColors.Early or RatingColors.Late
+			props.textTimer = 0.5
+		end
+	else
+		local sCritHit = abs(delta) <= 23
+
+		if self.showDeltaOn == "ALL" or (self.showDeltaOn == "<= CRITICAL" and not sCritHit) then
+			if sCritHit then
+				props.deltaColor = RatingColors.SCritical
+			else
+				props.deltaColor = delta < 0 and RatingColors.Early or RatingColors.Late
+			end
+
+			props.delta = delta
+			props.deltaTimer = 0.5
+		end
+
+		if self.showTextOn == "<= CRITICAL" and not sCritHit then
+			props.text = delta < 0 and "EARLY" or "LATE"
+			props.textColor = delta < 0 and RatingColors.Early or RatingColors.Late
+			props.textTimer = 0.5
+		end
+	end
+end
+
+function Earlate:getDeltaString()
+	local delta = self.ctx.earlate.delta
+
+	return (delta > 0 and "-%.1f ms" or "+%.1f ms"):format(abs(delta))
 end
 
 return Earlate

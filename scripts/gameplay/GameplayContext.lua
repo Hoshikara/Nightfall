@@ -1,8 +1,10 @@
+local RatingColors = require("common/constants/RatingColors")
+
 local abs = math.abs
 local max = math.max
 
-local minCritDelta = getSetting("minCriticalDelta", 23)
-local showCritDelta = getSetting("showCriticalDelta", false)
+local showEarlateDeltaOn = getSetting("earlateDelta", "OFF")
+local showEarlateTextOn = getSetting("earlateText", "<= NEAR")
 
 ---@class GameplayContext: GameplayContextBase
 ---@field bpmData BpmPoint[]
@@ -15,7 +17,6 @@ function GameplayContext.new()
 	local self = {
 		alertTimers = { -1.5, -1.5 },
 		bpmData = nil,
-		buttonDelta = 0,
 		buttonRatings = {
 			errorEarly = 0,
 			nearEarly = 0,
@@ -27,8 +28,15 @@ function GameplayContext.new()
 		},
 		chain = 0,
 		chainTimer = 0,
-		critHit = false,
-		earlateTimer = 0,
+		---@type EarlateProps
+		earlate = {
+			delta = 0,
+			deltaColor = RatingColors.SCritical,
+			deltaTimer = 0,
+			text = "EARLY",
+			textColor = RatingColors.Early,
+			textTimer = 0,
+		},
 		exScore = 0,
 		introAlpha = 1,
 		introOffset = 0,
@@ -75,8 +83,6 @@ function GameplayContext:handleButton(delta, rating)
 			self.buttonRatings.errorLate = self.buttonRatings.errorLate + 1
 		end
 	elseif rating == 1 then
-		self.buttonDelta = delta
-		self.critHit = false
 		self.exScore = self.exScore + 2
 
 		if delta < 0 then
@@ -84,16 +90,23 @@ function GameplayContext:handleButton(delta, rating)
 		else
 			self.buttonRatings.nearLate = self.buttonRatings.nearLate + 1
 		end
-	elseif rating == 2 then
-		local absDelta = abs(delta)
 
-		if showCritDelta and (absDelta >= minCritDelta) then
-			self.buttonDelta = delta
-			self.critHit = true
-			self.earlateTimer = 0.75
+		if showEarlateDeltaOn ~= "OFF" then
+			self.earlate.delta = delta
+			self.earlate.deltaColor = delta < 0 and RatingColors.Early or RatingColors.Late
+			self.earlate.deltaTimer = 0.75
 		end
 
-		if absDelta <= self.sCritWindow then
+		if showEarlateTextOn ~= "OFF" then
+			self.earlate.text = delta < 0 and "EARLY" or "LATE"
+			self.earlate.textColor = delta < 0 and RatingColors.Early or RatingColors.Late
+			self.earlate.textTimer = 0.75
+		end
+	elseif rating == 2 then
+		local absDelta = abs(delta)
+		local sCritHit = absDelta <= self.sCritWindow
+
+		if sCritHit then
 			self.exScore = self.exScore + 5
 
 			if delta < 0 then
@@ -107,6 +120,23 @@ function GameplayContext:handleButton(delta, rating)
 			else
 				self.buttonRatings.criticalLate = self.buttonRatings.criticalLate + 1
 			end
+		end
+
+		if showEarlateDeltaOn == "ALL" or (showEarlateDeltaOn == "<= CRITICAL" and not sCritHit) then
+			if sCritHit then
+				self.earlate.deltaColor = RatingColors.SCritical
+			else
+				self.earlate.deltaColor = delta < 0 and RatingColors.Early or RatingColors.Late
+			end
+
+			self.earlate.delta = delta
+			self.earlate.deltaTimer = 0.75
+		end
+
+		if showEarlateTextOn == "<= CRITICAL" and not sCritHit then
+			self.earlate.text = delta < 0 and "EARLY" or "LATE"
+			self.earlate.textColor = delta < 0 and RatingColors.Early or RatingColors.Late
+			self.earlate.textTimer = 0.75
 		end
 	end
 end
@@ -140,12 +170,6 @@ function GameplayContext:updateChain(newChain)
 	self.isButton = false
 end
 
----@param isLate boolean
-function GameplayContext:updateEarlate(isLate)
-	self.earlateTimer = 0.75
-	self.isLate = isLate
-end
-
 function GameplayContext:updateLaserAlerts(isRight)
 	if isRight and (self.alertTimers[2] < -1) then
 		self.alertTimers[2] = 1
@@ -165,3 +189,11 @@ function GameplayContext:resetButtonRatings()
 end
 
 return GameplayContext
+
+---@class EarlateProps
+---@field delta number
+---@field deltaColor Color
+---@field deltaTimer number
+---@field text string
+---@field textColor Color
+---@field textTimer number

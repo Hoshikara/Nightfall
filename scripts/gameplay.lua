@@ -271,7 +271,6 @@ end
 
 ---@param isLate boolean
 function near_hit(isLate)
-	context.earlateTimer = 0.75
 end
 
 ---@param newChain integer

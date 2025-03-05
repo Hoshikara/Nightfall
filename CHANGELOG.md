@@ -1,3 +1,10 @@
+### 1.5.9 - March 5, 2025
+- Separated `Early / Late` delta and text settings
+  - Delta now has options to show on `ALL`, `<= CRITICAL`, or `<= NEAR`
+  - Text now has options to show on `<= CRITICAL` or `<= NEAR`
+  - These options can be set via the `Gameplay Settings` screen
+
+
 ### 1.5.8 - November 9, 2024
 - `Gameplay` changes
   - Adjusted lane light texture

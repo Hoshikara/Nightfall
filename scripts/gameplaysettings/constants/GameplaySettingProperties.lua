@@ -51,13 +51,24 @@ local GameplaySettingProperties = {
 			name = "STATUS",
 		},
 		{
-			default = "TEXT",
-			key = "earlateType",
-			name = "DISPLAY TYPE",
+			default = "OFF",
+			key = "earlateDelta",
+			name = "SHOW DELTA",
 			options = {
-				"DELTA",
-				"TEXT",
-				"TEXT + DELTA",
+				"ALL",
+				"<= CRITICAL",
+				"<= NEAR",
+				"OFF",
+			},
+		},
+		{
+			default = "<= NEAR",
+			key = "earlateText",
+			name = "SHOW TEXT",
+			options = {
+				"<= CRITICAL",
+				"<= NEAR",
+				"OFF",
 			},
 		},
 		{
