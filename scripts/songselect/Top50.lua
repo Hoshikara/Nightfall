@@ -5,6 +5,35 @@ local getDateTemplate = require("common/helpers/getDateTemplate")
 local floor = math.floor
 local max = math.max
 
+local CLEAR_NAMES = {
+	PLAYED = "FAIL",
+	NORMAL = "EFF",
+	HARD = "EXC",
+	UC = "UC",
+	PUC = "PUC",
+}
+
+local CLEAR_TO_COLOR = {
+	PLAYED = { 220, 40, 40 },
+	NORMAL = { 20, 160, 240 },
+	HARD = { 240, 120, 40 },
+	UC = { 220, 80, 240 },
+	PUC = { 220, 180, 20 },
+}
+
+local DIFF_TO_COLOR = {
+	NOV = { 120, 60, 240 },
+	ADV = { 220, 180, 0 },
+	EXH = { 220, 40, 40 },
+	INF = { 220, 40, 200 },
+	GRV = { 220, 120, 20 },
+	HVN = { 0, 150, 200 },
+	VVD = { 220, 40, 120 },
+	XCD = { 40, 100, 240 },
+	MXM = { 110, 120, 130 },
+	ULT = { 220, 200, 20 },
+}
+
 ---@class Top50: Top50Base
 local Top50 = {}
 Top50.__index = Top50
@@ -16,7 +45,7 @@ function Top50.new(ctx, window)
 	---@class Top50Base
 	local self = {
 		ctx = ctx,
-		clear = makeLabel("SemiBold", "", 20, "White"),
+		clear = makeLabel("SemiBold", "", 14, "White"),
 		closeControl = ControlLabel.new("BT-A", "CLOSE"),
 		colors = {},
 		date = makeLabel(
@@ -26,16 +55,18 @@ function Top50.new(ctx, window)
 			22,
 			"White"
 		),
-		diff = makeLabel("SemiBold", "", 20, "White"),
+		diff = makeLabel("SemiBold", "", 14, "White"),
+		entryNumLabel = makeLabel("Number", "", 22, "White"),
 		heading = makeLabel("Regular", "", 48, "White"),
-		level = makeLabel("Number", "", 18, "White"),
+		level = makeLabel("Number", "", 14, "White"),
 		marginX = 12,
 		marginY = 0,
 		numCols = 0,
 		numRows = 0,
 		player = getSetting("playerName", "GUEST"),
-		score = DimmedNumber.new({ size = 18 }),
+		score = DimmedNumber.new({ size = 22 }),
 		title = makeLabel("JP", "", 16, "White"),
+		volforce = makeLabel("Number", "", 14, "White"),
 		window = window,
 		windowResized = nil,
 		x = 0,
@@ -144,6 +175,9 @@ function Top50:drawEntries(x1, y1)
 			level,
 			score,
 			clear,
+			self.volforce,
+			i,
+			self.entryNumLabel,
 			colors[colorIndex],
 			entry
 		)
@@ -166,21 +200,27 @@ end
 ---@param diff Label
 ---@param level Label
 ---@param score DimmedNumber
----@param clear Label
+---@param clearLabel Label
+---@param volforceLabel Label
+---@param entryNum number
+---@param entryNumLabel Label
 ---@param color Color
 ---@param entry TopPlay
 function Top50:drawEntry(
-	x,
-	y,
-	w,
-	h,
-	title,
-	diff,
-	level,
-	score,
-	clear,
-	color,
-	entry
+  x,
+  y,
+  w,
+  h,
+  title,
+  diff,
+  level,
+  score,
+  clearLabel,
+  volforceLabel,
+  entryNum,
+  entryNumLabel,
+  color,
+  entry
 )
 	local maxWidth = (self.window.isPortrait and 218) or 246
 
@@ -194,16 +234,16 @@ function Top50:drawEntry(
 	})
 
 	drawRect({
-		x = x + 1,
-		y = y + 1,
-		w = h - 2,
-		h = h - 2,
+		x = x + 0.5,
+		y = y + 0.5,
+		w = h - 1,
+		h = h - 1,
 		image = entry.jacket,
-		stroke = { color = "Medium", size = 2 },
+		stroke = { color = "White", size = 1 },
 	})
 
 	x = x + h + 8
-	y = y + 6
+	y = y + 5
 
 	title:update(entry.title)
 
@@ -218,34 +258,81 @@ function Top50:drawEntry(
 		title:draw({ x = x, y = y })
 	end
 
-	y = y + 20
+	y = y + 25
 
-	diff:draw({
-		x = x,
+	drawRect({
+		x = x + 1,
 		y = y,
+		w = 59,
+		h = 17,
+		color = DIFF_TO_COLOR[entry.diffName],
+		radius = 2,
+	})
+	diff:draw({
+		x = x + 6,
+		y = y - 1,
+		shadowAlpha = 0,
 		text = entry.diffName,
 		update = true,
 	})
 	level:draw({
-		x = x + diff.w + 5,
-		y = y + 2,
+		x = x + 37,
+		y = y - 1,
 		text = ("%02d"):format(entry.level),
+		shadowAlpha = 0,
 		update = true,
 	})
 
-	y = y + 25
+	drawRect({
+		x = x + 68,
+		y = y,
+		w = 40,
+		h = 17,
+		color = CLEAR_TO_COLOR[entry.clear],
+		radius = 2,
+	})
+	clearLabel:draw({
+		x = x + 68 + 20,
+		y = y - 1,
+		align = "CenterTop",
+		shadowAlpha = 0,
+		text = CLEAR_NAMES[entry.clear],
+		update = true,
+	})
+
+	drawRect({
+		x = x + 114,
+		y = y,
+		w = 49,
+		h = 17,
+		color = { 72, 76, 80 },
+		radius = 2,
+	})
+	volforceLabel:draw({
+		x = x + 114 + 5,
+		y = y - 1,
+		shadowAlpha = 0,
+		text = ("%.3f"):format(entry.volforce / 1000),
+		update = true,
+	})
 
 	score:draw({
 		x = x,
-		y = y,
+		y = y + 19,
 		value = entry.score,
 	})
-	clear:draw({
-		x = x + score.w + 6,
-		y = y - 2,
-		text = ("[ %s ]"):format(entry.clear),
+
+	entryNumLabel:draw({
+		x = x + maxWidth,
+		y = y + 19,
+		align = "RightTop",
+		alpha = 0.25,
+		color = "Standard",
+		shadowAlpha = 0,
+		text = ("%02d"):format(entryNum),
 		update = true,
 	})
+
 end
 
 return Top50

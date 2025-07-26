@@ -1,3 +1,6 @@
+### 1.5.10 - July 26, 2025
+- Added VOLFORCE values to Top 50 display
+
 ### 1.5.9 - March 5, 2025
 - Separated `Early / Late` delta and text settings
   - Delta now has options to show on `ALL`, `<= CRITICAL`, or `<= NEAR`

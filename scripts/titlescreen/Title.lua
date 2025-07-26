@@ -33,7 +33,7 @@ function Title.new(ctx, mouse, window)
 		mouse = mouse,
 		nightfallText = makeLabel("Medium", "NIGHTFALL", 160),
 		uscText = makeLabel("Medium", "UNNAMED SDVX CLONE", 40),
-		updateCheckSpinner = Spinner.new({ text = "CHECKING FOR UPDATES" }),
+		updateCheckSpinner = Spinner.new({ text = "CHECKING FOR GAME UPDATES" }),
 		viewChangelogText = makeLabel("SemiBold", "CLICK TO VIEW CHANGELOG"),
 		viewNewVersionText = makeLabel(
 			"SemiBold",

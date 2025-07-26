@@ -68,7 +68,7 @@ local function getTotalVolforce(diffs)
 		if diff.volforce > 0 then
 			topPlays[diff.id] = {
 				clear = Clears:get(diff.topBadge),
-				diffName = DifficultyNames:get(diff.jacketPath, diff.difficulty),
+				diffName = DifficultyNames:get(diff.jacketPath, diff.difficulty, true),
 				jacketPath = diff.jacketPath,
 				level = diff.level,
 				rank = i,

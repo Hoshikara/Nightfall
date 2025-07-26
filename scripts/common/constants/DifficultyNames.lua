@@ -9,10 +9,12 @@ local DifficultyNames = {
 	{ full = "HEAVENLY", short = "HVN" },
 	{ full = "VIVID",    short = "VVD" },
 	{ full = "EXCEED",   short = "XCD" },
+	{ full = "ULTIMATE", short = "ULT" },
 }
 
 ---@param jacketPath string
 ---@param diffIndex integer|string
+---@param isShort? boolean
 ---@return string
 function DifficultyNames:get(jacketPath, diffIndex, isShort)
 	if jacketPath then
@@ -29,6 +31,8 @@ function DifficultyNames:get(jacketPath, diffIndex, isShort)
 				diffIndex = 7
 			elseif path:find("xcd") then
 				diffIndex = 8
+			elseif path:find("ult") then
+				diffIndex = 9
 			end
 		end
 	end
