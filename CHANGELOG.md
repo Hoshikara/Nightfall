@@ -1,3 +1,6 @@
+### 1.5.11 - August 4, 2025
+- Fixed chain not being disabled through `Gameplay Settings`
+
 ### 1.5.10 - July 26, 2025
 - Added VOLFORCE values to Top 50 display
 

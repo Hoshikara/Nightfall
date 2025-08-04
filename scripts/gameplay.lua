@@ -29,6 +29,7 @@ local didPress = require("common/helpers/didPress")
 local window = Window.new()
 
 local assistTickEnabled = getSetting("assistTick", false)
+local chainEnabled = getSetting("showChain", true)
 local earlateEnabled = getSetting("showEarlate", true)
 local gaugeBarEnabled = getSetting("showGaugeBar", true)
 local hitAnimationsEnabled = getSetting("showHitAnimations", true)
@@ -70,7 +71,7 @@ local songInfo = nil
 local init = true
 
 local function initAll()
-	chain = Chain.new(context, window)
+	chain = chainEnabled and Chain.new(context, window)
 	earlate = earlateEnabled and Earlate.new(context, window)
 	gaugeBar = gaugeBarEnabled and GaugeBar.new(context, window)
 	hitDeltaBar = hitDeltaBarEnabled and HitDeltaBar.new(window)
@@ -179,7 +180,10 @@ function render(dt)
 
 	gfx.ResetTransform()
 	window:update()
-	chain:draw(dt)
+
+	if chainEnabled then
+		chain:draw(dt)
+	end
 
 	if gaugeBarEnabled then
 		gaugeBar:draw(dt)
@@ -217,8 +221,8 @@ function render(dt)
 		end
 
 		if playerCardEnabled
-			and (not gameplay.multiplayer)
-			and (gameplay.practice_setup == nil)
+		  and (not gameplay.multiplayer)
+		  and (gameplay.practice_setup == nil)
 		then
 			playerCard:draw()
 		end
